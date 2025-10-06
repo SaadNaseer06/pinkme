@@ -14,6 +14,10 @@ class Event extends Model
         'location',
     ];
 
+    protected $casts = [
+        'date' => 'datetime',
+    ];
+
     public function sponsorships(): HasMany
     {
         return $this->hasMany(EventSponsorship::class);
@@ -32,3 +36,4 @@ class Event extends Model
         return (float) $this->sponsorships()->sum('amount');
     }
 }
+

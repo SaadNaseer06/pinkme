@@ -29,10 +29,24 @@ class EventController extends Controller
 
         // select only columns that exist
         $sponsors = User::query()
+            ->where('role_id', 3)
             ->orderBy($displayCol)
             ->get(['id', $displayCol, 'email']);
 
         return view('admin.events.create', compact('sponsors', 'displayCol'));
+    }
+
+
+    public function edit(Event $event)
+    {
+        $displayCol = $this->userDisplayColumn();
+
+        $sponsors = User::query()
+            ->where('role_id', 3)
+            ->orderBy($displayCol)
+            ->get(['id', $displayCol, 'email']);
+
+        return view('admin.events.create', compact('event', 'sponsors', 'displayCol'));
     }
 
     public function store(Request $r)
@@ -63,6 +77,34 @@ class EventController extends Controller
         }
 
         return redirect()->route('events.show', $event)->with('success', 'Event created successfully.');
+    }
+
+    public function update(Request $r, Event $event)
+    {
+        $data = $r->validate([
+            'title'       => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'date'        => ['required', 'date'],
+            'location'    => ['nullable', 'string', 'max:255'],
+            'sponsor_id'  => ['nullable', 'exists:users,id'],
+            'amount'      => ['nullable', 'numeric', 'min:0.01'],
+        ]);
+
+        $event->update([
+            'title'       => $data['title'],
+            'description' => $data['description'] ?? null,
+            'date'        => $data['date'],
+            'location'    => $data['location'] ?? null,
+        ]);
+
+        if (!empty($data['sponsor_id']) && !empty($data['amount'])) {
+            $event->sponsorships()->create([
+                'sponsor_id' => $data['sponsor_id'],
+                'amount'     => $data['amount'],
+            ]);
+        }
+
+        return redirect()->route('events.show', $event)->with('success', 'Event updated successfully.');
     }
 
     public function show(Event $event)

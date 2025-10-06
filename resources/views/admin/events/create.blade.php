@@ -1,103 +1,256 @@
 @extends('admin.layouts.admin')
 
-@section('title', 'Create Event')
+@php
+    $isEdit = isset($event);
+    $pageTitle = $isEdit ? 'Edit Event' : 'Create Event';
+    $heroTitle = $isEdit ? 'Update Event Details' : 'Plan a New Event';
+    $heroSubtitle = $isEdit
+        ? 'Adjust the agenda, confirm logistics, and keep sponsors informed before publishing.'
+        : 'Outline the experience, lock in logistics, and optionally recognise a launch sponsor before publishing.';
+    $submitLabel = $isEdit ? 'Update Event' : 'Save Event';
+    $formAction = $isEdit ? route('events.update', $event) : route('events.store');
+    $titleValue = old('title', $isEdit ? $event->title : '');
+    $descriptionValue = old('description', $isEdit ? $event->description : '');
+    $dateValue = old('date', $isEdit && $event->date ? $event->date->format('Y-m-d\TH:i') : '');
+    $locationValue = old('location', $isEdit ? $event->location : '');
+    $selectedSponsor = old('sponsor_id', '');
+    $hasSponsor = $selectedSponsor !== '' && $selectedSponsor !== null;
+    $amountValue = old('amount', '');
+    $sponsorshipBadgeClasses = $hasSponsor ? 'bg-[#F3B9DA] text-[#B74F86]' : 'bg-[#F8D4E6] text-[#C25E95]';
+    $sponsorshipBadgeLabel = $hasSponsor ? 'Enabled' : 'Skipped';
+    $amountWrapperClasses = $hasSponsor ? '' : 'opacity-50';
+@endphp
+
+@section('title', $pageTitle)
 
 @section('content')
-    <div class="flex-1 flex flex-col min-h-screen bg-[#FBF7FA]">
-        <main class="flex-1 pb-8">
-            <div class="max-w-7xl mx-auto px-4 py-8">
-                @if (session('success'))
-                    <div class="p-4 rounded-lg bg-[#E8F5E9] text-[#1B5E20] mb-6">{{ session('success') }}</div>
-                @endif
-
-                <h1 class="text-2xl font-semibold text-[#213430] mb-8">Add New Event</h1>
-
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <form method="POST" action="{{ route('events.store') }}" class="space-y-6">
-                        @csrf
-
-                        <div>
-                            <label class="block text-sm font-medium text-[#213430] mb-1">Event Title <span
-                                    class="text-[#DB69A2]">*</span></label>
-                            <input name="title" type="text" value="{{ old('title') }}"
-                                class="mt-1 w-full rounded-lg border border-[#DCCFD8] p-3 focus:border-[#DB69A2] focus:ring focus:ring-[#DB69A2] focus:ring-opacity-50"
-                                required>
-                            @error('title')
-                                <p class="mt-1 text-sm text-[#DB69A2]">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-[#213430] mb-1">Event Description</label>
-                            <textarea name="description" rows="4"
-                                class="mt-1 w-full rounded-lg border border-[#DCCFD8] p-3 focus:border-[#DB69A2] focus:ring focus:ring-[#DB69A2] focus:ring-opacity-50">{{ old('description') }}</textarea>
-                            @error('description')
-                                <p class="mt-1 text-sm text-[#DB69A2]">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-[#213430] mb-1">Date & Time <span
-                                        class="text-[#DB69A2]">*</span></label>
-                                {{-- events.date is a single DATETIME --}}
-                                <input name="date" type="datetime-local" value="{{ old('date') }}"
-                                    class="mt-1 w-full rounded-lg border border-[#DCCFD8] p-3 focus:border-[#DB69A2] focus:ring focus:ring-[#DB69A2] focus:ring-opacity-50"
-                                    required>
-                                @error('date')
-                                    <p class="mt-1 text-sm text-[#DB69A2]">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-[#213430] mb-1">Event Location</label>
-                                <input name="location" type="text" value="{{ old('location') }}"
-                                    class="mt-1 w-full rounded-lg border border-[#DCCFD8] p-3 focus:border-[#DB69A2] focus:ring focus:ring-[#DB69A2] focus:ring-opacity-50">
-                                @error('location')
-                                    <p class="mt-1 text-sm text-[#DB69A2]">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <fieldset class="border border-[#DCCFD8] rounded-lg p-6 bg-[#F9EEF6]">
-                            <legend class="text-sm font-medium text-[#213430] px-2 bg-[#F9EEF6]">Initial Sponsorship
-                                (optional)</legend>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-[#213430] mb-1">Select Sponsor</label>
-                                    <select name="sponsor_id"
-                                        class="mt-1 w-full rounded-lg border border-[#DCCFD8] p-3 focus:border-[#DB69A2] focus:ring focus:ring-[#DB69A2] focus:ring-opacity-50 bg-white">
-                                        <option value="">— Select Sponsor —</option>
-                                        @foreach ($sponsors as $s)
-                                            <option value="{{ $s->id }}" @selected(old('sponsor_id') == $s->id)>
-                                                {{ $s->name ?? $s->email }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('sponsor_id')
-                                        <p class="mt-1 text-sm text-[#DB69A2]">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-[#213430] mb-1">Sponsorship Amount
-                                        ($)</label>
-                                    <input name="amount" type="number" step="0.01" min="0.01"
-                                        value="{{ old('amount') }}"
-                                        class="mt-1 w-full rounded-lg border border-[#DCCFD8] p-3 focus:border-[#DB69A2] focus:ring focus:ring-[#DB69A2] focus:ring-opacity-50">
-                                    @error('amount')
-                                        <p class="mt-1 text-sm text-[#DB69A2]">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
-                        </fieldset>
-
-                        <div class="flex justify-end pt-6">
-                            <button type="submit"
-                                class="px-6 py-3 bg-[#DB69A2] text-white text-sm font-medium rounded-lg hover:bg-[#c25891] transition-colors duration-200">
-                                Create Event
-                            </button>
-                        </div>
-                    </form>
+    <div class="max-w-8xl mx-auto">
+        <div class="space-y-8">
+            <div class="rounded-2xl bg-gradient-to-r from-[#C63A85] via-[#DB69A2] to-[#F9C6E2] p-8 text-white shadow-lg">
+                <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                    <div class="max-w-2xl" style="text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);">
+                        <p class="uppercase tracking-widest text-xs font-semibold">Events & Activations</p>
+                        <h1 class="mt-2 text-3xl font-semibold">{{ $heroTitle }}</h1>
+                        <p class="mt-3 max-w-2xl text-sm lg:text-base">{{ $heroSubtitle }}</p>
+                    </div>
+                    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                        <a href="{{ route('admin.sponsors') }}"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/20 px-5 py-3 text-sm font-medium text-white backdrop-blur transition hover:bg-white/30">Back
+                            to events</a>
+                        <button type="submit" form="create-event-form"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#DB69A2] shadow-md shadow-white/40 transition hover:bg-[#FFF1F7]">{{ $submitLabel }}</button>
+                    </div>
                 </div>
             </div>
-        </main>
-    </div>
-@endsection
+
+
+
+            <form id="create-event-form" method="POST" action="{{ $formAction }}"
+                class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+                @csrf
+                @if ($isEdit)
+                    @method('PUT')
+                @endif
+                <div class="space-y-8">
+                    <section class="rounded-2xl border border-[#E9DCE7] bg-white shadow-sm">
+                        <div class="border-b border-[#F1E5EF] px-6 py-5">
+                            <h2 class="text-lg font-semibold text-[#213430]">Event Snapshot</h2>
+                            <p class="mt-1 text-sm text-[#6C5B68]">Give sponsors and attendees a clear idea of what to
+                                expect.</p>
+                        </div>
+                        <div class="space-y-6 px-6 py-6">
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-[#213430]">Event Title <span
+                                        class="text-[#DB69A2]">*</span></label>
+                                <input name="title" type="text" value="{{ $titleValue }}"
+                                    placeholder="e.g. Pink Ribbon Charity Walk"
+                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
+                                    required>
+                                @error('title')
+                                    <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-[#213430]">Event Description</label>
+                                <textarea name="description" rows="5"
+                                    placeholder="Share the agenda, audience, and key highlights participants should know."
+                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">{{ $descriptionValue }}</textarea>
+                                @error('description')
+                                    <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="rounded-2xl border border-[#E9DCE7] bg-white shadow-sm">
+                        <div class="border-b border-[#F1E5EF] px-6 py-5">
+                            <h2 class="text-lg font-semibold text-[#213430]">Logistics</h2>
+                            <p class="mt-1 text-sm text-[#6C5B68]">Schedule the event and capture where it takes place.</p>
+                        </div>
+                        <div class="space-y-6 px-6 py-6">
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-[#213430]">Date & Time <span
+                                            class="text-[#DB69A2]">*</span></label>
+                                    <input name="date" type="datetime-local" value="{{ $dateValue }}"
+                                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
+                                        required>
+                                    @error('date')
+                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-[#213430]">Event Location</label>
+                                    <input name="location" type="text" value="{{ $locationValue }}"
+                                        placeholder="Venue or virtual link"
+                                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                                    @error('location')
+                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="rounded-xl bg-[#FDF7FB] px-4 py-3 text-xs text-[#6C5B68]">
+                                A calendar invite will be generated for attendees using this date and time.
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="rounded-2xl border border-[#E9DCE7] bg-white shadow-sm">
+                        <div class="border-b border-[#F1E5EF] px-6 py-5 flex flex-col gap-1">
+                            <h2 class="text-lg font-semibold text-[#213430]">Launch Sponsorship <span
+                                    class="text-xs font-medium uppercase tracking-wider text-[#DB69A2]">Optional</span></h2>
+                            <p class="text-sm text-[#6C5B68]">Highlight a sponsor who has already pledged support.</p>
+                        </div>
+                        <div class="space-y-6 px-6 py-6">
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-[#213430]">Select Sponsor</label>
+                                    <div class="relative">
+                                        <select id="sponsor-select" name="sponsor_id"
+                                            class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
+                                            {{ $sponsors->isEmpty() ? 'disabled' : '' }}>
+                                            <option value="">Select sponsor</option>
+                                            @forelse ($sponsors as $sponsor)
+                                                <option value="{{ $sponsor->id }}"
+                                                    @selected((string) $selectedSponsor === (string) $sponsor->id)>
+                                                    {{ $sponsor->{$displayCol} ?? $sponsor->email }}</option>
+                                            @empty
+                                                <option value="" disabled>No sponsors available</option>
+                                            @endforelse
+                                        </select>
+                                        <span class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[#91848C]">
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </span>
+                                        </div>
+                                        @error('sponsor_id')
+                                            <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div id="sponsorship-amount-wrapper"
+                                        class="transition {{ $amountWrapperClasses }}">
+                                        <div class="flex items-center justify-between">
+                                            <label class="mb-1 block text-sm font-medium text-[#213430]">Sponsorship Amount
+                                                ($)</label>
+                                            <span id="sponsorship-state"
+                                                class="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide {{ $sponsorshipBadgeClasses }}">{{ $sponsorshipBadgeLabel }}</span>
+                                        </div>
+                                        <div class="relative mt-1">
+                                            <span
+                                                class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[#91848C]">$</span>
+                                            <input id="amount-input" name="amount" type="number" min="0.01" step="0.01"
+                                                value="{{ $amountValue }}" placeholder="2500"
+                                                class="w-full rounded-xl border border-[#DCCFD8] bg-white pl-9 pr-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
+                                                {{ $hasSponsor ? '' : 'disabled' }}>
+                                        </div>
+                                        @error('amount')
+                                            <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="rounded-xl border border-dashed border-[#F4C9DD] bg-[#FEF6FB] px-5 py-4 text-sm text-[#6C5B68]">
+                                    Adding a launch sponsor automatically creates the first sponsorship record and highlights
+                                    them on the event page.
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <aside class="space-y-6">
+                        <div class="rounded-2xl border border-[#E9DCE7] bg-white p-6 shadow-sm">
+                            <h3 class="text-base font-semibold text-[#213430]">Event Checklist</h3>
+                            <ul class="mt-4 space-y-3 text-sm text-[#6C5B68]">
+                                <li class="flex items-start gap-3">
+                                    <span
+                                        class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">1</span>
+                                    Confirm your venue capacity and any accessibility details before publishing.
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span
+                                        class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">2</span>
+                                    Lock in at least one sponsor to secure upfront funding for supplies.
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span
+                                        class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">3</span>
+                                    Share the event link internally for final proofreading before it goes live.
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="rounded-2xl border border-[#E9DCE7] bg-[#FDF7FB] p-6 shadow-inner">
+                            <h3 class="text-base font-semibold text-[#213430]">Co-ordinate with Programs</h3>
+                            <p class="mt-3 text-sm text-[#6C5B68]">Pair this event with an ongoing support program to maximise
+                                sponsor visibility. Program banners appear beside event cards when they share a date range.</p>
+                            <p class="mt-4 text-xs uppercase tracking-wider text-[#91848C]">Reminder</p>
+                            <p class="mt-1 text-sm text-[#6C5B68]">Event highlights will sync to the sponsors hub immediately
+                                after saving.</p>
+                        </div>
+                    </aside>
+                </form>
+            </div>
+        </div>
+    @endsection
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var sponsorSelect = document.getElementById('sponsor-select');
+                var amountWrapper = document.getElementById('sponsorship-amount-wrapper');
+                var amountInput = document.getElementById('amount-input');
+                var badge = document.getElementById('sponsorship-state');
+
+                if (!sponsorSelect || !amountWrapper || !amountInput || !badge) {
+                    return;
+                }
+
+                var updateState = function() {
+                    if (sponsorSelect.value) {
+                        amountWrapper.classList.remove('opacity-50');
+                        amountInput.removeAttribute('disabled');
+                        badge.textContent = 'Enabled';
+                        badge.classList.remove('bg-[#F8D4E6]', 'text-[#C25E95]', 'bg-[#F3B9DA]', 'text-[#B74F86]');
+                        badge.classList.add('bg-[#F3B9DA]', 'text-[#B74F86]');
+                    } else {
+                        amountWrapper.classList.add('opacity-50');
+                        amountInput.value = '';
+                        amountInput.setAttribute('disabled', 'disabled');
+                        badge.textContent = 'Skipped';
+                        badge.classList.remove('bg-[#F3B9DA]', 'text-[#B74F86]', 'bg-[#F8D4E6]', 'text-[#C25E95]');
+                        badge.classList.add('bg-[#F8D4E6]', 'text-[#C25E95]');
+                    }
+                };
+
+                sponsorSelect.addEventListener('change', updateState);
+                updateState();
+            });
+        </script>
+    @endpush
+

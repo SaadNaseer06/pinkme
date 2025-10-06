@@ -277,12 +277,16 @@ class AdminController extends Controller
         })->with(['profile', 'sponsorDetail'])->paginate(20);
 
         $events = Event::with(['sponsors'])
-            ->orderBy('date', 'desc')
+            ->withCount('sponsors')
+            ->withSum('sponsorships as total_raised', 'amount')
+            ->orderByDesc('date')
             ->get();
-            
-        $programs = Program::with(['registrations'])
-            ->orderBy('event_date', 'desc')
-            ->orderBy('event_time', 'desc')
+
+        $programs = Program::with(['registrations', 'sponsorshipProgram'])
+            ->withCount('registrations')
+            ->withSum('sponsorships as total_raised', 'amount')
+            ->orderByDesc('event_date')
+            ->orderByDesc('event_time')
             ->get();
 
         return view('admin.sponsors', compact('sponsors', 'events', 'programs'));
@@ -414,3 +418,4 @@ class AdminController extends Controller
         ]);
     }
 }
+

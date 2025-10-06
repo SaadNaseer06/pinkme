@@ -72,7 +72,8 @@ class ProgramController extends Controller
             'description' => ['required', 'string'],
             'event_date'  => ['required', 'date'],
             'event_time'  => ['required', 'date_format:H:i'],
-            'status'      => ['required', 'in:upcoming,ongoing,completed'],\n            'program_fund' => ['required', 'numeric', 'min:0'],
+            'status'      => ['required', 'in:upcoming,ongoing,completed'],
+            'program_fund' => ['required', 'numeric', 'min:0'],
             'banner'      => ['nullable', 'image', 'max:2048'],
         ]);
 

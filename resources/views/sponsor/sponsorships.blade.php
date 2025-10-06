@@ -77,10 +77,6 @@
             $selectedProgram ??= $defaultProgram;
 
             $defaultPayload = $selectedProgram ? $formatProgramPayload($selectedProgram) : null;
-            $defaultPayloadJson = $defaultPayload
-                ? htmlspecialchars(json_encode($defaultPayload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8')
-                : '';
-
             $defaultAmount = $defaultPayload
                 ? ($defaultPayload['remaining'] > 0 ? $defaultPayload['remaining'] : $defaultPayload['goal'])
                 : null;
@@ -106,6 +102,10 @@
             $defaultGoalLabel = $defaultPayload ? '$' . number_format($defaultPayload['goal'], 2) : '$0.00';
             $defaultRaisedLabel = $defaultPayload ? '$' . number_format($defaultPayload['raised'], 2) : '$0.00';
             $defaultRemainingLabel = $defaultPayload ? '$' . number_format($defaultPayload['remaining'], 2) : '$0.00';
+
+            $defaultRemainingValue = $defaultPayload
+                ? number_format((float) ($defaultPayload['remaining'] ?? 0), 2, '.', '')
+                : '';
 
             $selectedProgramIdValue = old('program_source') === 'sponsorship_program'
                 ? old('sponsorship_program_id')
@@ -169,7 +169,7 @@
                                             </div>
                                             <button type="button"
                                                 class="w-full py-3 text-[#91848C] font-medium border border-gray-300 rounded hover:bg-[#db69a2] hover:text-white hover:border-transparent rounded-lg app-main"
-                                                data-sp-program="{{ $payloadJson }}">
+                                                data-sp-program='@json($payload)'>
                                                 Donate Now
                                             </button>
                                             <div class="flex justify-between items-center text-sm">
@@ -242,7 +242,7 @@
                                     <p class="text-[#91848C] app-text">Left</p>
                                     <p class="font-medium text-[#213430] app-text">${{ number_format($left, 0) }}</p>
                                 </div> --}}
-                                <button type="button" class="bg-transparent border border-[#213430] text-[#213430] py-3 px-8 rounded-lg program-btn hover:bg-[#db69a2] hover:text-white hover:border-transparent transition" data-sp-program="{{ $payloadJson }}">
+                                <button type="button" class="bg-transparent border border-[#213430] text-[#213430] py-3 px-8 rounded-lg program-btn hover:bg-[#db69a2] hover:text-white hover:border-transparent transition" data-sp-program='@json($payload)'>
                                     Sponsor Program
                                 </button>
                             </div>
@@ -265,7 +265,7 @@
                                     <span>Goal: ${{ number_format($goal, 0) }}</span>
                                     <span>Raised: ${{ number_format($raised, 0) }}</span>
                                 </div>
-                                <button type="button" class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#db69a2] hover:text-white hover:border-none py-2 px-6 rounded-lg" data-sp-program="{{ $payloadJson }}">
+                                <button type="button" class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#db69a2] hover:text-white hover:border-none py-2 px-6 rounded-lg" data-sp-program='@json($payload)'>
                                     Sponsor Program
                                 </button>
                             </div>
@@ -281,7 +281,7 @@
             <div
                 id="sponsorshipProgramOverlay"
                 class="fixed inset-0 z-40 hidden items-center justify-center bg-black/60 px-4 py-6"
-                data-default-program="{{ $defaultPayloadJson }}"
+                data-default-program='@json($defaultPayload)'
                 data-open-on-load="{{ $shouldOpenSponsorshipModal ? 'true' : 'false' }}"
             >
                 <div class="relative w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden">
@@ -354,15 +354,19 @@
                                             step="0.01"
                                             class="w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-[#213430] focus:border-[#DB69A2] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]/40"
                                             value="{{ $overlayAmountValue }}"
+                                            @if ($defaultRemainingValue !== '')
+                                                max="{{ $defaultRemainingValue }}"
+                                            @endif
                                             data-sp-amount
                                         >
                                     </div>
                                     @error('amount')
                                         <p class="mt-1 text-xs text-[#B32020]">{{ $message }}</p>
                                     @enderror
+                                    <p class="mt-2 text-xs text-[#B32020] hidden" data-sp-error role="alert"></p>
                                 </div>
 
-                                <button type="submit" class="w-full rounded-xl bg-[#DB69A2] py-3 text-white font-semibold shadow-sm hover:bg-[#c5588f] transition">
+                                <button type="submit" class="w-full rounded-xl bg-[#DB69A2] py-3 text-white font-semibold shadow-sm hover:bg-[#c5588f] transition" data-sp-submit>
                                     Confirm Sponsorship
                                 </button>
 
@@ -422,6 +426,8 @@
             const amountInput = overlay.querySelector('[data-sp-amount]');
             const form = overlay.querySelector('[data-sp-form]');
             const closeButtons = overlay.querySelectorAll('[data-sp-close]');
+            const submitButton = overlay.querySelector('[data-sp-submit]');
+            const errorEl = overlay.querySelector('[data-sp-error]');
             const payloadById = {};
 
             const formatCurrency = function (value) {
@@ -440,6 +446,92 @@
                 }
 
                 return numeric.toFixed(2);
+            };
+
+            const setAmountLimit = function (limit) {
+                if (!amountInput) {
+                    return;
+                }
+
+                if (typeof limit === 'number' && !Number.isNaN(limit)) {
+                    const normalizedLimit = normalizeAmount(limit);
+                    amountInput.setAttribute('max', normalizedLimit);
+                    amountInput.dataset.remaining = normalizedLimit;
+                } else {
+                    amountInput.removeAttribute('max');
+                    delete amountInput.dataset.remaining;
+                }
+            };
+
+            const showError = function (message) {
+                if (!errorEl) {
+                    return;
+                }
+
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+            };
+
+            const hideError = function () {
+                if (!errorEl) {
+                    return;
+                }
+
+                errorEl.textContent = '';
+                if (!errorEl.classList.contains('hidden')) {
+                    errorEl.classList.add('hidden');
+                }
+            };
+
+            const updateSubmitState = function (disabled) {
+                if (!submitButton) {
+                    return;
+                }
+
+                submitButton.disabled = disabled;
+                submitButton.classList.toggle('opacity-60', disabled);
+                submitButton.classList.toggle('cursor-not-allowed', disabled);
+            };
+
+            const validateAmount = function (options = {}) {
+                if (!amountInput) {
+                    return true;
+                }
+
+                const showMessage = options.showMessage !== false;
+                const report = options.report === true;
+
+                const rawValue = amountInput.value;
+                const numericValue = Number(rawValue);
+                const hasValue = rawValue !== '' && !Number.isNaN(numericValue);
+
+                const maxAttr = amountInput.getAttribute('max');
+                const maxValue = maxAttr !== null && maxAttr !== '' ? Number(maxAttr) : null;
+
+                amountInput.setCustomValidity('');
+
+                const limitExceeded = hasValue && maxValue !== null && maxValue >= 0 && numericValue > maxValue + 1e-6;
+
+                if (limitExceeded) {
+                    const message = `The maximum you can contribute to this program is ${formatCurrency(maxValue)}.`;
+
+                    if (showMessage) {
+                        showError(message);
+                    }
+
+                    amountInput.setCustomValidity(message);
+
+                    if (report) {
+                        amountInput.reportValidity();
+                    }
+
+                    updateSubmitState(true);
+                    return false;
+                }
+
+                hideError();
+                updateSubmitState(false);
+                return true;
             };
 
             const applyPayload = function (payload, overrides = {}) {
@@ -469,8 +561,13 @@
 
                 const amountOverride = overrides.amount !== undefined ? overrides.amount : (data.remaining > 0 ? data.remaining : data.goal);
                 if (amountInput) {
+                    hideError();
+                    const limitValue = Number(data.remaining);
+                    setAmountLimit(!Number.isNaN(limitValue) ? limitValue : null);
+
                     const normalizedValue = overrides.amountValue !== undefined ? overrides.amountValue : normalizeAmount(amountOverride);
                     amountInput.value = normalizedValue;
+                    validateAmount({ showMessage: false });
                 }
             };
 
@@ -486,6 +583,13 @@
                 overlay.classList.add('hidden');
                 overlay.classList.remove('flex');
                 body.classList.remove('overflow-hidden');
+
+                hideError();
+                updateSubmitState(false);
+
+                if (amountInput) {
+                    amountInput.setCustomValidity('');
+                }
 
                 applyPayload(defaultPayload, { amountValue: normalizeAmount(amountInput ? amountInput.value : undefined) });
             };
@@ -520,12 +624,39 @@
                 }
             });
 
+            if (amountInput) {
+                amountInput.addEventListener('input', function () {
+                    hideError();
+                    validateAmount({ showMessage: false });
+                });
+
+                amountInput.addEventListener('blur', function () {
+                    amountInput.value = normalizeAmount(amountInput.value);
+                    validateAmount({ report: true });
+                });
+            }
+
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!validateAmount({ report: true })) {
+                        event.preventDefault();
+                        if (amountInput) {
+                            amountInput.focus();
+                        }
+                    }
+                });
+            }
+
             if (programInput && !programInput.value && defaultPayload && defaultPayload.id) {
                 programInput.value = defaultPayload.id;
             }
 
             if (amountInput && amountInput.value === '' && defaultPayload) {
                 amountInput.value = normalizeAmount(defaultPayload.remaining > 0 ? defaultPayload.remaining : defaultPayload.goal);
+            }
+
+            if (amountInput) {
+                validateAmount({ showMessage: false });
             }
 
             if (openOnLoad && defaultPayload) {

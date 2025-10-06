@@ -99,7 +99,7 @@
                                     <td class="px-5 py-4">{{ \Carbon\Carbon::parse($payment->date)->format('M d, Y') }}</td>
                                     <td class="px-5 py-4 font-semibold text-[#DB69A2]">${{ number_format($payment->amount, 2) }}</td>
                                     <td class="px-5 py-4 text-[#91848C]">
-                                        {{ optional($payment->program)->program_fund ? 'Goal $' . number_format(optional($payment->program)->program_fund, 2) : 'One-time contribution' }}
+                                        {{ optional($payment->program)->program_fund ? '$' . number_format(optional($payment->program)->program_fund, 2) : 'One-time contribution' }}
                                     </td>
                                 </tr>
                             @empty

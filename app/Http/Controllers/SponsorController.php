@@ -450,38 +450,76 @@ class SponsorController extends Controller
             'amount' => ['required', 'numeric', 'min:1'],
         ]);
 
-        $sponsorshipProgram = null;
+        [$redirectRoute, $programTitle, $amount] = DB::transaction(function () use ($validated, $user) {
+            $program = null;
+            $sponsorshipProgram = null;
+            $redirectRoute = 'sponsor.sponsorships';
 
-        if ($validated['program_source'] === 'sponsorship_program') {
-            $sponsorshipProgram = SponsorshipProgram::with('program')->findOrFail($validated['sponsorship_program_id']);
-            $program = $sponsorshipProgram->program;
+            if ($validated['program_source'] === 'sponsorship_program') {
+                $sponsorshipProgram = SponsorshipProgram::with('program')
+                    ->whereKey($validated['sponsorship_program_id'])
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            if (!$program) {
-                throw ValidationException::withMessages([
-                    'sponsorship_program_id' => 'This sponsorship program is not linked to a program yet. Please contact support.',
-                ]);
+                $program = $sponsorshipProgram->program;
+
+                if (!$program) {
+                    throw ValidationException::withMessages([
+                        'sponsorship_program_id' => 'This sponsorship program is not linked to a program yet. Please contact support.',
+                    ]);
+                }
+
+                $redirectRoute = 'sponsor.sponsorships';
+            } else {
+                $program = Program::with('sponsorshipProgram')
+                    ->whereKey($validated['program_id'])
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $sponsorshipProgram = $program->sponsorshipProgram;
+                $redirectRoute = 'sponsor.becomeASponsor';
             }
 
-            $redirectRoute = 'sponsor.sponsorships';
-        } else {
-            $program = Program::findOrFail($validated['program_id']);
-            $redirectRoute = 'sponsor.becomeASponsor';
-            $sponsorshipProgram = $program->sponsorshipProgram;
-        }
+            $numericAmount = (float) $validated['amount'];
 
-        Sponsorship::create([
-            'sponsor_id' => $user->id,
-            'program_id' => $program->id,
-            'amount' => $validated['amount'],
-            'date' => now()->toDateString(),
-        ]);
+            $remaining = null;
+            if ($sponsorshipProgram) {
+                $remaining = max(
+                    (float) ($sponsorshipProgram->goal_amount ?? 0) - (float) ($sponsorshipProgram->raised_amount ?? 0),
+                    0
+                );
+            }
 
-        if ($sponsorshipProgram) {
-            $sponsorshipProgram->increment('raised_amount', (float) $validated['amount']);
-        }
+            if ($remaining !== null) {
+                if ($remaining <= 0) {
+                    throw ValidationException::withMessages([
+                        'amount' => 'This program has already reached its funding goal.',
+                    ]);
+                }
 
-        $formattedAmount = number_format((float) $validated['amount'], 2);
-        $programTitle = $sponsorshipProgram?->title ?? $program->title;
+                if ($numericAmount - $remaining > 1e-6) {
+                    throw ValidationException::withMessages([
+                        'amount' => 'The maximum you can contribute to this program is $' . number_format($remaining, 2) . '.',
+                    ]);
+                }
+            }
+
+            Sponsorship::create([
+                'sponsor_id' => $user->id,
+                'program_id' => $program->id,
+                'amount' => $numericAmount,
+                'date' => now()->toDateString(),
+            ]);
+
+            if ($sponsorshipProgram) {
+                $sponsorshipProgram->raised_amount = (float) ($sponsorshipProgram->raised_amount ?? 0) + $numericAmount;
+                $sponsorshipProgram->save();
+            }
+
+            return [$redirectRoute, $sponsorshipProgram?->title ?? $program->title, $numericAmount];
+        });
+
+        $formattedAmount = number_format($amount, 2);
 
         return redirect()
             ->route($redirectRoute)

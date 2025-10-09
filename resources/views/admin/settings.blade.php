@@ -4,11 +4,11 @@
 
 @section('content')
 
-    @if (session('success'))
+    {{-- @if (session('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
             {{ session('success') }}
         </div>
-    @endif
+    @endif --}}
 
     <!-- Dashboard Content -->
     <main class="flex-1 p-6">

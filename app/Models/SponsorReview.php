@@ -14,6 +14,11 @@ class SponsorReview extends Model
         'comment',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function sponsor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sponsor_id');

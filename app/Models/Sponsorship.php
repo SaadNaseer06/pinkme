@@ -10,6 +10,7 @@ class Sponsorship extends Model
     protected $fillable = [
         'sponsor_id',
         'program_id',
+        'sponsorship_program_id',
         'amount',
         'date',
     ];
@@ -22,5 +23,10 @@ class Sponsorship extends Model
     public function program(): BelongsTo
     {
         return $this->belongsTo(Program::class, 'program_id');
+    }
+
+    public function sponsorshipProgram(): BelongsTo
+    {
+        return $this->belongsTo(SponsorshipProgram::class, 'sponsorship_program_id');
     }
 }

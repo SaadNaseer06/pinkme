@@ -33,7 +33,7 @@ class SponsorController extends Controller
 
         $sponsorships = Sponsorship::where('sponsor_id', $user->id)
 
-            ->with('program')
+            ->with(['program', 'sponsorshipProgram'])
 
             ->orderByDesc('date')
 
@@ -48,11 +48,9 @@ class SponsorController extends Controller
             if ($program->event_date) {
 
                 return Carbon::parse($program->event_date)->isFuture() || Carbon::parse($program->event_date)->isToday();
-
             }
 
             return $program->status === 'ongoing';
-
         })->count();
 
         $myContributions = $sponsorships->count();
@@ -67,7 +65,7 @@ class SponsorController extends Controller
 
                 'sponsorDetail',
 
-                'sponsorships' => fn($query) => $query->latest('date')->limit(1)->with('program'),
+                'sponsorships' => fn($query) => $query->latest('date')->limit(1)->with(['program', 'sponsorshipProgram']),
 
             ])
 
@@ -148,7 +146,6 @@ class SponsorController extends Controller
             'companySponsors'
 
         ));
-
     }
 
     public function events()
@@ -180,15 +177,12 @@ class SponsorController extends Controller
                 if ($eventDay->gt($today)) {
 
                     $status = 'upcoming';
-
                 } elseif ($eventDay->eq($today)) {
 
                     $status = 'inProgress';
-
                 } else {
 
                     $status = 'past';
-
                 }
 
                 $event->status = $status;
@@ -206,7 +200,6 @@ class SponsorController extends Controller
                 $event->primary_sponsor = $event->sponsors->first();
 
                 return $event;
-
             });
 
         $ongoingEvents = $events->reject(fn($event) => $event->status === 'upcoming')->values();
@@ -216,7 +209,6 @@ class SponsorController extends Controller
         $pastEvents = $events->filter(fn($event) => $event->status === 'past')->values();
 
         return view('sponsor.events', compact('events', 'ongoingEvents', 'upcomingEvents', 'pastEvents'));
-
     }
 
     public function sponsorships()
@@ -227,7 +219,7 @@ class SponsorController extends Controller
 
         $sponsorships = Sponsorship::where('sponsor_id', $user->id)
 
-            ->with('program')
+            ->with(['program', 'sponsorshipProgram'])
 
             ->orderByDesc('date')
 
@@ -250,7 +242,6 @@ class SponsorController extends Controller
                 $program->progress_percent = $goal > 0 ? round(($raised / $goal) * 100) : 0;
 
                 return $program;
-
             });
 
         $today = Carbon::today();
@@ -260,11 +251,9 @@ class SponsorController extends Controller
             if ($program->start_date) {
 
                 return Carbon::parse($program->start_date)->isAfter($today);
-
             }
 
             return false;
-
         })->values();
 
         $ongoingPrograms = $programs->reject(function (SponsorshipProgram $program) use ($today) {
@@ -276,17 +265,14 @@ class SponsorController extends Controller
             if ($startDate && $startDate->isAfter($today)) {
 
                 return true;
-
             }
 
             if ($endDate && $endDate->isBefore($today)) {
 
                 return true;
-
             }
 
             return false;
-
         })->values();
 
         return view('sponsor.sponsorships', compact(
@@ -298,7 +284,6 @@ class SponsorController extends Controller
             'upcomingPrograms'
 
         ));
-
     }
 
     public function becomeASponsor()
@@ -338,11 +323,9 @@ class SponsorController extends Controller
                 ? $rawLogo
 
                 : asset('storage/' . ltrim($rawLogo, '/'));
-
         } else {
 
             $sponsorLogo = asset('images/brand.png');
-
         }
 
         $sponsorAbout = $companyDetail?->company_type
@@ -396,7 +379,6 @@ class SponsorController extends Controller
                 $program->remaining_amount = max(($program->program_fund ?? 0) - ($program->raised_amount ?? 0), 0);
 
                 return $program;
-
             });
 
         $today = Carbon::today();
@@ -406,11 +388,9 @@ class SponsorController extends Controller
             if ($program->event_date) {
 
                 return Carbon::parse($program->event_date)->isAfter($today);
-
             }
 
             return $program->status === 'upcoming';
-
         })->values();
 
         $ongoingPrograms = $programs->reject(function (Program $program) use ($today) {
@@ -418,11 +398,9 @@ class SponsorController extends Controller
             if ($program->event_date) {
 
                 return Carbon::parse($program->event_date)->isAfter($today);
-
             }
 
             return $program->status === 'upcoming';
-
         })->values();
 
         return view('sponsor.becomeASponsor', compact(
@@ -436,7 +414,6 @@ class SponsorController extends Controller
             'commitmentMessage'
 
         ));
-
     }
 
     public function storeSponsorship(Request $request)
@@ -456,27 +433,16 @@ class SponsorController extends Controller
             $redirectRoute = 'sponsor.sponsorships';
 
             if ($validated['program_source'] === 'sponsorship_program') {
-                $sponsorshipProgram = SponsorshipProgram::with('program')
+                $sponsorshipProgram = SponsorshipProgram::query()
                     ->whereKey($validated['sponsorship_program_id'])
                     ->lockForUpdate()
                     ->firstOrFail();
-
-                $program = $sponsorshipProgram->program;
-
-                if (!$program) {
-                    throw ValidationException::withMessages([
-                        'sponsorship_program_id' => 'This sponsorship program is not linked to a program yet. Please contact support.',
-                    ]);
-                }
-
-                $redirectRoute = 'sponsor.sponsorships';
             } else {
-                $program = Program::with('sponsorshipProgram')
+                $program = Program::query()
                     ->whereKey($validated['program_id'])
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                $sponsorshipProgram = $program->sponsorshipProgram;
                 $redirectRoute = 'sponsor.becomeASponsor';
             }
 
@@ -504,19 +470,34 @@ class SponsorController extends Controller
                 }
             }
 
-            Sponsorship::create([
+            $sponsorship = [
                 'sponsor_id' => $user->id,
-                'program_id' => $program->id,
+                'program_id' => $program?->id,
+                'sponsorship_program_id' => $sponsorshipProgram?->id,
                 'amount' => $numericAmount,
                 'date' => now()->toDateString(),
-            ]);
+            ];
+
+            if (!$sponsorship['program_id'] && !$sponsorship['sponsorship_program_id']) {
+                $errorField = $validated['program_source'] === 'sponsorship_program'
+                    ? 'sponsorship_program_id'
+                    : 'program_id';
+
+                throw ValidationException::withMessages([
+                    $errorField => 'We could not determine which program you selected. Please try again.',
+                ]);
+            }
+
+            Sponsorship::create($sponsorship);
 
             if ($sponsorshipProgram) {
                 $sponsorshipProgram->raised_amount = (float) ($sponsorshipProgram->raised_amount ?? 0) + $numericAmount;
                 $sponsorshipProgram->save();
             }
 
-            return [$redirectRoute, $sponsorshipProgram?->title ?? $program->title, $numericAmount];
+            $title = $sponsorshipProgram?->title ?? $program?->title ?? 'the selected program';
+
+            return [$redirectRoute, $title, $numericAmount];
         });
 
         $formattedAmount = number_format($amount, 2);
@@ -527,89 +508,113 @@ class SponsorController extends Controller
     }
 
     public function reviews()
-
     {
-
         $user = Auth::user();
-
-        $reviews = SponsorReview::where('sponsor_id', $user->id)
-
-            ->with('reviewer.profile')
-
+        $baseQuery = SponsorReview::query(); // Removed where('sponsor_id', $user->id)
+        $reviews = (clone $baseQuery)
+            ->with('reviewer.profile', 'reviewer.sponsorDetail', 'sponsor.profile')
             ->orderByDesc('created_at')
-
             ->paginate(10);
 
-        return view('sponsor.reviews', compact('reviews'));
+        $recentReviews = (clone $baseQuery)
+            ->with('reviewer.profile', 'reviewer.sponsorDetail', 'sponsor.profile')
+            ->orderByDesc('created_at')
+            ->take(3)
+            ->get();
 
+        $totalReviews = (clone $baseQuery)->count();
+        $averageRating = $totalReviews > 0
+            ? round((clone $baseQuery)->avg('rating'), 1)
+            : null;
+
+        $ratingCounts = (clone $baseQuery)
+            ->select('rating', DB::raw('COUNT(*) as total'))
+            ->groupBy('rating')
+            ->pluck('total', 'rating')
+            ->map(fn($count) => (int) $count);
+
+        $ratingLabels = [
+            1 => 'ONE',
+            2 => 'TWO',
+            3 => 'THREE',
+            4 => 'FOUR',
+            5 => 'FIVE',
+        ];
+        $distribution = collect(range(5, 1))->map(function (int $rating) use ($ratingCounts, $ratingLabels, $totalReviews) {
+            $count = (int) ($ratingCounts[$rating] ?? 0);
+            $percentage = $totalReviews > 0 ? round(($count / $totalReviews) * 100) : 0;
+            return [
+                'rating' => $rating,
+                'label' => $ratingLabels[$rating],
+                'count' => $count,
+                'percentage' => $percentage,
+            ];
+        });
+        $summary = [
+            'average' => $averageRating,
+            'total' => $totalReviews,
+            'distribution' => $distribution,
+        ];
+        return view('sponsor.reviews', compact('reviews', 'recentReviews', 'summary'));
+    }
+
+
+    public function storeReview(Request $request)
+    {
+        $user = Auth::user();
+        $data = $request->validate([
+            'rating' => ['required', 'integer', 'between:1,5'],
+            'comment' => ['required', 'string', 'max:1000'],
+        ]);
+        SponsorReview::create([
+            'sponsor_id' => $user->id,
+            'rating' => $data['rating'],
+            'comment' => $data['comment'],
+        ]);
+        return redirect()
+            ->route('sponsor.reviews')
+            ->with('success', 'Thanks for sharing your experience. Your review has been recorded.');
     }
 
     public function payment()
-
     {
-
         $user = Auth::user();
-
         $baseQuery = Sponsorship::where('sponsor_id', $user->id);
-
         $payments = (clone $baseQuery)
-
-            ->with('program')
-
+            ->with(['program', 'sponsorshipProgram'])
             ->orderByDesc('date')
-
             ->paginate(15);
-
         $totalAmount = (clone $baseQuery)->sum('amount');
-
         $programKeys = (clone $baseQuery)
-
-            ->get(['program_id'])
-
+            ->get(['program_id', 'sponsorship_program_id'])
             ->map(function (Sponsorship $payment) {
-
-                return $payment->program_id
-
-                    ? 'program-' . $payment->program_id
-
-                    : uniqid('manual-', true);
-
+                if ($payment->program_id) {
+                    return 'program-' . $payment->program_id;
+                }
+                if ($payment->sponsorship_program_id) {
+                    return 'sponsorship-program-' . $payment->sponsorship_program_id;
+                }
+                return uniqid('manual-', true);
             })
-
             ->unique()
-
             ->count();
 
         $latestPayment = (clone $baseQuery)
-
             ->orderByDesc('date')
-
             ->first();
 
         $totals = [
-
             'total_amount' => (float) $totalAmount,
-
             'programs_supported' => $programKeys,
-
             'latest_contribution' => $latestPayment?->amount,
-
             'latest_date' => $latestPayment?->date ? Carbon::parse($latestPayment->date) : null,
-
         ];
-
         return view('sponsor.payment', compact('payments', 'totals'));
-
     }
 
     public function setting()
-
     {
-
         $user = Auth::user()->load(['profile', 'sponsorDetail']);
-
         return view('sponsor.setting', compact('user'));
-
     }
-
 }

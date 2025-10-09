@@ -122,10 +122,11 @@ Route::prefix('sponsor')->middleware(['role.restrict'])->group(function () {
     Route::get('/sponsorships', [SponsorController::class, 'sponsorships'])->name('sponsor.sponsorships');
     Route::get('/become-a-sponsor', [SponsorController::class, 'becomeASponsor'])->name('sponsor.becomeASponsor');
     Route::post('/sponsorships', [SponsorController::class, 'storeSponsorship'])->name('sponsor.sponsorships.store');
-    Route::get('/reviews', [SponsorController::class, 'reviews'])->name('sponsor.reviews');
-    Route::get('/payment', [SponsorController::class, 'payment'])->name('sponsor.payment');
-    Route::get('/setting', [SponsorController::class, 'setting'])->name('sponsor.setting');
-});
+        Route::get('/reviews', [SponsorController::class, 'reviews'])->name('sponsor.reviews');
+        Route::post('/reviews', [SponsorController::class, 'storeReview'])->name('sponsor.reviews.store');
+        Route::get('/payment', [SponsorController::class, 'payment'])->name('sponsor.payment');
+        Route::get('/setting', [SponsorController::class, 'setting'])->name('sponsor.setting');
+    });
 
 
 Route::prefix('case_manager')->middleware(['role.restrict'])->group(function () {

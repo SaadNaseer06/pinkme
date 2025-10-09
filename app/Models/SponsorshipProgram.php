@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SponsorshipProgram extends Model
@@ -16,7 +15,6 @@ class SponsorshipProgram extends Model
         'description',
         'goal_amount',
         'raised_amount',
-        'program_id',
         'start_date',
         'end_date',
     ];
@@ -31,8 +29,4 @@ class SponsorshipProgram extends Model
         return $this->hasMany(Application::class, 'program_id');
     }
 
-    public function program(): BelongsTo
-    {
-        return $this->belongsTo(Program::class);
-    }
 }

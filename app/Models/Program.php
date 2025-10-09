@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Program extends Model
 {
@@ -27,11 +26,6 @@ class Program extends Model
     public function sponsorships(): HasMany
     {
         return $this->hasMany(Sponsorship::class);
-    }
-
-    public function sponsorshipProgram(): HasOne
-    {
-        return $this->hasOne(SponsorshipProgram::class);
     }
 
     public function registrations(): HasMany

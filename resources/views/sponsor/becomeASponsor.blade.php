@@ -9,7 +9,6 @@
                 @include('sponsor.partials.cards')
             </div>
 
-
             @if (session('success') || $errors->any())
                 <div class="max-w-4xl mx-auto px-4 mt-4 space-y-3">
                     @if (session('success'))
@@ -76,7 +75,6 @@
                 ];
             @endphp
 
-
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-2">
                     <h2 class="text-2xl font-semibold text-[#213430] mb-4 program-h">Upcoming Programs</h2>
@@ -118,7 +116,8 @@
                             'fund_label' => $program->fund_label ?? 'To be determined',
                         ];
                     @endphp
-                    <div class="bg-[#F3E8EF] rounded-lg p-4 mb-4 flex items-center justify-between md:flex hidden">
+                    <div class="bg-[#F3E8EF] rounded-lg p-4 mb-4 flex items-center justify-between md:flex hidden opacity-60 relative group cursor-not-allowed"
+                        title="Sponsorship available when program is ongoing">
                         <div class="flex items-center">
                             <div
                                 class="flex flex-col items-center justify-center w-20 h-20 border-2 border-pink rounded-lg mr-4 bg-[#FFF7FC]">
@@ -147,16 +146,16 @@
                             </div>
                             <div class="flex items-center gap-6 text-sm">
                                 <p class="text-[#91848C] app-text max-w-xs">{{ $commitmentText }}</p>
-                                <button type="button"
-                                    class="bg-transparent border border-[#213430] text-[#213430] py-3 px-8 rounded-lg program-btn"
-                                    data-program='@json($detailPayload)'>
-                                    Become The Sponsor
-                                </button>
                             </div>
+                        </div>
+                        <div
+                            class="absolute inset-0 flex items-center justify-center bg-[#F3E8EF]/80 rounded-lg hidden group-hover:flex">
+                            <p class="text-sm font-medium text-[#213430]">Sponsorship available when program is ongoing</p>
                         </div>
                     </div>
 
-                    <div class="bg-[#F3E8EF] rounded-lg p-3 mb-4 flex items-center justify-between md:hidden flex">
+                    <div class="bg-[#F3E8EF] rounded-lg p-3 mb-4 flex items-center justify-between md:hidden flex opacity-60 relative group cursor-not-allowed"
+                        title="Sponsorship available when program is ongoing">
                         <div class="flex flex-col gap-2">
                             <div class="w-[80px] h-[80px] rounded-lg overflow-hidden mr-4">
                                 <img src="{{ $programImage }}" alt="{{ $program->title }}"
@@ -179,11 +178,10 @@
                             </div>
                             <p class="text-xs text-[#DB69A2] font-medium uppercase">Full Funding Required</p>
                             <span class="text-[11px] font-semibold text-[#213430]">Sponsor covers 100% of costs</span>
-                            <button type="button"
-                                class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#db69a2] hover:text-white hover:border-none py-2 px-6 rounded-lg"
-                                data-program='@json($detailPayload)'>
-                                Become The Sponsor
-                            </button>
+                        </div>
+                        <div
+                            class="absolute inset-0 flex items-center justify-center bg-[#F3E8EF]/80 rounded-lg hidden group-hover:flex">
+                            <p class="text-sm font-medium text-[#213430]">Sponsorship available when program is ongoing</p>
                         </div>
                     </div>
                 @empty

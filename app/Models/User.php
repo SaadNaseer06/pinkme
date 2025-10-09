@@ -60,7 +60,7 @@ class User extends Authenticatable
         return $this->hasMany(Application::class, 'reviewer_id');
     }
 
-    public function sponsorReviews()
+    public function reviews()
     {
         return $this->hasMany(SponsorReview::class, 'sponsor_id');
     }

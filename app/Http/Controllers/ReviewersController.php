@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\SponsorReview;
 use App\Models\User;
 use App\Models\Application;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ReviewersController extends Controller
@@ -15,12 +17,10 @@ class ReviewersController extends Controller
      */
     public function index(Request $request)
     {
-        // Base query for reviewers
         $query = User::reviewers()
             ->with(['profile', 'reviewerApplications'])
             ->withCount('reviewerApplications as assigned_applications_count');
 
-        // Apply filters
         if ($request->filled('status')) {
             if ($request->status === 'Active') {
                 $query->whereHas('reviewerApplications', function ($q) {
@@ -33,18 +33,15 @@ class ReviewersController extends Controller
             }
         }
 
-        // Filter by reviewer ID
         if ($request->filled('reviewer_id')) {
             $reviewerId = str_replace('RVW-', '', $request->reviewer_id);
             $query->where('id', $reviewerId);
         }
 
-        // Filter by email
         if ($request->filled('email')) {
             $query->where('email', 'like', '%' . $request->email . '%');
         }
 
-        // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -55,13 +52,9 @@ class ReviewersController extends Controller
             });
         }
 
-        // Order by latest
         $query->orderBy('created_at', 'desc');
-
-        // Paginate results
         $reviewers = $query->paginate(10)->appends($request->query());
 
-        // Get statistics for cards
         $totalReviewers = User::reviewers()->count();
         $activeReviewers = User::reviewers()
             ->whereHas('reviewerApplications', function ($q) {
@@ -70,11 +63,9 @@ class ReviewersController extends Controller
         $inactiveReviewers = $totalReviewers - $activeReviewers;
         $totalApplicationsAssigned = Application::whereNotNull('reviewer_id')->count();
 
-        // Get unique reviewer IDs and emails for filter dropdowns
         $reviewerIds = User::reviewers()->get()->map(function ($user) {
             return $user->reviewer_id;
         });
-
         $reviewerEmails = User::reviewers()->pluck('email');
 
         return view('admin.reviewers', compact(
@@ -101,7 +92,25 @@ class ReviewersController extends Controller
      */
     public function store(Request $request)
     {
-        // Implementation for creating new reviewer
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            SponsorReview::create([
+                'sponsor_id' => $request->route('sponsor_id') ?? Auth::id(),
+                'rating' => $request->rating,
+                'comment' => $request->comment,
+                'user_id' => Auth::id(), // Store the authenticated user's ID
+            ]);
+
+            return redirect()->back()->with('success', 'Review submitted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to submit review. Please try again.');
+        }
     }
 
     /**

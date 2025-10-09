@@ -4,7 +4,7 @@
 
 @section('content')
     <main class="flex-1">
-        <div class="max-w-6xl mx-auto px-4 py-6 space-y-8">
+        <div class="max-w-8xl mx-auto px-4 py-6 space-y-8">
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 class="text-2xl font-semibold text-[#213430]">Payment History</h1>
@@ -92,15 +92,23 @@
                         <tbody class="divide-y divide-[#F1DCE8] text-sm text-[#213430]">
                             @forelse ($payments as $payment)
                                 @php
-                                    $programTitle = optional($payment->program)->title ?? 'Program';
+                                    $programModel = $payment->program ?? $payment->sponsorshipProgram;
+                                    $programTitle = optional($programModel)->title ?? 'Program';
+                                    if ($payment->program && $payment->program->program_fund) {
+                                        $fundingSummary = 'Program fund: $' . number_format((float) $payment->program->program_fund, 2);
+                                    } elseif ($payment->sponsorshipProgram) {
+                                        $goalAmount = (float) ($payment->sponsorshipProgram->goal_amount ?? 0);
+                                        $raisedAmount = (float) ($payment->sponsorshipProgram->raised_amount ?? 0);
+                                        $fundingSummary = 'Goal: $' . number_format($goalAmount, 2) . ' | Raised: $' . number_format($raisedAmount, 2);
+                                    } else {
+                                        $fundingSummary = 'One-time contribution';
+                                    }
                                 @endphp
                                 <tr class="hover:bg-[#FDF4FA] transition">
                                     <td class="px-5 py-4 font-medium">{{ $programTitle }}</td>
                                     <td class="px-5 py-4">{{ \Carbon\Carbon::parse($payment->date)->format('M d, Y') }}</td>
                                     <td class="px-5 py-4 font-semibold text-[#DB69A2]">${{ number_format($payment->amount, 2) }}</td>
-                                    <td class="px-5 py-4 text-[#91848C]">
-                                        {{ optional($payment->program)->program_fund ? '$' . number_format(optional($payment->program)->program_fund, 2) : 'One-time contribution' }}
-                                    </td>
+                                    <td class="px-5 py-4 text-[#91848C]">{{ $fundingSummary }}</td>
                                 </tr>
                             @empty
                                 <tr>

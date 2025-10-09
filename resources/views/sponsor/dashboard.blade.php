@@ -56,8 +56,10 @@
                                             $profile = optional($sponsor->profile);
                                             $avatar = $profile && $profile->avatar ? Storage::url($profile->avatar) : asset('images/patient-7.png');
                                             $latestSponsorship = optional($sponsor->sponsorships->first());
-                                            $latestProgram = optional($latestSponsorship->program);
-                                            $eventType = $latestProgram->title ?? 'N/A';
+                                            $latestTarget = optional(
+                                                $latestSponsorship->program ?? $latestSponsorship->sponsorshipProgram
+                                            );
+                                            $eventType = $latestTarget->title ?? 'N/A';
                                             $firstDate = $sponsor->first_contribution_date ? Carbon::parse($sponsor->first_contribution_date) : null;
                                             $lastDate = $sponsor->last_contribution_date ? Carbon::parse($sponsor->last_contribution_date) : null;
                                             $durationLabel = 'N/A';
@@ -137,8 +139,10 @@
                                             $detail = optional($sponsor->sponsorDetail);
                                             $logo = $detail && $detail->logo ? Storage::url($detail->logo) : asset('images/patient-4.png');
                                             $latestSponsorship = optional($sponsor->sponsorships->first());
-                                            $latestProgram = optional($latestSponsorship->program);
-                                            $eventType = $latestProgram->title ?? 'N/A';
+                                            $latestTarget = optional(
+                                                $latestSponsorship->program ?? $latestSponsorship->sponsorshipProgram
+                                            );
+                                            $eventType = $latestTarget->title ?? 'N/A';
                                             $firstDate = $sponsor->first_contribution_date ? Carbon::parse($sponsor->first_contribution_date) : null;
                                             $lastDate = $sponsor->last_contribution_date ? Carbon::parse($sponsor->last_contribution_date) : null;
                                             $durationLabel = 'N/A';

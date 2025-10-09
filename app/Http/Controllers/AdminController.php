@@ -282,7 +282,7 @@ class AdminController extends Controller
             ->orderByDesc('date')
             ->get();
 
-        $programs = Program::with(['registrations', 'sponsorshipProgram'])
+        $programs = Program::with(['registrations'])
             ->withCount('registrations')
             ->withSum('sponsorships as total_raised', 'amount')
             ->orderByDesc('event_date')

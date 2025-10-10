@@ -126,6 +126,11 @@ Route::prefix('sponsor')->middleware(['role.restrict'])->group(function () {
         Route::post('/reviews', [SponsorController::class, 'storeReview'])->name('sponsor.reviews.store');
         Route::get('/payment', [SponsorController::class, 'payment'])->name('sponsor.payment');
         Route::get('/setting', [SponsorController::class, 'setting'])->name('sponsor.setting');
+        Route::put('/settings', [SponsorController::class, 'updateSettings'])->name('sponsor.settings.update');
+        Route::put('/settings/password', [SponsorController::class, 'updatePassword'])->name('sponsor.settings.password');
+        Route::put('/settings/notifications', [SponsorController::class, 'updateNotifications'])->name('sponsor.settings.notifications');
+        Route::put('/settings/account', [SponsorController::class, 'updateAccount'])->name('sponsor.settings.account');
+        Route::put('/settings/social', [SponsorController::class, 'updateSocial'])->name('sponsor.settings.social');
     });
 
 

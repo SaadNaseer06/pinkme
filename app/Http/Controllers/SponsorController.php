@@ -617,4 +617,180 @@ class SponsorController extends Controller
         $user = Auth::user()->load(['profile', 'sponsorDetail']);
         return view('sponsor.setting', compact('user'));
     }
+
+    /**
+     * Update personal information for the sponsor.
+     */
+    public function updateSettings(Request $request)
+    {
+        $user = $request->user();
+        $profile = $user->profile;
+        if (!$profile) {
+            $profile = new \App\Models\UserProfile(['user_id' => $user->id]);
+            $profile->save();
+            $user->load('profile');
+            $profile = $user->profile;
+        }
+        
+        $sponsorDetail = $user->sponsorDetail;
+        // Only create SponsorDetail if we have company-related data to save
+        $hasCompanyData = $request->filled(['company_name', 'company_email', 'company_phone', 'registration_number', 'company_type']);
+        if (!$sponsorDetail && $hasCompanyData) {
+            $sponsorDetail = new \App\Models\SponsorDetail(['user_id' => $user->id]);
+        }
+
+        $rules = [
+            'avatar' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'username' => 'nullable|string|max:255|unique:user_profiles,username,' . ($profile->id ?? 'NULL'),
+            'phone' => 'nullable|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'gender' => 'nullable|string|max:10',
+            'date_of_birth' => 'nullable|date',
+            'country' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            // Company/Sponsor specific fields
+            'company_name' => 'nullable|string|max:255',
+            'company_email' => 'nullable|email',
+            'company_phone' => 'nullable|string|max:255',
+            'registration_number' => 'nullable|string|max:255',
+            'company_type' => 'nullable|string|max:255',
+        ];
+        
+        $data = $request->validate($rules);
+
+        // Update user email
+        $user->email = $data['email'];
+        $user->save();
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $profile->avatar = $path;
+        }
+
+        // Update or create profile fields
+        $profile->first_name = $data['first_name'] ?? $profile->first_name;
+        $profile->last_name = $data['last_name'] ?? $profile->last_name;
+        $profile->username = $data['username'] ?? $profile->username;
+        $profile->full_name = trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? ''));
+        $profile->phone = $data['phone'] ?? $profile->phone;
+        $profile->gender = $data['gender'] ?? $profile->gender;
+        $profile->date_of_birth = $data['date_of_birth'] ?? $profile->date_of_birth;
+        $profile->country = $data['country'] ?? $profile->country;
+        $profile->city = $data['city'] ?? $profile->city;
+        $profile->state = $data['state'] ?? $profile->state;
+        $profile->save();
+
+        // Update sponsor details only if we have the record or company data
+        if ($sponsorDetail || $hasCompanyData) {
+            if (!$sponsorDetail) {
+                $sponsorDetail = new \App\Models\SponsorDetail(['user_id' => $user->id]);
+            }
+            
+            $sponsorDetail->company_name = $data['company_name'] ?? $sponsorDetail->company_name;
+            $sponsorDetail->company_email = $data['company_email'] ?? $sponsorDetail->company_email;
+            $sponsorDetail->company_phone = $data['company_phone'] ?? $sponsorDetail->company_phone;
+            $sponsorDetail->registration_number = $data['registration_number'] ?? $sponsorDetail->registration_number;
+            $sponsorDetail->company_type = $data['company_type'] ?? $sponsorDetail->company_type;
+            $sponsorDetail->save();
+        }
+
+        return back()->with('success', 'Profile updated successfully.');
+    }
+
+    /**
+     * Update password for the sponsor.
+     */
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = $request->user();
+        if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        }
+
+        $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        $user->save();
+
+        return back()->with('success', 'Password updated successfully.');
+    }
+
+    /**
+     * Update notification preferences for the sponsor.
+     */
+    public function updateNotifications(Request $request)
+    {
+        $user = $request->user();
+        $profile = $user->profile;
+        if (!$profile) {
+            $profile = new \App\Models\UserProfile(['user_id' => $user->id]);
+        }
+        
+        $profile->email_notification = $request->has('email_notification');
+        $profile->sms_notification = $request->has('sms_notification');
+        $profile->notify_on_new_notifications = $request->has('notify_on_new_notifications');
+        $profile->notify_on_direct_message = $request->has('notify_on_direct_message');
+        $profile->save();
+
+        return back()->with('success', 'Notification preferences updated.');
+    }
+
+    /**
+     * Update account settings for the sponsor.
+     */
+    public function updateAccount(Request $request)
+    {
+        $user = $request->user();
+        $profile = $user->profile;
+        if (!$profile) {
+            $profile = new \App\Models\UserProfile(['user_id' => $user->id]);
+        }
+
+        $data = $request->validate([
+            'username' => 'nullable|string|max:255|unique:user_profiles,username,' . ($profile->id ?? 'NULL'),
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'alternate_email' => 'nullable|email',
+        ]);
+
+        $user->email = $data['email'];
+        $user->save();
+
+        $profile->username = $data['username'] ?? $profile->username;
+        $profile->alternate_email = $data['alternate_email'] ?? $profile->alternate_email;
+        $profile->save();
+
+        return back()->with('success', 'Account settings updated successfully.');
+    }
+
+    /**
+     * Update social media links for the sponsor.
+     */
+    public function updateSocial(Request $request)
+    {
+        $user = $request->user();
+        $profile = $user->profile;
+        if (!$profile) {
+            $profile = new \App\Models\UserProfile(['user_id' => $user->id]);
+        }
+        
+        $data = $request->validate([
+            'facebook' => 'nullable|url',
+            'twitter' => 'nullable|url',
+            'instagram' => 'nullable|url',
+        ]);
+
+        $profile->facebook = $data['facebook'] ?? $profile->facebook;
+        $profile->twitter = $data['twitter'] ?? $profile->twitter;
+        $profile->instagram = $data['instagram'] ?? $profile->instagram;
+        $profile->save();
+
+        return back()->with('success', 'Social media links updated.');
+    }
 }

@@ -192,11 +192,13 @@
                                         class="px-5 py-3 bg-transparent border border-[#DCCFD8] text-[#91848C] rounded-md app-text">
                                         Cancel
                                     </button>
-                                    <button type="button"
-                                        class="px-6 py-2 bg-pink text-white rounded-lg hover:bg-pink-dark transition app-text"
-                                        onclick="document.getElementById('popupModal')?.classList.remove('hidden')">
-                                        Register Yourself
-                                    </button>
+                                    <!-- Inside the modal -->
+                                    <a href="#" id="modalViewEventButton"
+                                        style="padding: 14px 24px; background-color: #DB69A2; color: white; border-radius: 8px; text-decoration: none; display: inline-block; font-size: 14px; font-weight: 500; transition: background-color 0.3s ease;"
+                                        onmouseover="this.style.backgroundColor='#C63A85'"
+                                        onmouseout="this.style.backgroundColor='#DB69A2'">
+                                        View Event Details
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -223,7 +225,8 @@
                             sponsorLogo,
                             sponsorAbout,
                             totalSponsors,
-                            totalRaised
+                            totalRaised,
+                            eventId
                         } = trigger.dataset;
 
                         document.getElementById('modalEventTitle').textContent = title || 'Event Details';
@@ -243,6 +246,12 @@
                             'Committed supporters partnering with us to impact more lives.';
                         document.getElementById('modalTotalSponsors').textContent = totalSponsors || '0';
                         document.getElementById('modalTotalRaised').textContent = totalRaised ? `$${totalRaised}` : '$0.00';
+
+                        // Update the event detail link
+                        const eventDetailBtn = document.getElementById('modalViewEventButton');
+                        if (eventDetailBtn && eventId) {
+                            eventDetailBtn.href = `/sponsor/events/${eventId}`;
+                        }
 
                         modalOverlay.style.display = 'flex';
                     }

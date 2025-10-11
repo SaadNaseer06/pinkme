@@ -63,7 +63,11 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
 
     // Events (table: events) + attach funding programs (pivot: event_sponsorships)
     Route::resource('events', EventController::class);
-
+    
+    // Event registration management
+    Route::get('events-registrations', [EventController::class, 'registrations'])->name('events.registrations.index');
+    Route::post('events-registrations/{registration}/approve', [EventController::class, 'approveRegistration'])->name('events.registrations.approve');
+    Route::post('events-registrations/{registration}/reject', [EventController::class, 'rejectRegistration'])->name('events.registrations.reject');
 
     Route::post('events/{event}/sponsorships',                 [EventController::class, 'storeSponsorship'])->name('events.sponsorships.store');
     Route::delete('events/{event}/sponsorships/{sponsorship}', [EventController::class, 'destroySponsorship'])->name('events.sponsorships.destroy');
@@ -122,15 +126,22 @@ Route::prefix('sponsor')->middleware(['role.restrict'])->group(function () {
     Route::get('/sponsorships', [SponsorController::class, 'sponsorships'])->name('sponsor.sponsorships');
     Route::get('/become-a-sponsor', [SponsorController::class, 'becomeASponsor'])->name('sponsor.becomeASponsor');
     Route::post('/sponsorships', [SponsorController::class, 'storeSponsorship'])->name('sponsor.sponsorships.store');
-        Route::get('/reviews', [SponsorController::class, 'reviews'])->name('sponsor.reviews');
-        Route::post('/reviews', [SponsorController::class, 'storeReview'])->name('sponsor.reviews.store');
-        Route::get('/payment', [SponsorController::class, 'payment'])->name('sponsor.payment');
-        Route::get('/setting', [SponsorController::class, 'setting'])->name('sponsor.setting');
-        Route::put('/settings', [SponsorController::class, 'updateSettings'])->name('sponsor.settings.update');
-        Route::put('/settings/password', [SponsorController::class, 'updatePassword'])->name('sponsor.settings.password');
-        Route::put('/settings/notifications', [SponsorController::class, 'updateNotifications'])->name('sponsor.settings.notifications');
-        Route::put('/settings/account', [SponsorController::class, 'updateAccount'])->name('sponsor.settings.account');
-        Route::put('/settings/social', [SponsorController::class, 'updateSocial'])->name('sponsor.settings.social');
+    
+    // Event Registration Routes
+    Route::get('/events/{event}', [SponsorController::class, 'showEvent'])->name('sponsor.events.show');
+    Route::post('/events/{event}/register', [SponsorController::class, 'registerForEvent'])->name('sponsor.events.register');
+    Route::delete('/events/{event}/cancel', [SponsorController::class, 'cancelEventRegistration'])->name('sponsor.events.cancel');
+    Route::get('/my-event-registrations', [SponsorController::class, 'myEventRegistrations'])->name('sponsor.events.my-registrations');
+    
+    Route::get('/reviews', [SponsorController::class, 'reviews'])->name('sponsor.reviews');
+    Route::post('/reviews', [SponsorController::class, 'storeReview'])->name('sponsor.reviews.store');
+    Route::get('/payment', [SponsorController::class, 'payment'])->name('sponsor.payment');
+    Route::get('/setting', [SponsorController::class, 'setting'])->name('sponsor.setting');
+    Route::put('/settings', [SponsorController::class, 'updateSettings'])->name('sponsor.settings.update');
+    Route::put('/settings/password', [SponsorController::class, 'updatePassword'])->name('sponsor.settings.password');
+    Route::put('/settings/notifications', [SponsorController::class, 'updateNotifications'])->name('sponsor.settings.notifications');
+    Route::put('/settings/account', [SponsorController::class, 'updateAccount'])->name('sponsor.settings.account');
+    Route::put('/settings/social', [SponsorController::class, 'updateSocial'])->name('sponsor.settings.social');
     });
 
 

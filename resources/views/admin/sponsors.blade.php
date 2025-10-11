@@ -317,21 +317,21 @@ System: -light app-text">
                         <div class="mb-6 mt-6">
                             <div class="flex justify-between items-center mb-4">
                                 <h2 class="text-2xl font-semibold text-[#213430]">Upcoming Events</h2>
-                                <div class="flex items-center space-x-4">
-                                    {{-- <button
-                                        class="flex items-center border border-[#91848C] text-[#91848C] px-4 py-2 rounded-lg hover:bg-[#F6EDF5] transition-colors duration-200">
-                                        <span class="text-sm">Filters</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586l-7.293 7.293a1 1 0 00-.293.707V21l-4-4v-6.586a1 1 0 00-.293-.707L3 6.586V4z" />
-                                        </svg>
-                                    </button> --}}
-                                    <a href="{{ route('events.create') }}"
-                                        class="flex items-center bg-[#db69a2] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#c25891] transition-colors duration-200">
-                                        <span>Add New Event</span>
-                                    </a>
-                                </div>
+
+                                @if ($events->count() > 0)
+                                    <div class="flex items-center gap-2">
+                                        @if (\App\Models\EventSponsorship::count() > 0)
+                                            <a href="{{ route('events.registrations.index') }}"
+                                                class="bg-[#db69a2] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#c25891] transition-colors duration-200">
+                                                <span>View Sponsors</span>
+                                            </a>
+                                        @endif
+                                        <a href="{{ route('events.create') }}"
+                                            class="flex items-center bg-[#db69a2] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#c25891] transition-colors duration-200">
+                                            <span>Add New Event</span>
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Events Grid -->
@@ -427,69 +427,14 @@ System: -light app-text">
                                         </div>
                                     </div>
                                 @empty
-                                    @php
-                                        $sampleEventDetail = [
-                                            'type' => 'event',
-                                            'title' => 'Breast Cancer Awareness Walk',
-                                            'description' =>
-                                                'A community walk to raise awareness about breast cancer prevention and early detection.',
-                                            'image' => asset('images/program-details.png'),
-                                            'date' => 'Saturday, March 30, 2025',
-                                            'time' => '10:00 AM',
-                                            'location' => 'Central Park, NYC',
-                                            'sponsor_count' => 8,
-                                            'total_raised' => 12500,
-                                            'show_url' => null,
-                                        ];
-                                    @endphp
-                                    <div
-                                        class="bg-[#F3E8EF] rounded-lg p-6 hover:shadow-lg transition-shadow duration-200">
-                                        <div class="flex items-start gap-4">
-                                            <div class="flex-none">
-                                                <div
-                                                    class="flex flex-col items-center justify-center w-20 h-20 border-2 border-[#DB69A2] rounded-lg bg-[#FFF7FC]">
-                                                    <span class="text-sm text-[#DB69A2]">Mar</span>
-                                                    <span class="text-4xl font-bold text-[#DB69A2]">30</span>
-                                                </div>
-                                            </div>
-                                            <div class="flex-1">
-                                                <h3 class="text-xl font-semibold text-[#213430] mb-2">Breast Cancer
-                                                    Awareness Walk</h3>
-                                                <p class="text-sm text-[#91848C] mb-4 line-clamp-2">A community walk to
-                                                    raise awareness about breast cancer prevention and early detection.</p>
-                                                <div class="flex flex-wrap items-center gap-4 mb-4 text-sm text-[#91848C]">
-                                                    <div class="flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        </svg>
-                                                        <span>Central Park, NYC</span>
-                                                    </div>
-                                                    <div class="flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        <span>10:00 AM</span>
-                                                    </div>
-                                                </div>
-                                                <div
-                                                    class="flex flex-wrap items-center justify-between gap-3 border border-[#E0D0DA] bg-white/60 px-3 py-2 rounded-lg text-xs text-[#6C5B68]">
-                                                    <span class="font-medium">Sponsors: 8</span>
-                                                    <span class="font-medium">Raised: $12,500.00</span>
-                                                </div>
-                                                <div class="mt-4 flex justify-end">
-                                                    <button onclick='openDetailModal(@json($sampleEventDetail))'
-                                                        class="inline-flex items-center justify-center rounded-md border border-transparent bg-[#DB69A2] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#c25891] transition">View</button>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="bg-[#F3E8EF] rounded-lg p-6 text-center">
+                                        <p class="text-[#91848C] text-lg font-medium mb-4">No upcoming events found.</p>
+                                        <p class="text-[#6C5B68] text-sm mb-6">Get started by creating a new event to
+                                            engage your community and sponsors.</p>
+                                        <a href="{{ route('events.create') }}"
+                                            class="inline-flex items-center justify-center rounded-md bg-[#DB69A2] px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-[#c25891] transition-colors duration-200">
+                                            Create New Event
+                                        </a>
                                     </div>
                                 @endforelse
                             </div>
@@ -499,10 +444,14 @@ System: -light app-text">
                         <div class="mt-12 mb-6">
                             <div class="flex justify-between items-center mb-4">
                                 <h2 class="text-2xl font-semibold text-[#213430] program-main">Support Programs</h2>
-                                <a href="{{ route('programs.create') }}"
-                                    class="bg-[#db69a2] text-white px-4 py-2 rounded-lg hover:bg-[#c25891] transition-colors inline-block">
-                                    Add New Program
-                                </a>
+                                @if ($programs->count() > 0)
+                                    <div class="flex items-center space-x-4">
+                                        <a href="{{ route('programs.create') }}"
+                                            class="flex items-center bg-[#db69a2] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#c25891] transition-colors duration-200">
+                                            <span>Add New Program</span>
+                                        </a>
+                                    </div>
+                                @endif
                             </div>
 
                             @if (isset($programs) && $programs->count() > 0)
@@ -618,94 +567,14 @@ System: -light app-text">
                                     </div>
                                 @endforeach
                             @else
-                                <!-- Sample Program Card -->
-                                @php
-                                    $sampleProgramDetail = [
-                                        'type' => 'program',
-                                        'title' => 'Stronger Together: Cancer Support Group',
-                                        'description' =>
-                                            'A community-driven program offering emotional and financial support for cancer patients and survivors.',
-                                        'image' => asset('images/program-3.png'),
-                                        'date' => 'Saturday, March 15, 2025',
-                                        'time' => '10:00 AM',
-                                        'status' => 'ongoing',
-                                        'registrations' => 42,
-                                        'total_raised' => 48000,
-                                        'fund_goal' => 60000,
-                                        'show_url' => null,
-                                    ];
-                                @endphp
-                                <div class="bg-[#F3E8EF] rounded-lg p-4 mb-4 hidden md:flex items-center justify-between">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-20 h-20 rounded-lg overflow-hidden">
-                                            <img src="{{ asset('images/program-3.png') }}" alt="Support Program"
-                                                class="w-full h-full object-cover" />
-                                        </div>
-                                        <div>
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <h3 class="text-xl font-semibold text-[#213430] program-h">Stronger
-                                                    Together: Cancer Support Group</h3>
-                                                <span
-                                                    class="inline-flex items-center rounded-full bg-white/60 px-3 py-1 text-xs font-medium text-[#DB69A2] capitalize">Ongoing</span>
-                                            </div>
-                                            <p class="text-sm text-[#91848C] program-p">A community-driven program offering
-                                                emotional and financial support for cancer patients and survivors.</p>
-                                            <div class="mt-3 flex flex-wrap items-center gap-4 text-xs text-[#6C5B68]">
-                                                <span><i class="fas fa-calendar mr-1"></i>Mar 15,
-                                                    2025</span>
-                                                <span><i class="far fa-clock mr-1"></i>10:00 AM</span>
-                                                <span><i class="fas fa-users mr-1"></i>Registrations: 42</span>
-                                            </div>
-                                            <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-[#6C5B68]">
-                                                <span
-                                                    class="inline-flex items-center rounded-md bg-white/70 px-2.5 py-1 font-medium">Raised:
-                                                    $48,000.00</span>
-                                                <span
-                                                    class="inline-flex items-center rounded-md bg-white/70 px-2.5 py-1 font-medium">Goal:
-                                                    $60,000.00</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <a href="{{ route('programs.create') }}"
-                                            class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-[#213430] shadow-sm hover:bg-[#F6EDF5] transition">Add
-                                            Program</a>
-                                        <button onclick='openDetailModal(@json($sampleProgramDetail))'
-                                            class="bg-[#DB69A2] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#c25891] transition">View
-                                            Details</button>
-                                    </div>
-                                </div>
-                                <div class="bg-[#F3E8EF] rounded-lg p-3 mb-4 md:hidden">
-                                    <div class="flex gap-3">
-                                        <div class="w-[80px] h-[80px] rounded-lg overflow-hidden flex-shrink-0">
-                                            <img src="{{ asset('images/program-3.png') }}" alt="Support Program"
-                                                class="w-full h-full object-cover" />
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="flex items-center justify-between">
-                                                <h3 class="text-[15px] font-semibold text-[#213430] mb-1">Stronger
-                                                    Together: Cancer Support Group</h3>
-                                                <span
-                                                    class="inline-flex items-center rounded-full bg-white/60 px-2 py-0.5 text-[10px] font-semibold text-[#DB69A2] capitalize">Ongoing</span>
-                                            </div>
-                                            <p class="text-[13px] font-light text-[#91848C] mb-2">A community-driven
-                                                program offering emotional and financial support.</p>
-                                            <div class="text-xs text-[#6C5B68] mb-2 grid grid-cols-2 gap-2">
-                                                <span><i class="fas fa-calendar mr-1"></i>Mar 15,
-                                                    2025</span>
-                                                <span><i class="far fa-clock mr-1"></i>10:00 AM</span>
-                                                <span><i class="fas fa-users mr-1"></i>Regs: 42</span>
-                                                <span><i class="fas fa-hand-holding-usd mr-1"></i>$48K / $60K</span>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <a href="{{ route('programs.create') }}"
-                                                    class="flex-1 text-center border border-[#213430] text-[#213430] text-xs py-2 rounded-md program-btn">Add
-                                                    Program</a>
-                                                <button onclick='openDetailModal(@json($sampleProgramDetail))'
-                                                    class="flex-1 text-center bg-[#DB69A2] text-white text-xs py-2 rounded-md program-btn">View</button>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="bg-[#F3E8EF] rounded-lg p-6 text-center">
+                                    <p class="text-[#91848C] text-lg font-medium mb-4">No upcoming programs found.</p>
+                                    <p class="text-[#6C5B68] text-sm mb-6">Get started by creating a new program to engage
+                                        your community and sponsors.</p>
+                                    <a href="{{ route('programs.create') }}"
+                                        class="inline-flex items-center justify-center rounded-md bg-[#DB69A2] px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-[#c25891] transition-colors duration-200">
+                                        Create New Program
+                                    </a>
                                 </div>
                             @endif
                         </div>

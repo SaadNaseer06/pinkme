@@ -96,7 +96,7 @@
     <div class="flex-1 flex flex-col">
         @include('admin.partials.topbar')
         <main class="flex-1 p-6">
-            @include('admin.partials.flash')
+            @include('partials.flash')
             @yield('content')
         </main>
         @include('admin.partials.footer')

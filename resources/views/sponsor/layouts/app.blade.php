@@ -43,6 +43,7 @@
     <div class="flex-1 flex flex-col">
         @include('sponsor.partials.topbar')
         <main class="flex-1 p-6">
+            @include('partials.flash')
             @yield('content')
         </main>
         @include('sponsor.partials.footer')

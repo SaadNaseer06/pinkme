@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Application;
 use App\Models\Event;
+use App\Models\EventSponsorship;
 use App\Models\SponsorReview;
 use App\Models\Sponsorship;
 use App\Models\SponsorshipProgram;
@@ -151,22 +152,22 @@ class SponsorController extends Controller
     public function events()
 
     {
+        $user = Auth::user();
 
         $events = Event::with([
-
             'sponsors' => fn($query) => $query->with(['profile', 'sponsorDetail'])
-
-                ->withPivot('amount'),
-
-            'sponsorships',
-
+                ->withPivot(['amount', 'registration_status', 'registered_at', 'confirmed_at']),
+            'sponsorships' => function($query) {
+                // Explicitly ensure we're using the event_sponsorships table
+                return $query;
+            }
         ])
 
             ->orderBy('date')
 
             ->get()
 
-            ->map(function (Event $event) {
+            ->map(function (Event $event) use ($user) {
 
                 $eventDate = Carbon::parse($event->date);
 
@@ -197,7 +198,14 @@ class SponsorController extends Controller
 
                 $event->total_sponsorship_amount = $event->sponsorships->sum('amount');
 
+                $event->confirmed_sponsorship_amount = $event->confirmedSponsorships->sum('amount');
+
                 $event->primary_sponsor = $event->sponsors->first();
+
+                // Check if current user is registered
+                $event->user_registration_status = $event->getSponsorRegistrationStatus($user->id);
+                $event->is_user_registered = $event->isSponsorRegistered($user->id);
+                $event->can_register = $event->isRegistrationOpen();
 
                 return $event;
             });
@@ -631,7 +639,7 @@ class SponsorController extends Controller
             $user->load('profile');
             $profile = $user->profile;
         }
-        
+
         $sponsorDetail = $user->sponsorDetail;
         // Only create SponsorDetail if we have company-related data to save
         $hasCompanyData = $request->filled(['company_name', 'company_email', 'company_phone', 'registration_number', 'company_type']);
@@ -658,7 +666,7 @@ class SponsorController extends Controller
             'registration_number' => 'nullable|string|max:255',
             'company_type' => 'nullable|string|max:255',
         ];
-        
+
         $data = $request->validate($rules);
 
         // Update user email
@@ -689,7 +697,7 @@ class SponsorController extends Controller
             if (!$sponsorDetail) {
                 $sponsorDetail = new \App\Models\SponsorDetail(['user_id' => $user->id]);
             }
-            
+
             $sponsorDetail->company_name = $data['company_name'] ?? $sponsorDetail->company_name;
             $sponsorDetail->company_email = $data['company_email'] ?? $sponsorDetail->company_email;
             $sponsorDetail->company_phone = $data['company_phone'] ?? $sponsorDetail->company_phone;
@@ -732,7 +740,7 @@ class SponsorController extends Controller
         if (!$profile) {
             $profile = new \App\Models\UserProfile(['user_id' => $user->id]);
         }
-        
+
         $profile->email_notification = $request->has('email_notification');
         $profile->sms_notification = $request->has('sms_notification');
         $profile->notify_on_new_notifications = $request->has('notify_on_new_notifications');
@@ -779,7 +787,7 @@ class SponsorController extends Controller
         if (!$profile) {
             $profile = new \App\Models\UserProfile(['user_id' => $user->id]);
         }
-        
+
         $data = $request->validate([
             'facebook' => 'nullable|url',
             'twitter' => 'nullable|url',
@@ -792,5 +800,158 @@ class SponsorController extends Controller
         $profile->save();
 
         return back()->with('success', 'Social media links updated.');
+    }
+
+    /**
+     * Show detailed event information for sponsor registration
+     */
+    public function showEvent(\App\Models\Event $event)
+    {
+        $user = Auth::user();
+        
+        // Load event with sponsorships and sponsor details
+        $event->load([
+            'sponsors.profile',
+            'sponsors.sponsorDetail',
+            'confirmedSponsorships',
+            'pendingSponsorships'
+        ]);
+        
+        // Check if current sponsor is already registered
+        $currentRegistration = $event->sponsorships()
+            ->where('sponsor_id', $user->id)
+            ->first();
+        
+        // Calculate funding progress
+        $fundingProgress = $event->funding_progress;
+        $remainingFunding = $event->remaining_funding;
+        
+        return view('sponsor.events.show', compact(
+            'event',
+            'currentRegistration',
+            'fundingProgress',
+            'remainingFunding'
+        ));
+    }
+    
+    /**
+     * Register sponsor for an event
+     */
+    public function registerForEvent(Request $request, \App\Models\Event $event)
+    {
+        $user = Auth::user();
+        
+        // Check if registration is still open
+        if (!$event->isRegistrationOpen()) {
+            return back()->with('error', 'Registration for this event is no longer open.');
+        }
+        
+        // Check if sponsor is already registered
+        if ($event->isSponsorRegistered($user->id)) {
+            return back()->with('error', 'You are already registered for this event.');
+        }
+        
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'message' => ['nullable', 'string', 'max:500'],
+        ]);
+        
+        // Check if amount doesn't exceed remaining funding needed
+        if ($event->funding_goal && $data['amount'] > $event->remaining_funding) {
+            return back()->with('error', 'Sponsorship amount exceeds remaining funding needed ($' . number_format($event->remaining_funding, 2) . ').');
+        }
+        
+        // Create event sponsorship registration
+        $event->sponsorships()->create([
+            'sponsor_id' => $user->id,
+            'amount' => $data['amount'],
+            'registration_status' => 'pending',
+            'message' => $data['message'] ?? null,
+            'registered_at' => now(),
+        ]);
+        
+        return back()->with('success', 'Your event registration has been submitted successfully! You will be notified once it\'s confirmed.');
+    }
+    
+    /**
+     * Cancel sponsor event registration
+     */
+    public function cancelEventRegistration(\App\Models\Event $event)
+    {
+        $user = Auth::user();
+        
+        $sponsorship = $event->sponsorships()
+            ->where('sponsor_id', $user->id)
+            ->whereIn('registration_status', ['pending', 'confirmed'])
+            ->first();
+        
+        if (!$sponsorship) {
+            return back()->with('error', 'No active registration found for this event.');
+        }
+        
+        // Only allow cancellation if event hasn't started yet
+        if ($event->date && now()->isAfter($event->date)) {
+            return back()->with('error', 'Cannot cancel registration for events that have already started.');
+        }
+        
+        $sponsorship->update([
+            'registration_status' => 'cancelled'
+        ]);
+        
+        return back()->with('success', 'Your event registration has been cancelled.');
+    }
+    
+    /**
+     * Show sponsor's event registrations
+     */
+    public function myEventRegistrations()
+    {
+        $user = Auth::user();
+        
+        // Get all events where the sponsor has registrations
+        $registrations = EventSponsorship::where('sponsor_id', $user->id)
+            ->with([
+                'event' => function($query) {
+                    $query->withCount(['confirmedSponsorships', 'pendingSponsorships']);
+                }
+            ])
+            ->orderByDesc('registered_at')
+            ->get()
+            ->map(function ($sponsorship) {
+                $event = $sponsorship->event;
+                if ($event) {
+                    $eventDate = Carbon::parse($event->date);
+                    $event->formatted_date = $eventDate->format('M d, Y');
+                    $event->formatted_time = $eventDate->format('g:i A');
+                    $event->is_upcoming = $eventDate->isFuture();
+                    $event->is_today = $eventDate->isToday();
+                    $event->is_past = $eventDate->isPast() && !$eventDate->isToday();
+                    
+                    // Calculate funding progress
+                    $event->funding_progress = $event->funding_progress;
+                    $event->remaining_funding = $event->remaining_funding;
+                }
+                return $sponsorship;
+            });
+        
+        // Group registrations by status
+        $confirmed = $registrations->where('registration_status', 'confirmed');
+        $pending = $registrations->where('registration_status', 'pending');
+        $cancelled = $registrations->where('registration_status', 'cancelled');
+        
+        // Calculate totals
+        $totalAmount = $registrations->sum('amount');
+        $confirmedAmount = $confirmed->sum('amount');
+        $pendingAmount = $pending->sum('amount');
+        
+        return view('sponsor.my-event-registrations', compact(
+            'registrations',
+            'confirmed',
+            'pending', 
+            'cancelled',
+            'totalAmount',
+            'confirmedAmount',
+            'pendingAmount'
+        ));
     }
 }

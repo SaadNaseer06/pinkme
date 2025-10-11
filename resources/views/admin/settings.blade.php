@@ -57,7 +57,8 @@
                                     <label class="block font-light text-md text-[#213430] mb-1 app-text">Site Name</label>
                                     <input type="text" name="site_name"
                                         value="{{ old('site_name', $settings->site_name ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text" />
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
+                                        required />
                                 </div>
 
                                 <!-- Site Description -->
@@ -74,7 +75,8 @@
                                         Email</label>
                                     <input type="email" name="contact_email"
                                         value="{{ old('contact_email', $settings->contact_email ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text" />
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
+                                        required />
                                 </div>
 
                                 <!-- Contact Phone -->
@@ -83,7 +85,8 @@
                                         Phone</label>
                                     <input type="text" name="contact_phone"
                                         value="{{ old('contact_phone', $settings->contact_phone ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text" />
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
+                                        required />
                                 </div>
 
                                 <!-- Address -->
@@ -91,7 +94,8 @@
                                     <label class="block font-light text-md text-[#213430] mb-1 app-text">Address</label>
                                     <input type="text" name="address"
                                         value="{{ old('address', $settings->address ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text" />
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
+                                        required />
                                 </div>
 
                                 <!-- Social Links -->
@@ -100,34 +104,38 @@
                                         URL</label>
                                     <input type="url" name="facebook_url"
                                         value="{{ old('facebook_url', $settings->facebook_url ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]" />
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]"
+                                        required />
                                 </div>
                                 <div>
                                     <label class="block font-light text-md text-[#213430] mb-1 app-text">Twitter URL</label>
                                     <input type="url" name="twitter_url"
                                         value="{{ old('twitter_url', $settings->twitter_url ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]" />
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]"
+                                        required />
                                 </div>
                                 <div>
                                     <label class="block font-light text-md text-[#213430] mb-1 app-text">Instagram
                                         URL</label>
                                     <input type="url" name="instagram_url"
                                         value="{{ old('instagram_url', $settings->instagram_url ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]" />
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]"
+                                        required />
                                 </div>
                                 <div>
                                     <label class="block font-light text-md text-[#213430] mb-1 app-text">LinkedIn
                                         URL</label>
                                     <input type="url" name="linkedin_url"
                                         value="{{ old('linkedin_url', $settings->linkedin_url ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]" />
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]"
+                                        required />
                                 </div>
 
                                 <!-- About Us -->
                                 <div class="md:col-span-2">
                                     <label class="block font-light text-md text-[#213430] mb-1 app-text">About Us</label>
                                     <textarea name="about_us_content" rows="4"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]">{{ old('about_us_content', $settings->about_us_content ?? '') }}</textarea>
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]" required>{{ old('about_us_content', $settings->about_us_content ?? '') }}</textarea>
                                 </div>
                             </div>
 
@@ -154,7 +162,7 @@
                                 <label class="block font-light text-md text-[#213430] mb-1 app-text">Privacy Policy
                                     Content</label>
                                 <textarea id="privacy_editor" name="privacy_policy_content" rows="8"
-                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]">
+                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" required>
 @if (!empty(old('privacy_policy_content', $settings->privacy_policy_content ?? '')))
 {{ old('privacy_policy_content', $settings->privacy_policy_content ?? '') }}
 @else
@@ -173,7 +181,7 @@
                                 <label class="block font-light text-md text-[#213430] mb-1 app-text">Last Updated</label>
                                 <input type="date" name="privacy_last_updated"
                                     value="{{ old('privacy_last_updated', $settings->privacy_last_updated ?? '') }}"
-                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" />
+                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" required />
                             </div>
 
                             <div class="mt-6">
@@ -199,7 +207,7 @@
                                 <label class="block font-light text-md text-[#213430] mb-1 app-text">Terms & Conditions
                                     Content</label>
                                 <textarea id="terms_editor" name="terms_conditions_content" rows="8"
-                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]">
+                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" required>
 @if (!empty(old('terms_conditions_content', $settings->terms_conditions_content ?? '')))
 {{ old('terms_conditions_content', $settings->terms_conditions_content ?? '') }}
 @else
@@ -218,7 +226,7 @@
                                 <label class="block font-light text-md text-[#213430] mb-1 app-text">Last Updated</label>
                                 <input type="date" name="terms_last_updated"
                                     value="{{ old('terms_last_updated', $settings->terms_last_updated ?? '') }}"
-                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" />
+                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" required />
                             </div>
 
                             <div class="mt-6">

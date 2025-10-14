@@ -33,6 +33,11 @@
                     src="{{ request()->is('admin/reviewers') ? asset('images/patient-pink.svg') : asset('images/patient.svg') }}"
                     alt="" />Reviewers</a>
         </li>
+        <li class="{{ request()->is('admin/case-managers*') ? 'active' : '' }}">
+            <a href="{{ route('admin.case-managers.index') }}"><img
+                    src="{{ request()->is('admin/case-managers*') ? asset('images/patient-pink.svg') : asset('images/patient.svg') }}"
+                    alt="" />Case Managers</a>
+        </li>
         <li class="{{ request()->is('admin/patients') ? 'active' : '' }}">
             <a href="{{ route('admin.patients') }}"><img
                     src="{{ request()->is('admin/patients') ? asset('images/patient-pink.svg') : asset('images/patient.svg') }}"
@@ -91,6 +96,14 @@
                             src="{{ request()->is('admin/reviewers') ? asset('images/patient-pink.svg') : asset('images/patient.svg') }}"
                             class="w-5 h-5" /></span>
                     <span class="title">Reviewers</span>
+                </a>
+            </li>
+            <li class="{{ request()->is('admin/case-managers*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.case-managers.index') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/case-managers*') ? asset('images/patient-pink.svg') : asset('images/patient.svg') }}"
+                            class="w-5 h-5" /></span>
+                    <span class="title">Case Managers</span>
                 </a>
             </li>
             <li class="{{ request()->is('admin/patients') ? 'hovered' : '' }}">

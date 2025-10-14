@@ -126,16 +126,48 @@ class CaseManagerController extends Controller
         if ($role === 'casemanager') {
             $application = Application::with([
                 'program',
-                'patient.user',           // so you can show patient email/name
+                'patient.user.profile',   // patient profile details
+                'reviewer.profile',       // assigned reviewer details
                 'documents',
             ])
                 ->where('id', $id)
                 ->where('reviewer_id', $user->id)
                 ->firstOrFail();
 
-            return view('case_manager.view_assigned_application', compact('application'));
-        }
+            // Build comprehensive patient stats for the sidebar/overview
+            $patient = $application->patient; // belongsTo Patient
+            $patientUserId = optional($patient)->user_id;
 
+            // All applications from this patient (any reviewer)
+            $patientApplications = Application::where('patient_id', $patient->id)
+                ->select(['id','status','submission_date','program_id','reviewer_id','created_at'])
+                ->get();
+
+            $totalRequests   = $patientApplications->count();
+            $approvedCount   = $patientApplications->where('status', 'Approved')->count();
+            $rejectedCount   = $patientApplications->where('status', 'Rejected')->count();
+            $pendingCount    = $patientApplications->where('status', 'Pending')->count();
+            $underReviewCnt  = $patientApplications->where('status', 'Under Review')->count();
+
+            // Programs the patient (user) has enrolled in
+            $programRegs = \App\Models\ProgramRegistration::with(['program:id,title'])
+                ->where('user_id', $patientUserId)
+                ->get();
+            $programsEnrolledCount = $programRegs->count();
+            $programTitles = $programRegs->pluck('program.title')->filter()->values();
+
+            $patientStats = [
+                'total_requests'     => $totalRequests,
+                'approved'           => $approvedCount,
+                'rejected'           => $rejectedCount,
+                'pending'            => $pendingCount,
+                'under_review'       => $underReviewCnt,
+                'programs_enrolled'  => $programsEnrolledCount,
+                'program_titles'     => $programTitles,
+            ];
+
+            return view('case_manager.view_assigned_application', compact('application', 'patientStats'));
+        }
         // Patient: only see your own application
         if ($role === 'patient') {
             $patient = Patient::where('user_id', $user->id)->firstOrFail();
@@ -171,6 +203,9 @@ class CaseManagerController extends Controller
             'rejection_reason' => null, // clear any past reason
         ]);
 
+        // Remove any existing missing document requests for this application
+        ApplicationMissingRequest::where('application_id', $application->id)->delete();
+
         return back()->with('success', 'The application has been approved successfully.');
     }
 
@@ -192,25 +227,57 @@ class CaseManagerController extends Controller
             'rejection_reason' => $data['reason'],
         ]);
 
+        // Remove any existing missing document requests for this application
+        ApplicationMissingRequest::where('application_id', $application->id)->delete();
+
         // Optional: trigger a notification to the applicant here
 
         return back()->with('success', 'The application has been rejected and the applicant has been notified.');
     }
 
+
     public function requestMissing(Application $application, Request $request)
     {
+        // Security: only the assigned case manager can request missing documents
         if ($application->reviewer_id !== Auth::id()) {
             abort(403);
         }
 
+        // Validate the incoming message
         $data = $request->validate([
             'message' => ['required', 'string', 'max:2000'],
         ]);
 
+        // Check if there's an existing missing request for this application
+        $existingRequest = ApplicationMissingRequest::where('application_id', $application->id)
+            ->first();
+
+        if ($existingRequest) {
+            // Update the existing record instead of creating a new one
+            $existingRequest->update([
+                'case_manager_id' => Auth::id(),
+                'message' => $data['message'],
+                'updated_at' => now(), // Explicitly update timestamp
+            ]);
+
+            // Update application status to "Required Docs"
+            $application->update([
+                'status' => 'Required Docs',
+            ]);
+
+            return back()->with('success', 'Your request for missing documents has been updated successfully.');
+        }
+
+        // If no existing request, create a new one
         ApplicationMissingRequest::create([
             'application_id' => $application->id,
             'case_manager_id' => Auth::id(),
             'message' => $data['message'],
+        ]);
+
+        // Update application status to "Required Docs"
+        $application->update([
+            'status' => 'Required Docs',
         ]);
 
         // TODO (optional): notify the patient to upload the required documents
@@ -221,8 +288,21 @@ class CaseManagerController extends Controller
 
     public function patientProfiles()
     {
-        // Get all patients with their profiles and applications
-        $patients = Patient::with(['user.profile', 'applications.program'])
+        // Only show patients whose applications are assigned to the logged-in case manager
+        $reviewerId = Auth::id();
+
+        $patients = Patient::query()
+            ->whereHas('applications', function ($q) use ($reviewerId) {
+                $q->where('reviewer_id', $reviewerId);
+            })
+            ->with([
+                'user.profile',
+                'applications' => function ($q) use ($reviewerId) {
+                    $q->where('reviewer_id', $reviewerId)
+                        ->with('program')
+                        ->orderByDesc('submission_date');
+                },
+            ])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 

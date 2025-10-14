@@ -92,7 +92,7 @@
                         <div class="flex justify-between">
                             <span class="text-[#213430] text-[16px] font-medium app-text">Program</span>
                             <span
-                                class="text-[#91848C] text-[16px] font-normal app-text">{{ $application->program->name ?? 'N/A' }}</span>
+                                class="text-[#91848C] text-[16px] font-normal app-text">{{ $application->program->title ?? 'N/A' }}</span>
                         </div>
                         <div class="flex flex-col">
                             <span class="text-[#213430] text-[16px] font-medium app-text mb-1">Description</span>
@@ -101,8 +101,38 @@
                         </div>
                     </div>
                 </div>
-
             </div>
+
+            {{-- Patient Overview Stats --}}
+            @isset($patientStats)
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div class="bg-[#F3E8EF] p-6 rounded-xl">
+                        <h3 class="text-lg font-semibold text-[#213430] mb-3 app-main">Patient Overview</h3>
+                        <hr class="border-[#DCCFD8] mb-4" />
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div class="flex justify-between"><span class="text-[#213430] app-text">Total Requests</span><span class="text-[#91848C] app-text">{{ $patientStats['total_requests'] }}</span></div>
+                            <div class="flex justify-between"><span class="text-[#213430] app-text">Approved</span><span class="text-[#91848C] app-text">{{ $patientStats['approved'] }}</span></div>
+                            <div class="flex justify-between"><span class="text-[#213430] app-text">Rejected</span><span class="text-[#91848C] app-text">{{ $patientStats['rejected'] }}</span></div>
+                            <div class="flex justify-between"><span class="text-[#213430] app-text">Pending</span><span class="text-[#91848C] app-text">{{ $patientStats['pending'] }}</span></div>
+                            <div class="flex justify-between"><span class="text-[#213430] app-text">Under Review</span><span class="text-[#91848C] app-text">{{ $patientStats['under_review'] }}</span></div>
+                            <div class="flex justify-between"><span class="text-[#213430] app-text">Programs Enrolled</span><span class="text-[#91848C] app-text">{{ $patientStats['programs_enrolled'] }}</span></div>
+                        </div>
+                    </div>
+                    <div class="bg-[#F3E8EF] p-6 rounded-xl md:col-span-2">
+                        <h3 class="text-lg font-semibold text-[#213430] mb-3 app-main">Enrolled Programs</h3>
+                        <hr class="border-[#DCCFD8] mb-4" />
+                        @if(($patientStats['program_titles'] ?? collect())->isNotEmpty())
+                            <ul class="list-disc list-inside text-sm text-[#91848C] space-y-1 app-text">
+                                @foreach($patientStats['program_titles'] as $ptitle)
+                                    <li>{{ $ptitle }}</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="text-sm text-[#91848C] app-text">No program enrollments found.</p>
+                        @endif
+                    </div>
+                </div>
+            @endisset
         </div>
 
         <div class="flex gap-6 max-w-8xl mx-auto mt-2 mb-12 px-5 patient-disease">

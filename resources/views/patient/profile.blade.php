@@ -460,16 +460,10 @@
                                 class="p-2 mt-2 text-[#91848C] text-[16px] font-light flex items-center underline gap-1 app-text">
                                 <img src="{{ asset('images/download.svg') }}" alt="" class="w-4 h-4">Download</td>
                         </tr>
-
-
                     </tbody>
                 </table>
             </div>
         </div>
-
     </main>
-
-
-
     <script src="{{ asset('js/patient/dashboard.js') }}"></script>
 @endsection

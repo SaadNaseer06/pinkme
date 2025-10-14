@@ -17,7 +17,7 @@
 
     // --- Base query ---
     $apps = Application::query()
-        ->with(['program:id,title', 'patient:id,user_id', 'patient.user:id,email', 'missingRequests'])
+        ->with(['program:id,title', 'patient:id,user_id', 'patient.user:id,email', 'reviewer.profile', 'missingRequests'])
         ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
         ->latest('created_at')
         ->paginate(10)
@@ -97,9 +97,9 @@
                     <div class="flex justify-between flex-col md:flex-row items-center mb-4 ml-3">
                         <h2 class="text-xl font-semibold text-[#213430] app-main mb-2 md:mb-0">All Applications List</h2>
 
-                        <form method="GET" class="flex space-x-4">
+                        <form id="applicationsFilters" method="GET" class="flex space-x-4">
                             <div class="relative w-[140px] md:w-[200px]">
-                                <select name="range"
+                                <select name="range" id="rangeFilter"
                                     class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#91848C] bg-transparent border border-[#91848C] focus:outline-none">
                                     <option value="">All Time</option>
                                     <option value="week" {{ $range === 'week' ? 'selected' : '' }}>Last Week</option>
@@ -113,12 +113,20 @@
                                     </svg>
                                 </div>
                             </div>
+                            <div class="relative w-[180px] md:w-[270px]">
+                                <input type="text" name="q" id="searchInput" value="{{ request('q') }}" placeholder="Search by name, email, code, ID" class="w-full rounded-md px-3 py-2 text-sm text-[#213430] bg-[#F3E8EF] border border-[#91848C] focus:outline-none" autocomplete="off" />
+                                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                                    </svg>
+                                </div>
+                            </div>
                             <button type="submit"
                                 class="px-4 py-2 bg-[#DB69A2] text-white rounded-md app-text hover:bg-pink-600">
                                 Apply
                             </button>
-                            @if (request()->filled('range'))
-                                <a href="{{ route('case_manager.myApplication') }}"
+                            @if (request()->filled('range') || request()->filled('q'))
+                                <a href="{{ route('admin.applications') }}"
                                     class="px-3 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md app-text">
                                     Reset
                                 </a>
@@ -126,123 +134,10 @@
                         </form>
                     </div>
 
-                    {{-- Table --}}
-                    <div class="table-container">
-                        <table class="min-w-full text-sm text-left mt-6 relative overflow-visible">
-                            <thead>
-                                <tr class="border-t border-[#e0cfd8]">
-                                    <th class="p-2 text-lg text-[#91848C] font-normal app-h">Patient Name</th>
-                                    <th class="p-2 text-lg text-[#91848C] font-normal app-h pad-left">Applications ID</th>
-                                    <th class="p-2 text-lg text-[#91848C] font-normal app-h">Sub. Date</th>
-                                    <th class="p-2 text-lg text-[#91848C] font-normal app-h">Email</th>
-                                    <th class="p-2 text-lg text-[#91848C] font-normal app-h">Contact</th>
-                                    <th class="p-2 text-lg text-[#91848C] font-normal app-h">Assigned Reviewer</th>
-                                    <th class="p-2 text-lg text-[#91848C] font-normal app-h">Status</th>
-                                    <th class="p-2 text-lg text-[#91848C] font-normal app-h">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-700">
-                                @forelse ($apps as $app)
-                                    @php
-                                        $patientProfile = $app->patient?->user?->profile;
-                                        $reviewerProfile = $app->reviewer?->profile;
-
-                                        $patientName = $patientProfile->full_name ?? 'Unknown';
-                                        $email = $app->patient?->user?->email ?? '—';
-                                        $contact = $patientProfile->phone ?? '—';
-                                        $reviewerName = $reviewerProfile->full_name ?? '—';
-                                    @endphp
-                                    <tr class="border-t border-[#e0cfd8]">
-                                        <td class="p-2">{{ $patientName }}</td>
-                                        <td class="p-2 pad-left">{{ $appCode($app) }}</td>
-                                        <td class="p-2">{{ $fmtDate($app->created_at) }}</td>
-                                        <td class="p-2">{{ $email }}</td>
-                                        <td class="p-2">{{ $contact }}</td>
-                                        <td class="p-2">{{ $reviewerName }}</td>
-                                        <td class="p-2">
-                                            @if ($app->missingRequests->isNotEmpty())
-                                                <span class="px-4 py-2 rounded-sm text-xs font-medium app-text"
-                                                    style="background:#FFF2CC; color:#D9980D;">Missing Docs Requested</span>
-                                            @else
-                                                {!! $statusBadge($app->status) !!}
-                                            @endif
-                                        </td>
-                                        <td class="p-2 relative">
-                                            <button onclick="toggleDropdown(this)"
-                                                class="text-[#213430] p-2 rounded-md focus:outline-none">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                                </svg>
-                                            </button>
-                                            <div
-                                                class="absolute right-[62px] top-10 w-[200px] max-w-none bg-[#F6EDF5] rounded-lg shadow-lg py-2 z-20 hidden">
-                                                <a href="{{ route('admin.viewApplication', $app->id) }}"
-                                                    class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm">
-                                                    <i class="fas fa-eye mr-2"></i> View Details
-                                                </a>
-                                                <a href="#"
-                                                    onclick="openAssignModal({{ $app->id }}, {{ $app->reviewer_id ?? 'null' }})"
-                                                    class="flex items-center px-4 py-2 text-[#91848C] text-sm">
-                                                    <i class="fas fa-check mr-2"></i>
-                                                    {{ $app->reviewer_id ? 'Change Reviewer' : 'Assign Reviewer' }}
-                                                </a>
-                                                <a href="#" onclick="openRejectModal({{ $app->id }})"
-                                                    class="flex items-center px-4 py-2 gap-2 text-[#91848C] text-sm">
-                                                    <i class="fa-solid fa-trash"></i> Delete Application
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr class="border-t border-[#e0cfd8]">
-                                        <td colspan="8" class="p-6 text-center text-[#91848C] app-text">
-                                            No applications found{{ $range ? ' in the selected range' : '' }}.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                    {{-- AJAX Table Wrapper --}}
+                    <div id="applicationsTableWrapper">
+                        @include('admin.applications._table', ['apps' => $apps, 'range' => $range])
                     </div>
-
-                    {{-- Pagination --}}
-                    @if ($apps instanceof LengthAwarePaginator && $apps->hasPages())
-                        @php
-                            $current = $apps->currentPage();
-                            $last = $apps->lastPage();
-                            $start = max(1, $current - 1);
-                            $end = min($last, $start + 2);
-                            $start = max(1, $end - 2);
-                            $pages = range($start, $end);
-                        @endphp
-                        <div class="mt-6 flex justify-end space-x-1">
-                            @if ($apps->onFirstPage())
-                                <span
-                                    class="px-3 py-1 rounded-md border border-[#B9B1B6] text-[#91848C] opacity-60 cursor-not-allowed">&lt;</span>
-                            @else
-                                <a href="{{ $apps->previousPageUrl() }}"
-                                    class="px-3 py-1 rounded-md border border-[#B9B1B6] text-[#91848C]">&lt;</a>
-                            @endif
-
-                            @foreach ($pages as $page)
-                                @if ($page == $current)
-                                    <span class="px-4 py-1 rounded-md bg-[#DB69A2] text-white">{{ $page }}</span>
-                                @else
-                                    <a href="{{ $apps->url($page) }}"
-                                        class="px-3 py-1 rounded-md border border-[#B9B1B6] text-[#91848C]">{{ $page }}</a>
-                                @endif
-                            @endforeach
-
-                            @if ($current < $last)
-                                <a href="{{ $apps->nextPageUrl() }}"
-                                    class="px-3 py-1 rounded-md border border-[#B9B1B6] text-[#91848C]">&gt;</a>
-                            @else
-                                <span
-                                    class="px-3 py-1 rounded-md border border-[#B9B1B6] text-[#91848C] opacity-60 cursor-not-allowed">&gt;</span>
-                            @endif
-                        </div>
-                    @endif
                 </div>
             </div>
         </main>
@@ -337,6 +232,7 @@
                Utilities
             ========================= */
         const CSRF_TOKEN = '{{ csrf_token() }}';
+        const LIST_URL = "{{ route('admin.applications.list') }}";
 
         function showToast(message, type = 'success') {
             const icon = type === 'success' ?
@@ -530,6 +426,63 @@
                 closeDeleteModal();
                 // Close dropdowns
                 document.querySelectorAll('td .absolute').forEach((el) => el.classList.add('hidden'));
+            }
+        });
+
+        /* =========================
+           AJAX Search + Filters
+        ========================= */
+        function debounce(fn, wait) {
+            let t;
+            return function(...args) {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), wait);
+            };
+        }
+
+        function loadApplications(params) {
+            const query = $.param(params);
+            $('#applicationsTableWrapper').addClass('opacity-60');
+            return $.get(LIST_URL + (query ? ('?' + query) : ''), function(html) {
+                $('#applicationsTableWrapper').html(html).removeClass('opacity-60');
+            }).fail(function(xhr) {
+                $('#applicationsTableWrapper').removeClass('opacity-60');
+                showToast('Failed to load applications: ' + (xhr.responseJSON?.message || 'Unknown error'), 'error');
+            });
+        }
+
+        // Handle typing in search
+        const handleSearch = debounce(function() {
+            const q = $('#searchInput').val();
+            const range = $('#rangeFilter').val();
+            loadApplications({ q, range });
+        }, 300);
+
+        $('#searchInput').on('input', handleSearch);
+
+        // Handle range apply via form submit (AJAX)
+        $('#applicationsFilters').on('submit', function(e) {
+            e.preventDefault();
+            const q = $('#searchInput').val();
+            const range = $('#rangeFilter').val();
+            loadApplications({ q, range });
+        });
+
+        // Intercept pagination links inside the wrapper
+        $(document).on('click', '#applicationsTableWrapper a', function(e) {
+            const href = $(this).attr('href');
+            if (!href) return;
+            const isPagination = /[?&]page=/.test(href) || $(this).closest('.flex.justify-end').length > 0;
+            if (isPagination) {
+                e.preventDefault();
+                // Preserve current q and range if not present
+                const url = new URL(href, window.location.origin);
+                const params = {
+                    q: $('#searchInput').val(),
+                    range: $('#rangeFilter').val(),
+                    page: url.searchParams.get('page') || 1
+                };
+                loadApplications(params);
             }
         });
     </script>

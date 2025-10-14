@@ -1,5 +1,6 @@
 ﻿<?php
 
+use App\Http\Controllers\AdminCaseManagerController;
 use App\Http\Controllers\EnrollProgramController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ReviewersController;
@@ -45,7 +46,7 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::get('/applications', [AdminController::class, 'applications'])->name('admin.applications');
     Route::get('/application/{id}', [AdminController::class, 'viewApplication'])->name('admin.viewApplication');
     Route::post('/applications/{id}/assign-reviewer', [AdminController::class, 'assignReviewer'])->name('admin.assignReviewer');
-    Route::get('/applications/{id}/assigned-reviewer', [AdminController::class, 'getAssignedReviewer'])->name('admin.getAssignedReviewer');
+    Route::get('/applications/{id}/assigned-reviewer', [ReviewersController::class, 'getAssignedReviewer'])->name('admin.getAssignedReviewer');
     Route::get('reviewer/{id}', [AdminController::class, 'show'])->name('admin.reviewers.show');
     Route::get('/reviewers/{id}/applications', [ReviewersController::class, 'getApplications']);
     Route::post('/reviewers/{id}/remove', [ReviewersController::class, 'removeReviewer']);
@@ -60,6 +61,10 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
 
     // Enrollable programs/workshops (tables: programs, program_registrations)
     Route::resource('programs', ProgramController::class);
+
+    // Case Managers (admin management of casemanager users)
+    Route::resource('case-managers', AdminCaseManagerController::class)
+        ->names('admin.case-managers');
 
     // Events (table: events) + attach funding programs (pivot: event_sponsorships)
     Route::resource('events', EventController::class);

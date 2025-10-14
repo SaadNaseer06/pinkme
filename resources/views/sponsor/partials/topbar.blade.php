@@ -3,11 +3,11 @@
     class="mt-4 ml-6 mr-6 bg-[#F3E8EF] p-4  justify-between items-center rounded-lg tab-head md:flex hidden tab-header-1">
     <!-- Search Bar -->
     <div class="relative">
-        <input type="text" placeholder="Type here to search..."
+        {{-- <input type="text" placeholder="Type here to search..."
             class="pl-4 pr-10 py-2 rounded-md bg-transparent text-[#B9B1B6] text-sm border border-[#B9B1B6] tab-search focus:outline-none focus:border-[#DB69A2] focus:ring-1 focus:ring-[#DB69A2]" />
         <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#DB69A2] mt-[12px]">
             <i class="fas fa-search"></i>
-        </button>
+        </button> --}}
     </div>
 
     <!-- User Menu -->
@@ -109,11 +109,11 @@
     </div>
     <!-- Search Bar -->
     <div class="relative mt-4">
-        <input type="text" placeholder="Type here to search..."
+        {{-- <input type="text" placeholder="Type here to search..."
             class="pl-4 pr-10 py-2 rounded-md bg-transparent text-[#B9B1B6] text-sm border border-[#B9B1B6] tab-search focus:outline-none focus:border-[#DB69A2] focus:ring-1 focus:ring-[#DB69A2]" />
         <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#DB69A2] mt-[12px]">
             <i class="fas fa-search"></i>
-        </button>
+        </button> --}}
     </div>
 </header>
 

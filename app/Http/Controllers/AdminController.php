@@ -397,7 +397,7 @@ class AdminController extends Controller
                 $qb->where(function ($w) use ($q) {
                     $w->whereHas('patient.user.profile', fn($qq) => $qq->where('full_name', 'like', "%{$q}%"))
                         ->orWhereHas('patient.user', fn($qq) => $qq->where('email', 'like', "%{$q}%"))
-                        ->orWhere('code', 'like', "%{$q}%");
+                        ->orWhere('title', 'like', "%{$q}%");
 
                     // also allow typing numeric id like "123"
                     if (ctype_digit($q)) {

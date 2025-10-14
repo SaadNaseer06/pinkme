@@ -68,7 +68,7 @@
                                 </div>
                             </div>
 
-                            <div class="relative w-[200px] md:w-[260px]">
+                            <div class="relative w-[200px] md:w-[320px]">
                                 <input id="patientsSearchInput" name="q" type="text" value="{{ $q }}"
                                     placeholder="Search name, email, disease, test or ID"
                                     class="w-full px-3 py-2 rounded-md border border-[#91848C] bg-transparent text-sm placeholder-[#B1A4AD] focus:outline-none">

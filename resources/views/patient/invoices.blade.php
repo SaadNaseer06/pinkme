@@ -56,12 +56,7 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
-
-
     </main>
-
     <script src="{{ asset('js/patient/dashboard.js') }}"></script>
-
 @endsection

@@ -54,13 +54,13 @@
             </a>
         </li>
 
-        <li class="{{ request()->routeIs('patient.invoices') || request()->routeIs('invoices.show') ? 'active' : '' }}">
+        {{-- <li class="{{ request()->routeIs('patient.invoices') || request()->routeIs('invoices.show') ? 'active' : '' }}">
             <a href="{{ route('patient.invoices') }}">
                 <img src="{{ request()->routeIs('patient.invoices') || request()->routeIs('invoices.show') ? asset('images/invoice.svg') : asset('images/invoice-pink.svg') }}"
                     alt="">
                 Invoices
             </a>
-        </li>
+        </li> --}}
 
         <li class="{{ request()->routeIs('patient.setting') ? 'active' : '' }}">
             <a href="{{ route('patient.setting') }}">
@@ -125,14 +125,14 @@
                     <span class="title">FAQ</span>
                 </a>
             </li>
-            <li class="{{ request()->routeIs('patient.invoices') || request()->routeIs('invoices.show') ? 'hovered' : '' }}">
+            {{-- <li class="{{ request()->routeIs('patient.invoices') || request()->routeIs('invoices.show') ? 'hovered' : '' }}">
                 <a href="{{ route('patient.invoices') }}">
                     <span class="icon"><img
                             src="{{ request()->routeIs('patient.invoices') || request()->routeIs('invoices.show') ? asset('images/invoice.svg') : asset('images/invoice-pink.svg') }}"
                             alt="" /></span>
                     <span class="title">Invoices</span>
                 </a>
-            </li>
+            </li> --}}
             <li class="{{ request()->routeIs('patient.setting') ? 'hovered' : '' }}">
                 <a href="{{ route('patient.setting') }}">
                     <span class="icon"><img

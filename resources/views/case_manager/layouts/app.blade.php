@@ -37,6 +37,7 @@
     <div class="flex-1 flex flex-col">
         @include('case_manager.partials.topbar')
         <main class="flex-1 p-6">
+            @include('partials.flash')
             @yield('content')
         </main>
         @include('case_manager.partials.footer')

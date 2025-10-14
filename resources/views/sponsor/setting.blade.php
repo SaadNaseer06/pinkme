@@ -20,12 +20,12 @@
     <!-- Settings Content -->
     <main class="flex-1">
         <div class="max-w-8xl mx-auto">
-            @if (session('success'))
+            {{-- @if (session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-md mb-6" role="alert">
                     <h4 class="font-semibold mb-1">Thank you!</h4>
                     <p>{{ session('success') }}</p>
                 </div>
-            @endif
+            @endif --}}
             <!-- Tab Navigation -->
             <div class="flex flex-wrap mb-10">
                 <div class="w-full md:w-1/4">

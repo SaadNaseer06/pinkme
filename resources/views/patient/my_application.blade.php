@@ -126,10 +126,10 @@
                     <div class="flex items-center space-x-1 bg-pink-500 px-4 py-2 rounded-md md:hidden flex">
                         <img src="{{ asset('images/export.svg') }}" alt="" />
                     </div>
-                    <div class="flex items-center space-x-2 bg-pink-500 px-8 py-2 rounded-md md:flex hidden">
+                    {{-- <div class="flex items-center space-x-2 bg-pink-500 px-8 py-2 rounded-md md:flex hidden">
                         <button class="text-white text-sm font-medium app-text">Export</button>
                         <img src="{{ asset('images/export.svg') }}" alt="" />
-                    </div>
+                    </div> --}}
                 </div>
             </div>
             <div class="table-container">

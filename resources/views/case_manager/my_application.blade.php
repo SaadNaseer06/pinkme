@@ -68,7 +68,7 @@ $statusBadge = function ($status) {
     <main class="flex-1 py-4">
 
         {{-- Flash messages --}}
-        @if (session('success'))
+        {{-- @if (session('success'))
             <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-md mb-4" role="alert">
                 <h4 class="font-semibold mb-1">Action completed</h4>
                 <p>{{ session('success') }}</p>
@@ -83,7 +83,7 @@ $statusBadge = function ($status) {
                     @endforeach
                 </ul>
             </div>
-        @endif
+        @endif --}}
 
         {{-- Status cards (your existing partial/UI) --}}
         @include('case_manager.partials.cards')

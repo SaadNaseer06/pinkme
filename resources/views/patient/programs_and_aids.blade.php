@@ -13,7 +13,7 @@
         $ongoingPrograms = \App\Models\Program::where('status', 'ongoing')->get();
     @endphp
     <main class="flex-1 overflow-hidden">
-        @if (session('success'))
+        {{-- @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-md mb-6" role="alert">
                 <h4 class="font-semibold mb-1">Thank you!</h4>
                 <p>{{ session('success') }}</p>
@@ -27,7 +27,7 @@
                     @endforeach
                 </ul>
             </div>
-        @endif
+        @endif --}}
 
         <!-- All Programs Header -->
         <div class="bg-[#F3E8EF] p-4 rounded-lg mb-6">
@@ -51,7 +51,7 @@
                                 class="text-4xl font-bold text-pink">{{ \Carbon\Carbon::parse($program->event_date)->format('d') }}</span>
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
-                            <img src="https://pinkme.testserverwebsite.com/images/program-3.png" alt="{{ $program->title }}"
+                            <img src="{{ url('storage/' . $program->banner) ? url('storage/' . $program->banner) : url('images/program-details.png') }}" alt="{{ $program->title }}"
                                 class="w-full h-full object-cover" />
                         </div>
                         <div>
@@ -84,7 +84,7 @@
                                 class="text-4xl font-bold text-pink">{{ \Carbon\Carbon::parse($program->event_date)->format('d') }}</span>
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
-                            <img src="{{ $program->banner }}" alt="{{ $program->title }}"
+                            <img src="{{ url('storage/' . $program->banner) }}" alt="{{ $program->title }}"
                                 class="w-full h-full object-cover" />
                         </div>
                         <div>
@@ -197,10 +197,10 @@
                                 </div>
                             </div>
 
-                            <div class="bg-[#E4D6DF] p-4 rounded-lg text-sm app-text">
+                            {{-- <div class="bg-[#E4D6DF] p-4 rounded-lg text-sm app-text">
                                 <h4 class="font-semibold text-[#213430] mb-1">ABOUT US</h4>
                                 <p class="text-[#213430] modal-sponsor-about">-</p>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
 
@@ -363,7 +363,7 @@
                     document.querySelector('#registerModal .modal-time').textContent = data.event_time || '—';
 
                     document.querySelector('#registerModal .modal-banner').src =
-                        'https://pinkme.testserverwebsite.com/images/program-3.png';
+                        '/program-3.png';
 
                     // Sponsor
                     const sponsor = data.sponsor || {};
@@ -373,7 +373,7 @@
                     if (sponsor.logo) {
                         document.querySelector('.modal-sponsor-logo').src = sponsor.logo;
                     }
-                    document.querySelector('.modal-sponsor-about').textContent = sponsor.about || '—';
+                    // document.querySelector('.modal-sponsor-about').textContent = sponsor.about || '—';
 
                     // Update register button state based on registration history
                     const registerButton = document.getElementById('register-btn');

@@ -38,6 +38,7 @@
     <div class="flex-1 flex flex-col">
         @include('patient.partials.topbar')
         <main class="flex-1 p-6">
+            @include('partials.flash')
             @yield('content')
         </main>
         @include('patient.partials.footer')

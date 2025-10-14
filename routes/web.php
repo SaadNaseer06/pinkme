@@ -40,7 +40,6 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
-
     // Admin Routes
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/applications', [AdminController::class, 'applications'])->name('admin.applications');
@@ -53,7 +52,6 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::get('/reviewers/{id}/edit', [AdminController::class, 'editReviewer'])->name('admin.reviewers.edit');
     Route::put('/reviewers/{id}', [AdminController::class, 'updateReviewer'])->name('admin.reviewers.update');
     Route::get('/reviewers/unassigned-applications', [AdminController::class, 'getUnassignedApplications']);
-
 
     // Sponsors' funding programs (table: sponsorship_programs)
     Route::get('sponsorship-programs/create', [SponsorshipProgramController::class, 'create'])->name('sp.create');
@@ -68,31 +66,20 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
 
     // Events (table: events) + attach funding programs (pivot: event_sponsorships)
     Route::resource('events', EventController::class);
-    
+
     // Event registration management
     Route::get('events-registrations', [EventController::class, 'registrations'])->name('events.registrations.index');
     Route::post('events-registrations/{registration}/approve', [EventController::class, 'approveRegistration'])->name('events.registrations.approve');
     Route::post('events-registrations/{registration}/reject', [EventController::class, 'rejectRegistration'])->name('events.registrations.reject');
-
     Route::post('events/{event}/sponsorships',                 [EventController::class, 'storeSponsorship'])->name('events.sponsorships.store');
     Route::delete('events/{event}/sponsorships/{sponsorship}', [EventController::class, 'destroySponsorship'])->name('events.sponsorships.destroy');
-
-
-
-
-
-
-
     // Reviewers routes
     Route::resource('reviewers', ReviewersController::class);
-
     // Additional reviewer routes
     Route::post('reviewers/{reviewer}/assign-applications', [ReviewersController::class, 'assignApplications'])
         ->name('reviewers.assign-applications');
-
     Route::get('available-reviewers', [ReviewersController::class, 'getAvailableReviewers'])
         ->name('reviewers.available');
-
     Route::get('reviewers/export', [ReviewersController::class, 'export'])
         ->name('reviewers.export');
     Route::delete('/applications/{id}', [AdminController::class, 'deleteApplication'])->name('admin.applications.delete');
@@ -106,7 +93,6 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
         ->name('admin.settings.update');
     Route::get('/admin/applications', [AdminController::class, 'applicationsIndex'])
         ->name('admin.applications.index');
-
     Route::get('/admin/applications/list', [AdminController::class, 'applicationsList'])
         ->name('admin.applications.list'); // AJAX endpoint
 
@@ -124,20 +110,19 @@ Route::prefix('api')->name('api.')->group(function () {
 
 
 Route::prefix('sponsor')->middleware(['role.restrict'])->group(function () {
-
     // Sponsor Dashboard Routes
     Route::get('/dashboard', [SponsorController::class, 'dashboard'])->name('sponsor.dashboard');
     Route::get('/events', [SponsorController::class, 'events'])->name('sponsor.events');
     Route::get('/sponsorships', [SponsorController::class, 'sponsorships'])->name('sponsor.sponsorships');
     Route::get('/become-a-sponsor', [SponsorController::class, 'becomeASponsor'])->name('sponsor.becomeASponsor');
     Route::post('/sponsorships', [SponsorController::class, 'storeSponsorship'])->name('sponsor.sponsorships.store');
-    
+
     // Event Registration Routes
     Route::get('/events/{event}', [SponsorController::class, 'showEvent'])->name('sponsor.events.show');
     Route::post('/events/{event}/register', [SponsorController::class, 'registerForEvent'])->name('sponsor.events.register');
     Route::delete('/events/{event}/cancel', [SponsorController::class, 'cancelEventRegistration'])->name('sponsor.events.cancel');
     Route::get('/my-event-registrations', [SponsorController::class, 'myEventRegistrations'])->name('sponsor.events.my-registrations');
-    
+
     Route::get('/reviews', [SponsorController::class, 'reviews'])->name('sponsor.reviews');
     Route::post('/reviews', [SponsorController::class, 'storeReview'])->name('sponsor.reviews.store');
     Route::get('/payment', [SponsorController::class, 'payment'])->name('sponsor.payment');
@@ -147,7 +132,7 @@ Route::prefix('sponsor')->middleware(['role.restrict'])->group(function () {
     Route::put('/settings/notifications', [SponsorController::class, 'updateNotifications'])->name('sponsor.settings.notifications');
     Route::put('/settings/account', [SponsorController::class, 'updateAccount'])->name('sponsor.settings.account');
     Route::put('/settings/social', [SponsorController::class, 'updateSocial'])->name('sponsor.settings.social');
-    });
+});
 
 
 Route::prefix('case_manager')->middleware(['role.restrict'])->group(function () {
@@ -194,4 +179,3 @@ Route::prefix('patient')->middleware(['role.restrict'])->group(function () {
     Route::post('/store-application', [ApplicationController::class, 'storeApplication'])->name('patient.storeApplication');
     Route::post('/program/register', [ProgramRegistrationController::class, 'store'])->name('program.register');
 });
-

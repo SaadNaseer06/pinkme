@@ -9,7 +9,7 @@
                 @include('sponsor.partials.cards')
             </div>
 
-            @if (session('success') || $errors->any())
+            {{-- @if (session('success') || $errors->any())
                 <div class="max-w-4xl mx-auto px-4 mt-4 space-y-3">
                     @if (session('success'))
                         <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
@@ -28,7 +28,7 @@
                         </div>
                     @endif
                 </div>
-            @endif
+            @endif --}}
 
             @php
                 use Carbon\Carbon;
@@ -195,22 +195,24 @@
                 <div class="px-4 py-6 bg-[#F3E8EF] rounded-lg">
                     <div class="flex justify-between items-center pb-6">
                         <h1 class="text-2xl font-medium text-[#213430] program-h">Ongoing Support Program</h1>
-                        <div class="flex space-x-2">
-                            <button id="fundPrevBtn"
-                                class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white p-2 rounded-lg">
-                                <svg class="md:h-6 h-4 md:w-6 w-4" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M15 18l-6-6 6-6" />
-                                </svg>
-                            </button>
-                            <button id="fundNextBtn"
-                                class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white p-2 rounded-lg">
-                                <svg class="md:h-6 h-4 md:w-6 w-4" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 18l6-6-6-6" />
-                                </svg>
-                            </button>
-                        </div>
+                        @if ($ongoingPrograms->count() > 4)
+                            <div class="flex space-x-2">
+                                <button id="fundPrevBtn"
+                                    class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white p-2 rounded-lg">
+                                    <svg class="md:h-6 h-4 md:w-6 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M15 18l-6-6 6-6" />
+                                    </svg>
+                                </button>
+                                <button id="fundNextBtn"
+                                    class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white p-2 rounded-lg">
+                                    <svg class="md:h-6 h-4 md:w-6 w-4" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 18l6-6-6-6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="relative overflow-hidden">

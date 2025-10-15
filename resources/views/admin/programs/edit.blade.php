@@ -37,16 +37,28 @@
                             <p class="mt-1 text-sm text-[#6C5B68]">Update the general information for this program.</p>
                         </div>
                         <div class="space-y-6 px-6 py-6">
-                            <div>
-                                <label class="mb-1 block text-sm font-medium text-[#213430]">Program Title <span
-                                        class="text-[#DB69A2]">*</span></label>
-                                <input name="title" type="text" value="{{ old('title', $program->title) }}"
-                                    placeholder="e.g. Community Wellness Initiative"
-                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
-                                    required>
-                                @error('title')
-                                    <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
-                                @enderror
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-[#213430]">Program Title <span
+                                            class="text-[#DB69A2]">*</span></label>
+                                    <input name="title" type="text" value="{{ old('title', $program->title) }}"
+                                        placeholder="e.g. Community Wellness Initiative"
+                                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
+                                        required>
+                                    @error('title')
+                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-[#213430]">Program Type <span class="text-[#DB69A2]">*</span></label>
+                                    <select name="payment_type" class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70" required>
+                                        <option value="full" @selected(old('payment_type', $program->payment_type)==='full')>Full amount (fixed)</option>
+                                        <option value="flexible" @selected(old('payment_type', $program->payment_type)==='flexible')>Flexible (pay what you can)</option>
+                                    </select>
+                                    @error('payment_type')
+                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
 
                             <div>

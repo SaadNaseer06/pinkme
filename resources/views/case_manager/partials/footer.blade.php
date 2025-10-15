@@ -6,7 +6,7 @@
         Reserved | Design by Bmybrand
     </div>
     <div class="flex space-x-4 text-[#213430] app-text">
-        <a href="#" class="hover:text-gray-700">Privacy Policy</a>
-        <a href="#" class="hover:text-gray-700">Terms of Use</a>
+        <a href="{{ route('policy.privacy') }}" class="hover:text-gray-700">Privacy Policy</a>
+        <a href="{{ route('policy.terms') }}" class="hover:text-gray-700">Terms &amp; Conditions</a>
     </div>
 </footer>

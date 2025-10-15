@@ -233,54 +233,104 @@ class SponsorController extends Controller
 
             ->paginate(15);
 
-        $programs = SponsorshipProgram::orderBy('start_date')
+        $programs = Program::query()
 
-            ->orderByDesc('created_at')
+            ->where('payment_type', 'flexible')
+
+            ->withSum('sponsorships as raised_amount', 'amount')
+
+            ->orderBy('event_date')
+
+            ->orderBy('event_time')
 
             ->get()
 
-            ->map(function (SponsorshipProgram $program) {
+            ->map(function (Program $program) {
 
-                $goal = (float) ($program->goal_amount ?? 0);
+                $goal = (float) ($program->program_fund ?? 0);
 
                 $raised = (float) ($program->raised_amount ?? 0);
+
+                $program->goal_amount = $goal;
 
                 $program->remaining_amount = max($goal - $raised, 0);
 
                 $program->progress_percent = $goal > 0 ? round(($raised / $goal) * 100) : 0;
+
+                $program->start_date = $program->event_date;
+
+                $program->end_date = $program->event_date;
 
                 return $program;
             });
 
         $today = Carbon::today();
 
-        $upcomingPrograms = $programs->filter(function (SponsorshipProgram $program) use ($today) {
+        $upcomingPrograms = $programs->filter(function (Program $program) use ($today) {
 
-            if ($program->start_date) {
+            if ($program->status === 'upcoming') {
 
-                return Carbon::parse($program->start_date)->isAfter($today);
+                return true;
+            }
+
+            if ($program->event_date instanceof Carbon) {
+
+                return $program->event_date->isAfter($today);
+            }
+
+            if ($program->event_date) {
+
+                return Carbon::parse($program->event_date)->isAfter($today);
             }
 
             return false;
         })->values();
 
-        $ongoingPrograms = $programs->reject(function (SponsorshipProgram $program) use ($today) {
+        $ongoingPrograms = $programs->filter(function (Program $program) use ($today) {
 
-            $startDate = $program->start_date ? Carbon::parse($program->start_date) : null;
+            if ($program->status === 'completed') {
 
-            $endDate = $program->end_date ? Carbon::parse($program->end_date) : null;
+                return false;
+            }
 
-            if ($startDate && $startDate->isAfter($today)) {
+            if ($program->status === 'ongoing') {
 
                 return true;
             }
 
-            if ($endDate && $endDate->isBefore($today)) {
+            if ($program->event_date instanceof Carbon) {
 
-                return true;
+                if ($program->event_date->isAfter($today)) {
+
+                    return false;
+                }
+
+                if ($program->event_date->isSameDay($today)) {
+
+                    return true;
+                }
+
+                return $program->status !== 'completed';
             }
 
-            return false;
+            if ($program->event_date) {
+
+                $eventDate = Carbon::parse($program->event_date);
+
+                if ($eventDate->isAfter($today)) {
+
+                    return false;
+                }
+
+                if ($eventDate->isSameDay($today)) {
+
+                    return true;
+                }
+
+                return $program->status !== 'completed';
+            }
+
+            return $program->status === 'ongoing';
         })->values();
 
         return view('sponsor.sponsorships', compact(
@@ -356,7 +406,11 @@ class SponsorController extends Controller
 
         ];
 
-        $programs = Program::withSum('sponsorships as raised_amount', 'amount')
+        $programs = Program::query()
+
+            ->where('payment_type', 'full')
+
+            ->withSum('sponsorships as raised_amount', 'amount')
 
             ->orderBy('event_date')
 
@@ -451,7 +505,9 @@ class SponsorController extends Controller
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                $redirectRoute = 'sponsor.becomeASponsor';
+                $redirectRoute = $program->payment_type === 'flexible'
+                    ? 'sponsor.sponsorships'
+                    : 'sponsor.becomeASponsor';
             }
 
             $numericAmount = (float) $validated['amount'];

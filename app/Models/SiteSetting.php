@@ -22,5 +22,12 @@ class SiteSetting extends Model
         'about_us_content',
         'privacy_policy_content',
         'terms_conditions_content',
+        'privacy_last_updated',
+        'terms_last_updated',
+    ];
+
+    protected $casts = [
+        'privacy_last_updated' => 'date',
+        'terms_last_updated' => 'date',
     ];
 }

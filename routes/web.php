@@ -8,6 +8,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\SponsorController;
 use App\Http\Controllers\SponsorshipProgramController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApplicationController;
@@ -17,13 +18,34 @@ use App\Http\Controllers\CaseManagerController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProgramRegistrationController;
 use App\Models\Application;
 use App\Models\Program;
 
 Route::get('/', function () {
-    return view('welcome');
+    if (Auth::check()) {
+        $roleName = Auth::user()->role->name ?? null;
+
+        switch ($roleName) {
+            case 'admin':
+                return redirect()->route('admin.dashboard');
+            case 'sponsor':
+                return redirect()->route('sponsor.dashboard');
+            case 'casemanager':
+                return redirect()->route('case_manager.dashboard');
+            case 'patient':
+                return redirect()->route('patient.dashboard');
+            default:
+                return redirect()->route('register', ['tab' => 'login']);
+        }
+    }
+
+    return view('auth.signup_login', ['initialTab' => 'login']);
 });
+
+Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('policy.privacy');
+Route::get('/terms-and-conditions', [PageController::class, 'terms'])->name('policy.terms');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])
     ->middleware('redirect.by.role')
@@ -91,6 +113,7 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::put('/settings/{tab}', [SiteSettingController::class, 'update'])
         ->whereIn('tab', ['general', 'privacy', 'terms'])
         ->name('admin.settings.update');
+    Route::post('/settings/upload', [SiteSettingController::class, 'upload'])->name('admin.settings.upload');
     Route::get('/admin/applications', [AdminController::class, 'applicationsIndex'])
         ->name('admin.applications.index');
     Route::get('/admin/applications/list', [AdminController::class, 'applicationsList'])

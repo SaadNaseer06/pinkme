@@ -891,7 +891,8 @@
 
             // Determine initial tab
             const urlParams = new URLSearchParams(window.location.search);
-            const tab = urlParams.get('tab') || 'signup';
+            const initialTab = @json($initialTab ?? 'signup');
+            const tab = urlParams.get('tab') || initialTab;
             toggleForm(tab);
         });
 

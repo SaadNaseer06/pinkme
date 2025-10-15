@@ -3,9 +3,44 @@
 @section('title', 'Settings')
 
 @section('content')
+    @php
+        $defaultPrivacyContent = <<<'HTML'
+<h3>Privacy Policy</h3>
+<p>We value your privacy. This policy explains how we collect, use, and protect your personal information when using our services.</p>
+<ul>
+    <li>We do not share your data with third parties without your consent.</li>
+    <li>We use cookies to improve your experience.</li>
+    <li>You can contact us anytime to update or delete your data.</li>
+</ul>
+HTML;
+        $defaultTermsContent = <<<'HTML'
+<h3>Terms &amp; Conditions</h3>
+<p>By using our website and services, you agree to the following terms and conditions:</p>
+<ol>
+    <li>You must be at least 18 years old to use our services.</li>
+    <li>Do not misuse or attempt to hack our system.</li>
+    <li>We reserve the right to update these terms at any time.</li>
+</ol>
+HTML;
+        $privacyContent = old('privacy_policy_content');
+        if ($privacyContent === null) {
+            $privacyContent = $settings->privacy_policy_content ?? $defaultPrivacyContent;
+        }
+        $termsContent = old('terms_conditions_content');
+        if ($termsContent === null) {
+            $termsContent = $settings->terms_conditions_content ?? $defaultTermsContent;
+        }
+        $privacyLastUpdated = old('privacy_last_updated')
+            ?? optional(optional($settings)->privacy_last_updated)->format('Y-m-d')
+            ?? now()->format('Y-m-d');
+        $termsLastUpdated = old('terms_last_updated')
+            ?? optional(optional($settings)->terms_last_updated)->format('Y-m-d')
+            ?? now()->format('Y-m-d');
+        $activeTab = session('active_tab', request('tab', 'general'));
+    @endphp
 
     {{-- @if (session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
             {{ session('success') }}
         </div>
     @endif --}}
@@ -162,25 +197,13 @@
                                 <label class="block font-light text-md text-[#213430] mb-1 app-text">Privacy Policy
                                     Content</label>
                                 <textarea id="privacy_editor" name="privacy_policy_content" rows="8"
-                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" required>
-@if (!empty(old('privacy_policy_content', $settings->privacy_policy_content ?? '')))
-{{ old('privacy_policy_content', $settings->privacy_policy_content ?? '') }}
-@else
-<h3>Privacy Policy</h3>
-    <p>We value your privacy. This policy explains how we collect, use, and protect your personal information when using our services.</p>
-    <ul>
-        <li>We do not share your data with third parties without your consent.</li>
-        <li>We use cookies to improve your experience.</li>
-        <li>You can contact us anytime to update or delete your data.</li>
-    </ul>
-@endif
-</textarea>
+                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" required>{!! $privacyContent !!}</textarea>
                             </div>
 
                             <div class="mt-4">
                                 <label class="block font-light text-md text-[#213430] mb-1 app-text">Last Updated</label>
                                 <input type="date" name="privacy_last_updated"
-                                    value="{{ old('privacy_last_updated', $settings->privacy_last_updated ?? '') }}"
+                                    value="{{ $privacyLastUpdated }}"
                                     class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" required />
                             </div>
 
@@ -207,25 +230,13 @@
                                 <label class="block font-light text-md text-[#213430] mb-1 app-text">Terms & Conditions
                                     Content</label>
                                 <textarea id="terms_editor" name="terms_conditions_content" rows="8"
-                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" required>
-@if (!empty(old('terms_conditions_content', $settings->terms_conditions_content ?? '')))
-{{ old('terms_conditions_content', $settings->terms_conditions_content ?? '') }}
-@else
-<h3>Terms & Conditions</h3>
-    <p>By using our website and services, you agree to the following terms and conditions:</p>
-    <ol>
-        <li>You must be at least 18 years old to use our services.</li>
-        <li>Do not misuse or attempt to hack our system.</li>
-        <li>We reserve the right to update these terms at any time.</li>
-    </ol>
-@endif
-</textarea>
+                                    class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" required>{!! $termsContent !!}</textarea>
                             </div>
 
                             <div class="mt-4">
                                 <label class="block font-light text-md text-[#213430] mb-1 app-text">Last Updated</label>
                                 <input type="date" name="terms_last_updated"
-                                    value="{{ old('terms_last_updated', $settings->terms_last_updated ?? '') }}"
+                                    value="{{ $termsLastUpdated }}"
                                     class="w-full px-4 py-2 rounded-md border border-[#DCCFD8]" required />
                             </div>
 
@@ -243,17 +254,71 @@
 
     <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
     <script>
-        ClassicEditor
-            .create(document.querySelector('#privacy_editor'))
-            .catch(error => {
-                console.error(error);
-            });
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const baseUploadUrl = @json(route('admin.settings.upload'));
 
-        ClassicEditor
-            .create(document.querySelector('#terms_editor'))
-            .catch(error => {
-                console.error(error);
-            });
+        const getEditorConfig = () => ({
+            toolbar: {
+                items: [
+                    'heading',
+                    '|',
+                    'bold',
+                    'italic',
+                    'link',
+                    'bulletedList',
+                    'numberedList',
+                    'blockQuote',
+                    '|',
+                    'insertTable',
+                    'imageUpload',
+                    'undo',
+                    'redo'
+                ]
+            },
+            // Use the CKFinder adapter shipped with the Classic build.
+            // Pass the CSRF token via query string so Laravel's CSRF middleware accepts the request.
+            ckfinder: {
+                uploadUrl: `${baseUploadUrl}?_token=${encodeURIComponent(csrfToken)}`
+            },
+            image: {
+                toolbar: [
+                    'imageStyle:inline',
+                    'imageStyle:block',
+                    'imageStyle:side',
+                    '|',
+                    'toggleImageCaption',
+                    'imageTextAlternative'
+                ]
+            },
+            table: {
+                contentToolbar: [
+                    'tableColumn',
+                    'tableRow',
+                    'mergeTableCells'
+                ]
+            },
+            heading: {
+                options: [
+                    { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                    { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                    { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
+                    { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' },
+                ]
+            }
+        });
+
+        ['#privacy_editor', '#terms_editor'].forEach((selector) => {
+            const element = document.querySelector(selector);
+            if (!element) {
+                return;
+            }
+
+            ClassicEditor
+                .create(element, getEditorConfig())
+                .catch(error => {
+                    console.error('Editor initialization error', error);
+                });
+        });
     </script>
 
     <script>
@@ -269,8 +334,8 @@
             document.getElementById(tabId + '-tab').classList.add('bg-[#DB69A2]', 'text-white');
         }
 
-        // Show general tab by default
-        showTab('general');
+        const defaultTab = @json($activeTab ?? 'general');
+        showTab(defaultTab || 'general');
     </script>
 
 @endsection

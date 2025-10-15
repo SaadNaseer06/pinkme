@@ -15,6 +15,7 @@ class Program extends Model
         'banner',
         'status',
         'program_fund',
+        'payment_type', // 'full' or 'flexible'
     ];
 
     protected $casts = [

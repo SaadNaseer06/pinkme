@@ -194,11 +194,11 @@
                                                     class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm gap-2">
                                                     <img src="/images/assign.svg" alt="">View Assign Applications
                                                 </a>
-                                                <a href="javascript:void(0);"
+                                                {{-- <a href="javascript:void(0);"
                                                     onclick="openRejectModal({{ $reviewer->id }})"
                                                     class="flex items-center px-4 py-2 gap-2 text-[#91848C] text-sm transition-colors">
                                                     <i class="fa-solid fa-trash"></i> Inactivate Reviewer
-                                                </a>
+                                                </a> --}}
                                             </div>
                                         </td>
                                     </tr>

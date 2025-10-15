@@ -18,44 +18,44 @@
     }
 
     // --- Base query: applications assigned to this case manager ---
-    $apps = Application::query()
-        ->with(['program:id,title', 'patient:id,user_id', 'patient.user:id,email'])
-        ->where('reviewer_id', $user->id)
-        ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-        ->latest('created_at')
-        ->paginate(10)
-        ->appends(request()->query());
+    try {
+        $apps = Application::query()
+            ->with(['program:id,title', 'patient:id,user_id', 'patient.user:id,email'])
+            ->where('reviewer_id', $user->id)
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->latest('created_at')
+            ->paginate(10)
+            ->appends(request()->query());
+    } catch (\Exception $e) {
+        // Fallback to empty paginator / collection
+        $apps = collect();
+        session()->flash('error', 'Unable to load applications. Please try again later.');
+    }
 
     // --- Helpers ---
     $fmtDate = fn($dt) => $dt ? Carbon::parse($dt)->format('Y-m-d h:i A') : '—';
 
-    // If you don't have a "code" column, synthesize one like APP-000123
-$appCode = function ($app) {
-    if (!empty($app->code)) {
-        return $app->code;
-    }
-    return 'APP-' . str_pad((string) $app->id, 6, '0', STR_PAD_LEFT);
-};
+    $appCode = function ($app) {
+        if (!empty($app->code)) {
+            return $app->code;
+        }
+        return 'APP-' . str_pad((string) ($app->id ?? 0), 6, '0', STR_PAD_LEFT);
+    };
 
-$statusBadge = function ($status) {
-    // Normalize the status string: convert to lowercase and replace spaces with underscores.
-    $normalized = str_replace(' ', '_', strtolower((string) $status));
-
-    // Define appearance for each status. Use underscore keys for consistency.
-    $map = [
-        'approved' => ['bg' => '#C5E8D1', 'text' => '#20B354', 'label' => 'Approved'],
-        'rejected' => ['bg' => '#E8C5C5', 'text' => '#B32020', 'label' => 'Rejected'],
-        'under_review' => ['bg' => '#E4D7DF', 'text' => '#91848C', 'label' => 'Under Review'],
-        'pending' => ['bg' => '#E4D7DF', 'text' => '#91848C', 'label' => 'Pending'],
-    ];
-
-    $cfg = $map[$normalized] ?? $map['pending'];
-
-    return sprintf(
-        '<span class="px-4 py-2 rounded-sm text-xs font-medium app-text" style="background:%s;color:%s">%s</span>',
-        e($cfg['bg']),
-        e($cfg['text']),
-        e($cfg['label']),
+    $statusBadge = function ($status) {
+        $normalized = str_replace(' ', '_', strtolower((string) $status));
+        $map = [
+            'approved' => ['bg' => '#C5E8D1', 'text' => '#20B354', 'label' => 'Approved'],
+            'rejected' => ['bg' => '#E8C5C5', 'text' => '#B32020', 'label' => 'Rejected'],
+            'under_review' => ['bg' => '#E4D7DF', 'text' => '#91848C', 'label' => 'Under Review'],
+            'pending' => ['bg' => '#E4D7DF', 'text' => '#91848C', 'label' => 'Pending'],
+        ];
+        $cfg = $map[$normalized] ?? $map['pending'];
+        return sprintf(
+            '<span class="px-4 py-2 rounded-sm text-xs font-medium app-text" style="background:%s;color:%s">%s</span>',
+            e($cfg['bg']),
+            e($cfg['text']),
+            e($cfg['label']),
         );
     };
 @endphp
@@ -67,11 +67,17 @@ $statusBadge = function ($status) {
 @section('content')
     <main class="flex-1 py-4">
 
-        {{-- Flash messages --}}
-        {{-- @if (session('success'))
+        {{-- Flash / status messages --}}
+        @if (session('success'))
             <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-md mb-4" role="alert">
                 <h4 class="font-semibold mb-1">Action completed</h4>
                 <p>{{ session('success') }}</p>
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-md mb-4" role="alert">
+                <h4 class="font-semibold mb-1">Error</h4>
+                <p>{{ session('error') }}</p>
             </div>
         @endif
         @if ($errors->any())
@@ -83,9 +89,9 @@ $statusBadge = function ($status) {
                     @endforeach
                 </ul>
             </div>
-        @endif --}}
+        @endif
 
-        {{-- Status cards (your existing partial/UI) --}}
+        {{-- Status cards --}}
         @include('case_manager.partials.cards')
 
         <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
@@ -122,34 +128,29 @@ $statusBadge = function ($status) {
                 <table class="min-w-full text-sm text-left mt-6 relative overflow-visible">
                     <thead>
                         <tr class="border-t border-[#e0cfd8]">
-                            <th class="p-2 text-lg text-[#91848C] font-normal app-h">Applications Title</th>
-                            <th class="p-2 text-lg text-[#91848C] font-normal app-h pad-left">Applications ID</th>
+                            <th class="p-2 text-lg text-[#91848C] font-normal app-h">Application Title</th>
+                            <th class="p-2 text-lg text-[#91848C] font-normal app-h">Application ID</th>
                             <th class="p-2 text-lg text-[#91848C] font-normal app-h">Submission Date</th>
                             <th class="p-2 text-lg text-[#91848C] font-normal app-h">Email</th>
                             <th class="p-2 text-lg text-[#91848C] font-normal app-h">Status</th>
                             <th class="p-2 text-lg text-[#91848C] font-normal app-h">Action</th>
                         </tr>
                     </thead>
-
                     <tbody class="text-gray-700">
                         @forelse ($apps as $app)
                             @php
-                                $title = $app->program->title ?? '—';
+                                $title = optional($app->program)->title ?? '—';
                                 $code = $appCode($app);
                                 $date = $fmtDate($app->created_at);
-                                $email = $app->patient?->user?->email ?? '—';
+                                $email = optional(optional($app->patient)->user)->email ?? '—';
                             @endphp
 
                             <tr class="border-t border-[#e0cfd8]">
                                 <td class="p-2">
-                                    <div class="flex items-center gap-3">
-                                        {{-- keep your plain text title (same UI color/size) --}}
-                                        <span
-                                            class="text-[#91848C] text-[16px] font-light app-text">{{ $title }}</span>
-                                    </div>
+                                    <span class="text-[#91848C] text-[16px] font-light app-text">{{ $title }}</span>
                                 </td>
 
-                                <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text pad-left">
+                                <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                     {{ $code }}
                                 </td>
 
@@ -162,15 +163,13 @@ $statusBadge = function ($status) {
                                 </td>
 
                                 <td class="p-2 align-middle">
-                                    @if ($app->missingRequests->isNotEmpty())
-                                        {{-- Custom Badge for Missing Docs --}}
+                                    @if (!empty($app->missingRequests) && $app->missingRequests->isNotEmpty())
                                         <span class="px-4 py-2 rounded-sm text-xs font-medium app-text"
                                             style="background:#FFF2CC; color:#D9980D;">Missing Docs Requested</span>
                                     @else
                                         {!! $statusBadge($app->status) !!}
                                     @endif
                                 </td>
-
 
                                 <td class="p-2 relative">
                                     <button onclick="toggleDropdown(this)"
@@ -212,8 +211,21 @@ $statusBadge = function ($status) {
                             </tr>
                         @empty
                             <tr class="border-t border-[#e0cfd8]">
-                                <td colspan="6" class="p-6 text-center text-[#91848C] app-text">
-                                    No applications found{{ $range ? ' in the selected range' : '' }}.
+                                <td colspan="6" class="p-8 text-center text-[#91848C] app-text">
+                                    <div class="flex flex-col items-center space-y-2">
+                                        <svg class="w-10 h-10 text-[#DCCFD8]" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        <p class="text-lg">No applications
+                                            found{{ $range ? ' in the selected range' : '' }}.</p>
+                                        @if (request()->filled('range'))
+                                            <a href="{{ route('case_manager.myApplication') }}"
+                                                class="mt-2 inline-block text-[#DB69A2] underline hover:text-[#FE6EB6]">
+                                                Reset filter and show all
+                                            </a>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -221,9 +233,9 @@ $statusBadge = function ($status) {
                 </table>
             </div>
 
-            {{-- Pagination styled like your mock --}}
+            {{-- Pagination --}}
             @php
-                $p = $apps ?? null;
+                $p = $apps;
                 $isPager = $p instanceof LengthAwarePaginator;
             @endphp
             @if ($isPager && $p->hasPages())
@@ -269,45 +281,46 @@ $statusBadge = function ($status) {
     </main>
 
     {{-- Reject Modal --}}
-    <div id="rejectModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden">
-        <div class="bg-[#F3E8EF] rounded-lg shadow-lg p-6 md:p-12 w-full max-w-[22rem] md:max-w-2xl text-center">
-            <div class="flex flex-col items-center space-y-2">
-                <div class="flex justify-center">
-                    <img src="{{ asset('/images/reject-illustration.png') }}" alt="Reject illustration"
-                        class="w-36 h-auto" />
+    @if ($apps->isNotEmpty())
+        <div id="rejectModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden">
+            <div class="bg-[#F3E8EF] rounded-lg shadow-lg p-6 md:p-12 w-full max-w-[22rem] md:max-w-2xl text-center">
+                <div class="flex flex-col items-center space-y-2">
+                    <div class="flex justify-center">
+                        <img src="{{ asset('/images/reject-illustration.png') }}" alt="Reject illustration"
+                            class="w-36 h-auto" />
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-normal text-gray-800">Reject Application</h1>
+                    <p class="text-black text-md md:text-lg leading-relaxed">
+                        Are you sure you want to reject this application? Please provide a <span
+                            class="text-[#DB69A2]">reason</span>.
+                    </p>
+
+                    <form id="rejectForm" method="POST"
+                        action="{{ route('case_manager.applications.reject', $apps->first()->id) }}">
+                        @csrf
+                        <div class="w-full max-w-md mx-auto text-left space-y-3">
+                            <label class="text-sm md:text-md text-[#91848C] font-normal">
+                                Enter Reason For Rejection <span class="text-red-500">*</span>
+                            </label>
+                            <textarea name="reason" placeholder="Message" rows="4" required
+                                class="w-full px-4 py-3 rounded-md bg-transparent text-[#B1A4AD] border border-[#DCCFD8] placeholder:text-[#C4B8C0] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]"></textarea>
+                        </div>
+
+                        <div class="flex justify-center gap-3 pt-4">
+                            <button type="submit"
+                                class="bg-[#DB69A2] text-white px-3 py-3 rounded-md text-sm font-semibold hover:bg-[#FE6EB6] transition app-text">
+                                CONFIRM & REJECT
+                            </button>
+                            <button type="button" onclick="closeRejectModal()"
+                                class="bg-transparent border border-[#D6C6CE] text-[#8B7E88] px-6 py-3 rounded-md text-sm font-semibold hover:bg-[#DCCFD8] transition app-text">
+                                CANCEL
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <h1 class="text-2xl md:text-3xl font-normal text-gray-800">Reject Application</h1>
-                <p class="text-black text-md md:text-lg leading-relaxed">
-                    Are you sure you want to reject this application? Please provide a <span
-                        class="text-[#DB69A2]">reason</span>.
-                </p>
-
-                {{-- <form id="rejectForm" method="POST" action=""> --}}
-                <form id="rejectForm" method="POST"
-                    action="{{ route('case_manager.applications.reject', $apps->first()->id) }}">
-                    @csrf
-                    <div class="w-full max-w-md mx-auto text-left space-y-3">
-                        <label class="text-sm md:text-md text-[#91848C] font-normal">
-                            Enter Reason For Rejection <span class="text-red-500">*</span>
-                        </label>
-                        <textarea name="reason" placeholder="Message" rows="4" required
-                            class="w-full px-4 py-3 rounded-md bg-transparent text-[#B1A4AD] border border-[#DCCFD8] placeholder:text-[#C4B8C0] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]"></textarea>
-                    </div>
-
-                    <div class="flex justify-center gap-3 pt-4">
-                        <button type="submit"
-                            class="bg-[#DB69A2] text-white px-3 py-3 rounded-md text-sm font-semibold hover:bg-[#FE6EB6] transition app-text">
-                            CONFIRM & REJECT
-                        </button>
-                        <a href="{{ url()->previous() }}"
-                            class="bg-transparent border border-[#D6C6CE] text-[#8B7E88] px-6 py-3 rounded-md text-sm font-semibold hover:bg-[#DCCFD8] transition app-text">
-                            CANCEL
-                        </a>
-                    </div>
-                </form>
             </div>
         </div>
-    </div>
+    @endif
 
     {{-- Missing Document Modal --}}
     <div id="missingDocModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 hidden">
@@ -346,7 +359,6 @@ $statusBadge = function ($status) {
         </div>
     </div>
 
-
     {{-- Page JS (dropdowns + modals) --}}
     <script>
         function toggleDropdown(btn) {
@@ -362,14 +374,11 @@ $statusBadge = function ($status) {
             });
         }
 
-        // Base path for actions: use the `case_manager` prefix (underscored) to match your Laravel routes.
         const baseCM = "{{ url('case_manager/applications') }}";
 
-        // Show Missing Document Modal
         function openMissingDocModal(appId) {
             const modal = document.getElementById('missingDocModal');
             const form = document.getElementById('missingDocForm');
-
             form.action = `${baseCM}/${appId}/request-missing`;
             modal.classList.remove('hidden');
         }
@@ -377,13 +386,10 @@ $statusBadge = function ($status) {
         function closeMissingDocument() {
             const modal = document.getElementById('missingDocModal');
             modal.classList.add('hidden');
-
-            // Optional: Clear message textarea
             const textarea = modal.querySelector('textarea[name="message"]');
             if (textarea) textarea.value = '';
         }
 
-        // Reject
         function openRejectModal(appId) {
             const form = document.getElementById('rejectForm');
             form.action = `${baseCM}/${appId}/reject`;
@@ -392,10 +398,10 @@ $statusBadge = function ($status) {
 
         function closeRejectModal() {
             document.getElementById('rejectModal').classList.add('hidden');
-            document.getElementById('rejectForm').reset();
+            const form = document.getElementById('rejectForm');
+            if (form) form.reset();
         }
     </script>
 
-    {{-- If you need any extra dashboard JS --}}
     <script src="{{ asset('js/case_manager/dashboard.js') }}"></script>
 @endsection

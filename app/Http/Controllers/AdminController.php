@@ -283,6 +283,7 @@ class AdminController extends Controller
             ->get();
 
         $programs = Program::with(['registrations'])
+            ->where('payment_type', 'full')
             ->withCount('registrations')
             ->withSum('sponsorships as total_raised', 'amount')
             ->orderByDesc('event_date')

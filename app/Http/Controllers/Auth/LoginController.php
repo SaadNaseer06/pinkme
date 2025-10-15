@@ -10,7 +10,7 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.login'); // Your Blade view
+        return view('auth.signup_login', ['initialTab' => 'login']);
     }
 
     public function login(Request $request)

@@ -897,15 +897,17 @@
         });
 
         document.querySelectorAll('.toggle-password').forEach(function(toggle) {
-            toggle.addEventListener('click', function() {
-                const input = this.previousElementSibling;
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const parent = this.parentElement;
+                const input = parent.querySelector('.password-input');
                 const icon = this.querySelector('i');
 
-                if (input.type === 'password') {
+                if (input && input.type === 'password') {
                     input.type = 'text';
                     icon.classList.remove('fa-eye');
                     icon.classList.add('fa-eye-slash');
-                } else {
+                } else if (input) {
                     input.type = 'password';
                     icon.classList.remove('fa-eye-slash');
                     icon.classList.add('fa-eye');

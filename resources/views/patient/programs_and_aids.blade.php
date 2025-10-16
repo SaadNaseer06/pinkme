@@ -204,16 +204,33 @@
                         </div>
                     </div>
 
+                    <!-- Registration Summary -->
+                    <div id="registration-info" class="hidden border border-[#DCCFD8] p-4 rounded-lg space-y-2">
+                        <h3 class="text-lg font-medium text-[#213430] app-main">Your Registration</h3>
+                        <p class="text-sm text-[#213430] app-text">Status: <span class="font-semibold registration-status">-</span></p>
+                        <p class="text-sm text-[#213430] app-text">Submitted: <span class="registration-submitted">-</span></p>
+                        <div class="registration-note hidden">
+                            <p class="text-sm font-medium text-[#213430] app-text">Admin Note</p>
+                            <p class="text-sm text-[#91848C] app-text registration-note-text"></p>
+                        </div>
+                    </div>
+
                     <!-- Action Buttons -->
-                    <div class="flex justify-between gap-4 pt-4">
+                    <div class="flex flex-col sm:flex-row justify-between gap-3 pt-4">
                         <button onclick="closeModal()"
                             class="px-5 py-3 bg-transparent border border-[#DCCFD8] text-[#91848C] rounded-md app-text">
                             Cancel
                         </button>
-                        <button type="button" id="register-btn" onclick="openRegistrationModal()"
-                            class="px-6 py-2 bg-pink text-white rounded-lg hover:bg-pink-dark transition app-text">
-                            Register Yourself
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <a id="registration-view-btn" href="#" target="_self"
+                                class="hidden px-5 py-3 border border-[#213430] text-[#213430] rounded-md hover:bg-[#213430] hover:text-white transition app-text">
+                                View Details
+                            </a>
+                            <button type="button" id="register-btn" onclick="openRegistrationForm()"
+                                class="px-6 py-2 bg-pink text-white rounded-lg hover:bg-pink-dark transition app-text">
+                                Register Yourself
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -354,7 +371,11 @@
         function openModal(id) {
             currentProgramId = id; // Save for use when opening register modal
 
-            fetch('{{ url('/patient/programs') }}/' + id)
+            fetch('{{ url('/patient/programs') }}/' + id, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
                 .then(res => res.json())
                 .then(data => {
                     document.querySelector('#registerModal .modal-title').textContent = data.title || '—';
@@ -362,8 +383,7 @@
                     document.querySelector('#registerModal .modal-date').textContent = data.event_date || '—';
                     document.querySelector('#registerModal .modal-time').textContent = data.event_time || '—';
 
-                    document.querySelector('#registerModal .modal-banner').src =
-                        '/program-3.png';
+                    document.querySelector('#registerModal .modal-banner').src = data.banner || '/program-3.png';
 
                     // Sponsor
                     const sponsor = data.sponsor || {};
@@ -377,12 +397,40 @@
 
                     // Update register button state based on registration history
                     const registerButton = document.getElementById('register-btn');
-                    if (registeredPrograms.includes(id)) {
+                    const viewButton = document.getElementById('registration-view-btn');
+                    const registrationPanel = document.getElementById('registration-info');
+                    const registrationStatus = registrationPanel.querySelector('.registration-status');
+                    const registrationSubmitted = registrationPanel.querySelector('.registration-submitted');
+                    const registrationNote = registrationPanel.querySelector('.registration-note');
+                    const registrationNoteText = registrationPanel.querySelector('.registration-note-text');
+                    const registrationInfo = data.registration || null;
+                    const alreadyRegistered = registrationInfo !== null || registeredPrograms.includes(id);
+
+                    if (alreadyRegistered) {
                         // Already registered: disable the button and update text/style
                         registerButton.textContent = 'Registered';
                         registerButton.disabled = true;
                         registerButton.classList.remove('bg-pink', 'hover:bg-pink-dark');
                         registerButton.classList.add('bg-gray-400', 'opacity-50', 'cursor-not-allowed');
+
+                        if (registrationInfo && registrationInfo.view_url) {
+                            viewButton.href = registrationInfo.view_url;
+                            viewButton.classList.remove('hidden');
+                        } else {
+                            viewButton.href = '{{ route('patient.programsAndAids') }}';
+                            viewButton.classList.remove('hidden');
+                        }
+
+                        registrationPanel.classList.remove('hidden');
+                        registrationStatus.textContent = registrationInfo?.status_label || 'Pending';
+                        registrationSubmitted.textContent = registrationInfo?.submitted_at || '-';
+                        if (registrationInfo?.review_note) {
+                            registrationNote.classList.remove('hidden');
+                            registrationNoteText.textContent = registrationInfo.review_note;
+                        } else {
+                            registrationNote.classList.add('hidden');
+                            registrationNoteText.textContent = '';
+                        }
                     } else {
                         // Not registered: ensure button is enabled and styled as primary
                         registerButton.textContent = 'Register Yourself';
@@ -394,6 +442,14 @@
                         if (!registerButton.classList.contains('hover:bg-pink-dark')) {
                             registerButton.classList.add('hover:bg-pink-dark');
                         }
+
+                        viewButton.classList.add('hidden');
+                        viewButton.href = '#';
+                        registrationPanel.classList.add('hidden');
+                        registrationStatus.textContent = '-';
+                        registrationSubmitted.textContent = '-';
+                        registrationNote.classList.add('hidden');
+                        registrationNoteText.textContent = '';
                     }
                     document.getElementById('registerModal').classList.remove('hidden');
                 })
@@ -403,7 +459,7 @@
                 });
         }
 
-        function openRegistrationModal() {
+        function openRegistrationForm() {
             // set the hidden input value in the popup modal form
             document.getElementById('program_id').value = currentProgramId;
 

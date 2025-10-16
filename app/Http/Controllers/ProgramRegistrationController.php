@@ -50,6 +50,7 @@ class ProgramRegistrationController extends Controller
             'assistance_type' => $request->assistance_type,
             'justification' => $request->justification,
             'document_paths' => $documentPaths,
+            'status' => ProgramRegistration::STATUS_PENDING,
         ]);
 
         // Flash a professional success message back to the session and redirect
@@ -57,5 +58,17 @@ class ProgramRegistrationController extends Controller
             'success',
             'Your application has been submitted successfully. Our team will review your details and get in touch with you shortly.'
         );
+    }
+
+    public function show(ProgramRegistration $registration)
+    {
+        $user = Auth::user();
+        abort_if(!$user || $registration->user_id !== $user->id, 403);
+
+        $registration->load(['program', 'program.sponsorships.sponsor.profile']);
+
+        return view('patient.program_registrations.show', [
+            'registration' => $registration,
+        ]);
     }
 }

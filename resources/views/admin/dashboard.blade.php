@@ -234,8 +234,8 @@
                                     <tr class="border-t border-[#e0cfd8]">
                                         <td class="p-2">
                                             <div class="flex items-center gap-2">
-                                                <img src="{{ $application->patient->user->profile->avatar ?? '' }}"
-                                                    alt="" class="w-8 h-8 rounded-full" />
+                                                {{-- <img src="{{ $application->patient->user->profile->avatar ?? '' }}"
+                                                    alt="" class="w-8 h-8 rounded-full" /> --}}
                                                 <span
                                                     class="text-[#91848C] text-[16px] font-light app-text">{{ $application->patient->user->profile->full_name ?? 'N/A' }}</span>
                                             </div>
@@ -263,14 +263,40 @@
                                                 {{ ucfirst($application->status) }}
                                             </span>
                                         </td>
+                                        @php
+                                            $appViewUrl = route('admin.viewApplication', $application->id);
+                                            $appFilterId = $application->code ?? $application->id;
+                                            $appListUrl = route('admin.applications', ['q' => $appFilterId]);
+                                            $patientEmail = optional($application->patient?->user)->email;
+                                        @endphp
                                         <td class="p-3">
-                                            <button class="text-[#213430] p-2 focus:outline-none">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                                </svg>
-                                            </button>
+                                            <div class="action-menu-wrapper relative inline-block" data-action-wrapper>
+                                                <button type="button" data-action-toggle
+                                                    class="text-[#213430] p-2 rounded-md focus:outline-none hover:text-[#db69a2] transition-colors">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                        viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                                    </svg>
+                                                </button>
+                                                <div data-action-menu class="patient-action-menu absolute right-0 top-10 z-20 hidden">
+                                                    <a href="{{ $appViewUrl }}" class="patient-action-item">
+                                                        <i class="fas fa-eye patient-action-icon"></i>
+                                                        <span>View Application</span>
+                                                    </a>
+                                                    <a href="{{ $appListUrl }}" class="patient-action-item">
+                                                        <img src="/images/assign.svg" alt="" class="patient-action-icon">
+                                                        <span>Open Applications List</span>
+                                                    </a>
+                                                    {{-- @if (!empty($patientEmail))
+                                                        <a href="mailto:{{ $patientEmail }}" class="patient-action-item">
+                                                            <i class="fas fa-envelope patient-action-icon"></i>
+                                                            <span>Email Patient</span>
+                                                        </a>
+                                                    @endif --}}
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -432,7 +458,7 @@
                                 <th class="p-2 text-lg text-[#91848C] font-medium app-h">Contact</th>
                                 <th class="p-2 text-lg text-[#91848C] font-medium app-h">Age</th>
                                 <th class="p-2 text-lg text-[#91848C] font-medium app-h">Disease</th>
-                                {{-- <th class="p-2 text-lg text-[#91848C] font-medium app-h">Action</th> --}}
+                                <th class="p-2 text-lg text-[#91848C] font-medium app-h">Action</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-700">
@@ -440,7 +466,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-3">
                                         <div class="flex items-center gap-3">
-                                            <img src="/images/patient-{{ $loop->iteration }}.png" alt=""
+                                            <img src="{{ $patient->user->profile->avatar ?? '/images/patient-'. $loop->iteration .'.png' }}" alt=""
                                                 class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">
                                                 {{ $patient->user->name ?? 'Unknown' }}
@@ -465,6 +491,42 @@
                                     <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                         {{ $patient->diagnosis ?? 'N/A' }}
                                     </td>
+                                    @php
+                                        $patientQuery = $patient->user->email
+                                            ?? ($patient->user->name ?? $patient->id);
+                                        $applicationsUrl = route('admin.applications', ['q' => $patientQuery]);
+                                        $patientsUrl = route('admin.patients', ['q' => $patientQuery]);
+                                    @endphp
+                                    <td class="p-2 align-middle">
+                                        <div class="action-menu-wrapper relative inline-block" data-action-wrapper>
+                                            <button type="button" data-action-toggle
+                                                class="text-[#213430] p-2 rounded-md focus:outline-none hover:text-[#db69a2] transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                                </svg>
+                                            </button>
+                                            <div data-action-menu
+                                                class="patient-action-menu absolute right-0 top-10 z-20 hidden">
+                                                <a href="{{ $patientsUrl }}" class="patient-action-item">
+                                                    <i class="fas fa-user-circle patient-action-icon"></i>
+                                                    <span>View in Patients List</span>
+                                                </a>
+                                                <a href="{{ $applicationsUrl }}" class="patient-action-item">
+                                                    <img src="/images/assign.svg" alt="" class="patient-action-icon">
+                                                    <span>View Applications</span>
+                                                </a>
+                                                @if (!empty($patient->user->email))
+                                                    <a href="mailto:{{ $patient->user->email }}"
+                                                        class="patient-action-item">
+                                                        <i class="fas fa-envelope patient-action-icon"></i>
+                                                        <span>Email Patient</span>
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
@@ -475,7 +537,6 @@
                     </table>
                 </div>
             </div>
-
         </div>
     </main>
 
@@ -486,6 +547,11 @@
             const dropdownBtn = document.getElementById('periodDropdown');
             const dropdownOptions = document.getElementById('periodOptions');
             const dropdownIcon = document.getElementById('dropdownIcon');
+            const closeActionMenus = () => {
+                document.querySelectorAll('[data-action-menu]').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            };
 
             if (dropdownBtn && dropdownOptions) {
                 dropdownBtn.addEventListener('click', function(e) {
@@ -508,6 +574,46 @@
                     e.stopPropagation();
                 });
             }
+
+            // Action dropdowns
+            const actionButtons = document.querySelectorAll('[data-action-toggle]');
+            const actionMenus = document.querySelectorAll('[data-action-menu]');
+
+            actionButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const menu = button.nextElementSibling;
+                    if (!menu) {
+                        return;
+                    }
+
+                    const shouldOpen = menu.classList.contains('hidden');
+                    closeActionMenus();
+                    if (shouldOpen) {
+                        menu.classList.remove('hidden');
+                    }
+                });
+            });
+
+            actionMenus.forEach(menu => {
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('[data-action-wrapper]')) {
+                    closeActionMenus();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeActionMenus();
+                }
+            });
 
             // Chart toggle functionality
             const toggles = {
@@ -575,6 +681,53 @@
             opacity: 0.5;
             pointer-events: none;
             transition: opacity 0.3s ease;
+        }
+
+        .patient-action-menu {
+            min-width: 12rem;
+            background-color: #ffffff;
+            border: 1px solid #DCCFD8;
+            border-radius: 0.75rem;
+            box-shadow: 0 12px 30px rgba(33, 52, 48, 0.15);
+            padding: 0.35rem 0;
+        }
+
+        .patient-action-item {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.55rem 1rem;
+            font-size: 0.875rem;
+            color: #213430;
+            text-decoration: none;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .patient-action-item + .patient-action-item {
+            border-top: 1px solid rgba(220, 207, 216, 0.6);
+        }
+
+        .patient-action-item:hover {
+            background-color: #F3E8EF;
+            color: #213430;
+        }
+
+        .patient-action-icon {
+            width: 1.1rem;
+            height: 1.1rem;
+            color: #DB69A2;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+        }
+
+        img.patient-action-icon {
+            display: block;
+            width: 1.1rem;
+            height: 1.1rem;
+            object-fit: contain;
         }
     </style>
 @endsection

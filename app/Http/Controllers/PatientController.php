@@ -26,20 +26,39 @@ class PatientController extends Controller
         // Get patient's applications
         $applications = Application::where('patient_id', $patient->id)
             ->with('program')
-            ->orderBy('submission_date', 'desc')
+            ->orderByDesc('submission_date')
+            ->orderByDesc('created_at')
             ->get();
 
         // Get application statistics
         $totalApplications = $applications->count();
-        $pendingApplications = $applications->where('status', 'Pending')->count();
-        $approvedApplications = $applications->where('status', 'Approved')->count();
-        $rejectedApplications = $applications->where('status', 'Rejected')->count();
+        $pendingApplications = $applications->filter(
+            fn($app) => strcasecmp($app->status ?? '', 'Pending') === 0
+        )->count();
+        $approvedApplications = $applications->filter(
+            fn($app) => strcasecmp($app->status ?? '', 'Approved') === 0
+        )->count();
+        $rejectedApplications = $applications->filter(
+            fn($app) => strcasecmp($app->status ?? '', 'Rejected') === 0
+        )->count();
 
         // Get last application date
-        $lastApplication = $applications->first();
-        $lastApplicationDate = $lastApplication
-            ? Carbon::parse($lastApplication->submission_date)->format('d/m/Y')
+        $latestApplication = $applications->first();
+        $latestSubmittedAt = $latestApplication
+            ? ($latestApplication->submission_date ?? $latestApplication->created_at)
+            : null;
+        $lastApplicationDate = $latestSubmittedAt
+            ? Carbon::parse($latestSubmittedAt)->format('d/m/Y')
             : 'N/A';
+        $inReviewApplications = $applications->filter(function ($app) {
+            $status = strtolower((string) $app->status);
+            return in_array($status, ['pending', 'under review', 'under_review'], true);
+        })->count();
+        $latestApplicationStatus = $latestApplication ? ($latestApplication->status ?: 'N/A') : 'N/A';
+        $latestApplicationCode = $latestApplication
+            ? ($latestApplication->code ?: ('APP-' . str_pad((string) $latestApplication->id, 6, '0', STR_PAD_LEFT)))
+            : null;
+        $latestProgramTitle = optional(optional($latestApplication)->program)->title;
 
         // Prepare stats for the view
         $stats = [
@@ -48,6 +67,11 @@ class PatientController extends Controller
             'approved_applications' => $approvedApplications,
             'rejected_applications' => $rejectedApplications,
             'last_application_date' => $lastApplicationDate,
+            'in_review_applications' => $inReviewApplications,
+            'latest_application_status' => $latestApplicationStatus,
+            'latest_application_id' => $latestApplication->id ?? null,
+            'latest_application_code' => $latestApplicationCode,
+            'latest_program_title' => $latestProgramTitle,
         ];
 
         // Get available programs

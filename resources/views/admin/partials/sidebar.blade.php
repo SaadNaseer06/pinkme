@@ -28,6 +28,12 @@
                     alt="" />Assigned
                 Applications</a>
         </li>
+        <li class="{{ request()->is('admin/program-registration-requests*') ? 'active' : '' }}">
+            <a href="{{ route('admin.program_registrations.index') }}"><img
+                    src="{{ request()->is('admin/program-registration-requests*') ? asset('images/App-app.svg') : asset('images/My_Application.svg') }}"
+                    alt="" />Program
+                Registrations</a>
+        </li>
         <li class="{{ request()->is('admin/reviewers') ? 'active' : '' }}">
             <a href="{{ route('admin.reviewers') }}"><img
                     src="{{ request()->is('admin/reviewers') ? asset('images/patient-pink.svg') : asset('images/patient.svg') }}"
@@ -88,6 +94,14 @@
                             src="{{ request()->is('admin/assigned') ? asset('images/App-app.svg') : asset('images/My_Application.svg') }}"
                             class="w-5 h-5" /></span>
                     <span class="title">Assigned Applications</span>
+                </a>
+            </li>
+            <li class="{{ request()->is('admin/program-registration-requests*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.program_registrations.index') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/program-registration-requests*') ? asset('images/App-app.svg') : asset('images/My_Application.svg') }}"
+                            class="w-5 h-5" /></span>
+                    <span class="title">Program Registrations</span>
                 </a>
             </li>
             <li class="{{ request()->is('admin/reviewers') ? 'hovered' : '' }}">

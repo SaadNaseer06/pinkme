@@ -68,7 +68,7 @@
     <main class="flex-1 py-4">
 
         {{-- Flash / status messages --}}
-        @if (session('success'))
+        {{-- @if (session('success'))
             <div class="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-md mb-4" role="alert">
                 <h4 class="font-semibold mb-1">Action completed</h4>
                 <p>{{ session('success') }}</p>
@@ -89,7 +89,7 @@
                     @endforeach
                 </ul>
             </div>
-        @endif
+        @endif --}}
 
         {{-- Status cards --}}
         @include('case_manager.partials.cards')
@@ -172,7 +172,7 @@
                                 </td>
 
                                 <td class="p-2 relative">
-                                    <button onclick="toggleDropdown(this)"
+                                    <button onclick="cmToggleDropdown(this)"
                                         class="text-[#213430] p-2 rounded-md focus:outline-none">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
@@ -197,12 +197,12 @@
                                             </button>
                                         </form>
 
-                                        <button type="button" onclick="openRejectModal({{ $app->id }})"
+                                        <button type="button" onclick="cmOpenRejectModal({{ $app->id }})"
                                             class="w-full text-left flex items-center px-4 py-2 text-[#91848C] hover:bg-[#ddd5dc] text-sm">
                                             <i class="fas fa-times mr-2"></i> Reject
                                         </button>
 
-                                        <button type="button" onclick="openMissingDocModal({{ $app->id }})"
+                                        <button type="button" onclick="cmOpenMissingDocModal({{ $app->id }})"
                                             class="w-full text-left flex items-center px-4 py-2 text-[#91848C] hover:bg-[#ddd5dc] text-sm">
                                             <i class="fas fa-file-alt mr-2"></i> Request Missing Documents
                                         </button>
@@ -311,7 +311,7 @@
                                 class="bg-[#DB69A2] text-white px-3 py-3 rounded-md text-sm font-semibold hover:bg-[#FE6EB6] transition app-text">
                                 CONFIRM & REJECT
                             </button>
-                            <button type="button" onclick="closeRejectModal()"
+                            <button type="button" onclick="cmCloseRejectModal()"
                                 class="bg-transparent border border-[#D6C6CE] text-[#8B7E88] px-6 py-3 rounded-md text-sm font-semibold hover:bg-[#DCCFD8] transition app-text">
                                 CANCEL
                             </button>
@@ -349,7 +349,7 @@
                             class="bg-[#DB69A2] text-white px-6 py-3 rounded-md text-sm font-semibold hover:bg-[#FE6EB6] transition">
                             SEND
                         </button>
-                        <button type="button" onclick="closeMissingDocument()"
+                        <button type="button" onclick="cmCloseMissingDocument()"
                             class="bg-transparent border border-[#D6C6CE] text-[#8B7E88] px-6 py-3 rounded-md text-sm font-semibold hover:bg-[#DCCFD8] transition">
                             CANCEL
                         </button>
@@ -361,42 +361,52 @@
 
     {{-- Page JS (dropdowns + modals) --}}
     <script>
-        function toggleDropdown(btn) {
+        function cmToggleDropdown(btn) {
             document.querySelectorAll('.dropdown').forEach(d => d.classList.add('hidden'));
             const menu = btn.parentElement.querySelector('.dropdown');
-            if (menu) menu.classList.toggle('hidden');
+            if (!menu) {
+                return;
+            }
 
-            document.addEventListener('click', function onDocClick(e) {
+            menu.classList.toggle('hidden');
+
+            const handleClickOutside = function(e) {
                 if (!btn.contains(e.target) && !menu.contains(e.target)) {
                     menu.classList.add('hidden');
-                    document.removeEventListener('click', onDocClick);
+                    document.removeEventListener('click', handleClickOutside);
                 }
-            });
+            };
+
+            document.addEventListener('click', handleClickOutside);
         }
 
         const baseCM = "{{ url('case_manager/applications') }}";
 
-        function openMissingDocModal(appId) {
+        function cmOpenMissingDocModal(appId) {
             const modal = document.getElementById('missingDocModal');
             const form = document.getElementById('missingDocForm');
-            form.action = `${baseCM}/${appId}/request-missing`;
+            if (form) {
+                form.action = `${baseCM}/${appId}/request-missing`;
+            }
             modal.classList.remove('hidden');
         }
 
-        function closeMissingDocument() {
+        function cmCloseMissingDocument() {
             const modal = document.getElementById('missingDocModal');
             modal.classList.add('hidden');
             const textarea = modal.querySelector('textarea[name="message"]');
             if (textarea) textarea.value = '';
         }
 
-        function openRejectModal(appId) {
+        function cmOpenRejectModal(appId) {
             const form = document.getElementById('rejectForm');
-            form.action = `${baseCM}/${appId}/reject`;
+            if (form) {
+                form.action = `${baseCM}/${appId}/reject`;
+            }
             document.getElementById('rejectModal').classList.remove('hidden');
         }
 
-        function closeRejectModal() {
+        function cmCloseRejectModal() {
             document.getElementById('rejectModal').classList.add('hidden');
             const form = document.getElementById('rejectForm');
             if (form) form.reset();

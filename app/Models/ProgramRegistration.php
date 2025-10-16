@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProgramRegistration extends Model
 {
+    public const STATUS_PENDING  = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+
     protected $fillable = [
         'program_id',
         'user_id',
@@ -22,11 +26,16 @@ class ProgramRegistration extends Model
         'assistance_type',
         'justification',
         'document_paths',
+        'status',
+        'reviewed_by',
+        'reviewed_at',
+        'review_note',
     ];
 
     protected $casts = [
         'document_paths' => 'array',
         'dob' => 'date',
+        'reviewed_at' => 'datetime',
     ];
     
     /**
@@ -43,6 +52,14 @@ class ProgramRegistration extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Admin reviewer who processed the registration.
+     */
+    public function reviewer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
     
     /**
@@ -71,5 +88,14 @@ class ProgramRegistration extends Model
                 ];
             })
             ->toArray();
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match (strtolower((string) $this->status)) {
+            self::STATUS_APPROVED => 'Approved',
+            self::STATUS_REJECTED => 'Rejected',
+            default               => 'Pending',
+        };
     }
 }

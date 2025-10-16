@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Models\UserNotification;
 
 class CaseManagerController extends Controller
 {
@@ -196,6 +197,8 @@ class CaseManagerController extends Controller
             abort(403);
         }
 
+        $application->loadMissing(['patient.user']);
+
         // Persist a consistent status that matches the enum definition.
         // The `applications` table stores status values in Title Case (e.g. "Approved").
         $application->update([
@@ -205,6 +208,16 @@ class CaseManagerController extends Controller
 
         // Remove any existing missing document requests for this application
         ApplicationMissingRequest::where('application_id', $application->id)->delete();
+
+        if ($patientUser = optional($application->patient)->user) {
+            $code = $application->code ?: ('APP-' . str_pad((string) $application->id, 6, '0', STR_PAD_LEFT));
+            UserNotification::create([
+                'user_id' => $patientUser->id,
+                'title' => 'Application Approved',
+                'message' => "Your application {$code} has been approved.",
+                'link_url' => route('patient.viewApplication', $application->id),
+            ]);
+        }
 
         return back()->with('success', 'The application has been approved successfully.');
     }
@@ -221,6 +234,8 @@ class CaseManagerController extends Controller
             'reason' => ['required', 'string', 'max:2000'],
         ]);
 
+        $application->loadMissing(['patient.user']);
+
         // Update the application status to a valid enum value and store the rejection reason
         $application->update([
             'status' => 'Rejected',
@@ -230,7 +245,15 @@ class CaseManagerController extends Controller
         // Remove any existing missing document requests for this application
         ApplicationMissingRequest::where('application_id', $application->id)->delete();
 
-        // Optional: trigger a notification to the applicant here
+        if ($patientUser = optional($application->patient)->user) {
+            $code = $application->code ?: ('APP-' . str_pad((string) $application->id, 6, '0', STR_PAD_LEFT));
+            UserNotification::create([
+                'user_id' => $patientUser->id,
+                'title' => 'Application Rejected',
+                'message' => "Your application {$code} has been rejected. Reason: {$data['reason']}.",
+                'link_url' => route('patient.viewApplication', $application->id),
+            ]);
+        }
 
         return back()->with('success', 'The application has been rejected and the applicant has been notified.');
     }

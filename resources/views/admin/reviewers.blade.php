@@ -4,6 +4,18 @@
 
 @section('content')
 
+    @php
+        $statusFilter = $status ?? request('status', 'active');
+        if (! in_array($statusFilter, ['active', 'inactive', 'all'], true)) {
+            $statusFilter = 'active';
+        }
+
+        $reviewerIdFilter = $reviewerId ?? request('reviewer_id', '');
+        $emailFilter = $email ?? request('email', '');
+        $searchFilter = $searchQuery ?? request('q', '');
+        $hasReviewersFilters = ($statusFilter !== 'active') || $reviewerIdFilter !== '' || $emailFilter !== '' || $searchFilter !== '';
+    @endphp
+
     <!-- Main Content -->
     <div class="flex-1 flex flex-col">
         <!---Main -->
@@ -15,7 +27,7 @@
 
                 <!-- Charts Section -->
                 <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
-                    <div x-data="{ showFilters: false }" class="mb-4 ml-3">
+                    <div x-data="{ showFilters: {{ json_encode($hasReviewersFilters) }} }" class="mb-4 ml-3">
                         <!-- Header -->
                         <div class="flex justify-between items-center">
                             <h2 class="text-xl font-semibold text-[#213430] app-main">All Reviewers List</h2>
@@ -52,58 +64,59 @@
                         </div>
 
                         <!-- Filter Dropdowns -->
-                        <div x-show="showFilters" class="mt-4 grid grid-cols-1  md:grid-cols-3 gap-4 max-w-8xl">
-                            <div class="relative w-full">
-                                <select
-                                    class="bg-transparent border border-[#91848C] text-[#91848C] text-sm px-4 py-2 pr-8 rounded-md w-full appearance-none focus:outline-none">
-                                    <option>Filter by Availability Status</option>
-                                    <option>Active</option>
-                                    <option>In Active</option>
-                                </select>
+                        <div x-show="showFilters" x-cloak class="mt-4">
+                            <form method="GET" action="{{ route('admin.reviewers') }}"
+                                class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-8xl">
+                                {{-- <div class="relative w-full">
+                                    <select name="status"
+                                        class="bg-transparent border border-[#91848C] text-[#91848C] text-sm px-4 py-2 pr-8 rounded-md w-full appearance-none focus:outline-none">
+                                        <option value="active" {{ $statusFilter === 'active' ? 'selected' : '' }}>
+                                            Active Reviewers</option>
+                                        <option value="inactive" {{ $statusFilter === 'inactive' ? 'selected' : '' }}>
+                                            Inactive Reviewers</option>
+                                        <option value="all" {{ $statusFilter === 'all' ? 'selected' : '' }}>All Statuses
+                                        </option>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[#91848C]">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div> --}}
 
-                                <!-- Custom arrow icon -->
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[#91848C]">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                <div class="relative w-full">
+                                    <input type="text" name="reviewer_id" value="{{ $reviewerIdFilter }}"
+                                        placeholder="Search by reviewer ID"
+                                        class="bg-transparent border border-[#91848C] text-[#91848C] text-sm px-4 py-2 rounded-md w-full focus:outline-none placeholder-[#B1A4AD]" />
                                 </div>
-                            </div>
 
-                            <div class="relative w-full">
-                                <select
-                                    class="bg-transparent border border-[#91848C] text-[#91848C] text-sm px-4 py-2 rounded-md w-full appearance-none focus:outline-none">
-                                    <option>Search by Reviewer’s ID</option>
-                                    <option>RVW-1001</option>
-                                    <option>RVW-1002</option>
-                                </select>
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[#91848C]">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                <div class="relative w-full">
+                                    <input type="text" name="email" value="{{ $emailFilter }}"
+                                        placeholder="Search by reviewer's email"
+                                        class="bg-transparent border border-[#91848C] text-[#91848C] text-sm px-4 py-2 rounded-md w-full focus:outline-none placeholder-[#B1A4AD]" />
                                 </div>
-                            </div>
 
-                            <div class="relative w-full">
-                                <select
-                                    class="bg-transparent border border-[#91848C] text-[#91848C] text-sm px-4 py-2 pr-8 rounded-md w-full appearance-none focus:outline-none">
-                                    <option>Search By Reviewer’s Email</option>
-                                    <option>sarah.j@email.com</option>
-                                    <option>michael.b@email.com</option>
-                                </select>
-
-                                <!-- Custom arrow icon -->
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-[#91848C]">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                <div class="relative w-full">
+                                    <input type="text" name="q" value="{{ $searchFilter }}"
+                                        placeholder="Search by name, username or phone"
+                                        class="bg-transparent border border-[#91848C] text-[#91848C] text-sm px-4 py-2 rounded-md w-full focus:outline-none placeholder-[#B1A4AD]" />
                                 </div>
-                            </div>
+
+                                <div class="flex items-center gap-3 md:col-span-4">
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-[#DB69A2] text-white rounded-md text-sm font-medium app-text hover:bg-[#c95791] transition">
+                                        Apply Filters
+                                    </button>
+                                    @if ($hasReviewersFilters)
+                                        <a href="{{ route('admin.reviewers') }}"
+                                            class="px-4 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md text-sm app-text hover:bg-[#F9EFF5] transition">
+                                            Reset
+                                        </a>
+                                    @endif
+                                </div>
+                            </form>
                         </div>
                     </div>
 
@@ -520,3 +533,5 @@
         }
     </script>
 @endsection
+
+

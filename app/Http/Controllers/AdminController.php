@@ -97,27 +97,69 @@ class AdminController extends Controller
             ->whereNotNull('reviewer_id')
             ->orderBy('submission_date', 'desc')
             ->paginate(20);
-        // dd($applications);
 
         return view('admin.assigned', compact('applications'));
     }
 
 
 
-    public function reviewers()
+    public function reviewers(Request $request)
     {
-        $reviewers = User::whereHas('role', function ($query) {
-            $query->where('name', 'casemanager');
-        })
-            ->whereHas('profile', function ($query) {
-                $query->where('status', 1); // Check the status in the user_profiles table
+        $status      = strtolower((string) $request->query('status', 'active'));
+        $reviewerId  = trim((string) $request->query('reviewer_id', ''));
+        $email       = trim((string) $request->query('email', ''));
+        $searchQuery = trim((string) $request->query('q', ''));
+
+        if (! in_array($status, ['active', 'inactive', 'all'], true)) {
+            $status = 'active';
+        }
+
+        $reviewers = User::query()
+            ->whereHas('role', function ($query) {
+                $query->where('name', 'casemanager');
             })
-            ->with(['profile', 'applications'])
+            ->whereHas('profile')
+            ->with([
+                'profile:id,user_id,full_name,username,phone,status,gender',
+                'applications',
+            ])
             ->withCount('applications')
-            ->paginate(20);
+            ->when($status === 'active', function ($query) {
+                $query->whereHas('profile', fn($profile) => $profile->where('status', 1));
+            })
+            ->when($status === 'inactive', function ($query) {
+                $query->whereHas('profile', fn($profile) => $profile->where('status', '!=', 1)->orWhereNull('status'));
+            })
+            ->when($status === 'all', function ($query) {
+                // No additional constraint; include any status
+            })
+            ->when($reviewerId !== '', function ($query) use ($reviewerId) {
+                $numericId = (int) ltrim(preg_replace('/\D/', '', $reviewerId), '0');
 
+                if ($numericId > 0) {
+                    $query->where('id', $numericId);
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
+            })
+            ->when($email !== '', function ($query) use ($email) {
+                $query->where('email', 'like', '%' . $email . '%');
+            })
+            ->when($searchQuery !== '', function ($query) use ($searchQuery) {
+                $query->where(function ($inner) use ($searchQuery) {
+                    $inner->where('email', 'like', '%' . $searchQuery . '%')
+                        ->orWhereHas('profile', function ($profileQuery) use ($searchQuery) {
+                            $profileQuery->where('full_name', 'like', '%' . $searchQuery . '%')
+                                ->orWhere('username', 'like', '%' . $searchQuery . '%')
+                                ->orWhere('phone', 'like', '%' . $searchQuery . '%');
+                        });
+                });
+            })
+            ->orderByDesc('created_at')
+            ->paginate(20)
+            ->appends($request->query());
 
-        return view('admin.reviewers', compact('reviewers'));
+        return view('admin.reviewers', compact('reviewers', 'status', 'reviewerId', 'email', 'searchQuery'));
     }
 
     public function getUnassignedApplications($reviewerId)

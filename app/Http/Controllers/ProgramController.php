@@ -39,10 +39,18 @@ class ProgramController extends Controller
         return back()->with('success', 'You have successfully registered for the program.');
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         // Fetch the program; do not eager-load a nonexistent 'sponsor' relation
         $program = Program::findOrFail($id);
+
+        $registration = null;
+        if (Auth::check()) {
+            $registration = ProgramRegistration::where('program_id', $program->id)
+                ->where('user_id', Auth::id())
+                ->select(['id', 'program_id', 'status', 'created_at', 'review_note'])
+                ->first();
+        }
 
         // Resolve a sponsor from the most recent sponsorship record, if any
         $latestSponsorship = $program->sponsorships()
@@ -64,6 +72,24 @@ class ProgramController extends Controller
             'about' => $sponsorDetail->company_type ?? 'No details available.',
         ];
 
+        $registrationPayload = $registration ? [
+            'id' => $registration->id,
+            'status' => $registration->status,
+            'status_label' => $registration->status_label,
+            'submitted_at' => optional($registration->created_at)->format('d M Y, h:i A'),
+            'view_url' => route('patient.programRegistrations.show', $registration),
+            'review_note' => $registration->review_note,
+        ] : null;
+
+        if (!$request->expectsJson()) {
+            if ($registration) {
+                return redirect()->route('patient.programRegistrations.show', $registration);
+            }
+
+            return redirect()->route('patient.programsAndAids')
+                ->with('info', 'You have not registered for this program yet.');
+        }
+
         return response()->json([
             'title' => $program->title,
             'description' => $program->description,
@@ -71,6 +97,7 @@ class ProgramController extends Controller
             'event_time' => $program->event_time,
             'banner' => $program->banner ? asset('storage/' . $program->banner) : asset('images/default_program_banner.png'),
             'sponsor' => $sponsorPayload,
+            'registration' => $registrationPayload,
         ]);
     }
 

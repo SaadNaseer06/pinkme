@@ -212,22 +212,38 @@ function openRejectModal() {
     const rejectLink = document.getElementById("rejectLink");
     const viewDetailsLink = document.getElementById("viewDetailsLink");
 
-    modal.classList.remove("hidden");
-    rejectLink.classList.add("text-pink-600");
-    rejectLink.classList.remove("text-gray-700");
+    if (modal) {
+        modal.classList.remove("hidden");
+    }
 
-    // Reset view details link to default gray/black
-    viewDetailsLink.classList.remove("text-pink-600");
-    viewDetailsLink.classList.add("text-gray-700");
+    if (rejectLink) {
+        rejectLink.classList.add("text-pink-600");
+        rejectLink.classList.remove("text-gray-700");
+    }
+
+    if (viewDetailsLink) {
+        viewDetailsLink.classList.remove("text-pink-600");
+        viewDetailsLink.classList.add("text-gray-700");
+    }
 }
 
 function closeRejectModal() {
     const modal = document.getElementById("rejectModal");
     const rejectLink = document.getElementById("rejectLink");
+    const rejectForm = document.getElementById("rejectForm");
 
-    modal.classList.add("hidden");
-    rejectLink.classList.remove("text-pink-600");
-    rejectLink.classList.add("text-gray-700");
+    if (modal) {
+        modal.classList.add("hidden");
+    }
+
+    if (rejectForm) {
+        rejectForm.reset();
+    }
+
+    if (rejectLink) {
+        rejectLink.classList.remove("text-pink-600");
+        rejectLink.classList.add("text-gray-700");
+    }
 }
 
 // Optional: close modal when clicking outside
@@ -240,20 +256,37 @@ window.addEventListener("click", function (e) {
 
 //Missing Document Model
 function openMissingDocument(e) {
-    e.preventDefault(); // stop link jump
+    if (e) {
+        e.preventDefault(); // stop link jump
+    }
     const link = document.getElementById("missingDocLink");
     const modal = document.getElementById("missingDocModal");
 
-    modal.classList.remove("hidden");
-    link.classList.replace("text-gray-700", "text-pink-600");
+    if (modal) {
+        modal.classList.remove("hidden");
+    }
+    if (link) {
+        link.classList.replace("text-gray-700", "text-pink-600");
+    }
 }
 
 function closeMissingDocument() {
     const link = document.getElementById("missingDocLink");
     const modal = document.getElementById("missingDocModal");
+    const form = document.getElementById("missingDocForm");
 
-    modal.classList.add("hidden");
-    link.classList.replace("text-pink-600", "text-gray-700");
+    if (modal) {
+        modal.classList.add("hidden");
+    }
+    if (link) {
+        link.classList.replace("text-pink-600", "text-gray-700");
+    }
+    if (form) {
+        const textarea = form.querySelector('textarea[name="message"]');
+        if (textarea) {
+            textarea.value = "";
+        }
+    }
 }
 
 // close when clicking outside the dialog
@@ -263,7 +296,13 @@ window.addEventListener("click", (e) => {
 });
 
 function toggleDropdown(btn) {
+    if (!btn) {
+        return;
+    }
     const dropdown = btn.parentElement.querySelector("div");
+    if (!dropdown) {
+        return;
+    }
     dropdown.classList.toggle("hidden");
 
     document.querySelectorAll("td .absolute").forEach((el) => {
@@ -280,17 +319,20 @@ window.addEventListener("click", function (e) {
     }
 });
 
-document.getElementById("fullscreenBtn").addEventListener("click", () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch((err) => {
-            console.error(
-                `Error attempting to enable fullscreen: ${err.message} (${err.name})`
-            );
-        });
-    } else {
-        document.exitFullscreen();
-    }
-});
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+if (fullscreenBtn) {
+    fullscreenBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch((err) => {
+                console.error(
+                    `Error attempting to enable fullscreen: ${err.message} (${err.name})`
+                );
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    });
+}
 
 function showTab(tabId) {
     // Hide all tab contents

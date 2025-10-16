@@ -8,6 +8,8 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\SponsorController;
 use App\Http\Controllers\SponsorshipProgramController;
+use App\Http\Controllers\AdminProgramRegistrationController;
+use App\Http\Controllers\PatientNotificationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
@@ -74,6 +76,11 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::get('/reviewers/{id}/edit', [AdminController::class, 'editReviewer'])->name('admin.reviewers.edit');
     Route::put('/reviewers/{id}', [AdminController::class, 'updateReviewer'])->name('admin.reviewers.update');
     Route::get('/reviewers/unassigned-applications', [AdminController::class, 'getUnassignedApplications']);
+
+    Route::get('/program-registration-requests', [AdminProgramRegistrationController::class, 'index'])->name('admin.program_registrations.index');
+    Route::get('/program-registration-requests/{registration}', [AdminProgramRegistrationController::class, 'show'])->name('admin.program_registrations.show');
+    Route::post('/program-registration-requests/{registration}/approve', [AdminProgramRegistrationController::class, 'approve'])->name('admin.program_registrations.approve');
+    Route::post('/program-registration-requests/{registration}/reject', [AdminProgramRegistrationController::class, 'reject'])->name('admin.program_registrations.reject');
 
     // Sponsors' funding programs (table: sponsorship_programs)
     Route::get('sponsorship-programs/create', [SponsorshipProgramController::class, 'create'])->name('sp.create');
@@ -201,4 +208,6 @@ Route::prefix('patient')->middleware(['role.restrict'])->group(function () {
     Route::get('/create-application', [ApplicationController::class, 'createApplication'])->name('patient.createApplication');
     Route::post('/store-application', [ApplicationController::class, 'storeApplication'])->name('patient.storeApplication');
     Route::post('/program/register', [ProgramRegistrationController::class, 'store'])->name('program.register');
+    Route::post('/notifications/{notification}/read', [PatientNotificationController::class, 'markAsRead'])->name('patient.notifications.read');
+    Route::get('/program-registrations/{registration}', [ProgramRegistrationController::class, 'show'])->name('patient.programRegistrations.show');
 });

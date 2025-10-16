@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\UserNotification;
 
 class User extends Authenticatable
 {
@@ -109,5 +110,10 @@ class User extends Authenticatable
     public function getGenderAttribute()
     {
         return $this->profile ? ucfirst($this->profile->gender) : 'N/A';
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(UserNotification::class)->latest();
     }
 }

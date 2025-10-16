@@ -462,11 +462,11 @@
                                             class="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" />
                                         <label class="text-sm text-gray-600">
                                             I agree to the
-                                            <a href="#"
-                                                class="text-primary-600 hover:text-primary-700 underline font-medium">Terms
+                                            <a href="{{ route('policy.privacy') }}"
+                                                class="text-primary-600 hover:text-primary-700 underline font-medium" target="_blank">Terms
                                                 of Service</a> and
-                                            <a href="#"
-                                                class="text-primary-600 hover:text-primary-700 underline font-medium">Privacy
+                                            <a href="{{ route('policy.terms') }}"
+                                                class="text-primary-600 hover:text-primary-700 underline font-medium" target="_blank">Privacy
                                                 Policy</a>
                                         </label>
                                     </div>
@@ -575,10 +575,10 @@
                                             class="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" />
                                         <label class="text-sm text-gray-600">
                                             I agree to the
-                                            <a href="#"
+                                            <a href="{{ route('policy.terms') }}"
                                                 class="text-primary-600 hover:text-primary-700 underline font-medium">Terms
                                                 of Service</a> and
-                                            <a href="#"
+                                            <a href="{{ route('policy.privacy') }}"
                                                 class="text-primary-600 hover:text-primary-700 underline font-medium">Privacy
                                                 Policy</a>
                                         </label>
@@ -670,14 +670,14 @@
                                     </div>
 
                                     <div class="relative">
-                                        <input type="file" name="logo" accept="image/*"
+                                        <input type="file" name="logo" accept="image/*" id="logoFileInput"
                                             class="opacity-0 absolute inset-0 z-50 cursor-pointer" />
                                         <div
                                             class="flex items-center w-full font-light rounded-xl bg-gray-50 text-gray-500 pointer-events-none border-2 border-dashed border-gray-300 hover:border-primary-400 transition-colors">
                                             <div class="bg-gray-100 px-4 py-4 rounded-l-xl text-gray-600 mobile-h3">
                                                 <i class="fas fa-upload mr-2"></i>Upload Logo
                                             </div>
-                                            <div class="ml-3 truncate">No file chosen</div>
+                                            <div class="ml-3 truncate" id="fileNameDisplay">No file chosen</div>
                                         </div>
                                         @error('logo')
                                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -861,19 +861,18 @@
 
         function toggleSponsorType(selectElement) {
             const type = selectElement.value;
-            // Find the two sponsor forms
             const individualForm = document.querySelector('#company form:not([enctype])');
             const companyForm = document.getElementById('companySponsorForm');
-            // Hide both first
+
             if (individualForm) individualForm.classList.add('hidden');
             if (companyForm) companyForm.classList.add('hidden');
-            // Show only the selected one
+
             if (type === 'individual' && individualForm) {
                 individualForm.classList.remove('hidden');
             } else if (type === 'company' && companyForm) {
                 companyForm.classList.remove('hidden');
             }
-            // Sync all selects
+
             const allSelects = document.querySelectorAll('.sponsor-type-select');
             allSelects.forEach((select) => {
                 if (select !== selectElement) {
@@ -883,15 +882,13 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Initialize sponsor type toggle
             const firstSelect = document.querySelector(".sponsor-type-select");
             if (firstSelect) {
                 toggleSponsorType(firstSelect);
             }
 
-            // Determine initial tab
             const urlParams = new URLSearchParams(window.location.search);
-            const initialTab = @json($initialTab ?? 'signup');
+            const initialTab = 'signup';
             const tab = urlParams.get('tab') || initialTab;
             toggleForm(tab);
         });
@@ -915,14 +912,16 @@
             });
         });
 
-        // File upload preview
-        document.querySelector('input[name="company_logo"]').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name || 'No file chosen';
-            const displayElement = this.parentElement.querySelector('.truncate');
-            if (displayElement) {
-                displayElement.textContent = fileName;
-            }
-        });
+        const logoInput = document.getElementById('logoFileInput');
+        if (logoInput) {
+            logoInput.addEventListener('change', function(e) {
+                const fileName = e.target.files[0]?.name || 'No file chosen';
+                const displayElement = document.getElementById('fileNameDisplay');
+                if (displayElement) {
+                    displayElement.textContent = fileName;
+                }
+            });
+        }
     </script>
 </body>
 

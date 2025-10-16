@@ -35,7 +35,7 @@
                 </div>
             </div>
 
-            <div class="grid gap-6 lg:grid-cols-3">
+            {{-- <div class="grid gap-6 lg:grid-cols-3">
                 <button id="openFormBtn"
                     class="flex items-center justify-center h-full min-h-[220px] rounded-2xl border border-dashed border-[#C4B2BE] bg-[#F3E8EF] px-6 text-center text-[#213430] shadow-sm hover:border-[#DB69A2] hover:text-[#DB69A2]">
                     <div class="flex flex-col items-center space-y-2">
@@ -69,7 +69,7 @@
                             class="absolute bottom-6 right-6 z-10 h-8" alt="Card Network" />
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             <div class="rounded-2xl border border-[#E5CADB] bg-white shadow-sm">
                 <div class="flex items-center justify-between border-b border-[#E5CADB] px-5 py-4">

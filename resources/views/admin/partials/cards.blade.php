@@ -21,7 +21,7 @@
     <!-- Total Applications -->
     <div class="bg-[#F3E8EF] rounded-lg px-4 py-4 flex items-center justify-between">
         <div class="bg-[#DB69A2] p-3 rounded-full mr-4">
-            <img src="../images/Case-D-1.svg" alt="" class="h-8 w-8 status-cards-img" />
+            <img src="{{ asset('images/Case-D-1.svg') }}" alt="" class="h-8 w-8 status-cards-img" />
         </div>
         <div>
             <h3 class="text-[#213430] font-semibold status-cards-h1">
@@ -36,7 +36,7 @@
     <!-- Approved Applications -->
     <div class="bg-[#C5E8D1] rounded-lg px-4 py-4 flex items-center justify-between">
         <div class="bg-[#20B354] p-3 rounded-full mr-4">
-            <img src="../images/Case-D-2.svg" alt="" class="h-8 w-8 status-cards-img" />
+            <img src="{{ asset('images/Case-D-2.svg') }}" alt="" class="h-8 w-8 status-cards-img" />
         </div>
         <div>
             <h3 class="text-[#213430] font-semibold status-cards-h1">
@@ -51,7 +51,7 @@
     <!-- Rejected Applications -->
     <div class="bg-[#E8C5C5] rounded-lg px-4 py-4 flex items-center justify-between">
         <div class="bg-[#B32020] p-3 rounded-full mr-4">
-            <img src="../images/Case-D-3.svg" alt="" class="h-8 w-8 status-cards-img" />
+            <img src="{{ asset('images/Case-D-3.svg') }}" alt="" class="h-8 w-8 status-cards-img" />
         </div>
         <div>
             <h3 class="text-[#213430] font-semibold status-cards-h1">
@@ -66,7 +66,7 @@
     <!-- Pending Applications -->
     <div class="bg-[#E7D4DF] rounded-lg px-4 py-4 flex items-center justify-between">
         <div class="bg-[#91848C] p-3 rounded-full mr-4">
-            <img src="../images/Case-D-4.svg" alt="" class="h-8 w-8 status-cards-img" />
+            <img src="{{ asset('images/Case-D-4.svg') }}" alt="" class="h-8 w-8 status-cards-img" />
         </div>
         <div>
             <h3 class="text-[#213430] font-semibold status-cards-h1">

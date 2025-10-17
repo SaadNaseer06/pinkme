@@ -88,7 +88,7 @@
                 <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto bg-transparent">
                     <div class="p-3 space-y-3">
                         <a href="{{ route('patient.profile') }}" class="flex items-start space-x-3 p-2 rounded-md">
-                            <img src="/images/p-1.svg" class="w-5 h-5 mt-1" />
+                            <img src="{{ asset('images/p-1.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">My Profile</p>
                                 <p class="text-xs text-[#A9A9A9]">View personal profile details.</p>
@@ -96,7 +96,7 @@
                         </a>
                         <div class="border-b border-[#B9B1B6]"></div>
                         <a href="{{ route('patient.setting') }}" class="flex items-start space-x-3 p-2 rounded-md">
-                            <img src="/images/p-2.svg" class="w-5 h-5 mt-1" />
+                            <img src="{{ asset('images/p-2.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">Edit Profile</p>
                                 <p class="text-xs text-[#A9A9A9]">Modify your personal details.</p>

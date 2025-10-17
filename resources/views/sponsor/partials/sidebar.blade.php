@@ -2,12 +2,12 @@
  <div class="mobile-sidebar" id="mobileSidebar">
      <!-- Close Button -->
      <button class="close-btn" id="closeBtn">
-         <img src="/images/cross-white.svg" alt="Close">
+        <img src="{{ asset('images/cross-white.svg') }}" alt="Close">
      </button>
 
      <!-- Logo -->
      <div class="mobile-logo">
-         <img src="/images/logo-white.png" alt="PINK ME Logo">
+        <img src="{{ asset('images/logo-white.png') }}" alt="PINK ME Logo">
      </div>
 
      <!-- Menu -->
@@ -31,7 +31,7 @@
          <ul>
              <li>
                  <a href="{{ route('sponsor.dashboard') }}">
-                     <img src="/images/logo-white.png" alt="" />
+                    <img src="{{ asset('images/logo-white.png') }}" alt="" />
                  </a>
              </li>
              <li class="{{ request()->routeIs('sponsor.dashboard') ? 'hovered' : '' }}">
@@ -81,9 +81,8 @@
      </div>
      <div class="sign-out">
          <a href="registration.html">
-             <span class="icon"><img src="/images/signout.svg" alt="" /></span>
+            <span class="icon"><img src="{{ asset('images/signout.svg') }}" alt="" /></span>
              <span class="title">Sign Out</span>
          </a>
      </div>
  </div>
-

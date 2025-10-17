@@ -202,7 +202,7 @@
                                                     </a>
                                                     <a href="{{ route('case_manager.myApplication', ['patient_id' => $p->id]) }}"
                                                         class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm gap-2">
-                                                        <img src="/images/assign.svg" alt=""> Applications
+                                                        <img src="{{ asset('images/assign.svg') }}" alt=""> Applications
                                                     </a>
                                                     {{-- Optional delete: wire if needed
                                                 <a href="#" onclick="openPatientDeleteModal({{ $p->id }})"

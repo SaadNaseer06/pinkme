@@ -52,13 +52,13 @@
                                     </svg>
                                 </button>
                                 <button class="bg-[#db69a2] px-4 py-2 rounded-md text-sm md:hidden flex">
-                                    <img src="/images/export.svg" alt="" class="w-4 h-4">
+                                    <img src="{{ asset('images/export.svg') }}" alt="" class="w-4 h-4">
                                 </button>
                                 <!-- Export Button -->
                                 {{-- <button
                                     class="flex items-center bg-[#db69a2] text-white text-sm px-4 py-1.5 rounded-md app-h md:flex hidden">
                                     Export
-                                    <img src="/images/export.svg" alt="" class="w-3 h-3 ml-1">
+                                    <img src="{{ asset('images/export.svg') }}" alt="" class="w-3 h-3 ml-1">
                                 </button> --}}
                             </div>
                         </div>
@@ -200,12 +200,12 @@
                                                 </a>
                                                 {{-- <a href="#"
                                                     class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm gap-2">
-                                                    <img src="/images/assign.svg" alt=""> Assign Applications
+                                                    <img src="{{ asset('images/assign.svg') }}" alt=""> Assign Applications
                                                 </a> --}}
                                                 <a href="javascript:void(0);"
                                                     onclick="viewAssignedApplications({{ $reviewer->id }})"
                                                     class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm gap-2">
-                                                    <img src="/images/assign.svg" alt="">View Assign Applications
+                                                    <img src="{{ asset('images/assign.svg') }}" alt="">View Assign Applications
                                                 </a>
                                                 {{-- <a href="javascript:void(0);"
                                                     onclick="openRejectModal({{ $reviewer->id }})"
@@ -533,5 +533,4 @@
         }
     </script>
 @endsection
-
 

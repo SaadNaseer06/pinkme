@@ -286,7 +286,7 @@
                                                         <span>View Application</span>
                                                     </a>
                                                     <a href="{{ $appListUrl }}" class="patient-action-item">
-                                                        <img src="/images/assign.svg" alt="" class="patient-action-icon">
+                                                        <img src="{{ asset('images/assign.svg') }}" alt="" class="patient-action-icon">
                                                         <span>Open Applications List</span>
                                                     </a>
                                                     {{-- @if (!empty($patientEmail))
@@ -466,7 +466,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-3">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ $patient->user->profile->avatar ?? '/images/patient-'. $loop->iteration .'.png' }}" alt=""
+                                            <img src="{{ optional($patient->user->profile)->avatar ? asset('storage/' . $patient->user->profile->avatar) : asset('images/patient-' . $loop->iteration . '.png') }}" alt=""
                                                 class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">
                                                 {{ $patient->user->name ?? 'Unknown' }}
@@ -514,7 +514,7 @@
                                                     <span>View in Patients List</span>
                                                 </a>
                                                 <a href="{{ $applicationsUrl }}" class="patient-action-item">
-                                                    <img src="/images/assign.svg" alt="" class="patient-action-icon">
+                                                    <img src="{{ asset('images/assign.svg') }}" alt="" class="patient-action-icon">
                                                     <span>View Applications</span>
                                                 </a>
                                                 @if (!empty($patient->user->email))

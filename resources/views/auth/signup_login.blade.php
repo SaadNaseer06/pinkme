@@ -332,9 +332,9 @@
                 <!-- Left Panel with Dynamic Background and Tabs -->
                 <div class="w-1/3 relative sidebar tab-form-img">
                     <!-- Background image -->
-                    <img id="signup-bg" src="/images/Patient Signup.png" alt="Signup Background"
+                    <img id="signup-bg" src="{{ asset('images/Patient Signup.png') }}" alt="Signup Background"
                         class="absolute inset-0 w-full h-full object-cover z-0" />
-                    <img id="login-bg" src="/images/Patient Login.png" alt="Login Background"
+                    <img id="login-bg" src="{{ asset('images/Patient Login.png') }}" alt="Login Background"
                         class="absolute inset-0 w-full h-full object-cover z-0 hidden" />
                     <div class="sidebar-divider"></div>
                     <div class="relative z-20 flex flex-col h-full justify-center items-center space-y-8">
@@ -350,7 +350,7 @@
                     <div id="signup-form" class="w-full max-w-lg animate-fade-in">
                         <div class="text-center mb-8">
                             <div class="flex justify-center mb-4">
-                                <img src="/images/logo.png" alt="Logo" class="h-16 tab-logo" />
+                                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-16 tab-logo" />
                             </div>
                             <h2 class="text-3xl font-bold text-gray-800 mb-2 mobile-h1">
                                 Welcome to PINK "ME"
@@ -737,7 +737,7 @@
                     <div id="login-form" class="hidden w-full max-w-md animate-fade-in">
                         <div class="text-center mb-8">
                             <div class="flex justify-center mb-4">
-                                <img src="/images/logo.png" alt="Logo" class="h-16" />
+                                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-16" />
                             </div>
                             <h2 class="text-3xl font-bold text-gray-800 mb-2">
                                 Welcome Back

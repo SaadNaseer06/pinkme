@@ -22,12 +22,12 @@
     <div class="flex items-center space-x-4 tab-p">
         <div class="flex items-center space-x-6 ml-2">
 
-            <img src="/images/HAM.svg" alt="Menu " class="hamburger hamburgerBtn">
+            <img src="{{ asset('images/HAM.svg') }}" alt="Menu " class="hamburger hamburgerBtn">
 
             <button id="fullscreenBtn">
-                <img src="/images/scanner.svg" alt="Scanner" class="h-3" />
+                <img src="{{ asset('images/scanner.svg') }}" alt="Scanner" class="h-3" />
             </button>
-            <img src="/images/notification.svg" alt="Scanner" class="h-4" />
+            <img src="{{ asset('images/notification.svg') }}" alt="Scanner" class="h-4" />
         </div>
 
         <!-- Profile Dropdown -->
@@ -51,7 +51,7 @@
                 <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto bg-transparent">
                     <div class="p-3 space-y-3">
                         <a href="{{ route('patient.profile') }}" class="flex items-start space-x-3 p-2 rounded-md">
-                            <img src="/images/p-1.svg" class="w-5 h-5 mt-1" />
+                            <img src="{{ asset('images/p-1.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">My Profile</p>
                                 <p class="text-xs text-[#A9A9A9]">View personal profile details.</p>
@@ -59,7 +59,7 @@
                         </a>
                         <div class="border-b border-[#B9B1B6]"></div>
                         <a href="{{ route('patient.setting') }}" class="flex items-start space-x-3 p-2 rounded-md">
-                            <img src="/images/p-2.svg" class="w-5 h-5 mt-1" />
+                            <img src="{{ asset('images/p-2.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">Edit Profile</p>
                                 <p class="text-xs text-[#A9A9A9]">Modify your personal details.</p>
@@ -92,21 +92,21 @@
 
     <!-- User Menu -->
     <div class="flex items-center justify-between w-full  ">
-        <img src="/images/HAM.svg" alt="Menu " class="hamburger mt-2 ml-2 hamburgerBtn">
+        <img src="{{ asset('images/HAM.svg') }}" alt="Menu " class="hamburger mt-2 ml-2 hamburgerBtn">
         <div class="flex items-center space-x-4 tab-p">
             <div class="flex items-center space-x-6 ml-2">
 
 
 
                 <button id="fullscreenBtn">
-                    <img src="/images/scanner.svg" alt="Scanner" class="h-3" />
+                    <img src="{{ asset('images/scanner.svg') }}" alt="Scanner" class="h-3" />
                 </button>
-                <img src="/images/notification.svg" alt="Scanner" class="h-4" />
+                <img src="{{ asset('images/notification.svg') }}" alt="Scanner" class="h-4" />
             </div>
 
             <div class="flex items-center space-x-2 ">
                 <div class="w-10 h-10 overflow-hidden">
-                    <img src="/images/profile.png" alt="Profile Picture" class="w-full h-full object-cover" />
+                    <img src="{{ asset('images/profile.png') }}" alt="Profile Picture" class="w-full h-full object-cover" />
                 </div>
                 <div class="text-left">
                     <p class="text-sm font-normal text-[#213430]">Sarah Tyler</p>

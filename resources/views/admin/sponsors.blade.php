@@ -69,13 +69,13 @@
                                         </button>
                                         <!-- Mobile Export Button -->
                                         <button class="bg-[#db69a2] px-4 py-2 rounded-md text-sm md:hidden">
-                                            <img src="/images/export.svg" alt="" class="w-4 h-4">
+                                            <img src="{{ asset('images/export.svg') }}" alt="" class="w-4 h-4">
                                         </button>
                                         <!-- Desktop Export Button -->
                                         <button
                                             class="hidden md:flex items-center bg-[#db69a2] text-white text-sm px-4 py-1.5 rounded-md app-h">
                                             Export
-                                            <img src="/images/export.svg" alt="" class="w-3 h-3 ml-1">
+                                            <img src="{{ asset('images/export.svg') }}" alt="" class="w-3 h-3 ml-1">
                                         </button>
                                     </div>
                                 </div>
@@ -179,8 +179,13 @@
                                                 </td>
                                                 <td class="p-2">
                                                     <div class="flex items-center gap-3">
-                                                        <img src="{{ $sponsor->profile_image ?? '/images/default-profile.png' }}"
-                                                            alt="{{ $sponsor->name }}"
+                                                        @php
+                                                            $profileImage = $sponsor->profile_image;
+                                                            $profileImageUrl = $profileImage && filter_var($profileImage, FILTER_VALIDATE_URL)
+                                                                ? $profileImage
+                                                                : asset($profileImage ? ltrim($profileImage, '/') : 'images/default-profile.png');
+                                                        @endphp
+                                                        <img src="{{ $profileImageUrl }}" alt="{{ $sponsor->name }}"
                                                             class="w-8 h-8 rounded-full object-cover" />
                                                         <span
                                                             class="text-[#91848C] text-[16px] font-light app-text">{{ $sponsor->name }}</span>
@@ -638,7 +643,7 @@ System: -light app-text">
                             </button>
                         </div>
                         <div class="w-full h-64 overflow-hidden">
-                            <img id="detailModalImage" src="/images/program-details.png" alt=""
+                            <img id="detailModalImage" src="{{ asset('images/program-details.png') }}" alt=""
                                 class="w-full h-full object-cover" />
                         </div>
                         <div class="p-5 space-y-6 text-sm">
@@ -776,7 +781,7 @@ System: -light app-text">
             const prettyType = type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Record';
 
             const description = data.description || 'No description available';
-            const imageUrl = data.image || '/images/program-details.png';
+            const imageUrl = data.image || "{{ asset('images/program-details.png') }}";
             const date = data.date || null;
             const time = data.time || null;
 
@@ -901,7 +906,7 @@ System: -light app-text">
                 type: 'program',
                 title: 'Breast Cancer Awareness',
                 description: 'A nonprofit initiative supporting women battling breast cancer, raising awareness about early detection and survivorship.',
-                image: '/images/program-details.png',
+                image: "{{ asset('images/program-details.png') }}",
                 date: 'Saturday, March 30, 2025',
                 time: '10:00 AM',
                 total_raised: 0,

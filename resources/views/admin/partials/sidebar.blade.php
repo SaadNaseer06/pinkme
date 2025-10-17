@@ -2,12 +2,12 @@
 <div class="mobile-sidebar" id="mobileSidebar">
     <!-- Close Button -->
     <button class="close-btn" id="closeBtn">
-        <img src="/images/cross-white.svg" alt="Close" />
+        <img src="{{ asset('images/cross-white.svg') }}" alt="Close" />
     </button>
 
     <!-- Logo -->
     <div class="mobile-logo">
-        <img src="../images/logo-white.png" alt="PINK ME Logo" />
+        <img src="{{ asset('images/logo-white.png') }}" alt="PINK ME Logo" />
     </div>
 
     <!-- Menu -->

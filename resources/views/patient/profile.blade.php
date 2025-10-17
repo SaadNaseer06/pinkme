@@ -12,7 +12,7 @@
                 <!-- Left column with profile picture and basic info -->
                 <div class="w-1/3 p-6 flex flex-col items-center p-box">
                     <div class="w-24 h-24 rounded-full overflow-hidden mb-3">
-                        <img src="/images/D-profile.png" alt="User Avatar" class="w-full h-full object-cover" />
+                        <img src="{{ asset('images/D-profile.png') }}" alt="User Avatar" class="w-full h-full object-cover" />
                     </div>
                     <h3 class="text-lg font-medium app-main">Sara Tylor</h3>
                     <p class="text-sm text-[#91848C] app-text">24 years, California</p>
@@ -169,8 +169,8 @@
                 <ul class="space-y-6">
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-2 group cursor-pointer">
-                            <img src="/images/document.svg" alt="" class="w-6 h-6 block group-hover:hidden" />
-                            <img src="/images/document-pink.svg" alt="" class="w-6 h-6 hidden group-hover:block" />
+                            <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                            <img src="{{ asset('images/document-pink.svg') }}" alt="" class="w-6 h-6 hidden group-hover:block" />
                             <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                 Mamogram_Report_Jan.pdf
                             </span>
@@ -191,8 +191,8 @@
 
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-2 group cursor-pointer">
-                            <img src="/images/document.svg" alt="" class="w-6 h-6 block group-hover:hidden" />
-                            <img src="/images/document-pink.svg" alt=""
+                            <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                            <img src="{{ asset('images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
                             <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                 Mamogram_Report_Feb.pdf
@@ -239,8 +239,8 @@
 
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-2 group cursor-pointer">
-                            <img src="/images/document.svg" alt="" class="w-6 h-6 block group-hover:hidden" />
-                            <img src="/images/document-pink.svg" alt=""
+                            <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                            <img src="{{ asset('images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
                             <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                 Mamogram_Report_Apr.pdf

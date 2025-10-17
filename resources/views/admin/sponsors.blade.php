@@ -448,7 +448,7 @@ System: -light app-text">
                         <!-- Support Programs Section -->
                         <div class="mt-12 mb-6">
                             <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-2xl font-semibold text-[#213430] program-main">Full Payment Programs</h2>
+                                <h2 class="text-2xl font-semibold text-[#213430] program-main">Support Programs</h2>
                                 @if ($programs->count() > 0)
                                     <div class="flex items-center space-x-4">
                                         <a href="{{ route('programs.create') }}"
@@ -477,6 +477,7 @@ System: -light app-text">
                                         $image = $program->banner
                                             ? asset('storage/' . $program->banner)
                                             : $program->image_url ?? asset('images/program-3.png');
+                                        $paymentLabel = $program->payment_type === 'flexible' ? 'Flexible Payment' : 'Full Payment';
                                         $detail = [
                                             'type' => 'program',
                                             'title' => $program->title,
@@ -489,6 +490,7 @@ System: -light app-text">
                                             'total_raised' => $program->total_raised ?? 0,
                                             'fund_goal' => $program->program_fund,
                                             'payment_type' => $program->payment_type,
+                                            'payment_label' => $paymentLabel,
                                             'show_url' => route('programs.edit', $program),
                                         ];
                                     @endphp
@@ -507,7 +509,7 @@ System: -light app-text">
                                                     <span
                                                         class="inline-flex items-center rounded-full bg-white/60 px-3 py-1 text-xs font-medium text-[#DB69A2] capitalize">{{ $program->status }}</span>
                                                     <span
-                                                        class="inline-flex items-center rounded-full bg-[#DB69A2] px-3 py-1 text-xs font-medium text-white">Full Payment</span>
+                                                        class="inline-flex items-center rounded-full bg-[#DB69A2] px-3 py-1 text-xs font-medium text-white">{{ $paymentLabel }}</span>
                                                 </div>
                                                 <p class="text-sm text-[#91848C] program-p">
                                                     {{ Str::limit($program->description, 150) }}</p>
@@ -551,8 +553,8 @@ System: -light app-text">
                                                     <div class="flex flex-col items-end gap-1">
                                                         <span
                                                             class="inline-flex items-center rounded-full bg-white/60 px-2 py-0.5 text-[10px] font-semibold text-[#DB69A2] capitalize">{{ $program->status }}</span>
-                                                        <span
-                                                            class="inline-flex items-center rounded-full bg-[#DB69A2] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">Full Payment</span>
+                                                    <span
+                                                        class="inline-flex items-center rounded-full bg-[#DB69A2] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">{{ $paymentLabel }}</span>
                                                 </div>
                                                 </div>
                                                 <p class="text-xs text-[#91848C] mt-1 program-p">
@@ -580,9 +582,8 @@ System: -light app-text">
                                 @endforeach
                             @else
                                 <div class="bg-[#F3E8EF] rounded-lg p-6 text-center">
-                                    <p class="text-[#91848C] text-lg font-medium mb-4">No full payment programs found.</p>
-                                    <p class="text-[#6C5B68] text-sm mb-6">Create a new program with the payment type set to
-                                        "full" to feature it here.</p>
+                                    <p class="text-[#91848C] text-lg font-medium mb-4">No support programs found.</p>
+                                    <p class="text-[#6C5B68] text-sm mb-6">Create a new program to feature it here.</p>
                                     <a href="{{ route('programs.create') }}"
                                         class="inline-flex items-center justify-center rounded-md bg-[#DB69A2] px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-[#c25891] transition-colors duration-200">
                                         Create New Program
@@ -671,17 +672,22 @@ System: -light app-text">
                                     <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
                                         id="detailModalLocationWrapper" hidden>
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Location</span>
-                                        <p class="text-[#213430]" id="detailModalLocation">—</p>
+                                        <p class="text-[#213430]" id="detailModalLocation">&mdash;</p>
                                     </div>
                                     <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
                                         id="detailModalStatusWrapper" hidden>
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Status</span>
-                                        <p class="text-[#213430]" id="detailModalStatus">—</p>
+                                        <p class="text-[#213430]" id="detailModalStatus">&mdash;</p>
+                                    </div>
+                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                        id="detailModalPaymentWrapper" hidden>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Payment Type</span>
+                                        <p class="text-[#213430]" id="detailModalPayment">&mdash;</p>
                                     </div>
                                     <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
                                         id="detailModalSponsorsWrapper" hidden>
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Sponsors</span>
-                                        <p class="text-[#213430]" id="detailModalSponsors">—</p>
+                                        <p class="text-[#213430]" id="detailModalSponsors">&mdash;</p>
                                     </div>
                                     <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
                                         id="detailModalRegistrationsWrapper" hidden>
@@ -829,6 +835,15 @@ System: -light app-text">
             applyValue('detailModalLocationWrapper', data.location, (val) => val);
             applyValue('detailModalStatusWrapper', data.status, (val) => {
                 const str = val.toString();
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            });
+            const paymentRaw = data.payment_label || data.payment_type;
+            const hasPaymentLabel = Boolean(data.payment_label);
+            applyValue('detailModalPaymentWrapper', paymentRaw, (val) => {
+                if (hasPaymentLabel) {
+                    return val;
+                }
+                const str = val.toString().replace(/_/g, ' ');
                 return str.charAt(0).toUpperCase() + str.slice(1);
             });
             applyValue('detailModalSponsorsWrapper', data.sponsor_count, (val) =>

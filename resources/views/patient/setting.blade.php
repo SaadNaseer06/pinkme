@@ -71,8 +71,8 @@
                                         <div
                                             class="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
                                             <img id="avatarPreview"
-                                                src="{{ '/storage/' . $profile->avatar ?? asset('images/profile.png') }}" alt="Profile"
-                                                class="object-cover w-full h-full" />
+                                                src="{{ $profile->avatar ? asset('storage/' . $profile->avatar) : asset('images/profile.png') }}"
+                                                alt="Profile" class="object-cover w-full h-full" />
                                         </div>
                                     </div>
                                     <label for="avatar"

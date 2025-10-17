@@ -127,15 +127,15 @@
                                     <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
                                         #
                                     </th>
-                                    <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
+                                    {{-- <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
                                         Reviewer Name
-                                    </th>
+                                    </th> --}}
                                     <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
                                         Reviewers ID
                                     </th>
-                                    <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
+                                    {{-- <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
                                         Gender
-                                    </th>
+                                    </th> --}}
                                     <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">Email</th>
                                     <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">Contact</th>
                                     <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">Assigned
@@ -151,20 +151,20 @@
                                                 class="text-[#91848C] text-[16px] font-light app-text">{{ $loop->index + 1 }}</span>
                                         </td>
 
-                                        <td class="p-2">
+                                        {{-- <td class="p-2">
                                             <div class="flex items-center gap-3">
                                                 <span
                                                     class="text-[#91848C] text-[16px] font-light app-text">{{ $reviewer->username ?? 'Unknown' }}</span>
                                             </div>
-                                        </td>
+                                        </td> --}}
 
                                         <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                             {{ $reviewer->reviewer_id }}
                                         </td>
 
-                                        <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
+                                        {{-- <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                             {{ $reviewer->gender }}
-                                        </td>
+                                        </td> --}}
 
                                         <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                             {{ $reviewer->email }}

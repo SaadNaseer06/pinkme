@@ -101,7 +101,7 @@
                         <tbody class="divide-y divide-[#F1E5EF] text-[#213430]">
                             @forelse($event->sponsorships as $row)
                                 @php
-                                    $recordedAt = $row->created_at ? \Carbon\Carbon::parse($row->created_at)->format('M d, Y � h:i A') : '�';
+                                    $recordedAt = $row->created_at ? \Carbon\Carbon::parse($row->created_at)->format('M d, Y • h:i A') : '—';
                                 @endphp
                                 <tr class="hover:bg-[#FEF6FB]/60 transition">
                                     <td class="px-6 py-4">

@@ -114,7 +114,7 @@
 
                 <!-- Image -->
                 <div class="w-full h-64 overflow-hidden rounded-md mb-2">
-                    <img src="{{ asset('images/program-details.png') }}" alt="Program Banner" class="modal-banner w-full h-full object-cover">
+                    <img src="{{ asset('public/images/program-details.png') }}" alt="Program Banner" class="modal-banner w-full h-full object-cover">
                 </div>
 
                 <!-- Modal Body -->
@@ -174,7 +174,7 @@
                                 <!-- Logo -->
                                 <div
                                     class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                                    <img class="modal-sponsor-logo w-10 h-10 object-contain" src="{{ asset('images/logo-white.png') }}"
+                                    <img class="modal-sponsor-logo w-10 h-10 object-contain" src="{{ asset('public/images/logo-white.png') }}"
                                         alt="Sponsor Logo">
                                 </div>
 
@@ -383,7 +383,7 @@
                     document.querySelector('#registerModal .modal-date').textContent = data.event_date || '—';
                     document.querySelector('#registerModal .modal-time').textContent = data.event_time || '—';
 
-                    document.querySelector('#registerModal .modal-banner').src = data.banner || "{{ asset('images/program-details.png') }}";
+                    document.querySelector('#registerModal .modal-banner').src = data.banner || "{{ asset('public/images/program-details.png') }}";
 
                     // Sponsor
                     const sponsor = data.sponsor || {};
@@ -394,7 +394,7 @@
                         const logoSrc = sponsor.logo.startsWith('http') ? sponsor.logo : "{{ asset('') }}" + sponsor.logo.replace(/^\/+/, '');
                         document.querySelector('.modal-sponsor-logo').src = logoSrc;
                     } else {
-                        document.querySelector('.modal-sponsor-logo').src = "{{ asset('images/logo-white.png') }}";
+                        document.querySelector('.modal-sponsor-logo').src = "{{ asset('public/images/logo-white.png') }}";
                     }
                     // document.querySelector('.modal-sponsor-about').textContent = sponsor.about || '—';
 

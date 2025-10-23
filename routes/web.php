@@ -8,6 +8,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\SponsorController;
 use App\Http\Controllers\SponsorshipProgramController;
+use App\Http\Controllers\AdminSponsorController;
 use App\Http\Controllers\AdminProgramRegistrationController;
 use App\Http\Controllers\PatientNotificationController;
 use Illuminate\Support\Facades\Auth;
@@ -116,6 +117,10 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::get('/reviewers', [AdminController::class, 'reviewers'])->name('admin.reviewers');
     Route::get('/patients', [AdminController::class, 'patients'])->name('admin.patients');
     Route::get('/sponsors', [AdminController::class, 'sponsors'])->name('admin.sponsors');
+    Route::get('/sponsors/{sponsor}', [AdminSponsorController::class, 'show'])->name('admin.sponsors.show');
+    Route::get('/sponsors/{sponsor}/edit', [AdminSponsorController::class, 'edit'])->name('admin.sponsors.edit');
+    Route::put('/sponsors/{sponsor}', [AdminSponsorController::class, 'update'])->name('admin.sponsors.update');
+    Route::delete('/sponsors/{sponsor}', [AdminSponsorController::class, 'destroy'])->name('admin.sponsors.destroy');
     Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
     Route::put('/settings/{tab}', [SiteSettingController::class, 'update'])
         ->whereIn('tab', ['general', 'privacy', 'terms'])

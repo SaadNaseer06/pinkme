@@ -78,11 +78,11 @@
                         <h2 class="text-lg font-semibold text-[#213430] app-main">Application Stats</h2>
                         <div class="flex items-center gap-2 text-sm text-[#91848C]">
                             <div class="bg-[#FDD7EC] p-1 rounded-md">
-                                <img src="{{ asset('/images/Calender.svg') }}" alt="Calendar" class="w-5 h-5" />
+                                <img src="{{ asset('public/images/Calender.svg') }}" alt="Calendar" class="w-5 h-5" />
                             </div>
                             <div class="flex items-center gap-1">
                                 <span>Week</span>
-                                <img src="{{ asset('/images/down-arrow.svg') }}" alt="Down" class="w-3 h-3" />
+                                <img src="{{ asset('public/images/down-arrow.svg') }}" alt="Down" class="w-3 h-3" />
                             </div>
                         </div>
                     </div>
@@ -175,11 +175,11 @@
                         <h2 class="text-lg font-semibold text-[#213430] app-main">Acquisitions</h2>
                         <div class="flex items-center gap-2 text-sm text-[#91848C]">
                             <div class="bg-[#FDD7EC] p-1 rounded-md">
-                                <img src="{{ asset('/images/Calender.svg') }}" alt="Calendar" class="w-5 h-5" />
+                                <img src="{{ asset('public/images/Calender.svg') }}" alt="Calendar" class="w-5 h-5" />
                             </div>
                             <div class="flex items-center gap-1">
                                 <span>Month</span>
-                                <img src="{{ asset('/images/down-arrow.svg') }}" alt="Down" class="w-3 h-3" />
+                                <img src="{{ asset('public/images/down-arrow.svg') }}" alt="Down" class="w-3 h-3" />
                             </div>
                         </div>
                     </div>
@@ -280,11 +280,11 @@
                         <h2 class="text-lg font-semibold text-[#213430] app-main">Statistics Of Applications</h2>
                         <div class="flex items-center gap-2 text-sm text-[#91848C]">
                             <div class="bg-[#FDD7EC] p-1 rounded-md">
-                                <img src="{{ asset('/images/Calender.svg') }}" alt="Calendar" class="w-5 h-5" />
+                                <img src="{{ asset('public/images/Calender.svg') }}" alt="Calendar" class="w-5 h-5" />
                             </div>
                             <div class="flex items-center gap-1">
                                 <span>Week</span>
-                                <img src="{{ asset('/images/down-arrow.svg') }}" alt="Down" class="w-3 h-3" />
+                                <img src="{{ asset('public/images/down-arrow.svg') }}" alt="Down" class="w-3 h-3" />
                             </div>
                         </div>
                     </div>

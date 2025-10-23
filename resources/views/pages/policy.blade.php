@@ -35,7 +35,7 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('public/images/favicon.png') }}" type="image/x-icon">
     <style>
         .policy-content h1,
         .policy-content h2,
@@ -84,7 +84,7 @@
             <div class="bg-gradient-to-r from-primary-500 via-primary-500/90 to-primary-400 text-white">
                 <div class="max-w-6xl mx-auto px-5 py-6 md:py-8 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <img src="{{ asset('images/logo-white.png') }}" alt="{{ config('app.name', 'Pink Me') }}"
+                        <img src="{{ asset('public/images/logo-white.png') }}" alt="{{ config('app.name', 'Pink Me') }}"
                             class="h-10 w-auto">
                         {{-- <span class="text-lg font-semibold tracking-wide uppercase">{{ config('app.name', 'Pink Me') }}</span> --}}
                     </div>

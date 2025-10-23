@@ -116,4 +116,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserNotification::class)->latest();
     }
+
+    /**
+     * Get the user's avatar URL.
+     *
+     * @return string
+     */
+    public function getAvatarUrlAttribute()
+    {
+        $profile = $this->profile;
+        
+        if ($profile && $profile->avatar) {
+            return asset('storage/app/public/' . $profile->avatar);
+        }
+        
+        return asset('public/images/profile.png');
+    }
 }

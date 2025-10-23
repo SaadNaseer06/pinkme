@@ -82,7 +82,7 @@
 
                 @forelse ($upcomingPrograms as $program)
                     @php
-                        $programImage = asset('images/' . $imagePool[$loop->index % count($imagePool)]);
+                        $programImage = asset('public/images/' . $imagePool[$loop->index % count($imagePool)]);
                         $monthLabel =
                             $program->month_label ??
                             ($program->event_date ? Carbon::parse($program->event_date)->format('M') : 'TBD');

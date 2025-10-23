@@ -29,7 +29,7 @@
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     {{-- Favicon --}}
-    <link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('public/images/favicon.png') }}" type="image/x-icon">
     @vite('resources/css/patient.css')
     @stack('head')
 </head>

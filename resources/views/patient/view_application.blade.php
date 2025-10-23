@@ -139,8 +139,8 @@
                     @forelse($application->documents as $doc)
                         <li class="flex justify-between items-center">
                             <div class="flex items-center gap-2 group cursor-pointer">
-                                <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                                <img src="{{ asset('images/document-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                     class="w-6 h-6 hidden group-hover:block" />
                                 <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                     {{ $doc->filename }}
@@ -148,8 +148,8 @@
                             </div>
                             <div class="flex items-center">
                                 <a href="{{ asset($doc->filepath) }}" target="_blank" class="text-pink-500 mr-2 group relative w-6 h-6">
-                                    <img src="{{ asset('images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                                    <img src="{{ asset('images/eye-pink.svg') }}" alt=""
+                                    <img src="{{ asset('public/images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                                    <img src="{{ asset('public/images/eye-pink.svg') }}" alt=""
                                         class="w-6 h-6 hidden group-hover:block absolute top-0 left-0" />
                                 </a>
                             </div>

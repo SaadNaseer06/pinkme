@@ -174,10 +174,10 @@
                     <div class="flex items-center justify-between manager-row" data-user-id="{{ $manager->id }}">
                         <div class="flex items-center space-x-3">
                             @if (!empty($manager->profile?->avatar))
-                                <img src="{{ asset('storage/' . $manager->profile->avatar) }}" alt="Reviewer"
+                                <img src="{{ $manager ? $manager->avatar_url : asset('public/images/profile.png') }}" alt="Reviewer"
                                     class="w-10 h-10 rounded-full" />
                             @else
-                                <img src="{{ asset('images/profile.png') }}" alt="Reviewer"
+                                <img src="{{ asset('public/images/profile.png') }}" alt="Reviewer"
                                     class="w-10 h-10 rounded-full" />
                             @endif
                             <span class="text-sm text-gray-800">{{ $manager->profile->full_name ?? 'Unknown' }}</span>

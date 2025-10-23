@@ -67,8 +67,8 @@ class ProgramController extends Controller
             'phone' => $sponsorDetail->company_phone ?? ($sponsorUser?->phone ?? 'N/A'),
             'email' => $sponsorDetail->company_email ?? ($sponsorUser?->email ?? 'N/A'),
             'logo'  => $sponsorUser && $sponsorUser->avatar
-                ? asset('storage/' . $sponsorUser->avatar)
-                : asset('images/default_sponsor.png'),
+                ? asset('storage/app/public/' . $sponsorUser->avatar)
+                : asset('public/images/default_sponsor.png'),
             'about' => $sponsorDetail->company_type ?? 'No details available.',
         ];
 
@@ -95,7 +95,7 @@ class ProgramController extends Controller
             'description' => $program->description,
             'event_date' => \Carbon\Carbon::parse($program->event_date)->format('l, F d, Y'),
             'event_time' => $program->event_time,
-            'banner' => $program->banner ? asset('storage/' . $program->banner) : asset('images/default_program_banner.png'),
+            'banner' => $program->banner ? asset('storage/app/public/' . $program->banner) : asset('public/images/default_program_banner.png'),
             'sponsor' => $sponsorPayload,
             'registration' => $registrationPayload,
         ]);

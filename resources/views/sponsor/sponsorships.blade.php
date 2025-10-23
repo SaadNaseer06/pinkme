@@ -231,7 +231,7 @@
                 <div class="space-y-4">
                     @forelse ($upcomingPrograms as $program)
                         @php
-                            $image = asset('images/' . $upcomingImages[$loop->index % count($upcomingImages)]);
+                            $image = asset('public/images/' . $upcomingImages[$loop->index % count($upcomingImages)]);
                             $startDate = $program->start_date ? Carbon::parse($program->start_date) : null;
                             $month = $startDate ? $startDate->format('M') : 'TBD';
                             $day = $startDate ? $startDate->format('d') : '--';

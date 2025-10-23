@@ -49,16 +49,16 @@
                                     </h2>
                                     <div class="flex items-center gap-3">
                                         <!-- Mobile Filters Button -->
-                                        <button @click="showFilters = !showFilters"
+                                        {{-- <button @click="showFilters = !showFilters"
                                             class="flex items-center border border-[#91848C] text-[#91848C] text-sm px-3 py-1.5 rounded-md app-h md:hidden">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L15 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 019 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
                                             </svg>
-                                        </button>
+                                        </button> --}}
                                         <!-- Desktop Filters Button -->
-                                        <button @click="showFilters = !showFilters"
+                                        {{-- <button @click="showFilters = !showFilters"
                                             class="hidden md:flex items-center border border-[#91848C] text-[#91848C] text-sm px-3 py-1.5 rounded-md app-h">
                                             Filters
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 ml-1" fill="none"
@@ -66,17 +66,17 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L15 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 019 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
                                             </svg>
-                                        </button>
+                                        </button> --}}
                                         <!-- Mobile Export Button -->
-                                        <button class="bg-[#db69a2] px-4 py-2 rounded-md text-sm md:hidden">
-                                            <img src="{{ asset('images/export.svg') }}" alt="" class="w-4 h-4">
-                                        </button>
+                                        {{-- <button class="bg-[#db69a2] px-4 py-2 rounded-md text-sm md:hidden">
+                                            <img src="{{ asset('public/images/export.svg') }}" alt="" class="w-4 h-4">
+                                        </button> --}}
                                         <!-- Desktop Export Button -->
-                                        <button
+                                        {{-- <button
                                             class="hidden md:flex items-center bg-[#db69a2] text-white text-sm px-4 py-1.5 rounded-md app-h">
                                             Export
-                                            <img src="{{ asset('images/export.svg') }}" alt="" class="w-3 h-3 ml-1">
-                                        </button>
+                                            <img src="{{ asset('public/images/export.svg') }}" alt="" class="w-3 h-3 ml-1">
+                                        </button> --}}
                                     </div>
                                 </div>
                                 <!-- Filter Dropdowns -->
@@ -145,14 +145,8 @@
                                             <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
                                                 All Sponsors
                                             </th>
-                                            <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h pad-left">
-                                                Sponsors Type
-                                            </th>
                                             <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
                                                 Company / Individual
-                                            </th>
-                                            <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
-                                                Contact
                                             </th>
                                             <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
                                                 Funds Given
@@ -183,7 +177,7 @@
                                                             $profileImage = $sponsor->profile_image;
                                                             $profileImageUrl = $profileImage && filter_var($profileImage, FILTER_VALIDATE_URL)
                                                                 ? $profileImage
-                                                                : asset($profileImage ? ltrim($profileImage, '/') : 'images/default-profile.png');
+                                                                : ($sponsor->user ? $sponsor->user->avatar_url : asset('public/images/profile.png'));
                                                         @endphp
                                                         <img src="{{ $profileImageUrl }}" alt="{{ $sponsor->name }}"
                                                             class="w-8 h-8 rounded-full object-cover" />
@@ -192,21 +186,11 @@
                                                     </div>
                                                 </td>
                                                 <td
-                                                    class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text pad-left">
-                                                    {{ $sponsor->type }}
-                                                </td>
-                                                <td
                                                     class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                                     {{ $sponsor->company_name ?? 'Individual' }}
                                                 </td>
                                                 <td
                                                     class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
-                                                    {{ $sponsor->contact_number }}
-                                                </td>
-                                                <td
-                                                    class="p-2 align-middle text-[#91848C] text-[16px] font
-
-System: -light app-text">
                                                     ${{ number_format($sponsor->total_funds, 2) }}
                                                 </td>
                                                 <td
@@ -231,24 +215,27 @@ System: -light app-text">
                                                     </button>
                                                     <div
                                                         class="absolute right-[28px] top-10 w-[250px] max-w-none bg-[#F6EDF5] rounded-lg shadow-lg py-2 z-20 hidden">
-                                                        <a href="#"
+                                                        <a href="{{ route('admin.sponsors.show', $sponsor->id) }}"
                                                             class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm">
                                                             <i class="fas fa-eye mr-2"></i> View Profile
                                                         </a>
-                                                        <a href="#"
+                                                        <a href="{{ route('admin.sponsors.edit', $sponsor->id) }}"
                                                             class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm gap-2">
                                                             <i class="fa-solid fa-pen"></i> Edit Sponsors Details
                                                         </a>
-                                                        <a href="#" onclick="openRejectModal()"
-                                                            class="flex items-center px-4 py-2 gap-2 text-[#91848C] text-sm transition-colors">
-                                                            <i class="fa-solid fa-trash"></i> Remove Sponsors
-                                                        </a>
+                                                        <form action="{{ route('admin.sponsors.destroy', $sponsor->id) }}" method="POST" onsubmit="return confirm('Remove this sponsor? If deletion fails due to dependencies, the sponsor will be deactivated.');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="w-full text-left flex items-center px-4 py-2 gap-2 text-[#91848C] text-sm transition-colors hover:bg-pink-100">
+                                                                <i class="fa-solid fa-trash"></i> Remove Sponsors
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr class="border-t border-[#e0cfd8]">
-                                                <td colspan="9" class="p-8 text-center text-[#91848C] app-text">
+                                                <td colspan="7" class="p-8 text-center text-[#91848C] app-text">
                                                     No sponsors found.
                                                 </td>
                                             </tr>
@@ -357,7 +344,7 @@ System: -light app-text">
                                             'type' => 'event',
                                             'title' => $event->title,
                                             'description' => $event->description,
-                                            'image' => asset('images/program-details.png'),
+                                            'image' => asset('public/images/program-details.png'),
                                             'date' => $eventDate ? $eventDate->format('l, F d, Y') : null,
                                             'time' => $eventDate ? $eventDate->format('h:i A') : null,
                                             'location' => $event->location,
@@ -475,8 +462,8 @@ System: -light app-text">
                                                     ? \Carbon\Carbon::parse($program->event_time)
                                                     : null);
                                         $image = $program->banner
-                                            ? asset('storage/' . $program->banner)
-                                            : $program->image_url ?? asset('images/program-3.png');
+                                            ? asset('storage/app/public/' . $program->banner)
+                                            : $program->image_url ?? asset('public/images/program-3.png');
                                         $paymentLabel = $program->payment_type === 'flexible' ? 'Flexible Payment' : 'Full Payment';
                                         $detail = [
                                             'type' => 'program',
@@ -644,7 +631,7 @@ System: -light app-text">
                             </button>
                         </div>
                         <div class="w-full h-64 overflow-hidden">
-                            <img id="detailModalImage" src="{{ asset('images/program-details.png') }}" alt=""
+                            <img id="detailModalImage" src="{{ asset('public/images/program-details.png') }}" alt=""
                                 class="w-full h-full object-cover" />
                         </div>
                         <div class="p-5 space-y-6 text-sm">
@@ -787,7 +774,7 @@ System: -light app-text">
             const prettyType = type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Record';
 
             const description = data.description || 'No description available';
-            const imageUrl = data.image || "{{ asset('images/program-details.png') }}";
+            const imageUrl = data.image || "{{ asset('public/images/program-details.png') }}";
             const date = data.date || null;
             const time = data.time || null;
 
@@ -921,7 +908,7 @@ System: -light app-text">
                 type: 'program',
                 title: 'Breast Cancer Awareness',
                 description: 'A nonprofit initiative supporting women battling breast cancer, raising awareness about early detection and survivorship.',
-                image: "{{ asset('images/program-details.png') }}",
+                image: "{{ asset('public/images/program-details.png') }}",
                 date: 'Saturday, March 30, 2025',
                 time: '10:00 AM',
                 total_raised: 0,

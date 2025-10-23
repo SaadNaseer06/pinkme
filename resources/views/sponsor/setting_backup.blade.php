@@ -70,7 +70,7 @@
                                         <div
                                             class="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
                                             <img id="avatarPreview"
-                                                src="{{ '/storage/' . $profile->avatar ?? asset('images/profile.png') }}" alt="Profile"
+                                                src="{{ '/storage/' . $profile->avatar ?? asset('public/images/profile.png') }}" alt="Profile"
                                                 class="object-cover w-full h-full" />
                                         </div>
                                     </div>
@@ -147,7 +147,7 @@
                                                 <option>Nov</option>
                                                 <option>Dec</option>
                                             </select>
-                                            <img src="{{ asset('images/down-arrow.svg') }}" alt="Dropdown arrow"
+                                            <img src="{{ asset('public/images/down-arrow.svg') }}" alt="Dropdown arrow"
                                                 class="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4" />
                                         </div>
 
@@ -269,7 +269,7 @@
                                             <option value="Corporation">Corporation</option>
                                             <option value="Sole Proprietorship">Sole Proprietorship</option>
                                         </select>
-                                        <img src="{{ asset('images/down-arrow.svg') }}" alt="Dropdown arrow"
+                                        <img src="{{ asset('public/images/down-arrow.svg') }}" alt="Dropdown arrow"
                                             class="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4" />
                                     </div>
                                 </div>
@@ -308,7 +308,7 @@
                                             <option value="Florida">Florida</option>
                                             <!-- Add more as needed -->
                                         </select>
-                                        <img src="{{ asset('images/down-arrow.svg') }}" alt="Dropdown arrow"
+                                        <img src="{{ asset('public/images/down-arrow.svg') }}" alt="Dropdown arrow"
                                             class="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4" />
                                     </div>
                                 </div>

@@ -11,7 +11,7 @@
             <div class="bg-[#F3E8EF] px-4 py-3 flex justify-between items-center border-b border-[#DCCFD8] mb-2">
                 <div class="flex items-center">
                     <div class="h-12 w-12 rounded-full flex items-center justify-center overflow-hidden">
-                        <img src="{{ asset('images/chat-profile.png') }}" alt="Support Agent" class="h-full w-full object-contain" />
+                        <img src="{{ asset('public/images/chat-profile.png') }}" alt="Support Agent" class="h-full w-full object-contain" />
                     </div>
                     <span class="ml-3 font-medium text-gray-700 app-main">Support Team</span>
                 </div>
@@ -34,7 +34,7 @@
                         </div>
                         <div class="ml-2">
                             <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                <img src="{{ asset('images/D-profile.png') }}" alt="User" class="h-full w-full object-cover" />
+                                <img src="{{ asset('public/images/D-profile.png') }}" alt="User" class="h-full w-full object-cover" />
                             </div>
                             <div class=" flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:45</div>
                         </div>
@@ -46,7 +46,7 @@
                     <div class="flex items-end">
                         <div class="mr-2">
                             <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                <img src="{{ asset('images/chat-profile.png') }}" alt="Support" class="h-full w-full object-contain" />
+                                <img src="{{ asset('public/images/chat-profile.png') }}" alt="Support" class="h-full w-full object-contain" />
                             </div>
                             <div class="flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:46</div>
                         </div>
@@ -65,7 +65,7 @@
                         </div>
                         <div class="ml-2">
                             <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                <img src="{{ asset('images/D-profile.png') }}" alt="User" class="h-full w-full object-cover" />
+                                <img src="{{ asset('public/images/D-profile.png') }}" alt="User" class="h-full w-full object-cover" />
                             </div>
                             <div class=" flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:48</div>
                         </div>
@@ -77,7 +77,7 @@
                     <div class="flex items-end">
                         <div class="mr-2">
                             <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                <img src="{{ asset('images/chat-profile.png') }}" alt="Support" class="h-full w-full object-contain" />
+                                <img src="{{ asset('public/images/chat-profile.png') }}" alt="Support" class="h-full w-full object-contain" />
                             </div>
                             <div class="flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:49</div>
                         </div>
@@ -97,7 +97,7 @@
                         </div>
                         <div class="ml-2">
                             <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                <img src="{{ asset('images/D-profile.png') }}" alt="User" class="h-full w-full object-cover" />
+                                <img src="{{ asset('public/images/D-profile.png') }}" alt="User" class="h-full w-full object-cover" />
                             </div>
                             <div class=" flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:52</div>
                         </div>
@@ -109,7 +109,7 @@
                     <div class="flex items-end">
                         <div class="mr-2">
                             <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                <img src="{{ asset('images/chat-profile.png') }}" alt="Support" class="h-full w-full object-contain" />
+                                <img src="{{ asset('public/images/chat-profile.png') }}" alt="Support" class="h-full w-full object-contain" />
                             </div>
                             <div class="flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:53</div>
                         </div>
@@ -129,7 +129,7 @@
                         </div>
                         <div class="ml-2">
                             <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                <img src="{{ asset('images/D-profile.png') }}" alt="User" class="h-full w-full object-cover" />
+                                <img src="{{ asset('public/images/D-profile.png') }}" alt="User" class="h-full w-full object-cover" />
                             </div>
                             <div class=" flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:54</div>
                         </div>

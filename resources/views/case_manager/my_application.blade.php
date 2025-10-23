@@ -286,7 +286,7 @@
             <div class="bg-[#F3E8EF] rounded-lg shadow-lg p-6 md:p-12 w-full max-w-[22rem] md:max-w-2xl text-center">
                 <div class="flex flex-col items-center space-y-2">
                     <div class="flex justify-center">
-                        <img src="{{ asset('/images/reject-illustration.png') }}" alt="Reject illustration"
+                        <img src="{{ asset('public/images/reject-illustration.png') }}" alt="Reject illustration"
                             class="w-36 h-auto" />
                     </div>
                     <h1 class="text-2xl md:text-3xl font-normal text-gray-800">Reject Application</h1>

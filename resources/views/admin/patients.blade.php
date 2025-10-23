@@ -138,9 +138,7 @@
 
                                             $pid = 'P-' . str_pad((string) $p->id, 4, '0', STR_PAD_LEFT);
 
-                                            $avatarPath = !empty($profile?->avatar)
-                                                ? asset('storage/' . $profile->avatar)
-                                                : asset('images/profile.png');
+                                            $avatarPath = $p->user ? $p->user->avatar_url : asset('public/images/profile.png');
                                         @endphp
 
                                         <tr class="border-t border-[#e0cfd8] {{ $loop->last ? 'border-b' : '' }}">
@@ -202,7 +200,7 @@
                                                     </a>
                                                     <a href="{{ route('case_manager.myApplication', ['patient_id' => $p->id]) }}"
                                                         class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm gap-2">
-                                                        <img src="{{ asset('images/assign.svg') }}" alt=""> Applications
+                                                        <img src="{{ asset('public/images/assign.svg') }}" alt=""> Applications
                                                     </a>
                                                     {{-- Optional delete: wire if needed
                                                 <a href="#" onclick="openPatientDeleteModal({{ $p->id }})"

@@ -1,5 +1,5 @@
 @php
-    $image = asset('images/' . $eventImages[$loopIndex % count($eventImages)]);
+    $image = asset('public/images/' . $eventImages[$loopIndex % count($eventImages)]);
     $description = $event->description ?: 'Details will be announced soon.';
     $primarySponsor = $event->primary_sponsor;
     $primarySponsorProfile = optional($primarySponsor)->profile;
@@ -13,7 +13,7 @@
     $primarySponsorLogo =
         $primarySponsorDetail && $primarySponsorDetail->logo
             ? Storage::url($primarySponsorDetail->logo)
-            : asset('images/brand.png');
+            : asset('public/images/brand.png');
     $primarySponsorAbout =
         $primarySponsorDetail && $primarySponsorDetail->company_type
             ? 'A ' . strtolower($primarySponsorDetail->company_type) . ' supporting patient care initiatives.'

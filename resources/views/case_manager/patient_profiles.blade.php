@@ -23,7 +23,7 @@
                     <div class="flex justify-center">
                         <div class="w-28 h-28 rounded-full p-1">
                             <div class="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
-                                <img src="{{ $profile && $profile->avatar ? asset('storage/' . $profile->avatar) : asset('images/profile.png') }}"
+                                <img src="{{ $user ? $user->avatar_url : asset('public/images/profile.png') }}"
                                     alt="Profile" class="object-cover" />
                             </div>
                         </div>

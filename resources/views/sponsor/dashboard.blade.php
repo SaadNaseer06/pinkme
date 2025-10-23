@@ -54,7 +54,7 @@
                                     @forelse ($individualSponsors as $sponsor)
                                         @php
                                             $profile = optional($sponsor->profile);
-                                            $avatar = $profile && $profile->avatar ? Storage::url($profile->avatar) : asset('images/patient-7.png');
+                                            $avatar = $profile && $profile->avatar ? Storage::url($profile->avatar) : asset('public/images/patient-7.png');
                                             $latestSponsorship = optional($sponsor->sponsorships->first());
                                             $latestTarget = optional(
                                                 $latestSponsorship->program ?? $latestSponsorship->sponsorshipProgram
@@ -137,7 +137,7 @@
                                         @php
                                             $profile = optional($sponsor->profile);
                                             $detail = optional($sponsor->sponsorDetail);
-                                            $logo = $detail && $detail->logo ? Storage::url($detail->logo) : asset('images/patient-4.png');
+                                            $logo = $detail && $detail->logo ? Storage::url($detail->logo) : asset('public/images/patient-4.png');
                                             $latestSponsorship = optional($sponsor->sponsorships->first());
                                             $latestTarget = optional(
                                                 $latestSponsorship->program ?? $latestSponsorship->sponsorshipProgram
@@ -221,7 +221,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-2">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ asset('images/china.svg') }}" alt="China" class="w-8 h-8 rounded-full" />
+                                            <img src="{{ asset('public/images/china.svg') }}" alt="China" class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">China</span>
                                         </div>
                                     </td>
@@ -232,7 +232,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-2">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ asset('images/france.svg') }}" alt="France" class="w-8 h-8 rounded-full" />
+                                            <img src="{{ asset('public/images/france.svg') }}" alt="France" class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">France</span>
                                         </div>
                                     </td>
@@ -243,7 +243,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-2">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ asset('images/germany.svg') }}" alt="Germany" class="w-8 h-8 rounded-full" />
+                                            <img src="{{ asset('public/images/germany.svg') }}" alt="Germany" class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">Germany</span>
                                         </div>
                                     </td>
@@ -254,7 +254,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-2">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ asset('images/italy.svg') }}" alt="Italy" class="w-8 h-8 rounded-full" />
+                                            <img src="{{ asset('public/images/italy.svg') }}" alt="Italy" class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">Italy</span>
                                         </div>
                                     </td>
@@ -265,7 +265,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-2">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ asset('images/netherlands.svg') }}" alt="Netherlands" class="w-8 h-8 rounded-full" />
+                                            <img src="{{ asset('public/images/netherlands.svg') }}" alt="Netherlands" class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">Netherlands</span>
                                         </div>
                                     </td>
@@ -276,7 +276,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-2">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ asset('images/norway.svg') }}" alt="Norway" class="w-8 h-8 rounded-full" />
+                                            <img src="{{ asset('public/images/norway.svg') }}" alt="Norway" class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">Norway</span>
                                         </div>
                                     </td>
@@ -287,7 +287,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-2">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ asset('images/south-koria.svg') }}" alt="South Korea" class="w-8 h-8 rounded-full" />
+                                            <img src="{{ asset('public/images/south-koria.svg') }}" alt="South Korea" class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">South Korea</span>
                                         </div>
                                     </td>
@@ -298,7 +298,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-2">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ asset('images/switzerlands.svg') }}" alt="Switzerland" class="w-8 h-8 rounded-full" />
+                                            <img src="{{ asset('public/images/switzerlands.svg') }}" alt="Switzerland" class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">Switzerland</span>
                                         </div>
                                     </td>
@@ -309,7 +309,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-2">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ asset('images/usa.svg') }}" alt="United States" class="w-8 h-8 rounded-full" />
+                                            <img src="{{ asset('public/images/usa.svg') }}" alt="United States" class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">United States</span>
                                         </div>
                                     </td>
@@ -320,7 +320,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-2">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ asset('images/sweden.svg') }}" alt="Sweden" class="w-8 h-8 rounded-full" />
+                                            <img src="{{ asset('public/images/sweden.svg') }}" alt="Sweden" class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">Sweden</span>
                                         </div>
                                     </td>
@@ -340,7 +340,7 @@
                     <div class="flex flex-col gap-2">
                         <div class="border-t border-[#e0cfd8]"></div>
                         <div class="flex items-center gap-3 p-2">
-                            <img src="{{ asset('images/Donation-1.png') }}" alt="Life-Saving Medical Treatment" class="w-20 h-20 rounded-full donation-img" />
+                            <img src="{{ asset('public/images/Donation-1.png') }}" alt="Life-Saving Medical Treatment" class="w-20 h-20 rounded-full donation-img" />
                             <div>
                                 <h3 class="text-[#213430] text-xl font-semibold mb-1 app-main">Life-Saving Medical Treatment</h3>
                                 <p class="text-[#91848C] font-md app-text">Your donations help cover chemotherapy, radiation, and surgeries for women who cannot afford them.</p>
@@ -348,7 +348,7 @@
                         </div>
                         <div class="border-b border-[#e0cfd8]"></div>
                         <div class="flex items-center gap-3 p-2">
-                            <img src="{{ asset('images/Donation-2.png') }}" alt="Free Breast Cancer Screenings" class="w-20 h-20 rounded-full donation-img" />
+                            <img src="{{ asset('public/images/Donation-2.png') }}" alt="Free Breast Cancer Screenings" class="w-20 h-20 rounded-full donation-img" />
                             <div>
                                 <h3 class="text-[#213430] text-xl font-semibold mb-1 app-main">Free Breast Cancer Screenings</h3>
                                 <p class="text-[#91848C] font-md app-text">Early detection saves lives! Thanks to your contributions, we organize free breast cancer screening camps.</p>
@@ -356,7 +356,7 @@
                         </div>
                         <div class="border-b border-[#e0cfd8]"></div>
                         <div class="flex items-center gap-3 p-2">
-                            <img src="{{ asset('images/Donation-3.png') }}" alt="Financial Aid for Women" class="w-20 h-20 rounded-full donation-img" />
+                            <img src="{{ asset('public/images/Donation-3.png') }}" alt="Financial Aid for Women" class="w-20 h-20 rounded-full donation-img" />
                             <div>
                                 <h3 class="text-[#213430] text-xl font-semibold mb-1 app-main">Financial Aid for Women</h3>
                                 <p class="text-[#91848C] font-md app-text">Many women delay or skip treatment due to financial constraints. With your help, we provide financial grants and sponsorships.</p>
@@ -364,7 +364,7 @@
                         </div>
                         <div class="border-b border-[#e0cfd8]"></div>
                         <div class="flex items-center gap-3 p-2">
-                            <img src="{{ asset('images/program-1.png') }}" alt="Nutritional & Wellness Support" class="w-20 h-20 rounded-full donation-img" />
+                            <img src="{{ asset('public/images/program-1.png') }}" alt="Nutritional & Wellness Support" class="w-20 h-20 rounded-full donation-img" />
                             <div>
                                 <h3 class="text-[#213430] text-xl font-semibold mb-1 app-main">Nutritional & Wellness Support</h3>
                                 <p class="text-[#91848C] font-md app-text">A strong body fights better! Your support funds nutrition programs, meal plans, and exercise workshops to help women.</p>

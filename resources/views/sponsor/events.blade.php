@@ -83,7 +83,7 @@
                             </div>
 
                             <div class="w-full h-64 overflow-hidden rounded-md mb-2">
-                                <img id="modalEventImage" src="{{ asset('images/program-details.png') }}" alt="Event banner"
+                                <img id="modalEventImage" src="{{ asset('public/images/program-details.png') }}" alt="Event banner"
                                     class="w-full h-full object-cover" />
                             </div>
 
@@ -147,7 +147,7 @@
                                         <div class="flex items-start gap-4 p-4 rounded-md max-w-xl">
                                             <div
                                                 class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                                                <img id="modalSponsorLogo" src="{{ asset('images/brand.png') }}" alt="Sponsor logo"
+                                                <img id="modalSponsorLogo" src="{{ asset('public/images/brand.png') }}" alt="Sponsor logo"
                                                     class="w-10 h-10 object-contain" />
                                             </div>
                                             <div class="flex flex-col">
@@ -231,7 +231,7 @@
 
                         document.getElementById('modalEventTitle').textContent = title || 'Event Details';
                         const imageEl = document.getElementById('modalEventImage');
-                        imageEl.src = image || "{{ asset('images/program-details.png') }}";
+                        imageEl.src = image || "{{ asset('public/images/program-details.png') }}";
                         imageEl.alt = title || 'Event banner';
                         document.getElementById('modalEventDescription').textContent = description || '';
                         document.getElementById('modalEventDate').textContent = date || 'TBD';
@@ -240,7 +240,7 @@
                         document.getElementById('modalSponsorName').textContent = sponsorName || 'Sponsor';
                         document.getElementById('modalSponsorPhone').textContent = sponsorPhone || 'Phone unavailable';
                         document.getElementById('modalSponsorEmail').textContent = sponsorEmail || 'Email unavailable';
-                        document.getElementById('modalSponsorLogo').src = sponsorLogo || "{{ asset('images/logo-white.png') }}";
+                        document.getElementById('modalSponsorLogo').src = sponsorLogo || "{{ asset('public/images/logo-white.png') }}";
                         document.getElementById('modalSponsorLogo').alt = sponsorName || 'Sponsor logo';
                         document.getElementById('modalSponsorAbout').textContent = sponsorAbout ||
                             'Committed supporters partnering with us to impact more lives.';

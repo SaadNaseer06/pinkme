@@ -45,7 +45,7 @@
                     <div class="py-3">
                         <a href="{{ route('invoices.download', $invoice) }}"
                             class="text-[#DB69A2] underline flex items-center gap-1">
-                            <img src="{{ asset('images/download.svg') }}" alt="" class="w-4 h-4" />
+                            <img src="{{ asset('public/images/download.svg') }}" alt="" class="w-4 h-4" />
                             Download PDF
                         </a>
                     </div>

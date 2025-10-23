@@ -31,35 +31,35 @@
                 <!-- User avatars -->
                 <div class="flex overflow-hidden px-4 py-2 gap-2 ">
                     <div class="flex-shrink-0 relative">
-                        <img src="{{ asset('/images/patient-1.png') }}" class="w-10 h-10 rounded-full" alt="User">
+                        <img src="{{ asset('public/images/patient-1.png') }}" class="w-10 h-10 rounded-full" alt="User">
                         <div class="absolute bottom-[-1px] right-[2px] bg-green-500 rounded-full w-3 h-3 border-2 "></div>
                     </div>
                     <div class="flex-shrink-0 relative">
-                        <img src="{{ asset('/images/patient-2.png') }}" class="w-10 h-10 rounded-full" alt="User">
+                        <img src="{{ asset('public/images/patient-2.png') }}" class="w-10 h-10 rounded-full" alt="User">
                         <div class="absolute bottom-[-1px] right-[2px] bg-green-500 rounded-full w-3 h-3 border-2 "></div>
                     </div>
                     <div class="flex-shrink-0 relative">
-                        <img src="{{ asset('/images/patient-7.png') }}" class="w-10 h-10 rounded-full" alt="User">
+                        <img src="{{ asset('public/images/patient-7.png') }}" class="w-10 h-10 rounded-full" alt="User">
                         <div class="absolute bottom-[-1px] right-[2px] bg-green-500 rounded-full w-3 h-3 border-2 "></div>
                     </div>
                     <div class="flex-shrink-0 relative">
-                        <img src="{{ asset('/images/patient-4.png') }}" class="w-10 h-10 rounded-full" alt="User">
+                        <img src="{{ asset('public/images/patient-4.png') }}" class="w-10 h-10 rounded-full" alt="User">
                         <div class="absolute bottom-[-1px] right-[2px] bg-green-500 rounded-full w-3 h-3 border-2 "></div>
                     </div>
                     <div class="flex-shrink-0 relative">
-                        <img src="{{ asset('/images/patient-3.png') }}" class="w-10 h-10 rounded-full" alt="User">
+                        <img src="{{ asset('public/images/patient-3.png') }}" class="w-10 h-10 rounded-full" alt="User">
                         <div class="absolute bottom-[-1px] right-[2px] bg-green-500 rounded-full w-3 h-3 border-2 "></div>
                     </div>
                     <div class="flex-shrink-0 relative">
-                        <img src="{{ asset('/images/patient-6.png') }}" class="w-10 h-10 rounded-full" alt="User">
+                        <img src="{{ asset('public/images/patient-6.png') }}" class="w-10 h-10 rounded-full" alt="User">
                         <div class="absolute bottom-[-1px] right-[2px] bg-green-500 rounded-full w-3 h-3 border-2 "></div>
                     </div>
                     <div class="flex-shrink-0 relative">
-                        <img src="{{ asset('/images/patient-5.png') }}" class="w-10 h-10 rounded-full" alt="User">
+                        <img src="{{ asset('public/images/patient-5.png') }}" class="w-10 h-10 rounded-full" alt="User">
                         <div class="absolute bottom-[-1px] right-[2px] bg-green-500 rounded-full w-3 h-3 border-2 "></div>
                     </div>
                     <div class="flex-shrink-0 relative">
-                        <img src="{{ asset('/images/patient-11.png') }}" class="w-10 h-10 rounded-full" alt="User">
+                        <img src="{{ asset('public/images/patient-11.png') }}" class="w-10 h-10 rounded-full" alt="User">
                         <div class="absolute bottom-[-1px] right-[2px] bg-green-500 rounded-full w-3 h-3 border-2 "></div>
                     </div>
                 </div>
@@ -78,7 +78,7 @@
                     <!-- User 1 -->
                     <div class="p-4 flex border-b border-gray-100 hover:bg-pink-100">
                         <div class="mr-3">
-                            <img src="{{ asset('/images/patient-1.png') }}" class="w-10 h-10 rounded-full" alt="John Doe">
+                            <img src="{{ asset('public/images/patient-1.png') }}" class="w-10 h-10 rounded-full" alt="John Doe">
                         </div>
                         <div class="flex-1">
                             <div class="flex justify-between">
@@ -95,7 +95,7 @@
                     <!-- User 2 -->
                     <div class="p-4 flex border-b border-gray-100 hover:bg-pink-100">
                         <div class="mr-3">
-                            <img src="{{ asset('/images/patient-7.png') }}" class="w-10 h-10 rounded-full" alt="Brian Hall">
+                            <img src="{{ asset('public/images/patient-7.png') }}" class="w-10 h-10 rounded-full" alt="Brian Hall">
                         </div>
                         <div class="flex-1 ">
                             <div class="flex justify-between ">
@@ -113,7 +113,7 @@
                     <!-- User 3 -->
                     <div class="p-4 flex border-b border-gray-100 hover:bg-pink-100">
                         <div class="mr-3">
-                            <img src="{{ asset('/images/patient-5.png') }}" class="w-10 h-10 rounded-full"
+                            <img src="{{ asset('public/images/patient-5.png') }}" class="w-10 h-10 rounded-full"
                                 alt="Daniel Ross">
                         </div>
                         <div class="flex-1">
@@ -132,7 +132,7 @@
                     <!-- User 4 -->
                     <div class="p-4 flex border-b border-gray-100 hover:bg-pink-100">
                         <div class="mr-3">
-                            <img src="{{ asset('/images/patient-3.png') }}" class="w-10 h-10 rounded-full"
+                            <img src="{{ asset('public/images/patient-3.png') }}" class="w-10 h-10 rounded-full"
                                 alt="Michael Anderson">
                         </div>
                         <div class="flex-1">
@@ -151,7 +151,7 @@
                     <!-- User 5 -->
                     <div class="p-4 flex border-b border-gray-100 hover:bg-pink-100">
                         <div class="mr-3">
-                            <img src="{{ asset('/images/patient-2.png') }}" class="w-10 h-10 rounded-full"
+                            <img src="{{ asset('public/images/patient-2.png') }}" class="w-10 h-10 rounded-full"
                                 alt="Sarah Johnson">
                         </div>
                         <div class="flex-1">
@@ -169,7 +169,7 @@
                     <!-- User 6 -->
                     <div class="p-4 flex border-b border-gray-100 hover:bg-pink-100">
                         <div class="mr-3">
-                            <img src="{{ asset('/images/patient-2.png') }}" class="w-10 h-10 rounded-full"
+                            <img src="{{ asset('public/images/patient-2.png') }}" class="w-10 h-10 rounded-full"
                                 alt="Emily Watson">
                         </div>
                         <div class="flex-1">
@@ -187,7 +187,7 @@
                     <!-- User 7 -->
                     <div class="p-4 flex border-b border-gray-100 hover:bg-pink-100">
                         <div class="mr-3">
-                            <img src="{{ asset('/images/patient-6.png') }}" class="w-10 h-10 rounded-full"
+                            <img src="{{ asset('public/images/patient-6.png') }}" class="w-10 h-10 rounded-full"
                                 alt="Lucy Taylor">
                         </div>
                         <div class="flex-1">
@@ -205,7 +205,7 @@
                     <!-- User 8 -->
                     <div class="p-4 flex border-b border-gray-100 hover:bg-pink-100">
                         <div class="mr-3">
-                            <img src="{{ asset('/images/patient-11.png') }}" class="w-10 h-10 rounded-full"
+                            <img src="{{ asset('public/images/patient-11.png') }}" class="w-10 h-10 rounded-full"
                                 alt="Lucy Taylor">
                         </div>
                         <div class="flex-1">
@@ -229,7 +229,7 @@
                 <div class="bg-[#F3E8EF] px-4 py-3 flex justify-between items-center border-b border-[#DCCFD8] mb-2">
                     <div class="flex items-center">
                         <div class="h-12 w-12 rounded-full flex items-center justify-center overflow-hidden">
-                            <img src="{{ asset('/images/chat-profile.png') }}" alt="Support Agent"
+                            <img src="{{ asset('public/images/chat-profile.png') }}" alt="Support Agent"
                                 class="h-full w-full object-contain" />
                         </div>
                         <span class="ml-3 font-medium text-gray-700 app-main">Support Team</span>
@@ -253,7 +253,7 @@
                             </div>
                             <div class="ml-2">
                                 <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                    <img src="{{ asset('/images/D-profile.png') }}" alt="User"
+                                    <img src="{{ asset('public/images/D-profile.png') }}" alt="User"
                                         class="h-full w-full object-cover" />
                                 </div>
                                 <div class=" flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:45</div>
@@ -266,7 +266,7 @@
                         <div class="flex items-end">
                             <div class="mr-2">
                                 <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                    <img src="{{ asset('/images/patient-1.png') }}" alt="Support"
+                                    <img src="{{ asset('public/images/patient-1.png') }}" alt="Support"
                                         class="h-full w-full object-contain" />
                                 </div>
                                 <div class="flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:46</div>
@@ -287,7 +287,7 @@
                             </div>
                             <div class="ml-2">
                                 <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                    <img src="{{ asset('/images/D-profile.png') }}" alt="User"
+                                    <img src="{{ asset('public/images/D-profile.png') }}" alt="User"
                                         class="h-full w-full object-cover" />
                                 </div>
                                 <div class=" flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:48</div>
@@ -300,7 +300,7 @@
                         <div class="flex items-end">
                             <div class="mr-2">
                                 <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                    <img src="{{ asset('/images/patient-1.png') }}" alt="Support"
+                                    <img src="{{ asset('public/images/patient-1.png') }}" alt="Support"
                                         class="h-full w-full object-contain" />
                                 </div>
                                 <div class="flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:49</div>
@@ -321,7 +321,7 @@
                             </div>
                             <div class="ml-2">
                                 <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                    <img src="{{ asset('/images/D-profile.png') }}" alt="User"
+                                    <img src="{{ asset('public/images/D-profile.png') }}" alt="User"
                                         class="h-full w-full object-cover" />
                                 </div>
                                 <div class=" flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:52</div>
@@ -334,7 +334,7 @@
                         <div class="flex items-end">
                             <div class="mr-2">
                                 <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                    <img src="{{ asset('/images/patient-1.png') }}" alt="Support"
+                                    <img src="{{ asset('public/images/patient-1.png') }}" alt="Support"
                                         class="h-full w-full object-contain" />
                                 </div>
                                 <div class="flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:53</div>
@@ -355,7 +355,7 @@
                             </div>
                             <div class="ml-2">
                                 <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                    <img src="{{ asset('/images/D-profile.png') }}" alt="User"
+                                    <img src="{{ asset('public/images/D-profile.png') }}" alt="User"
                                         class="h-full w-full object-cover" />
                                 </div>
                                 <div class=" flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:54</div>
@@ -367,7 +367,7 @@
                         <div class="flex items-end">
                             <div class="mr-2">
                                 <div class="h-12 w-12 rounded-full  flex items-center justify-center overflow-hidden">
-                                    <img src="{{ asset('/images/patient-1.png') }}" alt="Support"
+                                    <img src="{{ asset('public/images/patient-1.png') }}" alt="Support"
                                         class="h-full w-full object-contain" />
                                 </div>
                                 <div class="flex items-center justify-center text-xs text-[#B1A4AD] mt-1">6:55</div>

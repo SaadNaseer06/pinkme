@@ -53,7 +53,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 box-gap">
             <!--- Box 1 -->
             <div class="bg-[#F3E8EF] rounded-lg p-4  flex items-center space-x-4 box-padding">
-                <img src="{{ asset('images/app-icon-1.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
+                <img src="{{ asset('public/images/app-icon-1.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
                 <div class="space-y-2">
                     <h1 class="text-lg font-semibold text-gray-800 app-text ">
                         All Applications
@@ -63,7 +63,7 @@
             </div>
             <!--- Box 2 -->
             <div class="bg-[#F3E8EF] rounded-lg p-4  flex items-center space-x-4 box-padding">
-                <img src="{{ asset('images/app-icon-2.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
+                <img src="{{ asset('public/images/app-icon-2.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
                 <div class="space-y-2">
                     <h1 class="text-lg font-semibold text-gray-800 app-text">
                         Pending Applications
@@ -73,7 +73,7 @@
             </div>
             <!--- Box 3 -->
             <div class="bg-[#F3E8EF] rounded-lg p-4  flex items-center space-x-4 box-padding">
-                <img src="{{ asset('images/app-icon-3.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
+                <img src="{{ asset('public/images/app-icon-3.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
                 <div class="space-y-2">
                     <h1 class="text-lg font-semibold text-gray-800 app-text">
                         Approved Applications
@@ -83,7 +83,7 @@
             </div>
             <!--- Box 4 -->
             <div class="bg-[#F3E8EF] rounded-lg p-4  flex items-center space-x-4 box-padding">
-                <img src="{{ asset('images/app-icon-4.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
+                <img src="{{ asset('public/images/app-icon-4.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
                 <div class="space-y-2">
                     <h1 class="text-lg font-semibold text-gray-800 app-text">
                         Rejected Applications
@@ -124,11 +124,11 @@
                         + Add New
                     </button>
                     <div class="flex items-center space-x-1 bg-pink-500 px-4 py-2 rounded-md md:hidden flex">
-                        <img src="{{ asset('images/export.svg') }}" alt="" />
+                        <img src="{{ asset('public/images/export.svg') }}" alt="" />
                     </div>
                     {{-- <div class="flex items-center space-x-2 bg-pink-500 px-8 py-2 rounded-md md:flex hidden">
                         <button class="text-white text-sm font-medium app-text">Export</button>
-                        <img src="{{ asset('images/export.svg') }}" alt="" />
+                        <img src="{{ asset('public/images/export.svg') }}" alt="" />
                     </div> --}}
                 </div>
             </div>
@@ -163,7 +163,7 @@
                                 </td>
                                 <td class="p-2">
                                     <div class="flex items-center gap-3">
-                                        <img src="{{ asset('images/profile-1.png') }}" alt=""
+                                        <img src="{{ asset('public/images/profile-1.png') }}" alt=""
                                             class="w-8 h-8 rounded-full" />
                                         <span
                                             class="text-[#91848C] text-[16px] font-light app-text">{{ $application->title }}</span>

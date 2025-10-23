@@ -12,7 +12,7 @@
                 <!-- Left column with profile picture and basic info -->
                 <div class="w-1/3 p-6 flex flex-col items-center p-box">
                     <div class="w-24 h-24 rounded-full overflow-hidden mb-3">
-                        <img src="{{ asset('images/D-profile.png') }}" alt="User Avatar" class="w-full h-full object-cover" />
+                        <img src="{{ asset('public/images/D-profile.png') }}" alt="User Avatar" class="w-full h-full object-cover" />
                     </div>
                     <h3 class="text-lg font-medium app-main">Sara Tylor</h3>
                     <p class="text-sm text-[#91848C] app-text">24 years, California</p>
@@ -158,10 +158,10 @@
                     </div>
                     <div class="flex items-center space-x-2 bg-pink-500 px-4 py-2 rounded-md md:flex hidden">
                         <button class="text-white text-sm font-medium">Upload</button>
-                        <img src="{{ asset('images/upload.svg') }}" alt="" />
+                        <img src="{{ asset('public/images/upload.svg') }}" alt="" />
                     </div>
                     <div class="flex items-center space-x-2 bg-pink-500 px-4 py-3 rounded-md md:hidden flex">
-                        <img src="{{ asset('images/upload.svg') }}" alt="" />
+                        <img src="{{ asset('public/images/upload.svg') }}" alt="" />
                     </div>
                 </div>
 
@@ -169,21 +169,21 @@
                 <ul class="space-y-6">
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-2 group cursor-pointer">
-                            <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                            <img src="{{ asset('images/document-pink.svg') }}" alt="" class="w-6 h-6 hidden group-hover:block" />
+                            <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                            <img src="{{ asset('public/images/document-pink.svg') }}" alt="" class="w-6 h-6 hidden group-hover:block" />
                             <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                 Mamogram_Report_Jan.pdf
                             </span>
                         </div>
                         <div class="flex items-center">
                             <button class="text-pink-500 mr-2 group relative w-6 h-6">
-                                <img src="{{ asset('images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                                <img src="{{ asset('images/eye-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/eye-pink.svg') }}" alt=""
                                     class="w-6 h-6 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                             <button class="group relative w-4 h-4">
-                                <img src="{{ asset('images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
-                                <img src="{{ asset('images/cross-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/cross-pink.svg') }}" alt=""
                                     class="w-4 h-4 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                         </div>
@@ -191,8 +191,8 @@
 
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-2 group cursor-pointer">
-                            <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                            <img src="{{ asset('images/document-pink.svg') }}" alt=""
+                            <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                            <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
                             <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                 Mamogram_Report_Feb.pdf
@@ -200,13 +200,13 @@
                         </div>
                         <div class="flex items-center">
                             <button class="text-pink-500 mr-2 group relative w-6 h-6">
-                                <img src="{{ asset('images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                                <img src="{{ asset('images/eye-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/eye-pink.svg') }}" alt=""
                                     class="w-6 h-6 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                             <button class="group relative w-4 h-4">
-                                <img src="{{ asset('images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
-                                <img src="{{ asset('images/cross-pink.svg') }}"
+                                <img src="{{ asset('public/images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/cross-pink.svg') }}"
                                     class="w-4 h-4 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                         </div>
@@ -214,8 +214,8 @@
 
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-2 group cursor-pointer">
-                            <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                            <img src="{{ asset('images/document-pink.svg') }}" alt=""
+                            <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                            <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
                             <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                 Mamogram_Report_Mar.pdf
@@ -224,13 +224,13 @@
 
                         <div class="flex items-center">
                             <button class="text-pink-500 mr-2 group relative w-6 h-6">
-                                <img src="{{ asset('images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                                <img src="{{ asset('images/eye-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/eye-pink.svg') }}" alt=""
                                     class="w-6 h-6 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                             <button class="group relative w-4 h-4">
-                                <img src="{{ asset('images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
-                                <img src="{{ asset('images/cross-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/cross-pink.svg') }}" alt=""
                                     class="w-4 h-4 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                         </div>
@@ -239,8 +239,8 @@
 
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-2 group cursor-pointer">
-                            <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                            <img src="{{ asset('images/document-pink.svg') }}" alt=""
+                            <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                            <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
                             <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                 Mamogram_Report_Apr.pdf
@@ -248,13 +248,13 @@
                         </div>
                         <div class="flex items-center">
                             <button class="text-pink-500 mr-2 group relative w-6 h-6">
-                                <img src="{{ asset('images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                                <img src="{{ asset('images/eye-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/eye-pink.svg') }}" alt=""
                                     class="w-6 h-6 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                             <button class="group relative w-4 h-4">
-                                <img src="{{ asset('images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
-                                <img src="{{ asset('images/cross-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/cross-pink.svg') }}" alt=""
                                     class="w-4 h-4 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                         </div>
@@ -262,8 +262,8 @@
 
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-2 group cursor-pointer">
-                            <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                            <img src="{{ asset('images/document-pink.svg') }}" alt=""
+                            <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                            <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
                             <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                 Mamogram_Report_May.pdf
@@ -271,13 +271,13 @@
                         </div>
                         <div class="flex items-center">
                             <button class="text-pink-500 mr-2 group relative w-6 h-6">
-                                <img src="{{ asset('images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                                <img src="{{ asset('images/eye-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/eye-pink.svg') }}" alt=""
                                     class="w-6 h-6 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                             <button class="group relative w-4 h-4">
-                                <img src="{{ asset('images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
-                                <img src="{{ asset('images/cross-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/cross-pink.svg') }}" alt=""
                                     class="w-4 h-4 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                         </div>
@@ -285,8 +285,8 @@
 
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-2 group cursor-pointer">
-                            <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                            <img src="{{ asset('images/document-pink.svg') }}" alt=""
+                            <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                            <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
                             <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                 Mamogram_Report_Jun.pdf
@@ -294,13 +294,13 @@
                         </div>
                         <div class="flex items-center">
                             <button class="text-pink-500 mr-2 group relative w-6 h-6">
-                                <img src="{{ asset('images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                                <img src="{{ asset('images/eye-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/eye-pink.svg') }}" alt=""
                                     class="w-6 h-6 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                             <button class="group relative w-4 h-4">
-                                <img src="{{ asset('images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
-                                <img src="{{ asset('images/cross-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/cross-pink.svg') }}" alt=""
                                     class="w-4 h-4 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                         </div>
@@ -308,8 +308,8 @@
 
                     <li class="flex justify-between items-center">
                         <div class="flex items-center gap-2 group cursor-pointer">
-                            <img src="{{ asset('images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                            <img src="{{ asset('images/document-pink.svg') }}" alt=""
+                            <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                            <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
                             <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
                                 Mamogram_Report_Jul.pdf
@@ -317,13 +317,13 @@
                         </div>
                         <div class="flex items-center">
                             <button class="text-pink-500 mr-2 group relative w-6 h-6">
-                                <img src="{{ asset('images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
-                                <img src="{{ asset('images/eye-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/eye-pink.svg') }}" alt=""
                                     class="w-6 h-6 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                             <button class="group relative w-4 h-4">
-                                <img src="{{ asset('images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
-                                <img src="{{ asset('images/cross-pink.svg') }}" alt=""
+                                <img src="{{ asset('public/images/cross.svg') }}" alt="" class="w-4 h-4 block group-hover:hidden" />
+                                <img src="{{ asset('public/images/cross-pink.svg') }}" alt=""
                                     class="w-4 h-4 hidden group-hover:block absolute top-0 left-0" />
                             </button>
                         </div>
@@ -373,7 +373,7 @@
 
                             <td class="p-2">
                                 <div class="flex items-center gap-3">
-                                    <img src="{{ asset('images/profile-1.png') }}" alt="" class="w-8 h-8 rounded-full" />
+                                    <img src="{{ asset('public/images/profile-1.png') }}" alt="" class="w-8 h-8 rounded-full" />
                                     <span class="text-[#91848C] text-[16px] font-light app-text">Medical Aid Request</span>
                                 </div>
                             </td>
@@ -393,7 +393,7 @@
 
                             <td
                                 class="p-2 mt-2 text-[#91848C] text-[16px] font-light flex items-center underline gap-1 app-text">
-                                <img src="{{ asset('images/download.svg') }}" alt="" class="w-4 h-4">Download</td>
+                                <img src="{{ asset('public/images/download.svg') }}" alt="" class="w-4 h-4">Download</td>
                         </tr>
 
                         <!-- Row 2 -->
@@ -405,7 +405,7 @@
 
                             <td class="p-2">
                                 <div class="flex items-center gap-3">
-                                    <img src="{{ asset('images/profile-2.png') }}" alt="" class="w-8 h-8 rounded-full" />
+                                    <img src="{{ asset('public/images/profile-2.png') }}" alt="" class="w-8 h-8 rounded-full" />
                                     <span class="text-[#91848C] text-[16px] font-light app-text">Surgery Assistance</span>
                                 </div>
                             </td>
@@ -425,7 +425,7 @@
 
                             <td
                                 class="p-2 mt-2 text-[#91848C] text-[16px] font-light flex items-center underline gap-1 app-text">
-                                <img src="{{ asset('images/download.svg') }}" alt="" class="w-4 h-4">Download</td>
+                                <img src="{{ asset('public/images/download.svg') }}" alt="" class="w-4 h-4">Download</td>
                         </tr>
 
                         <!-- Row 3 -->
@@ -437,7 +437,7 @@
 
                             <td class="p-2">
                                 <div class="flex items-center gap-3">
-                                    <img src="{{ asset('images/profile-3.png') }}" alt="" class="w-8 h-8 rounded-full" />
+                                    <img src="{{ asset('public/images/profile-3.png') }}" alt="" class="w-8 h-8 rounded-full" />
                                     <span class="text-[#91848C] text-[16px] font-light app-text">Hospital Bill
                                         Support</span>
                                 </div>
@@ -458,7 +458,7 @@
 
                             <td
                                 class="p-2 mt-2 text-[#91848C] text-[16px] font-light flex items-center underline gap-1 app-text">
-                                <img src="{{ asset('images/download.svg') }}" alt="" class="w-4 h-4">Download</td>
+                                <img src="{{ asset('public/images/download.svg') }}" alt="" class="w-4 h-4">Download</td>
                         </tr>
                     </tbody>
                 </table>

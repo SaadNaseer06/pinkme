@@ -2,7 +2,7 @@
     $user = auth()->user();
     $profile = $user->profile;
     $fullName = $profile ? $profile->full_name : 'Unknown User';
-    $avatarUrl = $profile && $profile->avatar ? asset('/storage/' . $profile->avatar) : asset('images/profile.png');
+
 @endphp
 
 @extends('patient.layouts.app')
@@ -19,7 +19,7 @@
             <div class="bg-[#F3E8EF] rounded-lg p-6">
                 <div class="flex flex-col items-center mb-6">
                     <div class="w-32 h-32 rounded-full overflow-hidden mb-4">
-                        <img src="{{ $avatarUrl }}" alt="User Avatar" class="w-full h-full object-cover" />
+                        <img src="{{ auth()->user()->avatar_url }}" alt="User Avatar" class="w-full h-full object-cover" />
                     </div>
                     <h3 class="text-lg font-medium app-main">{{ $patient->user->profile->full_name ?? 'N/A' }}</h3>
                     <p class="text-sm text-[#91848C] app-text">
@@ -112,7 +112,7 @@
 
             <!-- Illustration -->
             <div class="bg-[#F3E8EF] rounded-lg p-6 flex justify-center items-center tab-board">
-                <img src="{{ asset('/images/D-illustration.png') }}" alt="Review Process Illustration"
+                <img src="{{ asset('public/images/D-illustration.png') }}" alt="Review Process Illustration"
                     class="max-h-72 object-contain" />
             </div>
         </div>

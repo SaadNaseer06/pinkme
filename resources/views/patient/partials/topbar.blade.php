@@ -2,8 +2,6 @@
     $user = auth()->user();
     $profile = $user->profile;
     $fullName = $profile ? $profile->full_name : 'Unknown User';
-    $avatarUrl = $profile && $profile->avatar ? asset('/storage/' . $profile->avatar) : asset('images/profile.png');
-    // dd($avatarUrl);
 @endphp
 
 <!-- Top Navigation Bar -->
@@ -22,16 +20,16 @@
     <div class="flex items-center space-x-4 tab-p">
         <!-- Left Menu Icons -->
         <div class="flex items-center space-x-6 ml-2">
-            <img src="{{ asset('images/HAM.svg') }}" alt="Menu" class="hamburger hamburgerBtn" />
+            <img src="{{ asset('public/images/HAM.svg') }}" alt="Menu" class="hamburger hamburgerBtn" />
 
             <button id="fullscreenBtn">
-                <img src="{{ asset('images/scanner.svg') }}" alt="Scanner" class="h-3" />
+                <img src="{{ asset('public/images/scanner.svg') }}" alt="Scanner" class="h-3" />
             </button>
 
             <!-- Notification Wrapper -->
             <div class="relative inline-block notificationWrapper">
                 <div class="cursor-pointer" onclick="toggleDropdown(event)">
-                    <img src="{{ asset('images/notification.svg') }}" alt="Notifications" class="h-4" />
+                    <img src="{{ asset('public/images/notification.svg') }}" alt="Notifications" class="h-4" />
                 </div>
 
                 <!-- Notification Dropdown -->
@@ -45,7 +43,7 @@
                     <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto">
                         <!-- Example Notification Item -->
                         <div class="flex items-center px-4 py-3 space-x-3 cursor-pointer">
-                            <img src="{{ asset('images/patient-1.png') }}" class="w-10 h-10 rounded-full" />
+                            <img src="{{ asset('public/images/patient-1.png') }}" class="w-10 h-10 rounded-full" />
                             <div class="flex-1">
                                 <p class="text-sm font-semibold text-[#213430]">Lorem ipsum</p>
                                 <p class="text-xs text-[#A9A9A9]">Sed ut</p>
@@ -53,7 +51,7 @@
                             <span class="text-xs text-[#A9A9A9] whitespace-nowrap">Just Now</span>
                         </div>
                         <div class="flex items-center px-4 py-3 space-x-3 cursor-pointer">
-                            <img src="{{ asset('images/patient-11.png') }}" class="w-10 h-10 rounded-full" />
+                            <img src="{{ asset('public/images/patient-11.png') }}" class="w-10 h-10 rounded-full" />
                             <div class="flex-1">
                                 <p class="text-sm font-semibold text-[#213430]">
                                     Lorem ipsum
@@ -71,7 +69,7 @@
         <div class="relative inline-block profileWrapper">
             <div class="flex items-center space-x-2 cursor-pointer" onclick="toggleProfileDropdown(event)">
                 <div class="w-10 h-10 overflow-hidden rounded-full border">
-                    <img src="{{ $avatarUrl }}" alt="Profile Picture" class="w-full h-full object-cover" />
+                    <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" class="w-full h-full object-cover" />
                 </div>
                 <div class="text-left">
                     <p class="text-sm font-normal text-[#213430]">{{ $fullName }}</p>
@@ -88,7 +86,7 @@
                 <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto bg-transparent">
                     <div class="p-3 space-y-3">
                         <a href="{{ route('patient.profile') }}" class="flex items-start space-x-3 p-2 rounded-md">
-                            <img src="{{ asset('images/p-1.svg') }}" class="w-5 h-5 mt-1" />
+                            <img src="{{ asset('public/images/p-1.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">My Profile</p>
                                 <p class="text-xs text-[#A9A9A9]">View personal profile details.</p>
@@ -96,7 +94,7 @@
                         </a>
                         <div class="border-b border-[#B9B1B6]"></div>
                         <a href="{{ route('patient.setting') }}" class="flex items-start space-x-3 p-2 rounded-md">
-                            <img src="{{ asset('images/p-2.svg') }}" class="w-5 h-5 mt-1" />
+                            <img src="{{ asset('public/images/p-2.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">Edit Profile</p>
                                 <p class="text-xs text-[#A9A9A9]">Modify your personal details.</p>
@@ -129,19 +127,19 @@
 
     <!-- User Menu -->
     <div class="flex items-center justify-between w-full  ">
-        <img src="{{ asset('images/HAM.svg') }}" alt="Menu " class="hamburger mt-2 ml-2 hamburgerBtn">
+        <img src="{{ asset('public/images/HAM.svg') }}" alt="Menu " class="hamburger mt-2 ml-2 hamburgerBtn">
         <div class="flex items-center space-x-4 tab-p">
             <!-- Left Menu Icons -->
             <div class="flex items-center space-x-6 ml-2">
 
                 <button id="fullscreenBtn">
-                    <img src="{{ asset('images/scanner.svg') }}" alt="Scanner" class="h-3" />
+                    <img src="{{ asset('public/images/scanner.svg') }}" alt="Scanner" class="h-3" />
                 </button>
 
                 <!-- Notification Wrapper -->
                 <div class="relative inline-block notificationWrapper">
                     <div class="cursor-pointer" onclick="toggleDropdown(event)">
-                        <img src="{{ asset('images/notification.svg') }}" alt="Notifications" class="h-4" />
+                        <img src="{{ asset('public/images/notification.svg') }}" alt="Notifications" class="h-4" />
                     </div>
 
                     <!-- Notification Dropdown -->
@@ -155,7 +153,7 @@
                         <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto">
                             <!-- Example Notification Item -->
                             <div class="flex items-center px-4 py-3 space-x-3 cursor-pointer">
-                                <img src="{{ asset('images/patient-1.png') }}" class="w-10 h-10 rounded-full" />
+                                <img src="{{ asset('public/images/patient-1.png') }}" class="w-10 h-10 rounded-full" />
                                 <div class="flex-1">
                                     <p class="text-sm font-semibold text-[#213430]">Lorem ipsum</p>
                                     <p class="text-xs text-[#A9A9A9]">Sed ut</p>
@@ -163,7 +161,7 @@
                                 <span class="text-xs text-[#A9A9A9] whitespace-nowrap">Just Now</span>
                             </div>
                             <div class="flex items-center px-4 py-3 space-x-3 cursor-pointer">
-                                <img src="{{ asset('images/patient-11.png') }}" class="w-10 h-10 rounded-full" />
+                                <img src="{{ asset('public/images/patient-11.png') }}" class="w-10 h-10 rounded-full" />
                                 <div class="flex-1">
                                     <p class="text-sm font-semibold text-[#213430]">
                                         Lorem ipsum
@@ -181,7 +179,7 @@
             <div class="relative inline-block profileWrapper">
                 <div class="flex items-center space-x-2 cursor-pointer" onclick="toggleProfileDropdown(event)">
                     <div class="w-10 h-10 overflow-hidden rounded-full border">
-                        <img src="{{ $avatarUrl }}" alt="Profile Picture"
+                        <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture"
                             class="w-full h-full object-cover" />
                     </div>
                     <div class="text-left">
@@ -200,7 +198,7 @@
                         <div class="p-3 space-y-3">
                             <a href="{{ route('patient.profile') }}"
                                 class="flex items-start space-x-3 p-2 rounded-md">
-                                <img src="{{ asset('images/p-1.svg') }}" class="w-5 h-5 mt-1" />
+                                <img src="{{ asset('public/images/p-1.svg') }}" class="w-5 h-5 mt-1" />
                                 <div>
                                     <p class="text-sm font-semibold text-[#213430]">My Profile</p>
                                     <p class="text-xs text-[#A9A9A9]">View personal profile details.</p>
@@ -209,7 +207,7 @@
                             <div class="border-b border-[#B9B1B6]"></div>
                             <a href="{{ route('patient.setting') }}"
                                 class="flex items-start space-x-3 p-2 rounded-md">
-                                <img src="{{ asset('images/p-2.svg') }}" class="w-5 h-5 mt-1" />
+                                <img src="{{ asset('public/images/p-2.svg') }}" class="w-5 h-5 mt-1" />
                                 <div>
                                     <p class="text-sm font-semibold text-[#213430]">Edit Profile</p>
                                     <p class="text-xs text-[#A9A9A9]">Modify your personal details.</p>

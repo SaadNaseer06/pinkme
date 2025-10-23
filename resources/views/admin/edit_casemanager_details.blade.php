@@ -39,7 +39,7 @@
                     <div class="relative">
                         <div class="w-28 h-28 rounded-full overflow-hidden bg-white flex items-center justify-center">
                             <img id="avatarPreview"
-                                src="{{ optional($reviewer->profile)->avatar ? asset('storage/' . $reviewer->profile->avatar) : asset('images/profile.png') }}"
+                                src="{{ $reviewer->avatar_url }}"
                                 alt="Profile" class="object-cover w-full h-full" />
                         </div>
                         <label for="avatar"

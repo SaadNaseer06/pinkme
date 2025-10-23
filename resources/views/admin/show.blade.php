@@ -25,7 +25,7 @@
                             <div class="flex flex-col md:flex-row gap-6">
                                 <!-- Reviewer Avatar -->
                                 <div class="flex-shrink-0">
-                                    <img src="{{ $reviewer->profile ? asset('storage/' . $reviewer->profile->image) : asset('images/default-avatar.png') }}"
+                                    <img src="{{ $reviewer->avatar_url }}"
                                         alt="{{ $reviewer->name }}"
                                         class="w-32 h-32 rounded-full object-cover shadow-md border-4 border-[#DB69A2]">
                                 </div>

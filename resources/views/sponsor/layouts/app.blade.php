@@ -16,7 +16,7 @@
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {{-- Favicon --}}
-    <link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('public/images/favicon.png') }}" type="image/x-icon">
     {{-- Tailwind Config --}}
     <script>
         tailwind.config = {

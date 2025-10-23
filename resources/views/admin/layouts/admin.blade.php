@@ -6,17 +6,17 @@
     <title>@yield('title', 'Admin Panel')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    @vite('resources/css/app.css')
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    @vite('resources/css/custom.css')
+    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
     @stack('head')
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {{-- Favicon --}}
-    <link rel="icon" href="{{ asset('images/favicon.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('public/images/favicon.png') }}" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- Tailwind Config --}}
     <script>

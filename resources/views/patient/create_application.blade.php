@@ -63,7 +63,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <img src="{{ asset('images/down-arrow.svg') }}" alt="arrow"
+                                <img src="{{ asset('public/images/down-arrow.svg') }}" alt="arrow"
                                     class="absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none">
                             </div>
                         </div>

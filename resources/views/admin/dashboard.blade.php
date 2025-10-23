@@ -286,7 +286,7 @@
                                                         <span>View Application</span>
                                                     </a>
                                                     <a href="{{ $appListUrl }}" class="patient-action-item">
-                                                        <img src="{{ asset('images/assign.svg') }}" alt="" class="patient-action-icon">
+                                                        <img src="{{ asset('public/images/assign.svg') }}" alt="" class="patient-action-icon">
                                                         <span>Open Applications List</span>
                                                     </a>
                                                     {{-- @if (!empty($patientEmail))
@@ -329,13 +329,13 @@
                         </h2>
                         <div class="flex items-center gap-2 text-sm text-[#91848C] pt-6 px-3 relative">
                             <div class="bg-[#FDD7EC] p-1 rounded-md">
-                                <img src="{{ asset('/images/Calender.svg') }}" alt="Calendar" class="w-5 h-5" />
+                                <img src="{{ asset('public/images/Calender.svg') }}" alt="Calendar" class="w-5 h-5" />
                             </div>
                             <div class="relative z-50">
                                 <button id="periodDropdown"
                                     class="flex items-center gap-1 hover:text-[#213430] transition-colors bg-white px-3 py-2 rounded-lg border border-[#DCCFD8] shadow-sm">
                                     <span id="currentPeriod">{{ $periodLabels[$timePeriod] }}</span>
-                                    <img src="{{ asset('/images/down-arrow.svg') }}" alt="Down"
+                                    <img src="{{ asset('public/images/down-arrow.svg') }}" alt="Down"
                                         class="w-3 h-3 transition-transform duration-200" id="dropdownIcon" />
                                 </button>
                                 <div id="periodOptions"
@@ -466,7 +466,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-3">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ optional($patient->user->profile)->avatar ? asset('storage/' . $patient->user->profile->avatar) : asset('images/patient-' . $loop->iteration . '.png') }}" alt=""
+                                            <img src="{{ $patient->user ? $patient->user->avatar_url : asset('public/images/profile.png') }}" alt=""
                                                 class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">
                                                 {{ $patient->user->name ?? 'Unknown' }}
@@ -514,7 +514,7 @@
                                                     <span>View in Patients List</span>
                                                 </a>
                                                 <a href="{{ $applicationsUrl }}" class="patient-action-item">
-                                                    <img src="{{ asset('images/assign.svg') }}" alt="" class="patient-action-icon">
+                                                    <img src="{{ asset('public/images/assign.svg') }}" alt="" class="patient-action-icon">
                                                     <span>View Applications</span>
                                                 </a>
                                                 @if (!empty($patient->user->email))

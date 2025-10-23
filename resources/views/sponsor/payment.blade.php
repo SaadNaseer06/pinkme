@@ -39,7 +39,7 @@
                 <button id="openFormBtn"
                     class="flex items-center justify-center h-full min-h-[220px] rounded-2xl border border-dashed border-[#C4B2BE] bg-[#F3E8EF] px-6 text-center text-[#213430] shadow-sm hover:border-[#DB69A2] hover:text-[#DB69A2]">
                     <div class="flex flex-col items-center space-y-2">
-                        <img src="{{ asset('images/add-payment.svg') }}" alt="Add" class="w-8 h-8" />
+                        <img src="{{ asset('public/images/add-payment.svg') }}" alt="Add" class="w-8 h-8" />
                         <span class="font-semibold">Add Payment Method</span>
                         <span class="text-sm text-gray-500">Store a card for quick sponsorships</span>
                     </div>
@@ -51,7 +51,7 @@
                         <div class="absolute inset-0 rounded-2xl bg-black/30 pointer-events-none"></div>
 
                         <div class="relative z-10 flex justify-between items-start">
-                            <img src="{{ asset('images/wifi.svg') }}" alt="Contactless" class="w-6 h-6" />
+                            <img src="{{ asset('public/images/wifi.svg') }}" alt="Contactless" class="w-6 h-6" />
                             <span class="text-xl tracking-wider font-semibold">PINKME</span>
                         </div>
                         <div class="relative z-10 mt-10 text-2xl tracking-[0.35em]" id="previewCardNumber">**** **** **** ****</div>
@@ -65,7 +65,7 @@
                                 <p class="text-base font-semibold" id="previewExpiry">MM / YY</p>
                             </div>
                         </div>
-                        <img id="previewLogo" src="{{ asset('images/payment-1.svg') }}"
+                        <img id="previewLogo" src="{{ asset('public/images/payment-1.svg') }}"
                             class="absolute bottom-6 right-6 z-10 h-8" alt="Card Network" />
                     </div>
                 </div>
@@ -143,8 +143,8 @@
 
                 <div class="flex flex-wrap items-center gap-2 mb-6" id="paymentMethods">
                     @foreach (['payment-1.svg', 'payment-2.svg', 'payment-3.svg', 'payment-4.svg'] as $logo)
-                        <div class="payment-option relative rounded-lg border border-[#DCCFD8] p-2 cursor-pointer" data-logo="{{ asset('images/' . $logo) }}">
-                            <img src="{{ asset('images/' . $logo) }}" class="h-8" alt="Payment option">
+                        <div class="payment-option relative rounded-lg border border-[#DCCFD8] p-2 cursor-pointer" data-logo="{{ asset('public/images/' . $logo) }}">
+                            <img src="{{ asset('public/images/' . $logo) }}" class="h-8" alt="Payment option">
                             <span class="check-icon absolute -top-2 -right-2 hidden h-5 w-5 rounded-full bg-[#DB69A2] text-white text-xs flex items-center justify-center">&#10003;</span>
                         </div>
                     @endforeach

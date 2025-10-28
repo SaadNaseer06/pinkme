@@ -28,10 +28,10 @@
                 href="{{ route('case_manager.patientProfiles') }}"><img
                     src="{{ request()->routeIs('case_manager.patientProfiles') ? asset('public/images/patient-pink.svg') : asset('public/images/patient.svg') }}"
                     alt="">Patient Profiles</a></li>
-        {{-- <li class="{{ request()->routeIs('case_manager.patientChats') ? 'active' : '' }}"><a
-                href="{{ route('case_manager.patientChats') }}"><img
-                    src="{{ request()->routeIs('case_manager.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"
-                    alt="">Patient Chats</a></li> --}}
+        <!--<li class="{{ request()->routeIs('case_manager.patientChats') ? 'active' : '' }}"><a-->
+        <!--        href="{{ route('case_manager.patientChats') }}"><img-->
+        <!--            src="{{ request()->routeIs('case_manager.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"-->
+        <!--            alt="">Patient Chats</a></li>-->
         <li class="{{ request()->routeIs('case_manager.setting') ? 'active' : '' }}"><a
                 href="{{ route('case_manager.setting') }}"><img
                     src="{{ request()->routeIs('case_manager.setting') ? asset('public/images/setting-pink.svg') : asset('public/images/setting.svg') }}"
@@ -73,14 +73,14 @@
                     <span class="title">Patient Profiles</span>
                 </a>
             </li>
-            {{-- <li class="{{ request()->routeIs('case_manager.patientChats') ? 'hovered' : '' }}">
-                <a href="{{ route('case_manager.patientChats') }}">
-                    <span class="icon"><img
-                            src="{{ request()->routeIs('case_manager.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"
-                            alt="" /></span>
-                    <span class="title">Patient Chats</span>
-                </a>
-            </li> --}}
+            <!--<li class="{{ request()->routeIs('case_manager.patientChats') ? 'hovered' : '' }}">-->
+            <!--    <a href="{{ route('case_manager.patientChats') }}">-->
+            <!--        <span class="icon"><img-->
+            <!--                src="{{ request()->routeIs('case_manager.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"-->
+            <!--                alt="" /></span>-->
+            <!--        <span class="title">Patient Chats</span>-->
+            <!--    </a>-->
+            <!--</li>-->
             <li class="{{ request()->routeIs('case_manager.setting') ? 'hovered' : '' }}">
                 <a href="{{ route('case_manager.setting') }}">
                     <span class="icon"><img

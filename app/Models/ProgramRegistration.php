@@ -83,7 +83,7 @@ class ProgramRegistration extends Model
             ->map(function ($path) {
                 return [
                     'path' => $path,
-                    'url' => asset('storage/app/public/' . $path),
+                    'url' => asset('storage/' . ltrim($path, '/')),
                     'filename' => basename($path),
                 ];
             })

@@ -2,10 +2,15 @@
 
 @php
     $eventDate = $event->date ? \Carbon\Carbon::parse($event->date) : null;
-    $formattedDate = $eventDate ? $eventDate->format('l, F d, Y � h:i A') : 'Date to be announced';
+    $formattedDate = $eventDate ? $eventDate->format('l, F d, Y • h:i A') : 'Date to be announced';
     $sponsorCount = $event->sponsorships->count();
     $totalRaised = number_format($event->sponsorship_total, 2);
     $locationLabel = $event->location ?: 'Location to be announced';
+    $descriptionHtml = $event->description
+        ? strip_tags($event->description, '<p><br><strong><em><u><ol><ul><li><a><span><div><blockquote>')
+        : null;
+    $descriptionText = strip_tags($event->description ?? '');
+    $isLongDescription = strlen($descriptionText) > 300;
 @endphp
 
 @section('content')
@@ -28,9 +33,24 @@
                         <span>Event Overview</span>
                     </div>
                     <h1 class="text-3xl md:text-4xl font-semibold">{{ $event->title }}</h1>
-                    <p class="text-sm md:text-base text-white/90 leading-relaxed max-w-2xl">
-                        {{ $event->description ?: 'No description has been added for this event yet.' }}
-                    </p>
+                    <div class="text-sm md:text-base text-white/90 leading-relaxed max-w-2xl">
+                        @if ($descriptionHtml)
+                            <div id="eventDescription" class="prose prose-sm prose-invert max-w-none {{ $isLongDescription ? 'line-clamp-4' : '' }}">
+                                {!! $descriptionHtml !!}
+                            </div>
+                            @if ($isLongDescription)
+                                <button onclick="toggleDescription()" id="readMoreBtn" 
+                                    class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-white/90 hover:text-white underline underline-offset-4 transition">
+                                    <span id="readMoreText">Read More</span>
+                                    <svg id="readMoreIcon" class="h-4 w-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                            @endif
+                        @else
+                            <p>No description has been added for this event yet.</p>
+                        @endif
+                    </div>
                     <div class="flex flex-wrap gap-3 text-sm">
                         <span class="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,4 +255,22 @@
     </div>
 @endsection
 
-
+@push('scripts')
+<script>
+    function toggleDescription() {
+        const description = document.getElementById('eventDescription');
+        const readMoreText = document.getElementById('readMoreText');
+        const readMoreIcon = document.getElementById('readMoreIcon');
+        
+        if (description.classList.contains('line-clamp-4')) {
+            description.classList.remove('line-clamp-4');
+            readMoreText.textContent = 'Read Less';
+            readMoreIcon.classList.add('rotate-180');
+        } else {
+            description.classList.add('line-clamp-4');
+            readMoreText.textContent = 'Read More';
+            readMoreIcon.classList.remove('rotate-180');
+        }
+    }
+</script>
+@endpush

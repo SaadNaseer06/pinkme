@@ -17,7 +17,13 @@
 
     // --- Base query ---
     $apps = Application::query()
-        ->with(['program:id,title', 'patient:id,user_id', 'patient.user:id,email', 'reviewer.profile', 'missingRequests'])
+        ->with([
+            'program:id,title',
+            'patient:id,user_id',
+            'patient.user:id,email',
+            'reviewer.profile',
+            'missingRequests',
+        ])
         ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
         ->latest('created_at')
         ->paginate(10)
@@ -114,10 +120,16 @@
                                 </div>
                             </div>
                             <div class="relative w-[180px] md:w-[270px]">
-                                <input type="text" name="q" id="searchInput" value="{{ request('q') }}" placeholder="Search by name, email, code, ID" class="w-full rounded-md px-3 py-2 text-sm text-[#213430] bg-[#F3E8EF] border border-[#91848C] focus:outline-none" autocomplete="off" />
-                                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                                <input type="text" name="q" id="searchInput" value="{{ request('q') }}"
+                                    placeholder="Search by name, email, code, ID"
+                                    class="w-full rounded-md px-3 py-2 text-sm text-[#213430] bg-[#F3E8EF] border border-[#91848C] focus:outline-none"
+                                    autocomplete="off" />
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
                                     </svg>
                                 </div>
                             </div>
@@ -174,8 +186,8 @@
                     <div class="flex items-center justify-between manager-row" data-user-id="{{ $manager->id }}">
                         <div class="flex items-center space-x-3">
                             @if (!empty($manager->profile?->avatar))
-                                <img src="{{ $manager ? $manager->avatar_url : asset('public/images/profile.png') }}" alt="Reviewer"
-                                    class="w-10 h-10 rounded-full" />
+                                <img src="{{ $manager ? $manager->avatar_url : asset('public/images/profile.png') }}"
+                                    alt="Reviewer" class="w-10 h-10 rounded-full" />
                             @else
                                 <img src="{{ asset('public/images/profile.png') }}" alt="Reviewer"
                                     class="w-10 h-10 rounded-full" />
@@ -229,10 +241,11 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         /* =========================
-               Utilities
-            ========================= */
+                       Utilities
+                    ========================= */
         const CSRF_TOKEN = '{{ csrf_token() }}';
         const LIST_URL = "{{ route('admin.applications.list') }}";
+        const APPLICATIONS_BASE_URL = "{{ url('admin/applications') }}";
 
         function showToast(message, type = 'success') {
             const icon = type === 'success' ?
@@ -284,7 +297,7 @@
 
             const $btn = $(this).prop('disabled', true).text('Deleting...');
             $.ajax({
-                url: `/admin/applications/${currentDeleteApplicationId}`,
+                url: `${APPLICATIONS_BASE_URL}/${currentDeleteApplicationId}`,
                 type: 'DELETE',
                 data: {
                     _token: CSRF_TOKEN
@@ -377,7 +390,7 @@
             if (!selectedReviewerId) return; // guard
             const $btn = $(this).prop('disabled', true).text('Assigning...');
             $.ajax({
-                url: `/admin/applications/${currentApplicationId}/assign-reviewer`,
+                url: `${APPLICATIONS_BASE_URL}/${currentApplicationId}/assign-reviewer`,
                 type: 'POST',
                 data: {
                     reviewer_id: selectedReviewerId,
@@ -447,7 +460,8 @@
                 $('#applicationsTableWrapper').html(html).removeClass('opacity-60');
             }).fail(function(xhr) {
                 $('#applicationsTableWrapper').removeClass('opacity-60');
-                showToast('Failed to load applications: ' + (xhr.responseJSON?.message || 'Unknown error'), 'error');
+                showToast('Failed to load applications: ' + (xhr.responseJSON?.message || 'Unknown error'),
+                    'error');
             });
         }
 
@@ -455,7 +469,10 @@
         const handleSearch = debounce(function() {
             const q = $('#searchInput').val();
             const range = $('#rangeFilter').val();
-            loadApplications({ q, range });
+            loadApplications({
+                q,
+                range
+            });
         }, 300);
 
         $('#searchInput').on('input', handleSearch);
@@ -465,7 +482,10 @@
             e.preventDefault();
             const q = $('#searchInput').val();
             const range = $('#rangeFilter').val();
-            loadApplications({ q, range });
+            loadApplications({
+                q,
+                range
+            });
         });
 
         // Intercept pagination links inside the wrapper

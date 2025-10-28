@@ -139,14 +139,14 @@ HTML;
                                         URL</label>
                                     <input type="url" name="facebook_url"
                                         value="{{ old('facebook_url', $settings->facebook_url ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]"
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
                                         required />
                                 </div>
                                 <div>
                                     <label class="block font-light text-md text-[#213430] mb-1 app-text">Twitter URL</label>
                                     <input type="url" name="twitter_url"
                                         value="{{ old('twitter_url', $settings->twitter_url ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]"
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
                                         required />
                                 </div>
                                 <div>
@@ -154,7 +154,7 @@ HTML;
                                         URL</label>
                                     <input type="url" name="instagram_url"
                                         value="{{ old('instagram_url', $settings->instagram_url ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]"
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
                                         required />
                                 </div>
                                 <div>
@@ -162,7 +162,7 @@ HTML;
                                         URL</label>
                                     <input type="url" name="linkedin_url"
                                         value="{{ old('linkedin_url', $settings->linkedin_url ?? '') }}"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]"
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
                                         required />
                                 </div>
 
@@ -170,7 +170,7 @@ HTML;
                                 <div class="md:col-span-2">
                                     <label class="block font-light text-md text-[#213430] mb-1 app-text">About Us</label>
                                     <textarea name="about_us_content" rows="4"
-                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430]" required>{{ old('about_us_content', $settings->about_us_content ?? '') }}</textarea>
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text" required>{{ old('about_us_content', $settings->about_us_content ?? '') }}</textarea>
                                 </div>
                             </div>
 

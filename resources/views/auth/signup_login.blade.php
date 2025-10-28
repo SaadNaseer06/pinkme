@@ -118,6 +118,7 @@
             color: rgb(55 65 81 / var(--tw-text-opacity, 1));
         }
 
+        /* Mobile-specific improvements */
         @media (max-width: 1023px) {
             .tab-form-img {
                 display: none !important;
@@ -128,7 +129,7 @@
             }
 
             .tab-logo {
-                height: 80px !important;
+                height: 70px !important;
             }
 
             .tab-bg {
@@ -136,32 +137,117 @@
             }
 
             .tab-shadow {
-                box-shadow: none !important;
-                padding: 2rem !important;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .tab-shadow {
-                box-shadow: none !important;
-                padding: 1rem !important;
-                margin-top: 2rem !important;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+                padding: 1.5rem !important;
+                margin-top: 1rem !important;
             }
 
-            .tab-logo {
-                height: 50px !important;
+            .mobile-container {
+                padding: 0.75rem !important;
+            }
+
+            .mobile-form-section {
+                padding: 1.25rem 1rem !important;
+            }
+
+            .mobile-hero {
+                min-height: 180px !important;
+                border-radius: 20px !important;
+                margin-bottom: 1.5rem !important;
+            }
+
+            .mobile-toggle {
+                margin-bottom: 1.5rem !important;
+                padding: 0.4rem !important;
+            }
+
+            .mobile-tab-btn {
+                padding: 0.75rem 0.5rem !important;
+                font-size: 0.875rem !important;
             }
 
             .mobile-h1 {
                 font-size: 1.5rem !important;
+                line-height: 1.3 !important;
+                margin-bottom: 0.5rem !important;
             }
 
             .mobile-h2 {
                 font-size: 0.875rem !important;
+                line-height: 1.4 !important;
             }
 
             .mobile-h3 {
                 font-size: 0.875rem !important;
+            }
+
+            .mobile-input {
+                padding: 0.875rem !important;
+                font-size: 0.875rem !important;
+            }
+
+            .mobile-btn {
+                padding: 0.875rem !important;
+                font-size: 1rem !important;
+            }
+
+            .mobile-grid {
+                gap: 0.75rem !important;
+            }
+
+            .mobile-space-y {
+                gap: 1.25rem !important;
+            }
+
+            .mobile-checkbox {
+                font-size: 0.75rem !important;
+            }
+
+            .mobile-hero__copy {
+                padding: 1.5rem !important;
+            }
+
+            .mobile-hero-title {
+                font-size: 1.25rem !important;
+                line-height: 1.4 !important;
+            }
+
+            .mobile-hero-subtitle {
+                font-size: 0.75rem !important;
+                line-height: 1.4 !important;
+            }
+
+            .mobile-hero-badge {
+                font-size: 0.7rem !important;
+                padding: 0.4rem 0.75rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .mobile-container {
+                padding: 0.5rem !important;
+            }
+
+            .mobile-form-section {
+                padding: 1rem 0.75rem !important;
+            }
+
+            .mobile-h1 {
+                font-size: 1.375rem !important;
+            }
+
+            .mobile-hero {
+                min-height: 160px !important;
+                border-radius: 16px !important;
+            }
+
+            .mobile-hero__copy {
+                padding: 1.25rem !important;
+            }
+
+            .mobile-hero-title {
+                font-size: 1.125rem !important;
             }
         }
 
@@ -279,6 +365,87 @@
             color: #fff;
         }
 
+        .mobile-toggle {
+            display: flex;
+            gap: 0.75rem;
+            background: #F3E8EF;
+            padding: 0.5rem;
+            border-radius: 9999px;
+            box-shadow: 0 14px 32px rgba(219, 105, 162, 0.18);
+            backdrop-filter: blur(18px);
+        }
+
+        .mobile-tab-btn {
+            flex: 1;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            padding: 0.85rem 1rem;
+            border-radius: 9999px;
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.55);
+            color: #91848C;
+            transition: all 0.25s ease;
+            font-size: 0.95rem;
+        }
+
+        .mobile-tab-btn.active {
+            background: linear-gradient(90deg, #DB69A2 0%, #FE6EB6 100%);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 16px 32px rgba(219, 105, 162, 0.35);
+        }
+
+        .mobile-hero {
+            position: relative;
+            min-height: 200px;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 26px 42px rgba(219, 105, 162, 0.22);
+        }
+
+        .mobile-hero img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mobile-hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(219, 105, 162, 0.85) 0%, rgba(254, 110, 182, 0.6) 100%);
+        }
+
+        .mobile-hero__copy {
+            position: relative;
+            z-index: 10;
+            color: #fff;
+        }
+
+        .auth-shell {
+            background: rgba(255, 255, 255, 0.65);
+            border-radius: 32px;
+            padding: 1.75rem;
+            box-shadow: 0 35px 70px rgba(66, 28, 49, 0.12);
+        }
+
+        @media (max-width: 1023px) {
+            .auth-shell {
+                padding: 1.5rem 1.25rem 2rem;
+                border-radius: 24px;
+                box-shadow: 0 24px 60px rgba(66, 28, 49, 0.15);
+            }
+        }
+
+        .form-wrapper {
+            width: 100%;
+            max-width: 520px;
+        }
+
         .tab-btn.bg-primary-600 {
             background: #DB69A2 !important;
             color: #fff !important;
@@ -325,10 +492,10 @@
 </head>
 
 <body
-    class="font-sans bg-gradient-to-br from-pink-50 via-white to-purple-50 min-h-screen flex items-center justify-center p-4">
-    <div class="container mx-auto max-w-7xl">
-        <div class="glass-effect rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
-            <div class="flex min-h-[700px]">
+    class="font-sans bg-gradient-to-br from-pink-50 via-white to-purple-50 min-h-screen flex items-center justify-center p-4 mobile-container">
+    <div class="container mx-auto max-w-6xl px-2 sm:px-4">
+        <div class="glass-effect rounded-[32px] shadow-2xl overflow-hidden animate-fade-in">
+            <div class="flex flex-col md:flex-row min-h-[720px]">
                 <!-- Left Panel with Dynamic Background and Tabs -->
                 <div class="w-1/3 relative sidebar tab-form-img">
                     <!-- Background image -->
@@ -344,10 +511,44 @@
                 </div>
 
                 <!-- Right Panel - Forms -->
-                <div class="w-2/3 p-12 flex items-center justify-center tab-form" id="form-container">
+                <div class="w-full md:w-2/3 p-4 md:p-12 flex items-center justify-center tab-form bg-white/40 md:bg-transparent"
+                    id="form-container">
+                    <!-- Mobile hero -->
+                    <div class="w-full md:hidden">
+                        <div class="mobile-hero mb-6">
+                            <img id="mobile-signup-bg" src="{{ asset('public/images/Patient Signup.png') }}"
+                                alt="Sign up illustration">
+                            <img id="mobile-login-bg" src="{{ asset('public/images/Patient Login.png') }}"
+                                alt="Login illustration" class="hidden">
+                            <div class="mobile-hero__copy px-6 py-8">
+                                <p id="mobile-hero-badge"
+                                    class="inline-flex items-center px-4 py-1.5 rounded-full bg-white/20 text-sm uppercase tracking-wide mb-3 mobile-hero-badge">
+                                    Join the community
+                                </p>
+                                <h2 id="mobile-hero-title"
+                                    class="text-2xl font-semibold leading-snug mobile-hero-title">
+                                    Start your healing journey with Pink "ME"
+                                </h2>
+                                <p id="mobile-hero-subtitle" class="text-sm mt-2 text-white/80 mobile-hero-subtitle">
+                                    Sign up to get personalised support, funding opportunities, and caring professionals
+                                    in your corner.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile toggle buttons -->
+                    <div class="w-full mb-8 md:hidden">
+                        <div class="mobile-toggle">
+                            <button id="mobile-signup" type="button" class="mobile-tab-btn"
+                                onclick="toggleForm('signup')">Sign Up</button>
+                            <button id="mobile-login" type="button" class="mobile-tab-btn"
+                                onclick="toggleForm('login')">Login</button>
+                        </div>
+                    </div>
 
                     <!-- Signup Form -->
-                    <div id="signup-form" class="w-full max-w-lg animate-fade-in">
+                    <div id="signup-form" class="form-wrapper auth-shell animate-fade-in mobile-form-section">
                         <div class="text-center mb-8">
                             <div class="flex justify-center mb-4">
                                 <img src="{{ asset('public/images/logo.png') }}" alt="Logo" class="h-16 tab-logo" />
@@ -374,24 +575,24 @@
                         <div id="tabContents">
                             <!-- Patient Signup Form -->
                             <div id="personal" class="tab-content animate-fade-in">
-                                <form method="POST" action="{{ route('register') }}" class="space-y-6">
+                                <form method="POST" action="{{ route('register') }}" class="space-y-6 mobile-space-y">
                                     @csrf
                                     <input type="hidden" name="role_id" value="2" />
                                     <div class="relative">
                                         <input type="text" name="full_name" placeholder=" "
                                             value="{{ old('full_name') }}" required
-                                            class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                            class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                         <label class="floating-label">Full Name</label>
                                         @error('full_name')
                                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
                                         <div class="relative">
                                             <input type="email" name="email" placeholder=" "
                                                 value="{{ old('email') }}" required
-                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                             <label class="floating-label">Email Address</label>
                                             @error('email')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -400,7 +601,7 @@
                                         <div class="relative">
                                             <input type="tel" name="phone" placeholder=" "
                                                 value="{{ old('phone') }}" required
-                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                             <label class="floating-label">Phone Number</label>
                                             @error('phone')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -408,11 +609,11 @@
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
                                         <div class="relative">
                                             <input type="date" name="date_of_birth"
                                                 value="{{ old('date_of_birth') }}"
-                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none mobile-h3" />
+                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none mobile-h3 mobile-input" />
                                             <label class="floating-label">Date of Birth</label>
                                             @error('date_of_birth')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -420,7 +621,7 @@
                                         </div>
                                         <div class="relative">
                                             <select name="gender"
-                                                class="form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3">
+                                                class="form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3 mobile-input">
                                                 <option value="">Select Gender</option>
                                                 <option value="female" @selected(old('gender') == 'female')>Female</option>
                                                 <option value="male" @selected(old('gender') == 'male')>Male</option>
@@ -436,7 +637,7 @@
 
                                     <div class="relative">
                                         <input type="password" name="password" placeholder=" " required
-                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                         <label class="floating-label">Password</label>
                                         <button type="button"
                                             class="absolute right-3 top-4 text-gray-400 hover:text-gray-600 toggle-password">
@@ -449,7 +650,7 @@
 
                                     <div class="relative">
                                         <input type="password" name="password_confirmation" placeholder=" " required
-                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                         <label class="floating-label">Confirm Password</label>
                                         <button type="button"
                                             class="absolute right-3 top-4 text-gray-400 hover:text-gray-600 toggle-password">
@@ -460,13 +661,15 @@
                                     <div class="flex items-start space-x-3">
                                         <input type="checkbox" name="terms" required
                                             class="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" />
-                                        <label class="text-sm text-gray-600">
+                                        <label class="text-sm text-gray-600 mobile-checkbox">
                                             I agree to the
                                             <a href="{{ route('policy.privacy') }}"
-                                                class="text-primary-600 hover:text-primary-700 underline font-medium" target="_blank">Terms
+                                                class="text-primary-600 hover:text-primary-700 underline font-medium"
+                                                target="_blank">Terms
                                                 of Service</a> and
                                             <a href="{{ route('policy.terms') }}"
-                                                class="text-primary-600 hover:text-primary-700 underline font-medium" target="_blank">Privacy
+                                                class="text-primary-600 hover:text-primary-700 underline font-medium"
+                                                target="_blank">Privacy
                                                 Policy</a>
                                         </label>
                                     </div>
@@ -475,7 +678,7 @@
                                     @enderror
 
                                     <button type="submit"
-                                        class="btn-primary w-full text-lg text-white py-4 rounded-xl font-semibold transition-all duration-300">
+                                        class="btn-primary w-full text-lg text-white py-4 rounded-xl font-semibold transition-all duration-300 mobile-btn">
                                         Create Account
                                     </button>
                                 </form>
@@ -484,16 +687,17 @@
                             <!-- Sponsor Signup Form -->
                             <div id="company" class="tab-content hidden animate-fade-in">
                                 <!-- Individual Sponsor Form -->
-                                <form method="POST" action="{{ route('register') }}" class="space-y-6">
+                                <form method="POST" action="{{ route('register') }}"
+                                    class="space-y-6 mobile-space-y">
                                     @csrf
                                     <input type="hidden" name="role_id" value="3" />
                                     <input type="hidden" name="sponsor_mode" value="individual" />
 
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
                                         <div class="relative">
                                             <select name="sponsor_mode" onchange="toggleSponsorType(this)"
-                                                class="sponsor-type-select form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3">
+                                                class="sponsor-type-select form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3 mobile-input">
                                                 <option value="individual">Individual Sponsor</option>
                                                 <option value="company">Company Sponsor</option>
                                             </select>
@@ -503,7 +707,7 @@
                                         <div class="relative">
                                             <input type="text" name="full_name" placeholder=" "
                                                 value="{{ old('full_name') }}" required
-                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                             <label class="floating-label">Full Name</label>
                                             @error('full_name')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -511,25 +715,25 @@
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
                                         <div class="relative">
                                             <input type="email" name="email" placeholder=" "
                                                 value="{{ old('email') }}" required
-                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                             <label class="floating-label">Email Address</label>
                                         </div>
                                         <div class="relative">
                                             <input type="tel" name="phone" placeholder=" "
                                                 value="{{ old('phone') }}" required
-                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                             <label class="floating-label">Phone Number</label>
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
                                         <div class="relative">
                                             <select name="gender"
-                                                class="form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3">
+                                                class="form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3 mobile-input">
                                                 <option value="">Select Gender</option>
                                                 <option value="female" @selected(old('gender') == 'female')>Female</option>
                                                 <option value="male" @selected(old('gender') == 'male')>Male</option>
@@ -540,7 +744,7 @@
                                         </div>
                                         <div class="relative">
                                             <select name="sponsor_type"
-                                                class="form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3">
+                                                class="form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3 mobile-input">
                                                 <option value="">Sponsor Type</option>
                                                 <option value="funding" @selected(old('sponsor_type') == 'funding')>Funding</option>
                                                 <option value="donation" @selected(old('sponsor_type') == 'donation')>Donation</option>
@@ -552,7 +756,7 @@
 
                                     <div class="relative">
                                         <input type="password" name="password" placeholder=" " required
-                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                         <label class="floating-label">Password</label>
                                         <button type="button"
                                             class="absolute right-3 top-4 text-gray-400 hover:text-gray-600 toggle-password">
@@ -562,7 +766,7 @@
 
                                     <div class="relative">
                                         <input type="password" name="password_confirmation" placeholder=" " required
-                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                         <label class="floating-label">Confirm Password</label>
                                         <button type="button"
                                             class="absolute right-3 top-4 text-gray-400 hover:text-gray-600 toggle-password">
@@ -573,7 +777,7 @@
                                     <div class="flex items-start space-x-3">
                                         <input type="checkbox" name="terms" required
                                             class="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" />
-                                        <label class="text-sm text-gray-600">
+                                        <label class="text-sm text-gray-600 mobile-checkbox">
                                             I agree to the
                                             <a href="{{ route('policy.terms') }}"
                                                 class="text-primary-600 hover:text-primary-700 underline font-medium">Terms
@@ -585,22 +789,22 @@
                                     </div>
 
                                     <button type="submit"
-                                        class="btn-primary w-full text-lg text-white py-4 rounded-xl font-semibold transition-all duration-300">
+                                        class="btn-primary w-full text-lg text-white py-4 rounded-xl font-semibold transition-all duration-300 mobile-btn">
                                         Create Sponsor Account
                                     </button>
                                 </form>
 
                                 <!-- Company Sponsor Form -->
                                 <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data"
-                                    class="space-y-6 hidden" id="companySponsorForm">
+                                    class="space-y-6 mobile-space-y hidden" id="companySponsorForm">
                                     @csrf
                                     <input type="hidden" name="role_id" value="3" />
                                     <input type="hidden" name="sponsor_mode" value="company" />
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
                                         <div class="relative">
                                             <select name="sponsor_mode" onchange="toggleSponsorType(this)"
-                                                class="sponsor-type-select form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3">
+                                                class="sponsor-type-select form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3 mobile-input">
                                                 <option value="individual">Individual Sponsor</option>
                                                 <option value="company" selected>Company Sponsor</option>
                                             </select>
@@ -610,7 +814,7 @@
                                         <div class="relative">
                                             <input type="text" name="company_name" placeholder=" "
                                                 value="{{ old('company_name') }}" required
-                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                             <label class="floating-label">Company Name</label>
                                             @error('company_name')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -618,11 +822,11 @@
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
                                         <div class="relative">
                                             <input type="email" name="company_email" placeholder=" "
                                                 value="{{ old('company_email') }}" required
-                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                             <label class="floating-label">Company Email</label>
                                             @error('company_email')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -631,7 +835,7 @@
                                         <div class="relative">
                                             <input type="tel" name="company_phone" placeholder=" "
                                                 value="{{ old('company_phone') }}" required
-                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                             <label class="floating-label">Company Phone</label>
                                             @error('company_phone')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -639,10 +843,10 @@
                                         </div>
                                     </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
                                         <div class="relative">
                                             <select name="company_type"
-                                                class="form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3"
+                                                class="form-input appearance-none w-full px-4 py-4 rounded-xl bg-gray-50 text-gray-700 outline-none pr-10 mobile-h3 mobile-input"
                                                 required>
                                                 <option value="">Company Type</option>
                                                 <option value="private" @selected(old('company_type') == 'private')>Private Limited
@@ -661,7 +865,7 @@
                                         <div class="relative">
                                             <input type="text" name="registration_number" placeholder=" "
                                                 value="{{ old('registration_number') }}" required
-                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                                class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                             <label class="floating-label">Registration Number</label>
                                             @error('registration_number')
                                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -686,7 +890,7 @@
 
                                     <div class="relative">
                                         <input type="password" name="password" placeholder=" " required
-                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                         <label class="floating-label">Password</label>
                                         <button type="button"
                                             class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 toggle-password">
@@ -699,7 +903,7 @@
 
                                     <div class="relative">
                                         <input type="password" name="password_confirmation" placeholder=" " required
-                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                            class="password-input form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                         <label class="floating-label">Confirm Password</label>
                                         <button type="button"
                                             class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 toggle-password">
@@ -710,7 +914,7 @@
                                     <div class="flex items-start space-x-3">
                                         <input type="checkbox" name="terms" required
                                             class="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" />
-                                        <label class="text-sm text-gray-600">
+                                        <label class="text-sm text-gray-600 mobile-checkbox">
                                             I agree to the
                                             <a href="#"
                                                 class="text-primary-600 hover:text-primary-700 underline font-medium">Terms
@@ -725,7 +929,7 @@
                                     @enderror
 
                                     <button type="submit"
-                                        class="btn-primary w-full text-lg text-white py-4 rounded-xl font-semibold transition-all duration-300">
+                                        class="btn-primary w-full text-lg text-white py-4 rounded-xl font-semibold transition-all duration-300 mobile-btn">
                                         Create Company Account
                                     </button>
                                 </form>
@@ -734,20 +938,21 @@
                     </div>
 
                     <!-- Login Form -->
-                    <div id="login-form" class="hidden w-full max-w-md animate-fade-in">
+                    <div id="login-form" class="hidden form-wrapper auth-shell animate-fade-in mobile-form-section">
                         <div class="text-center mb-8">
                             <div class="flex justify-center mb-4">
-                                <img src="{{ asset('public/images/logo.png') }}" alt="Logo" class="h-16" />
+                                <img src="{{ asset('public/images/logo.png') }}" alt="Logo"
+                                    class="h-16 tab-logo" />
                             </div>
-                            <h2 class="text-3xl font-bold text-gray-800 mb-2">
+                            <h2 class="text-3xl font-bold text-gray-800 mb-2 mobile-h1">
                                 Welcome Back
                             </h2>
-                            <p class="text-gray-600 text-lg">
+                            <p class="text-gray-600 text-lg mobile-h2">
                                 Sign in to your account
                             </p>
                         </div>
 
-                        <form method="POST" action="{{ route('login') }}" class="space-y-6">
+                        <form method="POST" action="{{ route('login') }}" class="space-y-6 mobile-space-y">
                             @csrf
 
                             @if (session('success'))
@@ -758,7 +963,7 @@
                             <div class="relative">
                                 <input type="text" name="login" placeholder=" " value="{{ old('login') }}"
                                     required
-                                    class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                    class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                 <label class="floating-label">Email or Phone</label>
                                 @error('login')
                                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -767,7 +972,7 @@
 
                             <div class="relative">
                                 <input id="login-password" type="password" name="password" placeholder=" " required
-                                    class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3" />
+                                    class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                 <label class="floating-label">Password</label>
                                 <button type="button"
                                     class="absolute right-3 top-4 text-gray-400 hover:text-gray-600"
@@ -784,7 +989,7 @@
                                     <input type="checkbox" name="remember"
                                         class="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                                         {{ old('remember') ? 'checked' : '' }} />
-                                    <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                                    <span class="ml-2 text-sm text-gray-600 mobile-checkbox">Remember me</span>
                                 </label>
                                 <a href="#" class="text-primary-600 hover:text-primary-700 text-sm font-medium">
                                     Forgot password?
@@ -792,7 +997,7 @@
                             </div>
 
                             <button type="submit"
-                                class="btn-primary w-full text-lg text-white py-4 rounded-xl font-semibold transition-all duration-300">
+                                class="btn-primary w-full text-lg text-white py-4 rounded-xl font-semibold transition-all duration-300 mobile-btn">
                                 Sign In
                             </button>
                         </form>
@@ -825,21 +1030,56 @@
             const loginBg = document.getElementById("login-bg");
             const sidebarSignup = document.getElementById("sidebar-signup");
             const sidebarLogin = document.getElementById("sidebar-login");
+            const mobileSignup = document.getElementById("mobile-signup");
+            const mobileLogin = document.getElementById("mobile-login");
+            const mobileSignupBg = document.getElementById("mobile-signup-bg");
+            const mobileLoginBg = document.getElementById("mobile-login-bg");
+            const mobileHeroTitle = document.getElementById("mobile-hero-title");
+            const mobileHeroSubtitle = document.getElementById("mobile-hero-subtitle");
+            const mobileHeroBadge = document.getElementById("mobile-hero-badge");
+
+            const heroCopy = {
+                signup: {
+                    title: 'Start your healing journey with Pink "ME"',
+                    subtitle: 'Sign up to get personalised support, funding opportunities, and caring professionals in your corner.',
+                    badge: 'Join the community',
+                },
+                login: {
+                    title: 'Welcome back, we saved your space',
+                    subtitle: 'Log in to manage applications, connect with sponsors, and keep your progress on track.',
+                    badge: 'Glad to see you',
+                },
+            };
 
             if (formType === "signup") {
                 signupForm.classList.remove("hidden");
                 loginForm.classList.add("hidden");
                 signupBg.classList.remove("hidden");
                 loginBg.classList.add("hidden");
-                sidebarSignup.classList.add("active");
-                sidebarLogin.classList.remove("active");
+                sidebarSignup?.classList.add("active");
+                sidebarLogin?.classList.remove("active");
+                mobileSignup?.classList.add("active");
+                mobileLogin?.classList.remove("active");
+                mobileSignupBg?.classList.remove("hidden");
+                mobileLoginBg?.classList.add("hidden");
             } else {
                 signupForm.classList.add("hidden");
                 loginForm.classList.remove("hidden");
                 signupBg.classList.add("hidden");
                 loginBg.classList.remove("hidden");
-                sidebarLogin.classList.add("active");
-                sidebarSignup.classList.remove("active");
+                sidebarLogin?.classList.add("active");
+                sidebarSignup?.classList.remove("active");
+                mobileLogin?.classList.add("active");
+                mobileSignup?.classList.remove("active");
+                mobileLoginBg?.classList.remove("hidden");
+                mobileSignupBg?.classList.add("hidden");
+            }
+
+            if (mobileHeroTitle && mobileHeroSubtitle && mobileHeroBadge) {
+                const copy = heroCopy[formType] ?? heroCopy.signup;
+                mobileHeroTitle.textContent = copy.title;
+                mobileHeroSubtitle.textContent = copy.subtitle;
+                mobileHeroBadge.textContent = copy.badge;
             }
         }
 

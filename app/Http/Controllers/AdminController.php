@@ -12,6 +12,7 @@ use App\Models\Role;
 use App\Models\Event;
 use App\Models\Program;
 use App\Models\SiteSetting;
+use App\Models\UserProfile;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class AdminController extends Controller
 {
@@ -99,6 +101,43 @@ class AdminController extends Controller
             ->paginate(20);
 
         return view('admin.assigned', compact('applications'));
+    }
+
+    public function deleteApplication($id)
+    {
+        $application = Application::with(['documents', 'missingRequests'])->find($id);
+
+        if (! $application) {
+            return response()->json(['message' => 'Application not found.'], 404);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($application->documents as $document) {
+                if ($document->filepath && Storage::disk('public')->exists($document->filepath)) {
+                    Storage::disk('public')->delete($document->filepath);
+                }
+            }
+
+            $application->documents()->delete();
+            $application->missingRequests()->delete();
+            $application->delete();
+
+            DB::commit();
+
+            return response()->json(['message' => 'Application deleted successfully.']);
+        } catch (Throwable $e) {
+            DB::rollBack();
+            Log::error('Failed to delete application', [
+                'application_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to delete application. Please try again later.',
+            ], 500);
+        }
     }
 
 
@@ -310,6 +349,98 @@ class AdminController extends Controller
             ->paginate(20);
 
         return view('admin.patients', compact('patients'));
+    }
+
+    public function showPatient(Patient $patient)
+    {
+        $patient->load([
+            'user.profile',
+            'applications.program',
+        ]);
+
+        return view('admin.patients.show', [
+            'patient' => $patient,
+            'applicationsCount' => $patient->applications->count(),
+        ]);
+    }
+
+    public function editPatient(Patient $patient)
+    {
+        $patient->load(['user.profile']);
+
+        return view('admin.patients.edit', [
+            'patient' => $patient,
+        ]);
+    }
+
+    public function updatePatient(Request $request, Patient $patient)
+    {
+        $user = $patient->user;
+
+        $validated = $request->validate([
+            'full_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', $user ? 'unique:users,email,' . $user->id : 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'blood_group' => ['nullable', 'string', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
+            'diagnosis' => ['nullable', 'string', 'max:255'],
+            'disease_type' => ['nullable', 'string', 'max:255'],
+            'disease_stage' => ['nullable', 'string', 'max:255'],
+            'genetic_test' => ['nullable', 'string', 'max:255'],
+            'diagnosis_date' => ['nullable', 'date'],
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            if ($user) {
+                $user->email = $validated['email'];
+                $user->save();
+
+                $profile = $user->profile ?? new UserProfile(['user_id' => $user->id]);
+                $profile->full_name = $validated['full_name'];
+                $profile->phone = $validated['phone'] ?? $profile->phone;
+                $profile->save();
+            }
+
+            $patient->update([
+                'blood_group' => $validated['blood_group'] ?? $patient->blood_group,
+                'diagnosis' => $validated['diagnosis'] ?? $patient->diagnosis,
+                'disease_type' => $validated['disease_type'] ?? $patient->disease_type,
+                'disease_stage' => $validated['disease_stage'] ?? $patient->disease_stage,
+                'genetic_test' => $validated['genetic_test'] ?? $patient->genetic_test,
+                'diagnosis_date' => $validated['diagnosis_date'] ?? $patient->diagnosis_date,
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('admin.patients.edit', $patient)
+                ->with('success', 'Patient details updated successfully.');
+        } catch (Throwable $e) {
+            DB::rollBack();
+            Log::error('Failed to update patient', [
+                'patient_id' => $patient->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to update patient. Please try again.']);
+        }
+    }
+
+    public function patientApplications(Patient $patient)
+    {
+        $applications = $patient->applications()
+            ->with(['program', 'reviewer.profile'])
+            ->orderByDesc('submission_date')
+            ->paginate(10);
+
+        return view('admin.patients.applications', [
+            'patient' => $patient->load('user.profile'),
+            'applications' => $applications,
+        ]);
     }
 
     public function sponsors()

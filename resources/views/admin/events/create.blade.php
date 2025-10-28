@@ -72,9 +72,9 @@
                             </div>
                             <div>
                                 <label class="mb-1 block text-sm font-medium text-[#213430]">Event Description</label>
-                                <textarea name="description" rows="5"
+                                <textarea name="description" id="event-description" rows="5"
                                     placeholder="Share the agenda, audience, and key highlights participants should know."
-                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">{{ $descriptionValue }}</textarea>
+                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">{!! $descriptionValue !!}</textarea>
                                 @error('description')
                                     <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
                                 @enderror
@@ -87,7 +87,7 @@
                                     <div class="space-y-1 text-center">
                                         @if ($isEdit && $event->image)
                                             <div class="mb-4" id="current-image">
-                                                <img src="{{ asset('storage/app/public/' . $event->image) }}" alt="Current event image"
+                                                <img src="{{ asset('storage/app/public/' . ltrim($event->image, '/')) }}" alt="Current event image"
                                                     class="mx-auto h-32 w-auto rounded-lg shadow-sm">
                                                 <p class="mt-2 text-xs text-[#6C5B68]">Current image</p>
                                             </div>
@@ -320,8 +320,29 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const descriptionField = document.querySelector('#event-description');
+
+            if (descriptionField && window.ClassicEditor) {
+                ClassicEditor.create(descriptionField, {
+                        toolbar: [
+                            'heading', '|',
+                            'bold', 'italic', 'underline', 'link', '|',
+                            'bulletedList', 'numberedList', '|',
+                            'blockQuote', 'undo', 'redo'
+                        ]
+                    })
+                    .then(editor => {
+                        window.__eventDescriptionEditor = editor;
+                        editor.ui.view.editable.element.style.minHeight = '280px';
+                    })
+                    .catch(error => {
+                        console.error('Failed to initialise the event description editor:', error);
+                    });
+            }
+
             // Sponsor select functionality
             var sponsorSelect = document.getElementById('sponsor-select');
             var amountWrapper = document.getElementById('sponsorship-amount-wrapper');

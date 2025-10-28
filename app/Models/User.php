@@ -127,9 +127,9 @@ class User extends Authenticatable
         $profile = $this->profile;
         
         if ($profile && $profile->avatar) {
-            return asset('storage/app/public/' . $profile->avatar);
+            return asset('storage/' . ltrim($profile->avatar, '/'));
         }
         
-        return asset('public/images/profile.png');
+        return asset('images/profile.png');
     }
 }

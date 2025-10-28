@@ -2,6 +2,15 @@
 
 @section('title', $event->title)
 
+@php
+    use App\Support\EventHighlightFormatter;
+
+    $descriptionHtml = $event->description
+        ? strip_tags($event->description, '<p><br><strong><em><u><ol><ul><li><a><span><div><blockquote>')
+        : null;
+    $eventHighlightsHtml = EventHighlightFormatter::format($event->event_highlights);
+@endphp
+
 @section('content')
     <main class="flex-1">
         <div class="max-w-8xl mx-auto">
@@ -56,28 +65,26 @@
                 <!-- Main Content -->
                 <div class="lg:col-span-2 space-y-8">
                     <!-- Event Description -->
-                    @if ($event->description)
+                    @if ($descriptionHtml)
                         <div class="bg-white rounded-2xl border border-[#E9DCE7] p-6 shadow-sm">
                             <h2 class="text-xl font-semibold text-[#213430] mb-4">About This Event</h2>
                             <div class="text-[#6C5B68] leading-relaxed">
-                                {!! nl2br(e($event->description)) !!}
+                                {!! $descriptionHtml !!}
                             </div>
+                        </div>
+                    @else
+                        <div class="bg-white rounded-2xl border border-[#E9DCE7] p-6 shadow-sm">
+                            <h2 class="text-xl font-semibold text-[#213430] mb-4">About This Event</h2>
+                            <p class="text-[#6C5B68]">No description has been added for this event yet.</p>
                         </div>
                     @endif
 
                     <!-- Event Highlights -->
-                    @if ($event->event_highlights)
+                    @if ($eventHighlightsHtml)
                         <div class="bg-white rounded-2xl border border-[#E9DCE7] p-6 shadow-sm">
                             <h2 class="text-xl font-semibold text-[#213430] mb-4">Event Highlights</h2>
                             <div class="text-[#6C5B68]">
-                                @foreach (explode('•', $event->event_highlights) as $highlight)
-                                    @if (trim($highlight))
-                                        <div class="flex items-start gap-2 mb-2">
-                                            <span class="text-[#DB69A2] text-lg">•</span>
-                                            <span>{{ trim($highlight) }}</span>
-                                        </div>
-                                    @endif
-                                @endforeach
+                                {!! $eventHighlightsHtml !!}
                             </div>
                         </div>
                     @endif

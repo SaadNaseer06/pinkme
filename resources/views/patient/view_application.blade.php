@@ -147,7 +147,7 @@
                                 </span>
                             </div>
                             <div class="flex items-center">
-                                <a href="{{ asset($doc->filepath) }}" target="_blank" class="text-pink-500 mr-2 group relative w-6 h-6">
+                                <a href="{{ asset('storage/app/public/' . $doc->filepath) }}" target="_blank" class="text-pink-500 mr-2 group relative w-6 h-6">
                                     <img src="{{ asset('public/images/eye.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
                                     <img src="{{ asset('public/images/eye-pink.svg') }}" alt=""
                                         class="w-6 h-6 hidden group-hover:block absolute top-0 left-0" />

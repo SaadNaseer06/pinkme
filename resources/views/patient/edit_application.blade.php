@@ -66,11 +66,17 @@
                         <div>
                             <label for="program_id" class="block text-[#213430] mb-1">Select Program:</label>
                             <select name="program_id" id="program_id"
-                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#F3E8EF] text-[#B1A4AD]">
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#F3E8EF] text-[#213430]">
+                                <option value="" disabled {{ old('program_id', $application->program_id) ? '' : 'selected' }}>
+                                    {{ $programs->isEmpty() ? 'No ongoing programs available' : 'Select a program' }}
+                                </option>
                                 @foreach ($programs as $program)
                                     <option value="{{ $program->id }}"
                                         {{ old('program_id', $application->program_id) == $program->id ? 'selected' : '' }}>
                                         {{ $program->title }}
+                                        @if ($program->event_date)
+                                            — {{ \Carbon\Carbon::parse($program->event_date)->format('M d, Y') }}
+                                        @endif
                                     </option>
                                 @endforeach
                             </select>

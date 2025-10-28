@@ -84,7 +84,7 @@
                                 class="text-4xl font-bold text-pink">{{ \Carbon\Carbon::parse($program->event_date)->format('d') }}</span>
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
-                            <img src="{{ url('storage/' . $program->banner) }}" alt="{{ $program->title }}"
+                            <img src="{{ url('storage/app/public/' . $program->banner) }}" alt="{{ $program->title }}"
                                 class="w-full h-full object-cover" />
                         </div>
                         <div>

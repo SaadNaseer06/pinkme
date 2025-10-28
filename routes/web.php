@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use App\Http\Controllers\AdminCaseManagerController;
 use App\Http\Controllers\EnrollProgramController;
@@ -116,6 +116,10 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::get('/assigned', [AdminController::class, 'assigned'])->name('admin.assigned');
     Route::get('/reviewers', [AdminController::class, 'reviewers'])->name('admin.reviewers');
     Route::get('/patients', [AdminController::class, 'patients'])->name('admin.patients');
+    Route::get('/patients/{patient}', [AdminController::class, 'showPatient'])->name('admin.patients.show');
+    Route::get('/patients/{patient}/edit', [AdminController::class, 'editPatient'])->name('admin.patients.edit');
+    Route::put('/patients/{patient}', [AdminController::class, 'updatePatient'])->name('admin.patients.update');
+    Route::get('/patients/{patient}/applications', [AdminController::class, 'patientApplications'])->name('admin.patients.applications');
     Route::get('/sponsors', [AdminController::class, 'sponsors'])->name('admin.sponsors');
     Route::get('/sponsors/{sponsor}', [AdminSponsorController::class, 'show'])->name('admin.sponsors.show');
     Route::get('/sponsors/{sponsor}/edit', [AdminSponsorController::class, 'edit'])->name('admin.sponsors.edit');

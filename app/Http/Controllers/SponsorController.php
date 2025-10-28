@@ -380,10 +380,10 @@ class SponsorController extends Controller
 
                 ? $rawLogo
 
-                : asset('storage/app/public/' . ltrim($rawLogo, '/'));
+                : asset('storage/' . ltrim($rawLogo, '/'));
         } else {
 
-            $sponsorLogo = asset('public/images/brand.png');
+            $sponsorLogo = asset('images/brand.png');
         }
 
         $sponsorAbout = $companyDetail?->company_type

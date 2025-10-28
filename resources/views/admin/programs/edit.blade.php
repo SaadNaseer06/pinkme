@@ -189,7 +189,7 @@
                             @if ($program->banner)
                                 <div class="rounded-xl border border-[#E9DCE7] bg-white p-4">
                                     <p class="text-xs font-semibold uppercase tracking-wider text-[#91848C]">Current Banner</p>
-                                    <img src="{{ asset('storage/app/public/' . $program->banner) }}" alt="Current banner"
+                                    <img src="{{ asset('storage/' . ltrim($program->banner, '/')) }}" alt="Current banner"
                                         class="mt-3 h-40 w-full rounded-lg object-cover" />
                                 </div>
                             @endif

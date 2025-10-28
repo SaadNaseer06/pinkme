@@ -1,6 +1,16 @@
 @php
+    use App\Support\EventHighlightFormatter;
+    use Carbon\Carbon;
+    use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Str;
+
     $image = asset('public/images/' . $eventImages[$loopIndex % count($eventImages)]);
-    $description = $event->description ?: 'Details will be announced soon.';
+    $descriptionHtml = $event->description
+        ? strip_tags($event->description, '<p><br><strong><em><u><ol><ul><li><a><span><div><blockquote>')
+        : null;
+    $descriptionText = trim(strip_tags($descriptionHtml ?? ''));
+    $descriptionSummary = $descriptionText !== '' ? $descriptionText : 'Details will be announced soon.';
+    $eventHighlightsHtml = EventHighlightFormatter::format($event->event_highlights);
     $primarySponsor = $event->primary_sponsor;
     $primarySponsorProfile = optional($primarySponsor)->profile;
     $primarySponsorDetail = optional($primarySponsor)->sponsorDetail;
@@ -38,19 +48,22 @@
             </div>
             <div>
                 <h3 class="text-xl font-semibold text-[#213430] mb-1 program-h">{{ $event->title }}</h3>
-                <p class="text-sm text-[#91848C] program-p">{{ Str::limit($description, 150) }}</p>
+                <p class="text-sm text-[#91848C] program-p">{{ Str::limit($descriptionSummary, 150) }}</p>
             </div>
         </div>
         <div class="flex gap-2">
             <button type="button"
                 class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white py-3 px-6 rounded-lg program-btn"
-                onclick="openModal(this)" data-title="{{ e($event->title) }}" data-description="{{ e($description) }}"
+                onclick="openModal(this)" data-title="{{ e($event->title) }}"
+                data-description="{{ e($descriptionSummary) }}"
+                data-description-html="{{ e($descriptionHtml ?? '') }}"
                 data-date="{{ e($event->date_label) }}" data-time="{{ e($timeLabel) }}"
                 data-location="{{ e($location) }}" data-image="{{ $image }}"
                 data-sponsor-name="{{ e($primarySponsorName) }}" data-sponsor-phone="{{ e($primarySponsorPhone) }}"
                 data-sponsor-email="{{ e($primarySponsorEmail) }}" data-sponsor-logo="{{ $primarySponsorLogo }}"
                 data-sponsor-about="{{ e($primarySponsorAbout) }}" data-total-sponsors="{{ $totalSponsors }}"
                 data-total-raised="{{ $totalRaised }}" data-status="{{ $status }}"
+                data-highlights="{{ e($eventHighlightsHtml ?? '') }}"
                 data-event-id="{{ $event->id }}">
                 Quick View
             </button>
@@ -83,18 +96,21 @@
         </div>
         <div class="flex flex-col gap-1 text-left">
             <h3 class="text-[15px] font-semibold text-[#213430]">{{ $event->title }}</h3>
-            <p class="text-[13px] font-light text-[#91848C]">{{ Str::limit($description, 110) }}</p>
+            <p class="text-[13px] font-light text-[#91848C]">{{ Str::limit($descriptionSummary, 110) }}</p>
             <div class="flex gap-2 flex-col">
                 <button type="button"
                     class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#db69a2] hover:text-white hover:border-none py-2 px-4 rounded-lg text-sm"
                     onclick="openModal(this)" data-title="{{ e($event->title) }}"
-                    data-description="{{ e($description) }}" data-date="{{ e($event->date_label) }}"
+                    data-description="{{ e($descriptionSummary) }}"
+                    data-description-html="{{ e($descriptionHtml ?? '') }}"
+                    data-date="{{ e($event->date_label) }}"
                     data-time="{{ e($timeLabel) }}" data-location="{{ e($location) }}"
                     data-image="{{ $image }}" data-sponsor-name="{{ e($primarySponsorName) }}"
                     data-sponsor-phone="{{ e($primarySponsorPhone) }}"
                     data-sponsor-email="{{ e($primarySponsorEmail) }}" data-sponsor-logo="{{ $primarySponsorLogo }}"
                     data-sponsor-about="{{ e($primarySponsorAbout) }}" data-total-sponsors="{{ $totalSponsors }}"
                     data-total-raised="{{ $totalRaised }}" data-status="{{ $status }}"
+                    data-highlights="{{ e($eventHighlightsHtml ?? '') }}"
                     data-event-id="{{ $event->id }}">
                     Quick View
                 </button>

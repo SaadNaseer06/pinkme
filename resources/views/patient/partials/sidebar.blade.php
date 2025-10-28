@@ -38,13 +38,13 @@
             </a>
         </li>
 
-        {{-- <li class="{{ request()->routeIs('patient.patientChats') ? 'active' : '' }}">
-            <a href="{{ route('patient.patientChats') }}">
-                <img src="{{ request()->routeIs('patient.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"
-                    alt="">
-                Chat
-            </a>
-        </li> --}}
+        <!--<li class="{{ request()->routeIs('patient.patientChats') ? 'active' : '' }}">-->
+        <!--    <a href="{{ route('patient.patientChats') }}">-->
+        <!--        <img src="{{ request()->routeIs('patient.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"-->
+        <!--            alt="">-->
+        <!--        Chat-->
+        <!--    </a>-->
+        <!--</li>-->
 
         <li class="{{ request()->routeIs('patient.faq') ? 'active' : '' }}">
             <a href="{{ route('patient.faq') }}">
@@ -109,14 +109,14 @@
                     <span class="title">Programs & Aids</span>
                 </a>
             </li>
-            {{-- <li class="{{ request()->routeIs('patient.patientChats') ? 'hovered' : '' }}">
-                <a href="{{ route('patient.patientChats') }}">
-                    <span class="icon"><img
-                            src="{{ request()->routeIs('patient.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"
-                            alt="" /></span>
-                    <span class="title">Chat</span>
-                </a>
-            </li> --}}
+            <!--<li class="{{ request()->routeIs('patient.patientChats') ? 'hovered' : '' }}">-->
+            <!--    <a href="{{ route('patient.patientChats') }}">-->
+            <!--        <span class="icon"><img-->
+            <!--                src="{{ request()->routeIs('patient.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"-->
+            <!--                alt="" /></span>-->
+            <!--        <span class="title">Chat</span>-->
+            <!--    </a>-->
+            <!--</li>-->
             <li class="{{ request()->routeIs('patient.faq') ? 'hovered' : '' }}">
                 <a href="{{ route('patient.faq') }}">
                     <span class="icon"><img

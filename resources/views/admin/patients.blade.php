@@ -190,15 +190,15 @@
                                                 <div
                                                     class="absolute right-[28px] top-10 w-[250px] max-w-none bg-[#F6EDF5] rounded-lg shadow-lg py-2 z-20 hidden">
                                                     {{-- ROUTES: adjust if your route names differ --}}
-                                                    <a href="#"
+                                                    <a href="{{ route('admin.patients.show', $p->id) }}"
                                                         class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm">
                                                         <i class="fas fa-eye mr-2"></i> View Profile
                                                     </a>
-                                                    <a href="#"
+                                                    <a href="{{ route('admin.patients.edit', $p->id) }}"
                                                         class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm gap-2">
                                                         <i class="fa-solid fa-pen"></i> Edit Patients Details
                                                     </a>
-                                                    <a href="{{ route('case_manager.myApplication', ['patient_id' => $p->id]) }}"
+                                                    <a href="{{ route('admin.patients.applications', $p->id) }}"
                                                         class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm gap-2">
                                                         <img src="{{ asset('public/images/assign.svg') }}" alt=""> Applications
                                                     </a>

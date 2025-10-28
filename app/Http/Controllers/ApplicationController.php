@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreApplicationRequest;
 use App\Models\Application;
 use App\Models\Patient;
-use App\Models\SponsorshipProgram;
+use App\Models\Program;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Container\Attributes\Log;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,10 +23,11 @@ class ApplicationController extends Controller
             $patient = Patient::create(['user_id' => $user->id]);
         }
 
-        $programs = SponsorshipProgram::where('end_date', '>', now())
-            ->orWhereNull('end_date')
-            ->get();
-        // dd($programs);
+        $programs = Program::query()
+            ->where('status', 'ongoing')
+            ->orderBy('event_date')
+            ->orderBy('title')
+            ->get(['id', 'title', 'event_date']);
 
         return view('patient.create_application', compact('programs'));
     }
@@ -47,7 +48,12 @@ class ApplicationController extends Controller
     public function edit($id)
     {
         $application = Application::findOrFail($id);
-        $programs = SponsorshipProgram::all();
+        $programs = Program::query()
+            ->where('status', 'ongoing')
+            ->orWhere('id', $application->program_id)
+            ->orderBy('event_date')
+            ->orderBy('title')
+            ->get(['id', 'title', 'event_date']);
 
         return view('patient.edit_application', compact('application', 'programs'));
     }
@@ -58,7 +64,7 @@ class ApplicationController extends Controller
             'title' => 'required|string|max:255',
             'blood_group' => 'required|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
             'assistance_type' => 'required|string',
-            'program_id' => 'required|exists:sponsorship_programs,id',
+            'program_id' => 'required|exists:programs,id',
             'description' => 'required|string|min:20',
             'documents.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx',
         ]);
@@ -138,7 +144,7 @@ class ApplicationController extends Controller
             'title' => 'required|string|max:255',
             'blood_group' => 'required|string|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
             'assistance_type' => 'required|string',
-            'program_id' => 'required|exists:sponsorship_programs,id',
+            'program_id' => 'required|exists:programs,id',
             'description' => 'required|string|min:20',
             'documents.*' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx',
         ]);

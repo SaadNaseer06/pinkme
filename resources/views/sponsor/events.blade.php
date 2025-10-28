@@ -83,7 +83,7 @@
                             </div>
 
                             <div class="w-full h-64 overflow-hidden rounded-md mb-2">
-                                <img id="modalEventImage" src="{{ asset('public/images/program-details.png') }}" alt="Event banner"
+                                <img id="modalEventImage" src="{{ asset('images/program-details.png') }}" alt="Event banner"
                                     class="w-full h-full object-cover" />
                             </div>
 
@@ -124,21 +124,11 @@
                                     </div>
                                 </div>
 
-                                <div>
+                                <div id="modalHighlightsWrapper" class="space-y-2">
                                     <h3 class="text-lg font-medium text-[#213430] mb-2 app-main">Event Highlights</h3>
-                                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[#213430] app-text">
-                                        <li class="flex items-center gap-2 font-medium"><span
-                                                class="text-pink text-2xl">&#8226;</span> Community awareness sessions</li>
-                                        <li class="flex items-center gap-2 font-medium"><span
-                                                class="text-pink text-2xl">&#8226;</span> Support resources and counselling
-                                        </li>
-                                        <li class="flex items-center gap-2 font-medium"><span
-                                                class="text-pink text-2xl">&#8226;</span> Health screenings and
-                                            consultations</li>
-                                        <li class="flex items-center gap-2 font-medium"><span
-                                                class="text-pink text-2xl">&#8226;</span> Stories from survivors & experts
-                                        </li>
-                                    </ul>
+                                    <div id="modalHighlightsContent" class="text-[#213430] app-text space-y-2">
+                                        <p class="text-[#91848C]">Highlights will appear here.</p>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -147,7 +137,7 @@
                                         <div class="flex items-start gap-4 p-4 rounded-md max-w-xl">
                                             <div
                                                 class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                                                <img id="modalSponsorLogo" src="{{ asset('public/images/brand.png') }}" alt="Sponsor logo"
+                                                <img id="modalSponsorLogo" src="{{ asset('images/brand.png') }}" alt="Sponsor logo"
                                                     class="w-10 h-10 object-contain" />
                                             </div>
                                             <div class="flex flex-col">
@@ -208,16 +198,26 @@
                 <script>
                     const modalOverlay = document.getElementById('registerModal');
                     const eventFilter = document.getElementById('eventFilter');
+                    const decodeHtmlEntities = (input = '') => {
+                        if (!input) {
+                            return '';
+                        }
+                        const textarea = document.createElement('textarea');
+                        textarea.innerHTML = input;
+                        return textarea.value;
+                    };
 
                     function openModal(trigger) {
                         if (!modalOverlay) return;
 
                         const {
                             title,
-                            description,
+                            description: encodedDescription = '',
+                            descriptionHtml: encodedDescriptionHtml = '',
                             date,
                             time,
                             location,
+                            highlights: encodedHighlights = '',
                             image,
                             sponsorName,
                             sponsorPhone,
@@ -228,29 +228,67 @@
                             totalRaised,
                             eventId
                         } = trigger.dataset;
+                        const descriptionHtml = decodeHtmlEntities(encodedDescriptionHtml);
+                        const descriptionText = decodeHtmlEntities(encodedDescription);
+                        const highlights = decodeHtmlEntities(encodedHighlights);
 
                         document.getElementById('modalEventTitle').textContent = title || 'Event Details';
                         const imageEl = document.getElementById('modalEventImage');
-                        imageEl.src = image || "{{ asset('public/images/program-details.png') }}";
+                        imageEl.src = image || "{{ asset('images/program-details.png') }}";
                         imageEl.alt = title || 'Event banner';
-                        document.getElementById('modalEventDescription').textContent = description || '';
+                        const descriptionEl = document.getElementById('modalEventDescription');
+                        if (descriptionHtml && descriptionHtml.trim().length) {
+                            descriptionEl.innerHTML = descriptionHtml;
+                        } else if (descriptionText && descriptionText.trim().length) {
+                            descriptionEl.textContent = descriptionText;
+                        } else {
+                            descriptionEl.textContent = 'Details will be announced soon.';
+                        }
                         document.getElementById('modalEventDate').textContent = date || 'TBD';
                         document.getElementById('modalEventTime').textContent = time || 'TBD';
                         document.getElementById('modalEventLocation').textContent = location || 'Location to be announced';
                         document.getElementById('modalSponsorName').textContent = sponsorName || 'Sponsor';
                         document.getElementById('modalSponsorPhone').textContent = sponsorPhone || 'Phone unavailable';
                         document.getElementById('modalSponsorEmail').textContent = sponsorEmail || 'Email unavailable';
-                        document.getElementById('modalSponsorLogo').src = sponsorLogo || "{{ asset('public/images/logo-white.png') }}";
+                        document.getElementById('modalSponsorLogo').src = sponsorLogo || "{{ asset('images/logo-white.png') }}";
                         document.getElementById('modalSponsorLogo').alt = sponsorName || 'Sponsor logo';
                         document.getElementById('modalSponsorAbout').textContent = sponsorAbout ||
                             'Committed supporters partnering with us to impact more lives.';
+                        const highlightsWrapper = document.getElementById('modalHighlightsWrapper');
+                        const highlightsContent = document.getElementById('modalHighlightsContent');
+                        if (highlightsContent && highlightsWrapper) {
+                            const applyListStyling = () => {
+                                highlightsContent.querySelectorAll('ul').forEach((list) => {
+                                    list.style.listStyleType = 'disc';
+                                    list.style.paddingLeft = '1.5rem';
+                                    list.style.margin = '0';
+                                });
+                                highlightsContent.querySelectorAll('ol').forEach((list) => {
+                                    list.style.listStyleType = 'decimal';
+                                    list.style.paddingLeft = '1.5rem';
+                                    list.style.margin = '0';
+                                });
+                                highlightsContent.querySelectorAll('li').forEach((item) => {
+                                    item.style.marginBottom = '0.35rem';
+                                });
+                            };
+
+                            if (highlights && highlights.trim().length) {
+                                highlightsWrapper.classList.remove('hidden');
+                                highlightsContent.innerHTML = highlights;
+                                applyListStyling();
+                            } else {
+                                highlightsWrapper.classList.remove('hidden');
+                                highlightsContent.innerHTML = '<p class="text-[#91848C]">Highlights will be announced soon.</p>';
+                            }
+                        }
                         document.getElementById('modalTotalSponsors').textContent = totalSponsors || '0';
                         document.getElementById('modalTotalRaised').textContent = totalRaised ? `$${totalRaised}` : '$0.00';
 
                         // Update the event detail link
                         const eventDetailBtn = document.getElementById('modalViewEventButton');
                         if (eventDetailBtn && eventId) {
-                            eventDetailBtn.href = `/sponsor/events/${eventId}`;
+                            eventDetailBtn.href = `/pinkme/sponsor/events/${eventId}`;
                         }
 
                         modalOverlay.style.display = 'flex';
@@ -289,3 +327,4 @@
                     });
                 </script>
             @endsection
+

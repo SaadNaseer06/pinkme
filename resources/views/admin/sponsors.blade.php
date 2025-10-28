@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.admin')
+@extends('admin.layouts.admin')
 
 @section('title', 'Sponsors')
 
@@ -175,9 +175,13 @@
                                                     <div class="flex items-center gap-3">
                                                         @php
                                                             $profileImage = $sponsor->profile_image;
-                                                            $profileImageUrl = $profileImage && filter_var($profileImage, FILTER_VALIDATE_URL)
-                                                                ? $profileImage
-                                                                : ($sponsor->user ? $sponsor->user->avatar_url : asset('public/images/profile.png'));
+                                                            $profileImageUrl =
+                                                                $profileImage &&
+                                                                filter_var($profileImage, FILTER_VALIDATE_URL)
+                                                                    ? $profileImage
+                                                                    : ($sponsor->user
+                                                                        ? $sponsor->user->avatar_url
+                                                                        : asset('public/images/profile.png'));
                                                         @endphp
                                                         <img src="{{ $profileImageUrl }}" alt="{{ $sponsor->name }}"
                                                             class="w-8 h-8 rounded-full object-cover" />
@@ -185,16 +189,13 @@
                                                             class="text-[#91848C] text-[16px] font-light app-text">{{ $sponsor->name }}</span>
                                                     </div>
                                                 </td>
-                                                <td
-                                                    class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
+                                                <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                                     {{ $sponsor->company_name ?? 'Individual' }}
                                                 </td>
-                                                <td
-                                                    class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
+                                                <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                                     ${{ number_format($sponsor->total_funds, 2) }}
                                                 </td>
-                                                <td
-                                                    class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
+                                                <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                                     {{ $sponsor->email }}
                                                 </td>
                                                 <td class="p-2 align-middle">
@@ -223,10 +224,13 @@
                                                             class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm gap-2">
                                                             <i class="fa-solid fa-pen"></i> Edit Sponsors Details
                                                         </a>
-                                                        <form action="{{ route('admin.sponsors.destroy', $sponsor->id) }}" method="POST" onsubmit="return confirm('Remove this sponsor? If deletion fails due to dependencies, the sponsor will be deactivated.');">
+                                                        <form action="{{ route('admin.sponsors.destroy', $sponsor->id) }}"
+                                                            method="POST"
+                                                            onsubmit="return confirm('Remove this sponsor? If deletion fails due to dependencies, the sponsor will be deactivated.');">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="w-full text-left flex items-center px-4 py-2 gap-2 text-[#91848C] text-sm transition-colors hover:bg-pink-100">
+                                                            <button type="submit"
+                                                                class="w-full text-left flex items-center px-4 py-2 gap-2 text-[#91848C] text-sm transition-colors hover:bg-pink-100">
                                                                 <i class="fa-solid fa-trash"></i> Remove Sponsors
                                                             </button>
                                                         </form>
@@ -340,11 +344,23 @@
                                                 : ($event->date
                                                     ? \Carbon\Carbon::parse($event->date)
                                                     : null);
+                                        $rawDescription = $event->description ?? '';
+                                        $eventDescriptionText = trim(strip_tags($rawDescription));
+                                        $eventDescriptionHtml = trim(
+                                            strip_tags(
+                                                $rawDescription,
+                                                '<p><br><strong><em><u><ol><ul><li><a><span><div><blockquote>',
+                                            ),
+                                        );
+                                        $eventImage = $event->image
+                                            ? asset('storage/app/public/' . ltrim($event->image, '/'))
+                                            : asset('public/images/program-details.png');
                                         $detail = [
                                             'type' => 'event',
                                             'title' => $event->title,
-                                            'description' => $event->description,
-                                            'image' => asset('public/images/program-details.png'),
+                                            'description' => $eventDescriptionText,
+                                            'description_html' => $eventDescriptionHtml,
+                                            'image' => $eventImage,
                                             'date' => $eventDate ? $eventDate->format('l, F d, Y') : null,
                                             'time' => $eventDate ? $eventDate->format('h:i A') : null,
                                             'location' => $event->location,
@@ -356,64 +372,78 @@
                                         ];
                                     @endphp
                                     <div
-                                        class="bg-[#F3E8EF] rounded-lg p-6 hover:shadow-lg transition-shadow duration-200">
-                                        <div class="flex items-start gap-4">
-                                            <div class="flex-none">
+                                        class="bg-[#F3E8EF] rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                                        <div class="relative h-48 w-full">
+                                            <img src="{{ $eventImage }}" alt="{{ $event->title }}"
+                                                class="h-full w-full object-cover">
+                                            @if ($eventDate)
                                                 <div
-                                                    class="flex flex-col items-center justify-center w-20 h-20 border-2 border-[#DB69A2] rounded-lg bg-[#FFF7FC]">
-                                                    <span
-                                                        class="text-sm text-[#DB69A2]">{{ $eventDate?->format('M') }}</span>
-                                                    <span
-                                                        class="text-4xl font-bold text-[#DB69A2]">{{ $eventDate?->format('d') }}</span>
+                                                    class="absolute top-4 left-4 flex flex-col items-center justify-center w-20 h-20 rounded-xl bg-white/90 text-[#DB69A2] shadow-md">
+                                                    <span class="text-sm font-semibold tracking-wide">
+                                                        {{ $eventDate->format('M') }}
+                                                    </span>
+                                                    <span class="text-3xl font-bold">
+                                                        {{ $eventDate->format('d') }}
+                                                    </span>
                                                 </div>
-                                            </div>
-                                            <div class="flex-1">
-                                                <h3 class="text-xl font-semibold text-[#213430] mb-2">{{ $event->title }}
-                                                </h3>
-                                                <p class="text-sm text-[#91848C] mb-4 line-clamp-2">
-                                                    {{ $event->description }}</p>
-                                                <div class="flex flex-wrap items-center gap-4 mb-4 text-sm text-[#91848C]">
-                                                    <div class="flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        </svg>
-                                                        <span>{{ $event->location ?? 'Location TBA' }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="p-6">
+                                            <div class="flex items-start gap-4">
+                                                <div class="flex-1">
+                                                    <h3 class="text-xl font-semibold text-[#213430] mb-2">
+                                                        {{ $event->title }}
+                                                    </h3>
+                                                    <div
+                                                        class="text-sm text-[#91848C] mb-4 line-clamp-2 prose prose-sm max-w-none">
+                                                        {!! \Illuminate\Support\Str::limit($eventDescriptionText, 180) !!}
                                                     </div>
-                                                    <div class="flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        <span>{{ $eventDate?->format('h:i A') ?? 'Time TBA' }}</span>
+                                                    <div
+                                                        class="flex flex-wrap items-center gap-4 mb-4 text-sm text-[#91848C]">
+                                                        <div class="flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            </svg>
+                                                            <span>{{ $event->location ?? 'Location TBA' }}</span>
+                                                        </div>
+                                                        <div class="flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            <span>{{ $eventDate?->format('h:i A') ?? 'Time TBA' }}</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div
-                                                    class="flex flex-wrap items-center justify-between gap-3 border border-[#E0D0DA] bg-white/60 px-3 py-2 rounded-lg text-xs text-[#6C5B68]">
-                                                    <span class="font-medium">Sponsors:
-                                                        {{ $event->sponsors_count ?? ($event->sponsors?->count() ?? 0) }}</span>
-                                                    <span class="font-medium">Raised:
-                                                        ${{ number_format($event->total_raised ?? 0, 2) }}</span>
-                                                </div>
-                                                <div class="mt-4 flex flex-wrap justify-end gap-2">
-                                                    <a href="{{ route('events.edit', $event) }}"
-                                                        class="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium text-[#213430] shadow-sm hover:bg-[#F6EDF5] transition">Edit</a>
-                                                    <form action="{{ route('events.destroy', $event) }}" method="POST"
-                                                        onsubmit="return confirm('Are you sure you want to delete this event?');"
-                                                        class="inline-flex">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 transition">Delete</button>
-                                                    </form>
-                                                    <button onclick='openDetailModal(@json($detail))'
-                                                        class="inline-flex items-center justify-center rounded-md border border-transparent bg-[#DB69A2] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#c25891] transition">View</button>
+                                                    <div
+                                                        class="flex flex-wrap items-center justify-between gap-3 border border-[#E0D0DA] bg-white/60 px-3 py-2 rounded-lg text-xs text-[#6C5B68]">
+                                                        <span class="font-medium">Sponsors:
+                                                            {{ $event->sponsors_count ?? ($event->sponsors?->count() ?? 0) }}</span>
+                                                        <span class="font-medium">Raised:
+                                                            ${{ number_format($event->total_raised ?? 0, 2) }}</span>
+                                                    </div>
+                                                    <div class="mt-4 flex flex-wrap justify-end gap-2">
+                                                        <a href="{{ route('events.edit', $event) }}"
+                                                            class="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium text-[#213430] shadow-sm hover:bg-[#F6EDF5] transition">Edit</a>
+                                                        <form action="{{ route('events.destroy', $event) }}"
+                                                            method="POST"
+                                                            onsubmit="return confirm('Are you sure you want to delete this event?');"
+                                                            class="inline-flex">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                class="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 transition">Delete</button>
+                                                        </form>
+                                                        <button onclick='openDetailModal(@json($detail))'
+                                                            class="inline-flex items-center justify-center rounded-md border border-transparent bg-[#DB69A2] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#c25891] transition">View</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -464,7 +494,8 @@
                                         $image = $program->banner
                                             ? asset('storage/app/public/' . $program->banner)
                                             : $program->image_url ?? asset('public/images/program-3.png');
-                                        $paymentLabel = $program->payment_type === 'flexible' ? 'Flexible Payment' : 'Full Payment';
+                                        $paymentLabel =
+                                            $program->payment_type === 'flexible' ? 'Flexible Payment' : 'Full Payment';
                                         $detail = [
                                             'type' => 'program',
                                             'title' => $program->title,
@@ -540,9 +571,9 @@
                                                     <div class="flex flex-col items-end gap-1">
                                                         <span
                                                             class="inline-flex items-center rounded-full bg-white/60 px-2 py-0.5 text-[10px] font-semibold text-[#DB69A2] capitalize">{{ $program->status }}</span>
-                                                    <span
-                                                        class="inline-flex items-center rounded-full bg-[#DB69A2] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">{{ $paymentLabel }}</span>
-                                                </div>
+                                                        <span
+                                                            class="inline-flex items-center rounded-full bg-[#DB69A2] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">{{ $paymentLabel }}</span>
+                                                    </div>
                                                 </div>
                                                 <p class="text-xs text-[#91848C] mt-1 program-p">
                                                     {{ Str::limit($program->description, 90) }}</p>
@@ -631,8 +662,8 @@
                             </button>
                         </div>
                         <div class="w-full h-64 overflow-hidden">
-                            <img id="detailModalImage" src="{{ asset('public/images/program-details.png') }}" alt=""
-                                class="w-full h-full object-cover" />
+                            <img id="detailModalImage" src="{{ asset('public/images/program-details.png') }}"
+                                alt="" class="w-full h-full object-cover" />
                         </div>
                         <div class="p-5 space-y-6 text-sm">
                             <p class="text-[#4A3F47] leading-relaxed" id="detailModalDescription">Loading description...
@@ -774,13 +805,19 @@
             const prettyType = type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Record';
 
             const description = data.description || 'No description available';
+            const descriptionHtml = data.description_html || null;
             const imageUrl = data.image || "{{ asset('public/images/program-details.png') }}";
             const date = data.date || null;
             const time = data.time || null;
 
             document.getElementById('detailModalTitle').textContent = title;
             document.getElementById('detailModalType').textContent = prettyType;
-            document.getElementById('detailModalDescription').textContent = description;
+            const descriptionEl = document.getElementById('detailModalDescription');
+            if (descriptionHtml) {
+                descriptionEl.innerHTML = descriptionHtml;
+            } else {
+                descriptionEl.textContent = description;
+            }
             const imageEl = document.getElementById('detailModalImage');
             imageEl.src = imageUrl;
             imageEl.alt = title;

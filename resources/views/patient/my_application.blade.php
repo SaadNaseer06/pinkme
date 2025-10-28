@@ -136,10 +136,10 @@
                 <table class="min-w-full text-sm text-left mt-6">
                     <thead>
                         <tr class="border-t border-[#e0cfd8]">
-                            <th class="p-2">
-                                <input type="checkbox"
-                                    class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
-                            </th>
+                            <!--<th class="p-2">-->
+                            <!--    <input type="checkbox"-->
+                            <!--        class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
+                            <!--</th>-->
 
                             <th class="p-2 text-lg text-[#91848C] font-normal app-h">
                                 Applications Title
@@ -157,14 +157,14 @@
                     <tbody class="text-gray-700">
                         @forelse($applications as $application)
                             <tr class="border-t border-[#e0cfd8]">
-                                <td class="p-2">
-                                    <input type="checkbox"
-                                        class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
-                                </td>
+                                <!--<td class="p-2">-->
+                                <!--    <input type="checkbox"-->
+                                <!--        class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
+                                <!--</td>-->
                                 <td class="p-2">
                                     <div class="flex items-center gap-3">
-                                        <img src="{{ asset('public/images/profile-1.png') }}" alt=""
-                                            class="w-8 h-8 rounded-full" />
+                                        <!--<img src="{{ asset('public/images/profile-1.png') }}" alt=""-->
+                                        <!--    class="w-8 h-8 rounded-full" />-->
                                         <span
                                             class="text-[#91848C] text-[16px] font-light app-text">{{ $application->title }}</span>
                                     </div>

@@ -281,6 +281,9 @@
     </div>
 
     <script>
+        const REVIEWER_BASE_URL = "{{ url('admin/reviewers') }}";
+        const APPLICATIONS_BASE_URL = "{{ url('admin/applications') }}";
+
         // Function to view unassigned applications for a specific reviewer
         function viewUnassignedApplications() {
             const modal = document.getElementById("unassignedApplicationsModal");
@@ -290,7 +293,7 @@
             content.innerHTML = `<p class="text-sm text-[#91848C]">Loading unassigned applications...</p>`;
 
             // Send a request to fetch the unassigned applications
-            fetch(`/admin/reviewers/unassigned-applications`)
+            fetch(`${REVIEWER_BASE_URL}/unassigned-applications`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.length === 0) {
@@ -351,7 +354,7 @@
             const reviewerId = document.querySelector('#reviewerId')
             .value; // Assuming the reviewer ID is stored somewhere (like a hidden input field)
 
-            fetch(`/admin/applications/${applicationId}/assign-reviewer`, {
+            fetch(`${APPLICATIONS_BASE_URL}/${applicationId}/assign-reviewer`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -393,7 +396,7 @@
             content.innerHTML = `<p class="text-sm text-[#91848C]">Loading applications...</p>`;
 
             // Send a request to fetch the applications for the given reviewer ID
-            fetch(`/admin/reviewers/${reviewerId}/applications`)
+            fetch(`${REVIEWER_BASE_URL}/${reviewerId}/applications`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.length === 0) {
@@ -484,7 +487,7 @@
             successMessage.innerHTML = `<p class="text-blue-600 font-semibold text-center">Removing reviewer...</p>`;
             successMessage.classList.remove('hidden');
 
-            fetch(`/admin/reviewers/${reviewerId}/remove`, {
+            fetch(`${REVIEWER_BASE_URL}/${reviewerId}/remove`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -533,4 +536,3 @@
         }
     </script>
 @endsection
-

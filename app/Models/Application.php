@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Program;
 
 
 class Application extends Model
@@ -44,7 +45,7 @@ class Application extends Model
 
     public function program(): BelongsTo
     {
-        return $this->belongsTo(SponsorshipProgram::class, 'program_id');
+        return $this->belongsTo(Program::class, 'program_id');
     }
 
     public function documents(): HasMany

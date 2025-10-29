@@ -10,7 +10,7 @@ use App\Http\Controllers\SponsorController;
 use App\Http\Controllers\SponsorshipProgramController;
 use App\Http\Controllers\AdminSponsorController;
 use App\Http\Controllers\AdminProgramRegistrationController;
-use App\Http\Controllers\PatientNotificationController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
@@ -72,6 +72,12 @@ Route::post('/register', [RegisterController::class, 'register']);
 
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read_all');
+});
 
 Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     // Admin Routes
@@ -226,6 +232,5 @@ Route::prefix('patient')->middleware(['role.restrict'])->group(function () {
     Route::get('/create-application', [ApplicationController::class, 'createApplication'])->name('patient.createApplication');
     Route::post('/store-application', [ApplicationController::class, 'storeApplication'])->name('patient.storeApplication');
     Route::post('/program/register', [ProgramRegistrationController::class, 'store'])->name('program.register');
-    Route::post('/notifications/{notification}/read', [PatientNotificationController::class, 'markAsRead'])->name('patient.notifications.read');
     Route::get('/program-registrations/{registration}', [ProgramRegistrationController::class, 'show'])->name('patient.programRegistrations.show');
 });

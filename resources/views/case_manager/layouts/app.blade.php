@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="current-user-id" content="{{ optional(auth()->user())->id }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <title>@yield('title', 'Case Manager')</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,7 +30,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    @vite('resources/css/custom.css')
+    @vite(['resources/css/custom.css', 'resources/js/app.js'])
     @stack('head')
 </head>
 
@@ -37,11 +39,12 @@
     <div class="flex-1 flex flex-col">
         @include('case_manager.partials.topbar')
         <main class="flex-1 p-6">
-            @include('partials.flash')
-            @yield('content')
-        </main>
+        @include('partials.flash')
+        @yield('content')
+    </main>
         @include('case_manager.partials.footer')
     </div>
+    @include('partials.notification-modal')
     @stack('scripts')
 </body>
 

@@ -26,43 +26,7 @@
                 <img src="{{ asset('public/images/scanner.svg') }}" alt="Scanner" class="h-3" />
             </button>
 
-            <!-- Notification Wrapper -->
-            <!--<div class="relative inline-block notificationWrapper">-->
-            <!--    <div class="cursor-pointer" onclick="toggleDropdown(event)">-->
-            <!--        <img src="{{ asset('public/images/notification.svg') }}" alt="Notifications" class="h-4" />-->
-            <!--    </div>-->
-
-                <!-- Notification Dropdown -->
-            <!--    <div-->
-            <!--        class="hidden fixed right-10 mt-2 w-80 bg-[#F3E8EF] rounded-md shadow-lg z-50 notificationDropdown">-->
-            <!--        <div class="flex justify-between items-center px-4 py-3 bg-[#db69a2] text-white rounded-t-md">-->
-            <!--            <span class="font-semibold">All Notifications</span>-->
-            <!--            <span class="bg-white text-[#db69a2] text-sm font-bold rounded px-2 py-0.5">4</span>-->
-            <!--        </div>-->
-
-            <!--        <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto">-->
-                        <!-- Example Notification Item -->
-            <!--            <div class="flex items-center px-4 py-3 space-x-3 cursor-pointer">-->
-            <!--                <img src="{{ asset('public/images/patient-1.png') }}" class="w-10 h-10 rounded-full" />-->
-            <!--                <div class="flex-1">-->
-            <!--                    <p class="text-sm font-semibold text-[#213430]">Lorem ipsum</p>-->
-            <!--                    <p class="text-xs text-[#A9A9A9]">Sed ut</p>-->
-            <!--                </div>-->
-            <!--                <span class="text-xs text-[#A9A9A9] whitespace-nowrap">Just Now</span>-->
-            <!--            </div>-->
-            <!--            <div class="flex items-center px-4 py-3 space-x-3 cursor-pointer">-->
-            <!--                <img src="{{ asset('public/images/patient-11.png') }}" class="w-10 h-10 rounded-full" />-->
-            <!--                <div class="flex-1">-->
-            <!--                    <p class="text-sm font-semibold text-[#213430]">-->
-            <!--                        Lorem ipsum-->
-            <!--                    </p>-->
-            <!--                    <p class="text-xs text-[#A9A9A9]">Sed ut</p>-->
-            <!--                </div>-->
-            <!--                <span class="text-xs text-[#A9A9A9] whitespace-nowrap">Just Now</span>-->
-            <!--            </div>-->
-            <!--        </div>-->
-            <!--    </div>-->
-            <!--</div>-->
+            @include('partials.notification-center', ['icon' => asset('public/images/notification.svg'), 'iconClass' => 'h-4'])
         </div>
 
         <!-- Profile Dropdown -->
@@ -137,42 +101,7 @@
                 </button>
 
                 <!-- Notification Wrapper -->
-                <!--<div class="relative inline-block notificationWrapper">-->
-                <!--    <div class="cursor-pointer" onclick="toggleDropdown(event)">-->
-                <!--        <img src="{{ asset('public/images/notification.svg') }}" alt="Notifications" class="h-4" />-->
-                <!--    </div>-->
-
-                    <!-- Notification Dropdown -->
-                <!--    <div-->
-                <!--        class="hidden fixed right-10 mt-2 w-80 bg-[#F3E8EF] rounded-md shadow-lg z-50 notificationDropdown">-->
-                <!--        <div class="flex justify-between items-center px-4 py-3 bg-[#db69a2] text-white rounded-t-md">-->
-                <!--            <span class="font-semibold">All Notifications</span>-->
-                <!--            <span class="bg-white text-[#db69a2] text-sm font-bold rounded px-2 py-0.5">4</span>-->
-                <!--        </div>-->
-
-                <!--        <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto">-->
-                            <!-- Example Notification Item -->
-                <!--            <div class="flex items-center px-4 py-3 space-x-3 cursor-pointer">-->
-                <!--                <img src="{{ asset('public/images/patient-1.png') }}" class="w-10 h-10 rounded-full" />-->
-                <!--                <div class="flex-1">-->
-                <!--                    <p class="text-sm font-semibold text-[#213430]">Lorem ipsum</p>-->
-                <!--                    <p class="text-xs text-[#A9A9A9]">Sed ut</p>-->
-                <!--                </div>-->
-                <!--                <span class="text-xs text-[#A9A9A9] whitespace-nowrap">Just Now</span>-->
-                <!--            </div>-->
-                <!--            <div class="flex items-center px-4 py-3 space-x-3 cursor-pointer">-->
-                <!--                <img src="{{ asset('public/images/patient-11.png') }}" class="w-10 h-10 rounded-full" />-->
-                <!--                <div class="flex-1">-->
-                <!--                    <p class="text-sm font-semibold text-[#213430]">-->
-                <!--                        Lorem ipsum-->
-                <!--                    </p>-->
-                <!--                    <p class="text-xs text-[#A9A9A9]">Sed ut</p>-->
-                <!--                </div>-->
-                <!--                <span class="text-xs text-[#A9A9A9] whitespace-nowrap">Just Now</span>-->
-                <!--            </div>-->
-                <!--        </div>-->
-                <!--    </div>-->
-                <!--</div>-->
+                @include('partials.notification-center', ['icon' => asset('public/images/notification.svg'), 'iconClass' => 'h-4'])
             </div>
 
             <!-- Profile Dropdown -->

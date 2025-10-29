@@ -215,6 +215,7 @@ class CaseManagerController extends Controller
                 'user_id' => $patientUser->id,
                 'title' => 'Application Approved',
                 'message' => "Your application {$code} has been approved.",
+                'priority' => UserNotification::PRIORITY_IMPORTANT,
                 'link_url' => route('patient.viewApplication', $application->id),
             ]);
         }
@@ -251,6 +252,7 @@ class CaseManagerController extends Controller
                 'user_id' => $patientUser->id,
                 'title' => 'Application Rejected',
                 'message' => "Your application {$code} has been rejected. Reason: {$data['reason']}.",
+                'priority' => UserNotification::PRIORITY_IMPORTANT,
                 'link_url' => route('patient.viewApplication', $application->id),
             ]);
         }

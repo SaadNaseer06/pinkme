@@ -18,12 +18,12 @@ $user = auth()->user();
     <div class="flex items-center space-x-4 tab-p">
         <div class="flex items-center space-x-6 ml-2">
 
-            <img src="{{ asset('public/images/HAM.svg') }}" alt="Menu " class="hamburger hamburgerBtn">
+            <img src="{{ asset('images/HAM.svg') }}" alt="Menu " class="hamburger hamburgerBtn">
 
             <button id="fullscreenBtn">
-                <img src="{{ asset('public/images/scanner.svg') }}" alt="Scanner" class="h-3" />
+                <img src="{{ asset('images/scanner.svg') }}" alt="Scanner" class="h-3" />
             </button>
-            <img src="{{ asset('public/images/notification.svg') }}" alt="Scanner" class="h-4" />
+            @include('partials.notification-center')
         </div>
 
         <!-- Profile Dropdown -->
@@ -47,7 +47,7 @@ $user = auth()->user();
                 <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto bg-transparent">
                     <div class="p-3 space-y-3">
                         <a href="{{ route('admin.settings') }}" class="flex items-start space-x-3 p-2 rounded-md">
-                            <img src="{{ asset('public/images/p-1.svg') }}" class="w-5 h-5 mt-1" />
+                            <img src="{{ asset('images/p-1.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">My Profile</p>
                                 <p class="text-xs text-[#A9A9A9]">View personal profile details.</p>
@@ -55,7 +55,7 @@ $user = auth()->user();
                         </a>
                         <div class="border-b border-[#B9B1B6]"></div>
                         <a href="{{ route('admin.settings') }}" class="flex items-start space-x-3 p-2 rounded-md">
-                            <img src="{{ asset('public/images/p-2.svg') }}" class="w-5 h-5 mt-1" />
+                            <img src="{{ asset('images/p-2.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">Edit Profile</p>
                                 <p class="text-xs text-[#A9A9A9]">Modify your personal details.</p>
@@ -88,16 +88,16 @@ $user = auth()->user();
 
     <!-- User Menu -->
     <div class="flex items-center justify-between w-full  ">
-        <img src="{{ asset('public/images/HAM.svg') }}" alt="Menu " class="hamburger mt-2 ml-2 hamburgerBtn">
+        <img src="{{ asset('images/HAM.svg') }}" alt="Menu " class="hamburger mt-2 ml-2 hamburgerBtn">
         <div class="flex items-center space-x-4 tab-p">
             <div class="flex items-center space-x-6 ml-2">
 
 
 
                 <button id="fullscreenBtn">
-                    <img src="{{ asset('public/images/scanner.svg') }}" alt="Scanner" class="h-3" />
+                    <img src="{{ asset('images/scanner.svg') }}" alt="Scanner" class="h-3" />
                 </button>
-                <img src="{{ asset('public/images/notification.svg') }}" alt="Scanner" class="h-4" />
+                @include('partials.notification-center', ['iconClass' => 'h-4'])
             </div>
 
             <div class="flex items-center space-x-2 ">

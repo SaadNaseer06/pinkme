@@ -5,13 +5,14 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'Admin Panel')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="current-user-id" content="{{ optional(auth()->user())->id }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    @vite('resources/css/app.css')
+    @vite(['resources/css/app.css', 'resources/css/custom.css', 'resources/js/app.js'])
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    @vite('resources/css/custom.css')
     @stack('head')
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -43,11 +44,12 @@
     <div class="flex-1 flex flex-col">
         @include('sponsor.partials.topbar')
         <main class="flex-1 p-6">
-            @include('partials.flash')
-            @yield('content')
-        </main>
-        @include('sponsor.partials.footer')
-    </div>
+        @include('partials.flash')
+        @yield('content')
+    </main>
+    @include('sponsor.partials.footer')
+</div>
+    @include('partials.notification-modal')
     @stack('scripts')
 </body>
 

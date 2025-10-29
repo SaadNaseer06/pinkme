@@ -6,6 +6,8 @@ use App\Http\Requests\StoreApplicationRequest;
 use App\Models\Application;
 use App\Models\Patient;
 use App\Models\Program;
+use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -178,6 +180,21 @@ class ApplicationController extends Controller
                         'filetype' => $file->getClientMimeType(),
                     ]);
                 }
+            }
+
+            // Notify admin users about the new application without triggering the popup modal.
+            $adminUsers = User::query()
+                ->whereHas('role', fn ($query) => $query->where('name', 'admin'))
+                ->get(['id']);
+
+            foreach ($adminUsers as $admin) {
+                UserNotification::create([
+                    'user_id' => $admin->id,
+                    'title' => 'New Patient Application',
+                    'message' => sprintf('A new application "%s" has been submitted and is waiting for review.', $application->title),
+                    'priority' => UserNotification::PRIORITY_NORMAL,
+                    'link_url' => route('admin.viewApplication', $application->id),
+                ]);
             }
 
             return redirect()->route('patient.applications')

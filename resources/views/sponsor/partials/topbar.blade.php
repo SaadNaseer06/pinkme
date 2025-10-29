@@ -19,7 +19,7 @@
             <button id="fullscreenBtn">
                 <img src="{{ asset('public/images/scanner.svg') }}" alt="Scanner" class="h-3" />
             </button>
-            <!--<img src="{{ asset('public/images/notification.svg') }}" alt="Scanner" class="h-4" />-->
+            @include('partials.notification-center', ['icon' => asset('public/images/notification.svg'), 'iconClass' => 'h-4'])
         </div>
 
         <!-- Profile Dropdown -->
@@ -93,7 +93,7 @@
                 <button id="fullscreenBtn">
                     <img src="{{ asset('public/images/scanner.svg') }}" alt="Scanner" class="h-3" />
                 </button>
-                <!--<img src="{{ asset('public/images/notification.svg') }}" alt="Scanner" class="h-4" />-->
+                @include('partials.notification-center', ['icon' => asset('public/images/notification.svg'), 'iconClass' => 'h-4'])
             </div>
 
             <div class="flex items-center space-x-2 ">

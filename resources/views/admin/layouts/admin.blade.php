@@ -12,12 +12,14 @@
         rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
+    @vite('resources/js/app.js')
     @stack('head')
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {{-- Favicon --}}
     <link rel="icon" href="{{ asset('public/images/favicon.png') }}" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="current-user-id" content="{{ optional(auth()->user())->id }}">
     {{-- Tailwind Config --}}
     <script>
         tailwind.config = {
@@ -101,8 +103,8 @@
         </main>
         @include('admin.partials.footer')
     </div>
+    @include('partials.notification-modal')
     @stack('scripts')
 </body>
 
 </html>
-

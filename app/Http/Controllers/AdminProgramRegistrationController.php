@@ -93,6 +93,7 @@ class AdminProgramRegistrationController extends Controller
                 'user_id' => $registration->user_id,
                 'title' => 'Program Registration Approved',
                 'message' => 'Your registration for "' . ($registration->program->title ?? 'a program') . '" has been approved.',
+                'priority' => UserNotification::PRIORITY_IMPORTANT,
                 'link_url' => route('patient.programRegistrations.show', $registration),
             ]);
         }
@@ -131,6 +132,7 @@ class AdminProgramRegistrationController extends Controller
                 'user_id' => $registration->user_id,
                 'title' => 'Program Registration Rejected',
                 'message' => 'Your registration for "' . ($registration->program->title ?? 'a program') . '" has been rejected. Reason: ' . $data['note'],
+                'priority' => UserNotification::PRIORITY_IMPORTANT,
                 'link_url' => route('patient.programRegistrations.show', $registration),
             ]);
         }

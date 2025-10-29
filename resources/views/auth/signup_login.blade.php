@@ -960,6 +960,20 @@
                                     {{ session('success') }}
                                 </div>
                             @endif
+
+                            <div class="space-y-4">
+                                <a href="{{ route('patient.google.redirect') }}"
+                                    class="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-xl px-4 py-3 bg-white text-gray-700 font-medium transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:ring-offset-1">
+                                    <i class="fab fa-google text-primary-500 text-lg"></i>
+                                    <span>Continue with Google</span>
+                                </a>
+                                <div class="flex items-center text-gray-400 uppercase text-xs tracking-wider">
+                                    <span class="flex-1 h-px bg-gray-200"></span>
+                                    <span class="px-3">or</span>
+                                    <span class="flex-1 h-px bg-gray-200"></span>
+                                </div>
+                            </div>
+
                             <div class="relative">
                                 <input type="text" name="login" placeholder=" " value="{{ old('login') }}"
                                     required

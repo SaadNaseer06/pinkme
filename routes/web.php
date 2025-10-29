@@ -17,6 +17,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CaseManagerController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PatientController;
@@ -53,6 +54,14 @@ Route::get('/terms-and-conditions', [PageController::class, 'terms'])->name('pol
 Route::get('/login', [LoginController::class, 'showLoginForm'])
     ->middleware('redirect.by.role')
     ->name('login');
+
+Route::get('/auth/google/redirect', [SocialLoginController::class, 'redirectToGoogle'])
+    ->middleware('guest')
+    ->name('patient.google.redirect');
+
+Route::get('/auth/google/callback', [SocialLoginController::class, 'handleGoogleCallback'])
+    ->middleware('guest')
+    ->name('patient.google.callback');
 
 Route::get('/register', [RegisterController::class, 'show'])
     ->middleware('redirect.by.role')

@@ -138,10 +138,10 @@
                                 <table class="min-w-full text-sm text-left mt-6">
                                     <thead>
                                         <tr class="border-t border-[#e0cfd8]">
-                                            <th class="p-2">
-                                                <input type="checkbox"
-                                                    class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
-                                            </th>
+                                            <!--<th class="p-2">-->
+                                            <!--    <input type="checkbox"-->
+                                            <!--        class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
+                                            <!--</th>-->
                                             <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
                                                 All Sponsors
                                             </th>
@@ -166,11 +166,11 @@
                                         @forelse($sponsors ?? [] as $sponsor)
                                             <tr
                                                 class="border-t border-[#e0cfd8] hover:bg-[#F6EDF5] transition-colors duration-200">
-                                                <td class="p-2">
-                                                    <input type="checkbox" name="selected_sponsors[]"
-                                                        value="{{ $sponsor->id }}"
-                                                        class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
-                                                </td>
+                                                <!--<td class="p-2">-->
+                                                <!--    <input type="checkbox" name="selected_sponsors[]"-->
+                                                <!--        value="{{ $sponsor->id }}"-->
+                                                <!--        class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
+                                                <!--</td>-->
                                                 <td class="p-2">
                                                     <div class="flex items-center gap-3">
                                                         @php

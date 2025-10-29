@@ -145,9 +145,17 @@
     </div>
     <!-- Separate Sign Out button outside navigation -->
     <div class="sign-out">
-        <a href="registration.html">
-            <span class="icon"><img src="{{ asset('public/images/signout.svg') }}" alt="" /></span>
-            <span class="title">Sign Out</span>
-        </a>
+        <a href="{{ route('logout') }}"
+   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+    <span class="icon">
+        <img src="{{ asset('images/signout.svg') }}" alt="Sign Out" />
+    </span>
+    <span class="title">Sign Out</span>
+</a>
+
+<form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+    @csrf
+</form>
+
     </div>
 </div>

@@ -19,7 +19,7 @@
             <button id="fullscreenBtn">
                 <img src="{{ asset('public/images/scanner.svg') }}" alt="Scanner" class="h-3" />
             </button>
-            <img src="{{ asset('public/images/notification.svg') }}" alt="Scanner" class="h-4" />
+            <!--<img src="{{ asset('public/images/notification.svg') }}" alt="Scanner" class="h-4" />-->
         </div>
 
         <!-- Profile Dropdown -->
@@ -42,7 +42,7 @@
 
                 <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto bg-transparent">
                     <div class="p-3 space-y-3">
-                        <a href="{{ route('patient.profile') }}" class="flex items-start space-x-3 p-2 rounded-md">
+                        <a href="{{ route('sponsor.setting') }}" class="flex items-start space-x-3 p-2 rounded-md">
                             <img src="{{ asset('public/images/p-1.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">My Profile</p>
@@ -50,7 +50,7 @@
                             </div>
                         </a>
                         <div class="border-b border-[#B9B1B6]"></div>
-                        <a href="{{ route('patient.setting') }}" class="flex items-start space-x-3 p-2 rounded-md">
+                        <a href="{{ route('sponsor.setting') }}" class="flex items-start space-x-3 p-2 rounded-md">
                             <img src="{{ asset('public/images/p-2.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">Edit Profile</p>
@@ -93,7 +93,7 @@
                 <button id="fullscreenBtn">
                     <img src="{{ asset('public/images/scanner.svg') }}" alt="Scanner" class="h-3" />
                 </button>
-                <img src="{{ asset('public/images/notification.svg') }}" alt="Scanner" class="h-4" />
+                <!--<img src="{{ asset('public/images/notification.svg') }}" alt="Scanner" class="h-4" />-->
             </div>
 
             <div class="flex items-center space-x-2 ">

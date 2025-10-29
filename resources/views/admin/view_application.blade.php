@@ -128,7 +128,7 @@
                     @forelse($application->documents as $doc)
                         <li class="flex justify-between items-center">
                             <span>{{ $doc->filename }}</span>
-                            <a href="{{ asset($doc->filepath) }}" target="_blank" class="text-pink-500">View</a>
+                            <a href="{{ asset('storage/app/public/' . $doc->filepath) }}" target="_blank" class="text-pink-500">View</a>
                         </li>
                     @empty
                         <li class="text-[#91848C]">No documents uploaded.</li>

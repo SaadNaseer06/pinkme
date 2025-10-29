@@ -1,3 +1,7 @@
+@php
+$user = auth()->user();
+@endphp
+
 <!-- Top Navigation Bar -->
 <header
     class="mt-4 ml-6 mr-6 bg-[#F3E8EF] p-4  justify-between items-center rounded-lg tab-head md:flex hidden tab-header-1">
@@ -29,7 +33,7 @@
                     <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" class="w-full h-full object-cover" />
                 </div>
                 <div class="text-left">
-                    <p class="text-sm font-normal text-[#213430]">Sarah Tyler</p>
+                    <p class="text-sm font-normal text-[#213430]">Admin</p>
                     <p class="text-xs text-[#DB69A2]">Online</p>
                 </div>
             </div>
@@ -42,7 +46,7 @@
 
                 <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto bg-transparent">
                     <div class="p-3 space-y-3">
-                        <a href="{{ route('patient.profile') }}" class="flex items-start space-x-3 p-2 rounded-md">
+                        <a href="{{ route('admin.settings') }}" class="flex items-start space-x-3 p-2 rounded-md">
                             <img src="{{ asset('public/images/p-1.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">My Profile</p>
@@ -50,7 +54,7 @@
                             </div>
                         </a>
                         <div class="border-b border-[#B9B1B6]"></div>
-                        <a href="{{ route('patient.setting') }}" class="flex items-start space-x-3 p-2 rounded-md">
+                        <a href="{{ route('admin.settings') }}" class="flex items-start space-x-3 p-2 rounded-md">
                             <img src="{{ asset('public/images/p-2.svg') }}" class="w-5 h-5 mt-1" />
                             <div>
                                 <p class="text-sm font-semibold text-[#213430]">Edit Profile</p>

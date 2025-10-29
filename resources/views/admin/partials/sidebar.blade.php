@@ -163,10 +163,17 @@
         </ul>
     </div>
     <div class="sign-out">
-        {{-- <a href="{{ route('logout') }}"> --}}
-        <a href="#">
-            <span class="icon"><img src="{{ asset('public/images/signout.svg') }}" /></span>
+        <a href="{{ route('logout') }}"
+           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+            <span class="icon">
+                <img src="{{ asset('images/signout.svg') }}" alt="Sign Out" />
+            </span>
             <span class="title">Sign Out</span>
         </a>
+        
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+            @csrf
+        </form>
+
     </div>
 </div>

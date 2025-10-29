@@ -14,6 +14,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'provider_name',
+        'provider_id',
+        'provider_avatar',
     ];
 
     protected $hidden = [
@@ -128,6 +131,10 @@ class User extends Authenticatable
         
         if ($profile && $profile->avatar) {
             return asset('storage/' . ltrim($profile->avatar, '/'));
+        }
+
+        if ($this->provider_avatar) {
+            return $this->provider_avatar;
         }
         
         return asset('images/profile.png');

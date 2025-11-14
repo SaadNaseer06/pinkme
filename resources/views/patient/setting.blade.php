@@ -70,9 +70,8 @@
                                     <div class="w-28 h-28 rounded-full p-1">
                                         <div
                                             class="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
-                                            <img id="avatarPreview"
-                                                src="{{ auth()->user()->avatar_url }}"
-                                                alt="Profile" class="object-cover w-full h-full" />
+                                            <img id="avatarPreview" src="{{ auth()->user()->avatar_url }}" alt="Profile"
+                                                class="object-cover w-full h-full" />
                                         </div>
                                     </div>
                                     <label for="avatar"
@@ -431,3 +430,8 @@
     </script>
 
 @endsection
+
+
+@push('scripts')
+    <script src="{{ asset('js/patient/dashboard.js') }}"></script>
+@endpush

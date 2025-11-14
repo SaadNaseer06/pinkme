@@ -81,7 +81,7 @@
                             <form method="POST" action="{{ route('admin.program_registrations.approve', $registration) }}" class="bg-[#F6EDF5] rounded-lg p-4 space-y-3">
                                 @csrf
                                 <h4 class="font-semibold text-[#213430] app-main">Approve Registration</h4>
-                                <p class="text-sm text-[#91848C] app-text">Optional: add a short note for the applicant (visible internally).</p>
+                                <p class="text-sm text-[#91848C] app-text">Optional: add a short note for the applicant.</p>
                                 <textarea name="note" rows="3" class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-[#DB69A2]" placeholder="Optional note"></textarea>
                                 <button type="submit"
                                     class="w-full inline-flex justify-center items-center px-4 py-2 bg-[#20B354] text-white rounded-md text-sm font-semibold hover:bg-[#1A9444] transition">

@@ -15,7 +15,10 @@ class RegisterController extends Controller
 {
     public function show()
     {
-        return view('auth.signup_login');
+        return view('auth.signup_login', [
+            'rememberedLogin' => request()->cookie('remembered_login'),
+            'rememberedPassword' => request()->cookie('remembered_password'),
+        ]);
     }
 
     public function register(Request $request)

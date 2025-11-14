@@ -84,7 +84,7 @@
             <div class="bg-gradient-to-r from-primary-500 via-primary-500/90 to-primary-400 text-white">
                 <div class="max-w-6xl mx-auto px-5 py-6 md:py-8 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <img src="{{ asset('public/images/logo-white.png') }}" alt="{{ config('app.name', 'Pink Me') }}"
+                        <img src="{{ asset('public/images/pink_me_logo.png') }}" alt="{{ config('app.name', 'Pink Me') }}"
                             class="h-10 w-auto">
                         {{-- <span class="text-lg font-semibold tracking-wide uppercase">{{ config('app.name', 'Pink Me') }}</span> --}}
                     </div>

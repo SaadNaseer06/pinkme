@@ -7,7 +7,7 @@
 
     <!-- Logo -->
     <div class="mobile-logo">
-        <img src="{{ asset('public/images/logo-white.png') }}" alt="PINK ME Logo" />
+        <img src="{{ asset('public/images/pink_me_logo.png') }}" alt="PINK ME Logo" />
     </div>
 
     <!-- Menu -->
@@ -75,7 +75,7 @@
 <div class="box relative">
     <div class="navigation">
         <ul>
-            <li><a href="#"><img src="{{ asset('public/images/logo-white.png') }}" alt="Logo"></a></li>
+            <li><a href="#"><img src="{{ asset('public/images/pink_me_logo.png') }}" alt="Logo"></a></li>
             <li class="{{ request()->is('admin/dashboard') ? 'hovered' : '' }}">
                 <a href="{{ route('admin.dashboard') }}">
                     <span class="icon"><img

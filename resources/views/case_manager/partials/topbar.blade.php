@@ -109,7 +109,7 @@
                     <img src="{{ asset('public/images/profile.png') }}" alt="Profile Picture" class="w-full h-full object-cover" />
                 </div>
                 <div class="text-left">
-                    <p class="text-sm font-normal text-[#213430]">Sarah Tyler</p>
+                    <p class="text-sm font-normal text-[#213430]">{{ $fullName }}</p>
                     <p class="text-xs text-[#DB69A2]">Online</p>
                 </div>
             </div>

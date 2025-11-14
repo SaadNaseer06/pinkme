@@ -241,8 +241,8 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         /* =========================
-                       Utilities
-                    ========================= */
+                           Utilities
+                        ========================= */
         const CSRF_TOKEN = '{{ csrf_token() }}';
         const LIST_URL = "{{ route('admin.applications.list') }}";
         const APPLICATIONS_BASE_URL = "{{ url('admin/applications') }}";

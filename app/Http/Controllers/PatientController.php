@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\SponsorshipProgram;
 use App\Models\Message;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -121,18 +122,83 @@ class PatientController extends Controller
         return view('patient.programs_and_aids', compact('programs'));
     }
 
-    public function patientChats()
+    public function patientChats(Request $request)
     {
         $user = Auth::user();
+        $patient = Patient::firstOrCreate(['user_id' => $user->id]);
 
-        // Get messages for this patient
-        $messages = Message::where('sender_id', $user->id)
-            ->orWhere('receiver_id', $user->id)
+        $caseManagerIds = Application::where('patient_id', $patient->id)
+            ->whereNotNull('reviewer_id')
+            ->pluck('reviewer_id')
+            ->unique()
+            ->values();
+
+        $contacts = User::query()
+            ->whereIn('id', $caseManagerIds)
+            ->with(['profile', 'role'])
+            ->get();
+
+        if ($contacts->isEmpty()) {
+            $contacts = User::query()
+                ->whereHas('role', fn ($query) => $query->where('name', 'admin'))
+                ->with(['profile', 'role'])
+                ->get();
+        }
+
+        if ($contacts->isEmpty()) {
+            return view('patient.patient_chats', [
+                'contacts' => collect(),
+                'activeContact' => null,
+                'activeContactId' => null,
+                'messagesPayload' => [],
+            ]);
+        }
+
+        $activeContactId = (int) $request->query('contact', $contacts->first()->id);
+        $activeContact = $contacts->firstWhere('id', $activeContactId) ?? $contacts->first();
+
+        Message::markThreadAsRead($user->id, $activeContact->id);
+
+        $messagesPayload = Message::betweenUsers($user->id, $activeContact->id)
             ->with(['sender.profile', 'receiver.profile'])
-            ->orderBy('sent_at', 'desc')
-            ->paginate(20);
+            ->orderBy('sent_at')
+            ->limit(200)
+            ->get()
+            ->map->toFrontendPayload()
+            ->values();
 
-        return view('patient.patient_chats', compact('messages'));
+        $contactsPayload = $contacts->map(function (User $contact) use ($user) {
+            $latestMessage = Message::betweenUsers($user->id, $contact->id)
+                ->latest('sent_at')
+                ->first();
+
+            $unreadCount = Message::betweenUsers($user->id, $contact->id)
+                ->where('receiver_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+
+            return [
+                'id' => $contact->id,
+                'name' => optional($contact->profile)->full_name ?? $contact->email,
+                'avatar_url' => $contact->avatar_url,
+                'latest_message' => $latestMessage?->content,
+                'latest_at' => optional($latestMessage?->sent_at)->format('H:i'),
+                'unread_count' => $unreadCount,
+                'fetch_url' => route('chat.messages.index', $contact),
+                'send_url' => route('chat.messages.store', $contact),
+            ];
+        })->values();
+
+        return view('patient.patient_chats', [
+            'contacts' => $contactsPayload,
+            'activeContact' => [
+                'id' => $activeContact->id,
+                'name' => optional($activeContact->profile)->full_name ?? $activeContact->email,
+                'avatar_url' => $activeContact->avatar_url,
+            ],
+            'activeContactId' => $activeContact->id,
+            'messagesPayload' => $messagesPayload,
+        ]);
     }
 
     public function faq()

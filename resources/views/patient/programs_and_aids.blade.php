@@ -174,7 +174,7 @@
                                 <!-- Logo -->
                                 <div
                                     class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                                    <img class="modal-sponsor-logo w-10 h-10 object-contain" src="{{ asset('public/images/logo-white.png') }}"
+                                    <img class="modal-sponsor-logo w-10 h-10 object-contain" src="{{ asset('public/images/pink_me_logo.png') }}"
                                         alt="Sponsor Logo">
                                 </div>
 
@@ -394,7 +394,7 @@
                         const logoSrc = sponsor.logo.startsWith('http') ? sponsor.logo : "{{ asset('') }}" + sponsor.logo.replace(/^\/+/, '');
                         document.querySelector('.modal-sponsor-logo').src = logoSrc;
                     } else {
-                        document.querySelector('.modal-sponsor-logo').src = "{{ asset('public/images/logo-white.png') }}";
+                        document.querySelector('.modal-sponsor-logo').src = "{{ asset('public/images/pink_me_logo.png') }}";
                     }
                     // document.querySelector('.modal-sponsor-about').textContent = sponsor.about || '—';
 

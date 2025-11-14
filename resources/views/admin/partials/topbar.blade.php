@@ -1,5 +1,7 @@
 @php
-$user = auth()->user();
+    $user = auth()->user();
+    $profile = $user->profile;
+    $fullName = $profile ? $profile->full_name : 'Unknown User';
 @endphp
 
 <!-- Top Navigation Bar -->
@@ -105,7 +107,7 @@ $user = auth()->user();
                     <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" class="w-full h-full object-cover" />
                 </div>
                 <div class="text-left">
-                    <p class="text-sm font-normal text-[#213430]">Sarah Tyler</p>
+                    <p class="text-sm font-normal text-[#213430]">{{ $fullName }}</p>
                     <p class="text-xs text-[#DB69A2]">Online</p>
                 </div>
             </div>

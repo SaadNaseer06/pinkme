@@ -1,3 +1,9 @@
+@php
+    $user = auth()->user();
+    $profile = $user->profile;
+    $fullName = $profile ? $profile->full_name : 'Unknown User';
+@endphp
+
 <!-- Top Navigation Bar -->
 <header
     class="mt-4 ml-6 mr-6 bg-[#F3E8EF] p-4  justify-between items-center rounded-lg tab-head md:flex hidden tab-header-1">
@@ -29,7 +35,7 @@
                     <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" class="w-full h-full object-cover" />
                 </div>
                 <div class="text-left">
-                    <p class="text-sm font-normal text-[#213430]">Sarah Tyler</p>
+                    <p class="text-sm font-normal text-[#213430]">{{ $fullName }}</p>
                     <p class="text-xs text-[#DB69A2]">Online</p>
                 </div>
             </div>
@@ -101,7 +107,7 @@
                     <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" class="w-full h-full object-cover" />
                 </div>
                 <div class="text-left">
-                    <p class="text-sm font-normal text-[#213430]">Sarah Tyler</p>
+                    <p class="text-sm font-normal text-[#213430]">{{ $fullName }}</p>
                     <p class="text-xs text-[#DB69A2]">Online</p>
                 </div>
             </div>

@@ -10,13 +10,16 @@ use App\Http\Controllers\SponsorController;
 use App\Http\Controllers\SponsorshipProgramController;
 use App\Http\Controllers\AdminSponsorController;
 use App\Http\Controllers\AdminProgramRegistrationController;
+use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CaseManagerController;
 use App\Http\Controllers\InvoiceController;
@@ -45,7 +48,11 @@ Route::get('/', function () {
         }
     }
 
-    return view('auth.signup_login', ['initialTab' => 'login']);
+    return view('auth.signup_login', [
+        'initialTab' => 'login',
+        'rememberedLogin' => request()->cookie('remembered_login'),
+        'rememberedPassword' => request()->cookie('remembered_password'),
+    ]);
 });
 
 Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('policy.privacy');
@@ -54,6 +61,17 @@ Route::get('/terms-and-conditions', [PageController::class, 'terms'])->name('pol
 Route::get('/login', [LoginController::class, 'showLoginForm'])
     ->middleware('redirect.by.role')
     ->name('login');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/password/forgot', [ForgotPasswordController::class, 'showLinkRequestForm'])
+        ->name('password.request');
+    Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+    Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])
+        ->name('password.reset');
+    Route::post('/password/reset', [ResetPasswordController::class, 'reset'])
+        ->name('password.update');
+});
 
 Route::get('/auth/google/redirect', [SocialLoginController::class, 'redirectToGoogle'])
     ->middleware('guest')
@@ -77,6 +95,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read_all');
+
+    Route::get('/chat/conversations/{contact}', [ChatMessageController::class, 'index'])->name('chat.messages.index');
+    Route::post('/chat/conversations/{contact}', [ChatMessageController::class, 'store'])->name('chat.messages.store');
 });
 
 Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
@@ -149,7 +170,6 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
         ->name('admin.applications.index');
     Route::get('/admin/applications/list', [AdminController::class, 'applicationsList'])
         ->name('admin.applications.list'); // AJAX endpoint
-
 });
 
 

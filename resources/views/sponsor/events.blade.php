@@ -250,7 +250,7 @@
                         document.getElementById('modalSponsorName').textContent = sponsorName || 'Sponsor';
                         document.getElementById('modalSponsorPhone').textContent = sponsorPhone || 'Phone unavailable';
                         document.getElementById('modalSponsorEmail').textContent = sponsorEmail || 'Email unavailable';
-                        document.getElementById('modalSponsorLogo').src = sponsorLogo || "{{ asset('images/logo-white.png') }}";
+                        document.getElementById('modalSponsorLogo').src = sponsorLogo || "{{ asset('images/pink_me_logo.png') }}";
                         document.getElementById('modalSponsorLogo').alt = sponsorName || 'Sponsor logo';
                         document.getElementById('modalSponsorAbout').textContent = sponsorAbout ||
                             'Committed supporters partnering with us to impact more lives.';

@@ -7,7 +7,7 @@
 
      <!-- Logo -->
      <div class="mobile-logo">
-        <img src="{{ asset('public/images/logo-white.png') }}" alt="PINK ME Logo">
+        <img src="{{ asset('public/images/pink_me_logo.png') }}" alt="PINK ME Logo">
      </div>
 
      <!-- Menu -->
@@ -31,7 +31,7 @@
          <ul>
              <li>
                  <a href="{{ route('sponsor.dashboard') }}">
-                    <img src="{{ asset('public/images/logo-white.png') }}" alt="" />
+                    <img src="{{ asset('public/images/pink_me_logo.png') }}" alt="" />
                  </a>
              </li>
              <li class="{{ request()->routeIs('sponsor.dashboard') ? 'hovered' : '' }}">

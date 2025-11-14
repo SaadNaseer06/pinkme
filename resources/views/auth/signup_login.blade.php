@@ -954,6 +954,14 @@
 
                         <form method="POST" action="{{ route('login') }}" class="space-y-6 mobile-space-y">
                             @csrf
+                            @php
+                                $rememberedLoginValue = old('login', $rememberedLogin ?? '');
+                                $hasOldInput = session()->has('_old_input');
+                                $rememberedPasswordValue = $hasOldInput ? '' : ($rememberedPassword ?? '');
+                                $rememberCheckboxChecked = $hasOldInput
+                                    ? old('remember') !== null
+                                    : (!empty($rememberedLoginValue) || !empty($rememberedPasswordValue));
+                            @endphp
 
                             @if (session('success'))
                                 <div class="mb-4 p-4 rounded-lg bg-green-100 text-green-800 text-center">
@@ -975,8 +983,8 @@
                             </div>
 
                             <div class="relative">
-                                <input type="text" name="login" placeholder=" " value="{{ old('login') }}"
-                                    required
+                                <input type="text" name="login" placeholder=" " value="{{ $rememberedLoginValue }}"
+                                    required autocomplete="username"
                                     class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                 <label class="floating-label">Email or Phone</label>
                                 @error('login')
@@ -985,7 +993,8 @@
                             </div>
 
                             <div class="relative">
-                                <input id="login-password" type="password" name="password" placeholder=" " required
+                                <input id="login-password" type="password" name="password" placeholder=" "
+                                    value="{{ $rememberedPasswordValue }}" required autocomplete="current-password"
                                     class="form-input w-full px-4 py-4 rounded-xl bg-gray-50 outline-none mobile-h3 mobile-input" />
                                 <label class="floating-label">Password</label>
                                 <button type="button"
@@ -999,13 +1008,14 @@
                             </div>
 
                             <div class="flex justify-between items-center">
-                                <label class="flex items-center">
-                                    <input type="checkbox" name="remember"
+                                <label class="flex items-center" for="login-remember">
+                                    <input id="login-remember" type="checkbox" name="remember" value="1"
                                         class="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                                        {{ old('remember') ? 'checked' : '' }} />
+                                        {{ $rememberCheckboxChecked ? 'checked' : '' }} />
                                     <span class="ml-2 text-sm text-gray-600 mobile-checkbox">Remember me</span>
                                 </label>
-                                <a href="#" class="text-primary-600 hover:text-primary-700 text-sm font-medium">
+                                <a href="{{ route('password.request') }}"
+                                    class="text-primary-600 hover:text-primary-700 text-sm font-medium">
                                     Forgot password?
                                 </a>
                             </div>

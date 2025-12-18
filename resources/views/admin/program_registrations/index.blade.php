@@ -6,7 +6,8 @@
     <main class="flex-1">
         <div class="max-w-8xl mx-auto">
             <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4 border-b border-[#DCCFD8] pb-4">
+                <div
+                    class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4 border-b border-[#DCCFD8] pb-4">
                     <div>
                         <h2 class="text-2xl font-semibold text-[#213430] app-main">Program Registration Requests</h2>
                         <p class="text-sm text-[#91848C] app-text mt-1">
@@ -26,13 +27,14 @@
                         <select name="status"
                             class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#91848C] focus:outline-none">
                             <option value="pending" {{ $selectedStatus === 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
-                            <option value="rejected" {{ $selectedStatus === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                            <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved
+                            </option>
+                            <option value="rejected" {{ $selectedStatus === 'rejected' ? 'selected' : '' }}>Rejected
+                            </option>
                             <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>All</option>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                             </svg>
                         </div>
@@ -57,7 +59,7 @@
                                 <th class="p-3 text-[#91848C] font-medium app-h">Program</th>
                                 <th class="p-3 text-[#91848C] font-medium app-h">Submitted</th>
                                 <th class="p-3 text-[#91848C] font-medium app-h">Status</th>
-                                <th class="p-3 text-[#91848C] font-medium app-h text-right">Action</th>
+                                <th class="p-3 text-[#91848C] font-medium app-h text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody class="text-[#213430]">
@@ -76,19 +78,19 @@
                                         {{ $registration->created_at?->format('d M Y, h:i A') ?? 'N/A' }}
                                     </td>
                                     <td class="p-3">
-                                        @php
-                                            $status = strtolower($registration->status);
-                                            $badgeClasses = match ($status) {
-                                                'approved' => 'bg-[#C5E8D1] text-[#20B354]',
-                                                'rejected' => 'bg-[#FAD4D4] text-[#B32020]',
-                                                default => 'bg-[#FDE8F3] text-[#DB69A2]',
-                                            };
-                                        @endphp
-                                        <span class="px-3 py-1 rounded-full text-xs font-semibold app-text {{ $badgeClasses }}">
+                    @php
+                        $status = strtolower($registration->status);
+                        $badgeClasses = match ($status) {
+                            'approved' => 'bg-[#C5E8D1] text-[#20B354]',
+                            'rejected' => 'bg-[#FAD4D4] text-[#B32020]',
+                            default => 'bg-[#FDE8F3] text-[#DB69A2]',
+                        };
+                    @endphp
+                                        <span class="rounded-full text-xs font-semibold app-text {{ $badgeClasses }}">
                                             {{ ucfirst($status) }}
                                         </span>
                                     </td>
-                                    <td class="p-3 text-right">
+                                    <td class="p-3 text-center">
                                         <a href="{{ route('admin.program_registrations.show', $registration) }}"
                                             class="inline-flex items-center px-3 py-2 text-sm text-[#DB69A2] border border-[#DB69A2] rounded-md hover:bg-[#DB69A2] hover:text-white transition app-text">
                                             View Details

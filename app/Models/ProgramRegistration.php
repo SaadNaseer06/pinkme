@@ -24,8 +24,30 @@ class ProgramRegistration extends Model
         'blood_group',
         'medical_condition',
         'assistance_type',
+        'quarter_applied',
+        'programs_applied',
+        'active_treatment',
+        'pregnant',
+        'family_history',
+        'assistance_history',
+        'heard_about',
+        'referral_type',
+        'treatment_facility_name',
+        'street_address',
+        'city',
+        'state',
+        'postal_code',
+        'proof_of_income_status',
+        'story',
+        'authorization_allow',
+        'authorization_permissions',
+        'billing_details',
+        'signature',
         'justification',
         'document_paths',
+        'treatment_letter_path',
+        'bill_statement_paths',
+        'income_document_paths',
         'status',
         'reviewed_by',
         'reviewed_at',
@@ -34,6 +56,14 @@ class ProgramRegistration extends Model
 
     protected $casts = [
         'document_paths' => 'array',
+        'programs_applied' => 'array',
+        'active_treatment' => 'boolean',
+        'pregnant' => 'boolean',
+        'proof_of_income_status' => 'array',
+        'authorization_permissions' => 'array',
+        'authorization_allow' => 'boolean',
+        'bill_statement_paths' => 'array',
+        'income_document_paths' => 'array',
         'dob' => 'date',
         'reviewed_at' => 'datetime',
     ];
@@ -78,16 +108,8 @@ class ProgramRegistration extends Model
         if (!$this->document_paths) {
             return [];
         }
-        
-        return collect($this->document_paths)
-            ->map(function ($path) {
-                return [
-                    'path' => $path,
-                    'url' => asset('storage/' . ltrim($path, '/')),
-                    'filename' => basename($path),
-                ];
-            })
-            ->toArray();
+
+        return $this->mapFileArray($this->document_paths);
     }
 
     public function getStatusLabelAttribute(): string
@@ -97,5 +119,47 @@ class ProgramRegistration extends Model
             self::STATUS_REJECTED => 'Rejected',
             default               => 'Pending',
         };
+    }
+
+    public function getTreatmentLetterAttribute(): ?array
+    {
+        return $this->mapFile($this->treatment_letter_path);
+    }
+
+    public function getBillStatementsAttribute(): array
+    {
+        return $this->mapFileArray($this->bill_statement_paths);
+    }
+
+    public function getIncomeDocumentsAttribute(): array
+    {
+        return $this->mapFileArray($this->income_document_paths);
+    }
+
+    private function mapFile(?string $path): ?array
+    {
+        if (!$path) {
+            return null;
+        }
+
+        return [
+            'path' => $path,
+            'url' => asset('storage/' . ltrim($path, '/')),
+            'filename' => basename($path),
+        ];
+    }
+
+    private function mapFileArray($paths): array
+    {
+        if (!$paths) {
+            return [];
+        }
+
+        return collect(is_array($paths) ? $paths : [$paths])
+            ->filter()
+            ->map(fn ($path) => $this->mapFile($path))
+            ->filter()
+            ->values()
+            ->toArray();
     }
 }

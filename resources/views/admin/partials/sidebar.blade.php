@@ -22,12 +22,6 @@
                     src="{{ request()->is('admin/applications') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
                     alt="" />Applications</a>
         </li>
-        <li class="{{ request()->is('admin/assigned') ? 'active' : '' }}">
-            <a href="{{ route('admin.assigned') }}"><img
-                    src="{{ request()->is('admin/assigned') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
-                    alt="" />Assigned
-                Applications</a>
-        </li>
         <li class="{{ request()->is('admin/program-registration-requests*') ? 'active' : '' }}">
             <a href="{{ route('admin.program_registrations.index') }}"><img
                     src="{{ request()->is('admin/program-registration-requests*') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
@@ -94,14 +88,6 @@
                             class="w-5 h-5" />
                     </span>
                     <span class="title">Applications</span>
-                </a>
-            </li>
-            <li class="{{ request()->is('admin/assigned') ? 'hovered' : '' }}">
-                <a href="{{ route('admin.assigned') }}">
-                    <span class="icon"><img
-                            src="{{ request()->is('admin/assigned') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
-                            class="w-5 h-5" /></span>
-                    <span class="title">Assigned Applications</span>
                 </a>
             </li>
             <li class="{{ request()->is('admin/program-registration-requests*') ? 'hovered' : '' }}">

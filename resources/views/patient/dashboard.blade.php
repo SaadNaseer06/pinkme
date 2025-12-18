@@ -13,7 +13,7 @@
 
     <!-- Dashboard Content -->
     <main class="flex-1">
-        <div class="grid gap-6 tab-con grid-cols-[1.5fr_1.5fr_1fr] sm:grid-cols-[1.5fr_1.5fr_1fr] grid-cols-none">
+        <div class="grid gap-6 tab-con grid-cols-[1.5fr_1.5fr] sm:grid-cols-[1.5fr_1.5fr] grid-cols-none">
 
             <!-- User Profile Card -->
             <div class="bg-[#F3E8EF] rounded-lg p-6">
@@ -50,14 +50,17 @@
                 $inReviewCount = $stats['in_review_applications'] ?? ($stats['pending_applications'] ?? 0);
                 $lastSubmission = $stats['last_application_date'] ?? 'N/A';
                 $latestStatusRaw = $stats['latest_application_status'] ?? 'N/A';
-                $latestStatus = $latestStatusRaw !== 'N/A'
-                    ? trim(\Illuminate\Support\Str::title(strtolower($latestStatusRaw)))
-                    : 'N/A';
+                $latestStatus =
+                    $latestStatusRaw !== 'N/A'
+                        ? trim(\Illuminate\Support\Str::title(strtolower($latestStatusRaw)))
+                        : 'N/A';
                 $latestCode = $stats['latest_application_code'] ?? null;
                 $latestProgram = $stats['latest_program_title'] ?? null;
                 $latestId = $stats['latest_application_id'] ?? null;
                 $hasLatest = !empty($latestId);
-                $detailUrl = $hasLatest ? route('patient.viewApplication', $latestId) : route('patient.createApplication');
+                $detailUrl = $hasLatest
+                    ? route('patient.viewApplication', $latestId)
+                    : route('patient.createApplication');
                 $detailLabel = $hasLatest ? 'View Latest Application' : 'Start a New Application';
                 $reviewEta = $inReviewCount > 0 ? 'Typically 5-7 business days' : 'No applications awaiting review';
             @endphp
@@ -95,26 +98,26 @@
                         <span class="text-md font-semibold text-[#213430] app-text">Estimated Time for Review</span>
                         <span class="font-normal text-[#91848C] app-text">{{ $reviewEta }}</span>
                     </div>
-                    <div class="flex justify-between items-center gap-4">
-                        <span class="text-md font-semibold text-[#213430] app-text">Your Application Details</span>
-                        <a href="{{ $detailUrl }}"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-[#DB69A2] text-[#DB69A2] hover:bg-[#DB69A2] hover:text-white transition app-text">
-                            {{ $detailLabel }}
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
-                        </a>
-                    </div>
+                    <!--<div class="flex justify-between items-center gap-4">-->
+                    <!--    <span class="text-md font-semibold text-[#213430] app-text">Your Application Details</span>-->
+                    <!--    <a href="{{ $detailUrl }}"-->
+                    <!--        class="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-[#DB69A2] text-[#DB69A2] hover:bg-[#DB69A2] hover:text-white transition app-text">-->
+                    <!--        {{ $detailLabel }}-->
+                    <!--        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"-->
+                    <!--            stroke="currentColor">-->
+                    <!--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"-->
+                    <!--                d="M9 5l7 7-7 7" />-->
+                    <!--        </svg>-->
+                    <!--    </a>-->
+                    <!--</div>-->
                 </div>
             </div>
 
             <!-- Illustration -->
-            <div class="bg-[#F3E8EF] rounded-lg p-6 flex justify-center items-center tab-board">
-                <img src="{{ asset('public/images/D-illustration.png') }}" alt="Review Process Illustration"
-                    class="max-h-72 object-contain" />
-            </div>
+            <!--<div class="bg-[#F3E8EF] rounded-lg p-6 flex justify-center items-center tab-board">-->
+            <!--    <img src="{{ asset('public/images/D-illustration.png') }}" alt="Review Process Illustration"-->
+            <!--        class="max-h-72 object-contain" />-->
+            <!--</div>-->
         </div>
     </main>
 

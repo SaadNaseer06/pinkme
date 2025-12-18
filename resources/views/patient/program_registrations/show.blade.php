@@ -18,6 +18,36 @@
     $sponsorModel = optional($latestSponsorship)->sponsor;
     $sponsorProfile = optional($sponsorModel)->profile;
     $sponsorDetail = optional($sponsorModel)->sponsorDetail;
+    $sponsor = $sponsorModel;
+
+    $programLabels = [
+        'breast_cancer_treatment' => 'Breast Cancer Treatment Assistance Program',
+        'mastectomy_wellness' => 'Pink Mastectomy and Wellness Assistance Program',
+        'pinkme_food_hunger' => 'PINK “ME” Food & Hunger Grant',
+    ];
+
+    $incomeLabels = [
+        'employed' => 'Employed',
+        'self_employed' => 'Self Employed',
+        'disabled' => 'Disabled',
+        'retired' => 'Retired',
+        'student' => 'Student',
+    ];
+
+    $authorizationLabels = [
+        'full_name' => 'Use my full name',
+        'story_anonymous' => 'Share part of my story anonymously',
+        'story_full' => 'Share my story with my name',
+        'photos' => 'Use photos / media of me',
+        'contact_details' => 'Contact me for follow-ups related to my story',
+    ];
+
+    $quarterLabels = [
+        'q1' => 'Quarter One (January thru March)',
+        'q2' => 'Quarter Two (April thru June)',
+        'q3' => 'Quarter Three (July thru September)',
+        'q4' => 'Quarter Four (October thru December)',
+    ];
 @endphp
 
 @extends('patient.layouts.app')
@@ -62,40 +92,148 @@
                         {{ $registration->phone ?? 'N/A' }}</p>
                     <p class="text-sm text-[#213430] app-text"><span class="font-medium">Date of Birth:</span>
                         {{ optional($registration->dob)->format('d M Y') ?? 'N/A' }}</p>
-                    <p class="text-sm text-[#213430] app-text"><span class="font-medium">Gender:</span>
-                        {{ ucfirst($registration->gender ?? 'N/A') }}</p>
-                    <p class="text-sm text-[#213430] app-text"><span class="font-medium">Blood Group:</span>
-                        {{ strtoupper($registration->blood_group ?? 'N/A') }}</p>
+                    <p class="text-sm text-[#213430] app-text"><span class="font-medium">Referral Type:</span>
+                        {{ $registration->referral_type === 'facility' ? 'Healthcare facility referral' : 'Self referral' }}</p>
+                    <p class="text-sm text-[#213430] app-text"><span class="font-medium">Treatment Facility:</span>
+                        {{ $registration->treatment_facility_name ?? 'N/A' }}</p>
+                    <p class="text-sm text-[#213430] app-text"><span class="font-medium">Address:</span>
+                        {{ $registration->street_address ?? 'N/A' }}</p>
+                    <p class="text-sm text-[#213430] app-text"><span class="font-medium">City / State:</span>
+                        {{ $registration->city ?? 'N/A' }} {{ $registration->state ? ', ' . $registration->state : '' }}</p>
+                    <p class="text-sm text-[#213430] app-text"><span class="font-medium">Postal Code:</span>
+                        {{ $registration->postal_code ?? 'N/A' }}</p>
+                    <p class="text-sm text-[#213430] app-text"><span class="font-medium">Username:</span> {{ $registration->username }}</p>
                 </div>
             </div>
 
             <div class="bg-white/70 rounded-xl p-4 space-y-3">
-                <h2 class="text-lg font-semibold text-[#213430] app-main">Medical & Assistance Details</h2>
-                <p class="text-sm text-[#213430] app-text"><span class="font-medium">Medical Condition:</span>
-                    {{ $registration->medical_condition ?? 'N/A' }}</p>
-                <p class="text-sm text-[#213430] app-text"><span class="font-medium">Assistance Type:</span>
-                    {{ $registration->assistance_type ?? 'N/A' }}</p>
+                <h2 class="text-lg font-semibold text-[#213430] app-main">Application Details</h2>
+                <p class="text-sm text-[#213430] app-text"><span class="font-medium">Quarter:</span>
+                    {{ $quarterLabels[$registration->quarter_applied] ?? 'N/A' }}</p>
+                <p class="text-sm text-[#213430] app-text"><span class="font-medium">Programs Applied:</span>
+                    {{ collect($registration->programs_applied ?? [])->map(fn ($p) => $programLabels[$p] ?? $p)->filter()->implode(', ') ?: 'N/A' }}
+                </p>
+                <p class="text-sm text-[#213430] app-text"><span class="font-medium">Active Treatment:</span>
+                    {{ $registration->active_treatment ? 'Yes' : 'No' }}</p>
+                <p class="text-sm text-[#213430] app-text"><span class="font-medium">Pregnant:</span>
+                    {{ $registration->pregnant ? 'Yes' : 'No' }}</p>
+                <p class="text-sm text-[#213430] app-text"><span class="font-medium">Family History:</span>
+                    {{ $registration->family_history ?? 'N/A' }}</p>
+                <p class="text-sm text-[#213430] app-text"><span class="font-medium">Received Assistance Before:</span>
+                    {{ $registration->assistance_history ?? 'N/A' }}</p>
+                <p class="text-sm text-[#213430] app-text"><span class="font-medium">How did you hear about us?:</span>
+                    {{ $registration->heard_about ?? 'N/A' }}</p>
+                <p class="text-sm text-[#213430] app-text"><span class="font-medium">Proof of Income Status:</span>
+                    {{ collect($registration->proof_of_income_status ?? [])->map(fn ($p) => $incomeLabels[$p] ?? $p)->filter()->implode(', ') ?: 'N/A' }}
+                </p>
+            </div>
+
+            <div class="bg-white/70 rounded-xl p-4 space-y-3">
+                <h2 class="text-lg font-semibold text-[#213430] app-main">Your Story & Authorization</h2>
                 <div>
-                    <span class="text-sm font-medium text-[#213430] app-main">Justification</span>
+                    <span class="text-sm font-medium text-[#213430] app-main">Story</span>
                     <p class="text-sm text-[#91848C] whitespace-pre-line app-text mt-1">
-                        {{ $registration->justification ?? 'No justification provided.' }}</p>
+                        {{ $registration->story ?? 'No story provided.' }}</p>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-[#213430] app-main">Authorization</span>
+                    <p class="text-sm text-[#213430] app-text mt-1">
+                        {{ $registration->authorization_allow ? 'Consent granted' : 'Consent not granted' }}
+                    </p>
+                    @if ($registration->authorization_allow && !empty($registration->authorization_permissions))
+                        <ul class="list-disc ml-5 text-sm text-[#91848C] app-text">
+                            @foreach ($registration->authorization_permissions as $perm)
+                                <li>{{ $authorizationLabels[$perm] ?? ucfirst(str_replace('_', ' ', $perm)) }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+                <p class="text-sm text-[#213430] app-text"><span class="font-medium">Billing Details:</span>
+                    {{ $registration->billing_details ?? 'N/A' }}</p>
+                <div>
+                    <span class="text-sm font-medium text-[#213430] app-main">Signature</span>
+                    @if ($registration->signature)
+                        <div class="mt-2">
+                            <img src="{{ asset('storage/' . ltrim($registration->signature, '/')) }}" alt="Signature" class="h-20 object-contain">
+                        </div>
+                    @else
+                        <p class="text-sm text-[#91848C] app-text">N/A</p>
+                    @endif
                 </div>
             </div>
 
-            @if (!empty($registration->document_paths))
-                <div class="bg-white/70 rounded-xl p-4 space-y-3">
-                    <h2 class="text-lg font-semibold text-[#213430] app-main">Uploaded Documents</h2>
-                    <ul class="space-y-2 text-sm app-text">
-                        @foreach ($registration->documents as $document)
-                            <li class="flex items-center justify-between gap-3 bg-white/80 rounded-md px-3 py-2">
-                                <span class="text-[#213430] truncate">{{ $document['filename'] }}</span>
-                                <a href="{{ $document['url'] }}" target="_blank"
-                                    class="inline-flex items-center text-[#DB69A2] hover:underline">Download</a>
-                            </li>
-                        @endforeach
-                    </ul>
+            <div class="bg-white/70 rounded-xl p-4 space-y-3">
+                <h2 class="text-lg font-semibold text-[#213430] app-main">Uploaded Documents</h2>
+                <div class="space-y-3 text-sm app-text">
+                    <div class="flex items-center justify-between gap-3 bg-white/70 rounded-md px-3 py-2">
+                        <span class="text-[#213430] font-medium">Treatment Verification Letter</span>
+                        @if ($registration->treatment_letter)
+                            <a href="{{ $registration->treatment_letter['url'] }}" target="_blank" class="text-[#DB69A2] hover:underline">Download</a>
+                        @else
+                            <span class="text-[#91848C]">Not provided</span>
+                        @endif
+                    </div>
+
+                    <div class="bg-white/70 rounded-md px-3 py-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[#213430] font-medium">Bill Statements</span>
+                            @if (!empty($registration->bill_statements))
+                                <span class="text-xs text-[#91848C]">{{ count($registration->bill_statements) }} file(s)</span>
+                            @endif
+                        </div>
+                        @if (!empty($registration->bill_statements))
+                            <ul class="mt-2 space-y-1">
+                                @foreach ($registration->bill_statements as $bill)
+                                    <li class="flex items-center justify-between gap-2">
+                                        <span class="text-[#213430] truncate">{{ $bill['filename'] }}</span>
+                                        <a href="{{ $bill['url'] }}" target="_blank" class="text-[#DB69A2] hover:underline">Download</a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="text-[#91848C] text-sm">No bill statements uploaded.</p>
+                        @endif
+                    </div>
+
+                    <div class="bg-white/70 rounded-md px-3 py-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[#213430] font-medium">Proof of Income Documents</span>
+                            @if (!empty($registration->income_documents))
+                                <span class="text-xs text-[#91848C]">{{ count($registration->income_documents) }} file(s)</span>
+                            @endif
+                        </div>
+                        @if (!empty($registration->income_documents))
+                            <ul class="mt-2 space-y-1">
+                                @foreach ($registration->income_documents as $income)
+                                    <li class="flex items-center justify-between gap-2">
+                                        <span class="text-[#213430] truncate">{{ $income['filename'] }}</span>
+                                        <a href="{{ $income['url'] }}" target="_blank" class="text-[#DB69A2] hover:underline">Download</a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="text-[#91848C] text-sm">No income documents uploaded.</p>
+                        @endif
+                    </div>
+
+                    @if (!empty($registration->documents))
+                        <div class="bg-white/70 rounded-md px-3 py-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[#213430] font-medium">Additional Documents</span>
+                                <span class="text-xs text-[#91848C]">{{ count($registration->documents) }} file(s)</span>
+                            </div>
+                            <ul class="mt-2 space-y-1">
+                                @foreach ($registration->documents as $document)
+                                    <li class="flex items-center justify-between gap-2">
+                                        <span class="text-[#213430] truncate">{{ $document['filename'] }}</span>
+                                        <a href="{{ $document['url'] }}" target="_blank" class="text-[#DB69A2] hover:underline">Download</a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 </div>
-            @endif
+            </div>
 
             <div class="bg-white/70 rounded-xl p-4 space-y-3">
                 <h2 class="text-lg font-semibold text-[#213430] app-main">Sponsor</h2>

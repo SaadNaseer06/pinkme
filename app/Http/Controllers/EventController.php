@@ -201,20 +201,35 @@ class EventController extends Controller
     /**
      * Show all event registration requests for admin approval
      */
-    public function registrations()
+    public function registrations(Request $request)
     {
         $displayCol = $this->userDisplayColumn();
-        
+        $selectedEventId = (int) $request->query('event_id');
+        if ($selectedEventId <= 0) {
+            $selectedEventId = null;
+        }
+
         $pendingRegistrations = EventSponsorship::with(['event', 'sponsor'])
+            ->when($selectedEventId, fn($query) => $query->where('event_id', $selectedEventId))
             ->where('registration_status', 'pending')
             ->orderBy('registered_at', 'desc')
             ->get();
             
         $allRegistrations = EventSponsorship::with(['event', 'sponsor'])
+            ->when($selectedEventId, fn($query) => $query->where('event_id', $selectedEventId))
             ->orderBy('registered_at', 'desc')
-            ->paginate(20);
+            ->paginate(20)
+            ->appends($request->query());
+
+        $eventsForFilter = Event::orderBy('title')->get(['id', 'title']);
             
-        return view('admin.events.registrations', compact('pendingRegistrations', 'allRegistrations', 'displayCol'));
+        return view('admin.events.registrations', [
+            'pendingRegistrations' => $pendingRegistrations,
+            'allRegistrations'     => $allRegistrations,
+            'displayCol'           => $displayCol,
+            'eventsForFilter'      => $eventsForFilter,
+            'selectedEventId'      => $selectedEventId,
+        ]);
     }
     
     /**

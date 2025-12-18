@@ -16,12 +16,14 @@ class Program extends Model
         'status',
         'program_fund',
         'payment_type', // 'full' or 'flexible'
+        'custom_fields',
     ];
 
     protected $casts = [
         'event_date' => 'date',
         'event_time' => 'datetime:H:i:s',
         'program_fund' => 'decimal:2',
+        'custom_fields' => 'array',
     ];
 
     public function sponsorships(): HasMany

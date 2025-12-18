@@ -99,29 +99,26 @@ closeBtn.addEventListener("click", () => {
     });
 });
 function toggleFAQ(clickedHeader) {
+    const answer = clickedHeader.nextElementSibling;
+    const wasOpen = !answer.classList.contains("hidden");
     const allHeaders = document.querySelectorAll(".faq-header");
-    const allAnswers = document.querySelectorAll(".faq-answer");
 
     allHeaders.forEach((header) => {
         const question = header.querySelector("h3");
         const icon = header.querySelector("svg");
-        const answer = header.nextElementSibling;
+        const headerAnswer = header.nextElementSibling;
 
-        // Collapse all
         question.classList.remove("text-pink-500");
         question.classList.add("text-[#91848C]");
         icon.classList.remove("rotate-180");
-        if (answer) {
-            answer.classList.add("hidden");
+        if (headerAnswer) {
+            headerAnswer.classList.add("hidden");
         }
     });
 
-    const question = clickedHeader.querySelector("h3");
-    const icon = clickedHeader.querySelector("svg");
-    const answer = clickedHeader.nextElementSibling;
-
-    // If the clicked one was closed, open it
-    if (answer.classList.contains("hidden")) {
+    if (!wasOpen) {
+        const question = clickedHeader.querySelector("h3");
+        const icon = clickedHeader.querySelector("svg");
         question.classList.add("text-pink-500");
         question.classList.remove("text-[#91848C]");
         icon.classList.add("rotate-180");

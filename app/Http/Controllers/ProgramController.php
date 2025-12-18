@@ -9,6 +9,9 @@ use App\Models\Program;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 
 class ProgramController extends Controller
 {
@@ -52,25 +55,8 @@ class ProgramController extends Controller
                 ->first();
         }
 
-        // Resolve a sponsor from the most recent sponsorship record, if any
-        $latestSponsorship = $program->sponsorships()
-            ->orderByDesc('date')
-            ->orderByDesc('id')
-            ->with(['sponsor.sponsorDetail'])
-            ->first();
-
-        $sponsorUser = $latestSponsorship?->sponsor->profile;
-        $sponsorDetail = $sponsorUser?->sponsorDetail;
-
-        $sponsorPayload = [
-            'name'  => $sponsorDetail->company_name ?? ($sponsorUser?->full_name ?? 'N/A'),
-            'phone' => $sponsorDetail->company_phone ?? ($sponsorUser?->phone ?? 'N/A'),
-            'email' => $sponsorDetail->company_email ?? ($sponsorUser?->email ?? 'N/A'),
-            'logo'  => $sponsorUser && $sponsorUser->avatar
-                ? asset('storage/' . ltrim($sponsorUser->avatar, '/'))
-                : asset('images/default_sponsor.png'),
-            'about' => $sponsorDetail->company_type ?? 'No details available.',
-        ];
+        // Sponsor block removed from modal; keep payload empty
+        $sponsorPayload = null;
 
         $registrationPayload = $registration ? [
             'id' => $registration->id,
@@ -93,42 +79,87 @@ class ProgramController extends Controller
         return response()->json([
             'title' => $program->title,
             'description' => $program->description,
-            'event_date' => \Carbon\Carbon::parse($program->event_date)->format('l, F d, Y'),
-            'event_time' => $program->event_time,
+            'event_date' => Carbon::parse($program->event_date)->format('l, F d, Y'),
+            'event_time' => $program->event_time ? Carbon::parse($program->event_time)->format('H:i') : null,
             'banner' => $program->banner
                 ? asset('storage/' . ltrim($program->banner, '/'))
-                : asset('images/default_program_banner.png'),
+                : asset('public/images/program-details.png'),
             'sponsor' => $sponsorPayload,
             'registration' => $registrationPayload,
+            'custom_fields' => $program->custom_fields ?? [],
         ]);
     }
 
     public function create()
     {
-        return view('admin.programs.create');
+        $defaultProgram = Program::orderByDesc('id')->first();
+        $defaultFields = $defaultProgram?->custom_fields ?? [];
+
+        return view('admin.programs.create', compact('defaultProgram', 'defaultFields'));
     }
 
     public function store(Request $r)
     {
-        // Match your programs migration exactly
-        $data = $r->validate([
-            'title'       => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'event_date'  => ['required', 'date'],
-            'event_time'  => ['required', 'date_format:H:i'],
-'status'      => ['required', 'in:upcoming,ongoing,completed'],
-            'payment_type' => ['required', 'in:full,flexible'],
-            'program_fund' => ['required', 'numeric', 'min:0'],
+        $validator = Validator::make($r->all(), [
+            'title'       => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'event_date'  => ['nullable', 'date'],
+            'event_time'  => ['nullable', 'date_format:H:i'],
+            'status'      => ['nullable', 'in:upcoming,ongoing,completed'],
+            'payment_type' => ['nullable', 'in:full,flexible'],
+            'program_fund' => ['nullable', 'numeric', 'min:0'],
             'banner'      => ['nullable', 'image', 'max:2048'],
+            'custom_fields' => ['array'],
+            'custom_fields.*.name' => ['required', 'string', 'max:60', Rule::in($this->allowedFieldNames())],
+            'custom_fields.*.id' => ['nullable', 'string', 'max:60'],
+            'custom_fields.*.label' => ['nullable', 'string', 'max:120'],
+            'custom_fields.*.type' => ['required_with:custom_fields.*.name', Rule::in($this->customFieldTypes())],
+            'custom_fields.*.value' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $validator->after(function ($validator) use ($r) {
+            $fields = collect($r->input('custom_fields', []));
+
+            $hasTitleField = $fields->contains(fn ($field) => isset($field['name']) && $field['name'] === 'title');
+            $titleValue = $fields->first(function ($field) {
+                return isset($field['name']) && $field['name'] === 'title'
+                    && strlen(trim((string) ($field['value'] ?? ''))) > 0;
+            });
+
+            $inlineTitle = $this->stringValue($r->input('title'));
+            $hasTitleValue = ($inlineTitle !== '') || (bool) $titleValue;
+
+            // Prevent duplicate field names
+            $names = $fields->pluck('name')->filter()->map(fn ($n) => strtolower(trim($n)));
+            $duplicateNames = $names->count() !== $names->unique()->count()
+                ? $names->duplicates()->unique()->values()->all()
+                : [];
+
+            if (!$hasTitleField) {
+                $validator->errors()->add('custom_fields', 'Please add a Title field.');
+            }
+
+            if (!$hasTitleValue) {
+                $validator->errors()->add('title', 'Title is required. Please fill in the Title field.');
+            }
+
+            if (!empty($duplicateNames)) {
+                $validator->errors()->add('custom_fields', 'Do not repeat the same field: ' . implode(', ', $duplicateNames) . '.');
+            }
+        });
+
+        $data = $validator->validate();
 
         if ($r->hasFile('banner')) {
             $data['banner'] = $r->file('banner')->store('programs', 'public');
         }
 
+        $data['custom_fields'] = $this->normalizeCustomFields($r->input('custom_fields', []));
+        $data = $this->mergeDerivedDefaults($data);
+
         Program::create($data);
 
-        return back()->with('success', 'Program created.');
+        return redirect()->route('admin.sponsors')->with('success', 'Program created.');
     }
 
     public function edit(Program $program)
@@ -139,16 +170,55 @@ class ProgramController extends Controller
 
     public function update(Request $r, Program $program)
     {
-        $data = $r->validate([
-            'title'       => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'event_date'  => ['required', 'date'],
-            'event_time'  => ['required', 'date_format:H:i'],
-'status'      => ['required', 'in:upcoming,ongoing,completed'],
-            'payment_type' => ['required', 'in:full,flexible'],
-            'program_fund' => ['required', 'numeric', 'min:0'],
+        $validator = Validator::make($r->all(), [
+            'title'       => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'event_date'  => ['nullable', 'date'],
+            'event_time'  => ['nullable', 'date_format:H:i'],
+            'status'      => ['nullable', 'in:upcoming,ongoing,completed'],
+            'payment_type' => ['nullable', 'in:full,flexible'],
+            'program_fund' => ['nullable', 'numeric', 'min:0'],
             'banner'      => ['nullable', 'image', 'max:2048'],
+            'custom_fields' => ['array'],
+            'custom_fields.*.name' => ['required', 'string', 'max:60', Rule::in($this->allowedFieldNames())],
+            'custom_fields.*.id' => ['nullable', 'string', 'max:60'],
+            'custom_fields.*.label' => ['nullable', 'string', 'max:120'],
+            'custom_fields.*.type' => ['required_with:custom_fields.*.name', Rule::in($this->customFieldTypes())],
+            'custom_fields.*.value' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $validator->after(function ($validator) use ($r) {
+            $fields = collect($r->input('custom_fields', []));
+
+            $hasTitleField = $fields->contains(fn ($field) => isset($field['name']) && $field['name'] === 'title');
+            $titleValue = $fields->first(function ($field) {
+                return isset($field['name']) && $field['name'] === 'title'
+                    && strlen(trim((string) ($field['value'] ?? ''))) > 0;
+            });
+
+            $inlineTitle = $this->stringValue($r->input('title'));
+            $hasTitleValue = ($inlineTitle !== '') || (bool) $titleValue;
+
+            // Prevent duplicate field names
+            $names = $fields->pluck('name')->filter()->map(fn ($n) => strtolower(trim($n)));
+            $duplicateNames = $names->count() !== $names->unique()->count()
+                ? $names->duplicates()->unique()->values()->all()
+                : [];
+
+            if (!$hasTitleField) {
+                $validator->errors()->add('custom_fields', 'Please add a Title field.');
+            }
+
+            if (!$hasTitleValue) {
+                $validator->errors()->add('title', 'Title is required. Please fill in the Title field.');
+            }
+
+            if (!empty($duplicateNames)) {
+                $validator->errors()->add('custom_fields', 'Do not repeat the same field: ' . implode(', ', $duplicateNames) . '.');
+            }
+        });
+
+        $data = $validator->validate();
 
         if ($r->hasFile('banner')) {
             $data['banner'] = $r->file('banner')->store('programs', 'public');
@@ -157,8 +227,193 @@ class ProgramController extends Controller
             unset($data['banner']);
         }
 
+        $data['custom_fields'] = $this->normalizeCustomFields($r->input('custom_fields', []));
+        $data = $this->mergeDerivedDefaults($data, $program);
+
         $program->update($data);
 
-        return redirect()->route('programs.edit', $program)->with('success', 'Program updated.');
+        return redirect()->route('admin.sponsors')->with('success', 'Program updated.');
+    }
+
+    /**
+     * Allowed custom field types for programs.
+     */
+    private function customFieldTypes(): array
+    {
+        return ['short_text', 'long_text', 'number', 'money', 'date', 'time', 'link', 'boolean'];
+    }
+
+    /**
+     * Predefined field names mapped from the previous static form.
+     */
+    private function allowedFieldNames(): array
+    {
+        return [
+            'title',
+            'description',
+            'event_date',
+            'event_time',
+            'status',
+            'payment_type',
+            'program_fund',
+            'custom_note',
+            'link',
+        ];
+    }
+
+    /**
+     * Normalize incoming custom fields to a consistent, safe structure.
+     */
+    private function normalizeCustomFields(array $rawFields): array
+    {
+        $allowedTypes = $this->customFieldTypes();
+        $allowedNames = $this->allowedFieldNames();
+
+        return collect($rawFields)
+            ->map(function ($field) use ($allowedTypes, $allowedNames) {
+                $name = $field['name'] ?? null;
+                if (!$name || !in_array($name, $allowedNames, true)) {
+                    return null;
+                }
+
+                $label = trim($field['label'] ?? '');
+
+                $type = $field['type'] ?? 'short_text';
+                if (!in_array($type, $allowedTypes, true)) {
+                    $type = 'short_text';
+                }
+
+                $value = $field['value'] ?? '';
+                if ($type === 'boolean') {
+                    $value = filter_var($value, FILTER_VALIDATE_BOOL);
+                } else {
+                    $value = is_scalar($value) ? trim((string) $value) : '';
+                }
+
+                return [
+                    'id' => $field['id'] ?? 'cf_' . Str::random(8),
+                    'name' => $name,
+                    'label' => $label,
+                    'type' => $type,
+                    'value' => $value,
+                    'required' => (bool) ($field['required'] ?? false),
+                ];
+            })
+            ->filter() // remove null or disallowed names
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Derive required base columns from custom fields so admins can rely on a fully dynamic form.
+     */
+    private function mergeDerivedDefaults(array $data, ?Program $existing = null): array
+    {
+        $fields = $data['custom_fields'] ?? [];
+
+        $title = $data['title'] ?? $existing?->title;
+        $description = $data['description'] ?? $existing?->description;
+        $eventDate = $data['event_date'] ?? optional($existing?->event_date)->format('Y-m-d');
+        $eventTime = $data['event_time'] ?? ($existing?->event_time ? \Carbon\Carbon::parse($existing->event_time)->format('H:i') : null);
+        $status = $data['status'] ?? $existing?->status ?? 'upcoming';
+        $paymentType = $data['payment_type'] ?? $existing?->payment_type ?? 'full';
+        $programFund = $data['program_fund'] ?? $existing?->program_fund ?? 0;
+
+        foreach ($fields as &$field) {
+            $name = $field['name'] ?? null;
+            $type = $field['type'] ?? 'short_text';
+            $value = $field['value'] ?? null;
+
+            // Ensure a readable label even if not provided
+            if (empty($field['label'])) {
+                $field['label'] = $this->defaultLabelForName($name);
+            }
+
+            switch ($name) {
+                case 'title':
+                    $title = $this->stringValue($value) ?: $title;
+                    break;
+                case 'description':
+                    $description = $this->stringValue($value) ?: $description;
+                    break;
+                case 'event_date':
+                    $eventDate = $value ?: $eventDate;
+                    break;
+                case 'event_time':
+                    $eventTime = $value ?: $eventTime;
+                    break;
+                case 'status':
+                    $candidate = strtolower($this->stringValue($value));
+                    if (in_array($candidate, ['upcoming', 'ongoing', 'completed'], true)) {
+                        $status = $candidate;
+                    }
+                    break;
+                case 'payment_type':
+                    $candidate = strtolower($this->stringValue($value));
+                    if (in_array($candidate, ['full', 'flexible'], true)) {
+                        $paymentType = $candidate;
+                    }
+                    break;
+                case 'program_fund':
+                    if ($value !== null && $value !== '') {
+                        $programFund = is_numeric($value) ? (float) $value : $programFund;
+                    }
+                    break;
+                default:
+                    // leave as-is for custom display
+                    break;
+            }
+        }
+        unset($field);
+
+        $data['title'] = $title ?: 'Untitled Program';
+        $data['description'] = $description ?: 'Details will be shared soon.';
+        $data['event_date'] = $this->normalizeDate($eventDate);
+        $data['event_time'] = $this->normalizeTime($eventTime);
+        $data['status'] = $status ?: 'upcoming';
+        $data['payment_type'] = $paymentType ?: 'full';
+        $data['program_fund'] = $programFund ?? 0;
+        $data['custom_fields'] = array_values($fields);
+
+        return $data;
+    }
+
+    private function stringValue($value): string
+    {
+        return is_scalar($value) ? trim((string) $value) : '';
+    }
+
+    private function normalizeDate($value): string
+    {
+        try {
+            return Carbon::parse($value)->toDateString();
+        } catch (\Throwable $e) {
+            return Carbon::now()->toDateString();
+        }
+    }
+
+    private function normalizeTime($value): string
+    {
+        try {
+            return Carbon::parse($value)->format('H:i:s');
+        } catch (\Throwable $e) {
+            return '09:00:00';
+        }
+    }
+
+    private function defaultLabelForName(?string $name): string
+    {
+        return match ($name) {
+            'title' => 'Title',
+            'description' => 'Description',
+            'event_date' => 'Date',
+            'event_time' => 'Time',
+            'status' => 'Status',
+            'payment_type' => 'Payment Type',
+            'program_fund' => 'Fund Goal',
+            'custom_note' => 'Note',
+            'link' => 'Link',
+            default => 'Detail',
+        };
     }
 }

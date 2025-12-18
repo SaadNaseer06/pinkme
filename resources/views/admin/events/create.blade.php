@@ -272,6 +272,7 @@
                                         <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
                                     @enderror
                                 </div>
+
                             </div>
 
                             <div

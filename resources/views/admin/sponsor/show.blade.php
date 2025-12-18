@@ -3,7 +3,7 @@
 @section('title', 'Sponsor Profile')
 
 @section('content')
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-9xl mx-auto">
         @if (session('success'))
             <div class="mb-4 rounded-md border border-green-300 bg-green-50 px-4 py-3 text-green-800">
                 {{ session('success') }}

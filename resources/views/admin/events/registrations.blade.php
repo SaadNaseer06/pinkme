@@ -2,12 +2,37 @@
 
 @section('content')
     <div class="container mx-auto py-6">
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex justify-between flex-col gap-4 md:flex-row md:items-center mb-6">
             <div>
                 <h1 class="text-2xl font-semibold text-gray-800">Event Registration Requests</h1>
                 <p class="text-gray-600">Review and manage sponsor registration requests for events</p>
             </div>
-            <div class="flex space-x-3">
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:space-x-3">
+                <form method="GET" class="flex items-center gap-2">
+                    <div class="relative">
+                        <select name="event_id" onchange="this.form.submit()"
+                            class="appearance-none rounded-md border border-[#DCCFD8] bg-white px-4 py-2 pr-10 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                            <option value="">All Events</option>
+                            @foreach ($eventsForFilter as $eventOption)
+                                <option value="{{ $eventOption->id }}"
+                                    {{ (string) $selectedEventId === (string) $eventOption->id ? 'selected' : '' }}>
+                                    {{ $eventOption->title }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </span>
+                    </div>
+                    @if ($selectedEventId)
+                        <a href="{{ route('events.registrations.index') }}"
+                            class="px-3 py-2 text-sm text-[#91848C] border border-[#DCCFD8] rounded-md hover:text-[#213430]">
+                            Reset
+                        </a>
+                    @endif
+                </form>
                 <a href="{{ route('events.index') }}"
                     class="bg-pink-600 text-white px-4 py-2 rounded-md hover:bg-pink-700 transition">
                     Back to Events

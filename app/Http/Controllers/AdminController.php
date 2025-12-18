@@ -95,12 +95,7 @@ class AdminController extends Controller
 
     public function assigned()
     {
-        $applications = Application::with(['patient.user.profile', 'reviewer.profile', 'program'])
-            ->whereNotNull('reviewer_id')
-            ->orderBy('submission_date', 'desc')
-            ->paginate(20);
-
-        return view('admin.assigned', compact('applications'));
+        return redirect()->route('admin.applications', ['tab' => 'assigned']);
     }
 
     public function deleteApplication($id)
@@ -547,8 +542,12 @@ class AdminController extends Controller
 
     public function applicationsList(Request $request)
     {
-        $range = $request->string('range')->toString();
-        $q     = trim($request->string('q')->toString());
+        $range  = $request->string('range')->toString();
+        $q      = trim($request->string('q')->toString());
+        $status = strtolower($request->string('status')->toString());
+
+        $allowedStatuses = ['pending', 'under_review', 'approved', 'rejected'];
+        $statusFilter    = in_array($status, $allowedStatuses, true) ? $status : null;
 
         $startDate = match ($range) {
             'week'  => Carbon::now()->subWeek(),
@@ -566,6 +565,7 @@ class AdminController extends Controller
                 'missingRequests',
             ])
             ->when($startDate, fn($q2) => $q2->where('created_at', '>=', $startDate))
+            ->when($statusFilter, fn($q2) => $q2->where('status', $statusFilter))
             // search: name, email, code, id
             ->when($q !== '', function ($qb) use ($q) {
                 $qb->where(function ($w) use ($q) {
@@ -591,5 +591,100 @@ class AdminController extends Controller
             'range' => $range,
         ]);
     }
-}
 
+    public function applicationsExport(Request $request)
+    {
+        $range  = $request->string('range')->toString();
+        $q      = trim($request->string('q')->toString());
+        $status = strtolower($request->string('status')->toString());
+
+        $allowedStatuses = ['pending', 'under_review', 'approved', 'rejected'];
+        $statusFilter    = in_array($status, $allowedStatuses, true) ? $status : null;
+
+        $startDate = match ($range) {
+            'week'  => Carbon::now()->subWeek(),
+            'month' => Carbon::now()->subMonth(),
+            default => null,
+        };
+
+        $apps = Application::query()
+            ->with([
+                'program:id,title',
+                'patient:id,user_id',
+                'patient.user:id,email',
+                'patient.user.profile:id,user_id,full_name,phone',
+                'reviewer.profile:id,user_id,full_name',
+                'missingRequests',
+            ])
+            ->when($startDate, fn($q2) => $q2->where('created_at', '>=', $startDate))
+            ->when($statusFilter, fn($q2) => $q2->where('status', $statusFilter))
+            ->when($q !== '', function ($qb) use ($q) {
+                $qb->where(function ($w) use ($q) {
+                    $w->whereHas('patient.user.profile', fn($qq) => $qq->where('full_name', 'like', "%{$q}%"))
+                        ->orWhereHas('patient.user', fn($qq) => $qq->where('email', 'like', "%{$q}%"))
+                        ->orWhere('title', 'like', "%{$q}%");
+
+                    if (ctype_digit($q)) {
+                        $w->orWhere('id', (int) $q);
+                    }
+                });
+            })
+            ->orderByRaw('CASE WHEN reviewer_id IS NULL THEN 0 ELSE 1 END')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $filename = 'applications_' . now()->format('Ymd_His') . '.csv';
+        $headers  = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $statusLabel = fn($statusValue) => match (strtolower((string) $statusValue)) {
+            'approved'     => 'Approved',
+            'rejected'     => 'Rejected',
+            'under_review' => 'Under Review',
+            'pending'      => 'Pending',
+            default        => ucfirst(str_replace('_', ' ', (string) $statusValue)),
+        };
+
+        $timezone = config('app.timezone');
+
+        return response()->stream(function () use ($apps, $statusLabel, $timezone) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                'Application ID',
+                'Patient Name',
+                'Email',
+                'Contact',
+                'Program',
+                'Assigned Reviewer',
+                'Status',
+                'Missing Docs Requested',
+                'Submitted At',
+            ]);
+
+            foreach ($apps as $app) {
+                $patientProfile  = $app->patient?->user?->profile;
+                $reviewerProfile = $app->reviewer?->profile;
+                $missingDocs     = $app->missingRequests->isNotEmpty() ? 'Yes' : 'No';
+                $submittedAt     = $app->created_at
+                    ? $app->created_at->timezone($timezone)->format('Y-m-d H:i:s')
+                    : '';
+
+                fputcsv($handle, [
+                    $app->code ?: ('APP-' . str_pad((string) $app->id, 6, '0', STR_PAD_LEFT)),
+                    $patientProfile->full_name ?? 'Unknown',
+                    $app->patient?->user?->email ?? 'N/A',
+                    $patientProfile->phone ?? 'N/A',
+                    $app->program?->title ?? 'N/A',
+                    $reviewerProfile->full_name ?? 'Unassigned',
+                    $missingDocs === 'Yes' ? 'Missing Docs Requested' : $statusLabel($app->status),
+                    $missingDocs,
+                    $submittedAt,
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+}

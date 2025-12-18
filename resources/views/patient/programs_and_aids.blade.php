@@ -51,7 +51,10 @@
                                 class="text-4xl font-bold text-pink">{{ \Carbon\Carbon::parse($program->event_date)->format('d') }}</span>
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
-                            <img src="{{ url('storage/' . $program->banner) ? url('storage/' . $program->banner) : url('images/program-details.png') }}" alt="{{ $program->title }}"
+                            @php
+                                $bannerUrl = $program->banner ? url('storage/' . ltrim($program->banner, '/')) : asset('public/images/program-details.png');
+                            @endphp
+                            <img src="{{ $bannerUrl }}" alt="{{ $program->title }}"
                                 class="w-full h-full object-cover" />
                         </div>
                         <div>
@@ -84,7 +87,10 @@
                                 class="text-4xl font-bold text-pink">{{ \Carbon\Carbon::parse($program->event_date)->format('d') }}</span>
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
-                            <img src="{{ url('storage/app/public/' . $program->banner) }}" alt="{{ $program->title }}"
+                            @php
+                                $bannerUrl = $program->banner ? url('storage/' . ltrim($program->banner, '/')) : asset('public/images/program-details.png');
+                            @endphp
+                            <img src="{{ $bannerUrl }}" alt="{{ $program->title }}"
                                 class="w-full h-full object-cover" />
                         </div>
                         <div>
@@ -104,8 +110,8 @@
     </main>
 
     <!-- Modal -->
-    <div id="registerModal" class="modal-overlay fixed inset-0 z-50 bg-black/50 hidden flex items-center">
-        <div class="modal-content p-4 max-w-2xl w-full bg-[#F3E8EF] rounded-2xl shadow-lg overflow-y-auto max-h-[95vh]">
+    <div id="registerModal" class="modal-overlay fixed inset-0 z-50 bg-black/50 hidden flex items-start justify-end overflow-y-auto">
+        <div class="modal-content p-4 sm:p-5 w-full sm:w-[520px] md:w-[560px] bg-[#F3E8EF] rounded-2xl shadow-lg overflow-y-auto max-h-[100vh]">
             <div class="border border-[#DCCFD8] p-2 rounded-md">
                 <!-- Modal Header -->
                 <div class="p-2 mb-2 border-b border-[#DCCFD8] rounded-md">
@@ -147,60 +153,10 @@
 
                     <!-- About Program -->
                     <div>
-                        <h3 class="text-lg font-medium text-[#213430] mb-4 app-main">About This Program</h3>
-                        <div class="bg-[#F3E8EF] p-4 rounded-lg space-y-2 border border-[#DCCFD8]">
-                            <p class="text-[#91848C] app-text">
-                                This program aims to provide support, raise awareness, and empower individuals affected by
-                                breast cancer.
-                            </p>
-                            <ul class="list-none space-y-2 text-sm app-text modal-features">
-                                <li class="flex items-center gap-2 font-medium"><span class="text-pink text-2xl">•</span>
-                                    Free Breast Cancer Screenings &amp; Consultations</li>
-                                <li class="flex items-center gap-2 font-medium"><span class="text-pink text-2xl">•</span>
-                                    Inspirational Stories from Survivors</li>
-                                <li class="flex items-center gap-2 font-medium"><span class="text-pink text-2xl">•</span>
-                                    Financial Assistance Info</li>
-                                <li class="flex items-center gap-2 font-medium"><span class="text-pink text-2xl">•</span>
-                                    Wellness &amp; Nutrition Advice</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Sponsored By -->
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-4 app-main">Sponsored By</h3>
-                        <div class="border border-[#DCCFD8] p-2 rounded-md">
-                            <div class="flex items-start gap-4 p-4 rounded-md max-w-xl">
-                                <!-- Logo -->
-                                <div
-                                    class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                                    <img class="modal-sponsor-logo w-10 h-10 object-contain" src="{{ asset('public/images/pink_me_logo.png') }}"
-                                        alt="Sponsor Logo">
-                                </div>
-
-                                <!-- Right side content -->
-                                <div class="flex flex-col">
-                                    <!-- Heading -->
-                                    <span class="font-semibold text-[#213430] mb-1 app-text modal-sponsor-name">-</span>
-
-                                    <!-- Contact Info -->
-                                    <div class="flex flex-col sm:flex-row gap-2 text-sm text-gray-600 app-text">
-                                        <div class="flex items-center gap-2">
-                                            <i class="fas fa-phone-alt text-pink-500"></i>
-                                            <span class="modal-sponsor-phone">-</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <i class="far fa-envelope text-pink-500"></i>
-                                            <span class="modal-sponsor-email">-</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- <div class="bg-[#E4D6DF] p-4 rounded-lg text-sm app-text">
-                                <h4 class="font-semibold text-[#213430] mb-1">ABOUT US</h4>
-                                <p class="text-[#213430] modal-sponsor-about">-</p>
-                            </div> --}}
+                        <h3 class="text-lg font-medium text-[#213430] mb-4 app-main">Program Details</h3>
+                        <div class="bg-[#F3E8EF] p-4 rounded-lg space-y-3 border border-[#DCCFD8]">
+                            <div data-custom-fields class="space-y-3"></div>
+                            <p data-custom-fields-empty class="text-sm text-[#91848C] app-text">No additional details have been added yet.</p>
                         </div>
                     </div>
 
@@ -238,9 +194,9 @@
     </div>
 
     <!-- Registration Popup Modal -->
-    <div id="popupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div id="popupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start sm:items-center justify-center overflow-y-auto py-6 px-4 hidden">
         <!-- Modal Box -->
-        <div class="bg-[#F3E8EF] p-6 rounded-lg w-full max-w-4xl relative overflow-y-auto max-h-[90vh] shadow-lg">
+        <div class="bg-[#F3E8EF] p-6 rounded-lg w-full max-w-4xl relative overflow-y-auto max-h-[120vh] shadow-lg">
 
             <!-- Close Button -->
             <button onclick="document.getElementById('popupModal').classList.add('hidden')"
@@ -249,97 +205,303 @@
             </button>
 
             <!-- Modal Title -->
-            <h2 class="text-lg font-medium text-black app-main mb-4">Apply for Program Assistance</h2>
+            <h2 class="text-lg font-medium text-black app-main mb-4">Financial Assistance Pre-Qualification</h2>
 
             <!-- Form Start -->
-            <form action="{{ route('program.register') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('program.register') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
                 @csrf
                 <input type="hidden" name="program_id" id="program_id" value="">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="first_name" class="block font-light text-md text-[#213430] mb-1 app-text">First
-                            Name:</label>
-                        <input type="text" id="first_name" name="first_name"
-                            class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
-                            required>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
+                        <h3 class="text-md font-semibold text-[#213430] app-main">Choose the grant quarter</h3>
+                        <div class="space-y-2 text-sm app-text text-[#213430]">
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="quarter" value="q1" class="text-[#DB69A2]" required>
+                                <span>Quarter One (January thru March)</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="quarter" value="q2" class="text-[#DB69A2]">
+                                <span>Quarter Two (April thru June)</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="quarter" value="q3" class="text-[#DB69A2]">
+                                <span>Quarter Three (July thru September)</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="radio" name="quarter" value="q4" class="text-[#DB69A2]">
+                                <span>Quarter Four (October thru December)</span>
+                            </label>
+                        </div>
                     </div>
-                    <div>
-                        <label for="last_name" class="block font-light text-md text-[#213430] mb-1 app-text">Last
-                            Name:</label>
-                        <input type="text" id="last_name" name="last_name"
-                            class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
-                            required>
+
+                    <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
+                        <h3 class="text-md font-semibold text-[#213430] app-main">Programs you’re applying for</h3>
+                        <div class="space-y-2 text-sm app-text text-[#213430]">
+                            <label class="flex items-start gap-2">
+                                <input type="checkbox" name="programs_applied[]" value="breast_cancer_treatment" class="mt-1 text-[#DB69A2]">
+                                <span>Breast Cancer Treatment Assistance Program (up to $1,500)</span>
+                            </label>
+                            <label class="flex items-start gap-2">
+                                <input type="checkbox" name="programs_applied[]" value="mastectomy_wellness" class="mt-1 text-[#DB69A2]">
+                                <span>Pink Mastectomy and Wellness Assistance Program (up to $4,500)</span>
+                            </label>
+                            <label class="flex items-start gap-2">
+                                <input type="checkbox" name="programs_applied[]" value="pinkme_food_hunger" class="mt-1 text-[#DB69A2]">
+                                <span>PINK “ME” Food & Hunger Grant (groceries or deliveries)</span>
+                            </label>
+                        </div>
                     </div>
-                    <div>
-                        <label for="email" class="block font-light text-md text-[#213430] mb-1 app-text">Email:</label>
-                        <input type="email" id="email" name="email"
-                            class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
-                            required>
+                </div>
+
+                <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Health background</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm app-text text-[#213430]">
+                        <div class="space-y-2">
+                            <p class="font-medium">Are you in active treatment?</p>
+                            <div class="flex items-center gap-4">
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="active_treatment" value="1" class="text-[#DB69A2]" required>
+                                    <span>Yes</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="active_treatment" value="0" class="text-[#DB69A2]">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="font-medium">Are you pregnant?</p>
+                            <div class="flex items-center gap-4">
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="pregnant" value="1" class="text-[#DB69A2]" required>
+                                    <span>Yes</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="pregnant" value="0" class="text-[#DB69A2]">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1">Family history of breast cancer?</label>
+                            <input type="text" name="family_history" placeholder="Add answer here"
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1">Received financial assistance from us before?</label>
+                            <input type="text" name="assistance_history" placeholder="Add answer here"
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1">How did you hear about us?</label>
+                            <input type="text" name="heard_about" placeholder="Referral, friend, web search..."
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div class="space-y-2">
+                            <p class="font-medium">Select one</p>
+                            <div class="flex items-center gap-4">
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="referral_type" value="self" class="text-[#DB69A2]" required>
+                                    <span>Self referral</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="referral_type" value="facility" class="text-[#DB69A2]">
+                                    <span>Healthcare facility referral</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label for="phone" class="block font-light text-md text-[#213430] mb-1 app-text">Phone:</label>
-                        <input type="text" id="phone" name="phone"
-                            class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
-                            required>
+                </div>
+
+                <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Contact & treatment details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-medium mb-1 text-sm">First Name *</label>
+                            <input type="text" name="first_name" id="first_name" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1 text-sm">Last Name *</label>
+                            <input type="text" name="last_name" id="last_name" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1 text-sm">Date of Birth *</label>
+                            <input type="date" name="dob" id="dob" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1 text-sm">Email Address *</label>
+                            <input type="email" name="email" id="email" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1 text-sm">Phone *</label>
+                            <input type="text" name="phone" id="phone" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1 text-sm">Treatment Facility Name *</label>
+                            <input type="text" name="treatment_facility_name" id="treatment_facility_name" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block font-medium mb-1 text-sm">Street Address *</label>
+                            <input type="text" name="street_address" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1 text-sm">City *</label>
+                            <input type="text" name="city" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1 text-sm">State *</label>
+                            <input type="text" name="state" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1 text-sm">Postal / Zip code *</label>
+                            <input type="text" name="postal_code" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
                     </div>
-                    <div class="md:col-span-1">
-                        <label for="dob" class="block font-light text-md text-[#213430] mb-1 app-text">Date of
-                            Birth:</label>
-                        <input type="date" id="dob" name="dob"
-                            class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
-                            required>
+                </div>
+
+                <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Proof of income / employment status *</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-[#213430] app-text">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="proof_of_income_status[]" value="employed" class="text-[#DB69A2]">
+                            <span>Employed</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="proof_of_income_status[]" value="self_employed" class="text-[#DB69A2]">
+                            <span>Self Employed</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="proof_of_income_status[]" value="disabled" class="text-[#DB69A2]">
+                            <span>Disabled</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="proof_of_income_status[]" value="retired" class="text-[#DB69A2]">
+                            <span>Retired</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="proof_of_income_status[]" value="student" class="text-[#DB69A2]">
+                            <span>Student</span>
+                        </label>
                     </div>
-                    <div class="md:col-span-1">
-                        <label for="gender"
-                            class="block font-light text-md text-[#213430] mb-1 app-text">Gender:</label>
-                        <select id="gender" name="gender"
-                            class="appearance-none w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
-                            required>
-                            <option value="">Select Gender</option>
-                            <option>Female</option>
-                            <option>Male</option>
-                            <option>Other</option>
-                        </select>
+                    <p class="text-xs text-[#91848C] app-text">
+                        Provide one: last two years W-2, last two months recent pay stubs, last three months bank statements, or a written signed statement. Upload documents below.
+                    </p>
+                </div>
+
+                <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Your story *</h3>
+                    <p class="text-sm text-[#91848C] app-text">Please share your breast cancer journey. This helps us make a funding decision and will not be shared unless you authorize it below.</p>
+                    <textarea name="story" rows="5" required
+                        class="w-full px-4 py-3 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300"></textarea>
+                </div>
+
+                <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Authorization</h3>
+                    <p class="text-sm text-[#91848C] app-text">
+                        If approved, may we use parts of your story to help others? This does not affect your eligibility.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 text-sm text-[#213430] app-text">
+                        <label class="inline-flex items-center gap-2">
+                            <input type="radio" name="authorization_choice" value="allow" class="text-[#DB69A2]" checked>
+                            <span>Yes, you may share the items I select below.</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2">
+                            <input type="radio" name="authorization_choice" value="decline" class="text-[#DB69A2]">
+                            <span>No, do not use my information or images.</span>
+                        </label>
                     </div>
-                    <div class="md:col-span-1">
-                        <label for="condition" class="block font-light text-md text-[#213430] mb-1 app-text">Medical
-                            Condition:</label>
-                        <input type="text" id="condition" name="medical_condition"
-                            class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
-                            required>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-[#213430] app-text" data-auth-permissions>
+                        <label class="flex items-start gap-2">
+                            <input type="checkbox" name="authorization_permissions[]" value="full_name" class="mt-1 text-[#DB69A2]">
+                            <span>Use my full name</span>
+                        </label>
+                        <label class="flex items-start gap-2">
+                            <input type="checkbox" name="authorization_permissions[]" value="story_anonymous" class="mt-1 text-[#DB69A2]">
+                            <span>Share part of my story anonymously</span>
+                        </label>
+                        <label class="flex items-start gap-2">
+                            <input type="checkbox" name="authorization_permissions[]" value="story_full" class="mt-1 text-[#DB69A2]">
+                            <span>Share my story with my name</span>
+                        </label>
+                        <label class="flex items-start gap-2">
+                            <input type="checkbox" name="authorization_permissions[]" value="photos" class="mt-1 text-[#DB69A2]">
+                            <span>Use photos / media of me or my journey</span>
+                        </label>
+                        <label class="flex items-start gap-2">
+                            <input type="checkbox" name="authorization_permissions[]" value="contact_details" class="mt-1 text-[#DB69A2]">
+                            <span>Contact me for follow-ups related to my story</span>
+                        </label>
                     </div>
-                    <div class="md:col-span-1">
-                        <label for="assistance" class="block font-light text-md text-[#213430] mb-1 app-text">Assistance
-                            Needed:</label>
-                        <select id="assistance" name="assistance_type"
-                            class="appearance-none w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
-                            required>
-                            <option value="">Select Assistance Type</option>
-                            <option>Medical Bill Support</option>
-                            <option>Post-Surgery Recovery</option>
-                            <option>Nutrition & Wellness</option>
-                            <option>Transport Aid</option>
-                            <option>Other</option>
-                        </select>
+                </div>
+
+                <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Billing & verification</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block font-medium mb-1 text-sm">Billing address / online payment details</label>
+                            <textarea name="billing_details" rows="3"
+                                class="w-full px-4 py-3 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300"></textarea>
+                            <p class="text-xs text-[#91848C] app-text mt-1">To help us with your bill payments and submissions, please provide the billing address or the necessary information for making online payments.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block font-medium mb-1 text-sm">Signature *</label>
+                            <div class="border border-dashed border-[#DCCFD8] rounded-lg bg-white">
+                                <canvas id="signature-pad" class="w-full h-40" style="touch-action: none;"></canvas>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-[#91848C] app-text">
+                                <span>Sign inside the box above.</span>
+                                <button type="button" id="signature-clear" class="px-3 py-1 rounded-md border border-[#DB69A2] text-[#DB69A2] hover:bg-[#FDE8F3]">Clear</button>
+                            </div>
+                            <input type="hidden" name="signature_data" id="signature_data" required>
+                        </div>
                     </div>
-                    <div class="md:col-span-2">
-                        <label for="justification" class="block font-light text-md text-[#213430] mb-1 app-text">Why do
-                            you need support?</label>
-                        <textarea id="justification" name="justification" rows="3"
-                            class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
-                            required></textarea>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="documents" class="block font-light text-md text-[#213430] mb-1 app-text">Upload
-                            Supporting Documents:</label>
-                        <input type="file" id="documents" name="documents[]" multiple
-                            class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
-                            required>
+                </div>
+
+                <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Upload documentation</h3>
+                    <div class="space-y-3 text-sm text-[#213430] app-text">
+                        <div>
+                            <label class="block font-medium mb-1">Upload Treatment Verification Letter *</label>
+                            <input type="file" name="treatment_verification_letter" accept=".pdf,.jpg,.jpeg,.png" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                            <p class="text-xs text-[#91848C]">Must be on facility letterhead.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block font-medium">Upload Bill Statements *</label>
+                            <input type="file" name="bill_statements[]" accept=".pdf,.jpg,.jpeg,.png" required
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                            <input type="file" name="bill_statements[]" accept=".pdf,.jpg,.jpeg,.png"
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                            <input type="file" name="bill_statements[]" accept=".pdf,.jpg,.jpeg,.png"
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                            <p class="text-xs text-[#91848C]">All bills must be submitted at one time; partial submissions will not be accepted.</p>
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1">Proof of income documents (optional)</label>
+                            <input type="file" name="income_documents[]" accept=".pdf,.jpg,.jpeg,.png" multiple
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1">Additional supporting documents (optional)</label>
+                            <input type="file" name="documents[]" accept=".pdf,.jpg,.jpeg,.png" multiple
+                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        </div>
                     </div>
                 </div>
 
                 <!-- Form Actions -->
-                <div class="flex mt-8 space-x-4">
+                <div class="flex mt-4 space-x-4">
                     <button type="button" onclick="document.getElementById('popupModal').classList.add('hidden')"
                         class="px-6 py-2 bg-[#FFF7FC] text-[#91848C] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
                         Cancel
@@ -357,9 +519,133 @@
 
 @push('scripts')
     <script src="{{ asset('js/patient/dashboard.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.2.0/dist/signature_pad.umd.min.js"></script>
     <script>
         // List of program IDs the current user has already registered for
         const registeredPrograms = @json($registeredProgramIds);
+        const customFieldsContainer = document.querySelector('[data-custom-fields]');
+        const customFieldsEmptyState = document.querySelector('[data-custom-fields-empty]');
+        const defaultLabels = {
+            title: 'Title',
+            description: 'Description',
+            event_date: 'Date',
+            event_time: 'Time',
+            status: 'Status',
+            payment_type: 'Payment Type',
+            program_fund: 'Fund Goal',
+            custom_note: 'Note',
+            link: 'Link',
+        };
+
+        const buildFieldValueNode = (field) => {
+            const type = field?.type || 'short_text';
+            const rawValue = field?.value;
+            const valueNode = type === 'link' ? document.createElement('a') : document.createElement('span');
+            const isTruthy = rawValue === true || rawValue === '1' || rawValue === 1 || rawValue === 'true' || rawValue === 'yes';
+
+            const asNumber = Number(rawValue);
+            const isNumeric = Number.isFinite(asNumber);
+
+            switch (type) {
+                case 'money':
+                    valueNode.textContent = isNumeric
+                        ? `$${asNumber.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : (rawValue ?? '—');
+                    break;
+                case 'number':
+                    valueNode.textContent = isNumeric ? asNumber.toLocaleString() : (rawValue ?? '—');
+                    break;
+                case 'date': {
+                    const parsed = rawValue ? new Date(rawValue) : null;
+                    valueNode.textContent = parsed && !isNaN(parsed.valueOf())
+                        ? parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+                        : (rawValue ?? '—');
+                    break;
+                }
+                case 'time':
+                    valueNode.textContent = typeof rawValue === 'string' && rawValue.length >= 5
+                        ? rawValue.slice(0, 5)
+                        : (rawValue ?? '—');
+                    break;
+                case 'link':
+                    valueNode.href = rawValue || '#';
+                    valueNode.textContent = rawValue || 'Open link';
+                    valueNode.className = 'text-sm text-[#DB69A2] underline break-all';
+                    valueNode.target = '_blank';
+                    valueNode.rel = 'noopener noreferrer';
+                    break;
+                case 'boolean':
+                    valueNode.textContent = isTruthy ? 'Yes' : 'No';
+                    valueNode.className = isTruthy
+                        ? 'text-sm text-[#1B7B3A] font-semibold'
+                        : 'text-sm text-[#B32020] font-semibold';
+                    break;
+                default:
+                    valueNode.textContent = rawValue ?? '—';
+            }
+
+            if (!valueNode.className) {
+                valueNode.className = 'text-sm font-medium text-[#213430] text-right';
+            }
+
+            return valueNode;
+        };
+
+        const renderCustomFields = (fields) => {
+            if (!customFieldsContainer || !customFieldsEmptyState) {
+                return;
+            }
+
+            customFieldsContainer.innerHTML = '';
+
+            if (!Array.isArray(fields) || fields.length === 0) {
+                customFieldsEmptyState.classList.remove('hidden');
+                return;
+            }
+
+            customFieldsEmptyState.classList.add('hidden');
+
+            fields.forEach((field) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-start justify-between gap-3 rounded-lg border border-[#DCCFD8] bg-white px-3 py-3';
+
+                const labelWrap = document.createElement('div');
+                labelWrap.className = 'flex flex-col gap-1';
+
+                const labelRow = document.createElement('div');
+                labelRow.className = 'flex items-center gap-2';
+
+                const label = document.createElement('span');
+                label.className = 'text-sm font-semibold text-[#213430]';
+                label.textContent = field?.label || defaultLabels[field?.name] || 'Detail';
+
+                labelRow.appendChild(label);
+
+                if (field?.required) {
+                    const badge = document.createElement('span');
+                    badge.className = 'inline-flex items-center rounded-full bg-[#DB69A2]/10 px-2 py-0.5 text-[10px] font-semibold text-[#DB69A2]';
+                    badge.textContent = 'Important';
+                    labelRow.appendChild(badge);
+                }
+
+                labelWrap.appendChild(labelRow);
+
+                if (field?.help_text) {
+                    const help = document.createElement('p');
+                    help.className = 'text-xs text-[#91848C]';
+                    help.textContent = field.help_text;
+                    labelWrap.appendChild(help);
+                }
+
+                const valueWrap = document.createElement('div');
+                valueWrap.className = 'flex items-center justify-end text-right';
+                valueWrap.appendChild(buildFieldValueNode(field));
+
+                row.appendChild(labelWrap);
+                row.appendChild(valueWrap);
+                customFieldsContainer.appendChild(row);
+            });
+        };
 
         function openRegistrationModal(programId) {
             document.getElementById('popupModal').classList.remove('hidden');
@@ -370,6 +656,8 @@
 
         function openModal(id) {
             currentProgramId = id; // Save for use when opening register modal
+
+            renderCustomFields([]);
 
             fetch('{{ url('/patient/programs') }}/' + id, {
                     headers: {
@@ -383,21 +671,17 @@
                     document.querySelector('#registerModal .modal-date').textContent = data.event_date || '—';
                     document.querySelector('#registerModal .modal-time').textContent = data.event_time || '—';
 
-                    document.querySelector('#registerModal .modal-banner').src = data.banner || "{{ asset('public/images/program-details.png') }}";
-
-                    // Sponsor
-                    const sponsor = data.sponsor || {};
-                    document.querySelector('.modal-sponsor-name').textContent = sponsor.name || '—';
-                    document.querySelector('.modal-sponsor-phone').textContent = sponsor.phone || '—';
-                    document.querySelector('.modal-sponsor-email').textContent = sponsor.email || '—';
-                    if (sponsor.logo) {
-                        const logoSrc = sponsor.logo.startsWith('http') ? sponsor.logo : "{{ asset('') }}" + sponsor.logo.replace(/^\/+/, '');
-                        document.querySelector('.modal-sponsor-logo').src = logoSrc;
-                    } else {
-                        document.querySelector('.modal-sponsor-logo').src = "{{ asset('public/images/pink_me_logo.png') }}";
+                    const fallbackBanner = "{{ asset('public/images/program-details.png') }}";
+                    const bannerEl = document.querySelector('#registerModal .modal-banner');
+                    const bannerSrc = data.banner ? data.banner : fallbackBanner;
+                    if (bannerEl) {
+                        bannerEl.src = bannerSrc;
+                        bannerEl.onerror = () => {
+                            bannerEl.src = fallbackBanner;
+                        };
                     }
-                    // document.querySelector('.modal-sponsor-about').textContent = sponsor.about || '—';
 
+                    renderCustomFields(data.custom_fields || []);
                     // Update register button state based on registration history
                     const registerButton = document.getElementById('register-btn');
                     const viewButton = document.getElementById('registration-view-btn');
@@ -469,10 +753,81 @@
             // hide details modal, show registration modal
             document.getElementById('registerModal').classList.add('hidden');
             document.getElementById('popupModal').classList.remove('hidden');
+            // ensure signature canvas sizes correctly after showing
+            setTimeout(() => {
+                initSignaturePad();
+            }, 50);
         }
 
         function closeModal() {
             document.getElementById('registerModal').classList.add('hidden');
         }
+
+        const authRadios = document.querySelectorAll('input[name="authorization_choice"]');
+        const permissionSection = document.querySelector('[data-auth-permissions]');
+        const permissionCheckboxes = permissionSection ? permissionSection.querySelectorAll('input[type="checkbox"]') : [];
+        const syncPermissions = () => {
+            if (!permissionSection) return;
+            const allowSelected = Array.from(authRadios).some((r) => r.checked && r.value === 'allow');
+            permissionSection.classList.toggle('opacity-60', !allowSelected);
+            permissionSection.classList.toggle('pointer-events-none', !allowSelected);
+            permissionCheckboxes.forEach((cb) => {
+                cb.disabled = !allowSelected;
+            });
+        };
+
+        authRadios.forEach((radio) => radio.addEventListener('change', syncPermissions));
+        syncPermissions();
+
+        // Signature pad
+        const signatureCanvas = document.getElementById('signature-pad');
+        const signatureInput = document.getElementById('signature_data');
+        const clearBtn = document.getElementById('signature-clear');
+        let signaturePad = null;
+
+        const resizeSignatureCanvas = () => {
+            if (!signatureCanvas) return;
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const width = signatureCanvas.offsetWidth || 400;
+            const height = signatureCanvas.offsetHeight || 160;
+            signatureCanvas.width = width * ratio;
+            signatureCanvas.height = height * ratio;
+            const ctx = signatureCanvas.getContext('2d');
+            ctx.scale(ratio, ratio);
+        };
+
+        const syncSignature = () => {
+            if (!signaturePad || !signatureInput) return;
+            signatureInput.value = signaturePad.isEmpty() ? '' : signaturePad.toDataURL('image/png');
+        };
+
+        const initSignaturePad = () => {
+            if (!signatureCanvas || !window.SignaturePad) return;
+            if (!signaturePad) {
+                resizeSignatureCanvas();
+                signaturePad = new SignaturePad(signatureCanvas, {
+                    backgroundColor: '#ffffff',
+                    penColor: '#DB69A2'
+                });
+                signaturePad.onEnd = syncSignature;
+            }
+            signaturePad.clear();
+            syncSignature();
+        };
+
+        clearBtn?.addEventListener('click', () => {
+            signaturePad?.clear();
+            syncSignature();
+        });
+
+        // Ensure the form won't submit without a signature
+        const form = document.querySelector('#popupModal form');
+        form?.addEventListener('submit', (e) => {
+            syncSignature();
+            if (!signatureInput.value) {
+                e.preventDefault();
+                alert('Please add your signature before submitting.');
+            }
+        });
     </script>
 @endpush

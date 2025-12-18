@@ -170,6 +170,8 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
         ->name('admin.applications.index');
     Route::get('/admin/applications/list', [AdminController::class, 'applicationsList'])
         ->name('admin.applications.list'); // AJAX endpoint
+    Route::get('/admin/applications/export', [AdminController::class, 'applicationsExport'])
+        ->name('admin.applications.export');
 });
 
 

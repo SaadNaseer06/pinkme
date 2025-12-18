@@ -3,7 +3,7 @@
 @section('title', 'Edit Sponsor')
 
 @section('content')
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-9xl mx-auto">
         <div class="bg-[#F3E8EF] rounded-xl p-6">
             <h1 class="text-2xl font-semibold text-[#213430] mb-4">Edit Sponsor</h1>
             <form method="POST" action="{{ route('admin.sponsors.update', $sponsor) }}" class="space-y-6">

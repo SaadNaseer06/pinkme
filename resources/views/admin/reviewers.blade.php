@@ -25,12 +25,46 @@
                 <!-- Status Cards -->
                 @include('admin.partials.cards')
 
+                <div class="grid gap-4 md:grid-cols-3 mt-6 mb-6">
+                    <div class="md:col-span-2 bg-gradient-to-r from-[#FCE8F3] via-[#F7F0F7] to-white rounded-2xl p-6 shadow-sm">
+                        <span class="text-xs font-semibold uppercase tracking-[0.2em] text-[#DB69A2]">Reviewer Workspace</span>
+                        <h2 class="mt-2 text-2xl font-semibold text-[#213430]">Grow and support your reviewer roster</h2>
+                        <p class="mt-2 text-sm text-[#5F4E57]">This page is people-focused: add reviewers, monitor status, and keep their profiles compliant. Assigned Applications is workflow-focused and only shows the cases they already own.</p>
+                        {{-- <div class="mt-4 flex flex-wrap gap-3">
+                            <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 text-xs font-semibold text-[#213430]">
+                                <span class="w-2 h-2 rounded-full bg-[#20B354]"></span>
+                                Roster health
+                            </div>
+                            <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 text-xs font-semibold text-[#213430]">
+                                <span class="w-2 h-2 rounded-full bg-[#F4A259]"></span>
+                                Credential tracking
+                            </div>
+                        </div> --}}
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 border border-[#F0D9E6] shadow-sm flex flex-col justify-between">
+                        <div>
+                            <p class="text-sm font-semibold text-[#213430]">Need to see workloads?</p>
+                            <p class="mt-1 text-xs text-[#91848C]">Jump into Assigned Applications to check how donations and reviews line up.</p>
+                        </div>
+                        <a href="{{ route('admin.assigned') }}"
+                            class="inline-flex items-center justify-center px-4 py-2 mt-4 rounded-md bg-[#DB69A2] text-white text-sm font-semibold hover:bg-[#C4568C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#DB69A2]">
+                            View Assigned Applications
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.25 6.75H18V11.5M18 6.75l-6.75 6.75M6 17.25h12" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Charts Section -->
                 <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
                     <div x-data="{ showFilters: {{ json_encode($hasReviewersFilters) }} }" class="mb-4 ml-3">
                         <!-- Header -->
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-xl font-semibold text-[#213430] app-main">All Reviewers List</h2>
+                        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div>
+                                <h2 class="text-xl font-semibold text-[#213430] app-main">Reviewer Directory</h2>
+                                <p class="text-xs text-[#5F4E57] mt-1">Build the reviewer roster, adjust statuses, and keep contact info fresh.</p>
+                            </div>
                             <div class="flex items-center gap-3">
                                 <!-- Filters Toggle Button -->
                                 <button @click="showFilters = !showFilters"

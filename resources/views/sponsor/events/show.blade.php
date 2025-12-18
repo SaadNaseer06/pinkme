@@ -176,7 +176,6 @@
                                     Sponsorship Amount: <span
                                         class="font-semibold">${{ number_format($currentRegistration->amount, 2) }}</span>
                                 </p>
-
                                 @if ($currentRegistration->registration_status !== 'cancelled' && $event->date && now()->isBefore($event->date))
                                     <form method="POST" action="{{ route('sponsor.events.cancel', $event) }}"
                                         onsubmit="return confirm('Are you sure you want to cancel your registration?')">

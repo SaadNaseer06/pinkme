@@ -41,26 +41,25 @@
 
         switch ($period) {
             case 'day':
-                // Last 24 hours by 4-hour intervals
+                // Last 6 calendar days (including today)
                 for ($i = 5; $i >= 0; $i--) {
-                    $start = Carbon::now()->subHours($i * 4);
-                    $end = $start->copy()->addHours(4);
-                    $label = $start->format('H:i');
+                    $day = Carbon::today()->subDays($i);
+                    $label = $day->format('M d');
 
-                    $intervalTotal = (clone $query)->whereBetween('created_at', [$start, $end])->count();
-                    $intervalApproved = (clone $query)
+                    $dayTotal = (clone $query)->whereDate('created_at', $day->toDateString())->count();
+                    $dayApproved = (clone $query)
                         ->where('status', 'approved')
-                        ->whereBetween('created_at', [$start, $end])
+                        ->whereDate('created_at', $day->toDateString())
                         ->count();
-                    $intervalRejected = (clone $query)
+                    $dayRejected = (clone $query)
                         ->where('status', 'rejected')
-                        ->whereBetween('created_at', [$start, $end])
+                        ->whereDate('created_at', $day->toDateString())
                         ->count();
-                    $intervalRemain = max(0, $intervalTotal - $intervalApproved - $intervalRejected);
+                    $dayRemain = max(0, $dayTotal - $dayApproved - $dayRejected);
 
-                    if ($intervalTotal > 0) {
-                        $appsPct = (int) round(($intervalRemain / $intervalTotal) * 100);
-                        $approvedPct = (int) round(($intervalApproved / $intervalTotal) * 100);
+                    if ($dayTotal > 0) {
+                        $appsPct = (int) round(($dayRemain / $dayTotal) * 100);
+                        $approvedPct = (int) round(($dayApproved / $dayTotal) * 100);
                         $rejectedPct = max(0, 100 - $appsPct - $approvedPct);
                     } else {
                         $appsPct = $approvedPct = $rejectedPct = 0;
@@ -109,26 +108,27 @@
                 break;
 
             case 'month':
-                // Last 4 weeks
+                // Last 4 months
                 for ($i = 3; $i >= 0; $i--) {
-                    $weekStart = Carbon::now()->subWeeks($i)->startOfWeek();
-                    $weekEnd = Carbon::now()->subWeeks($i)->endOfWeek();
-                    $label = 'W' . (4 - $i);
+                    $monthPoint = Carbon::now()->subMonths($i);
+                    $monthStart = $monthPoint->copy()->startOfMonth();
+                    $monthEnd = $monthPoint->copy()->endOfMonth();
+                    $label = $monthPoint->format('M');
 
-                    $weekTotal = (clone $query)->whereBetween('created_at', [$weekStart, $weekEnd])->count();
-                    $weekApproved = (clone $query)
+                    $monthTotal = (clone $query)->whereBetween('created_at', [$monthStart, $monthEnd])->count();
+                    $monthApproved = (clone $query)
                         ->where('status', 'approved')
-                        ->whereBetween('created_at', [$weekStart, $weekEnd])
+                        ->whereBetween('created_at', [$monthStart, $monthEnd])
                         ->count();
-                    $weekRejected = (clone $query)
+                    $monthRejected = (clone $query)
                         ->where('status', 'rejected')
-                        ->whereBetween('created_at', [$weekStart, $weekEnd])
+                        ->whereBetween('created_at', [$monthStart, $monthEnd])
                         ->count();
-                    $weekRemain = max(0, $weekTotal - $weekApproved - $weekRejected);
+                    $monthRemain = max(0, $monthTotal - $monthApproved - $monthRejected);
 
-                    if ($weekTotal > 0) {
-                        $appsPct = (int) round(($weekRemain / $weekTotal) * 100);
-                        $approvedPct = (int) round(($weekApproved / $weekTotal) * 100);
+                    if ($monthTotal > 0) {
+                        $appsPct = (int) round(($monthRemain / $monthTotal) * 100);
+                        $approvedPct = (int) round(($monthApproved / $monthTotal) * 100);
                         $rejectedPct = max(0, 100 - $appsPct - $approvedPct);
                     } else {
                         $appsPct = $approvedPct = $rejectedPct = 0;
@@ -457,7 +457,7 @@
                                 <th class="p-2 text-lg text-[#91848C] font-medium app-h px-10">Email</th>
                                 <th class="p-2 text-lg text-[#91848C] font-medium app-h">Contact</th>
                                 <th class="p-2 text-lg text-[#91848C] font-medium app-h">Age</th>
-                                <th class="p-2 text-lg text-[#91848C] font-medium app-h">Disease</th>
+                                <th class="p-2 text-lg text-[#91848C] font-medium app-h">Stage</th>
                                 <th class="p-2 text-lg text-[#91848C] font-medium app-h">Action</th>
                             </tr>
                         </thead>

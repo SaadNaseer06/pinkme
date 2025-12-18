@@ -908,8 +908,8 @@ class SponsorController extends Controller
         }
         
         $data = $request->validate([
-            'amount' => ['required', 'numeric', 'min:0.01'],
-            'message' => ['nullable', 'string', 'max:500'],
+            'amount'             => ['required', 'numeric', 'min:0.01'],
+            'message'            => ['nullable', 'string', 'max:500'],
         ]);
         
         // Check if amount doesn't exceed remaining funding needed

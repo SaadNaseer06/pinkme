@@ -64,10 +64,13 @@
 
                 <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
                     {{-- Header + Filter --}}
-                    <div class="flex justify-between flex-col md:flex-row items-center mb-4 ml-3">
-                        <h2 class="text-xl font-semibold text-[#213430] app-main mb-2 md:mb-0">All Applications List</h2>
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-4 ml-3">
+                        <div>
+                            <h2 class="text-xl font-semibold text-[#213430] app-main">Reviewer Assignments Board</h2>
+                            <p class="text-xs text-[#5F4E57] mt-1">Applications listed here already have an owner and are waiting on outcomes or funding.</p>
+                        </div>
 
-                        <form method="GET" class="flex space-x-4">
+                        <form method="GET" class="flex flex-wrap gap-3 md:flex-nowrap md:space-x-4 md:gap-0">
                             <div class="relative w-[140px] md:w-[200px]">
                                 <select name="range"
                                     class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#91848C] bg-transparent border border-[#91848C] focus:outline-none">
@@ -88,7 +91,7 @@
                                 Apply
                             </button>
                             @if (request()->filled('range'))
-                                <a href="{{ route('case_manager.myApplication') }}"
+                                <a href="{{ route('admin.assigned') }}"
                                     class="px-3 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md app-text">
                                     Reset
                                 </a>

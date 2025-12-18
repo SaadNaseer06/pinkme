@@ -7,8 +7,17 @@
 
     $user = Auth::user();
 
-    // --- Range filter ---
+    // --- Filters ---
     $range = request('range');
+    $statusOptions = [
+        'pending' => 'Pending',
+        'under_review' => 'Under Review',
+        'approved' => 'Approved',
+        'rejected' => 'Rejected',
+    ];
+    $selectedStatus = strtolower((string) request('status'));
+    $statusFilter = array_key_exists($selectedStatus, $statusOptions) ? $selectedStatus : null;
+
     $startDate = match ($range) {
         'week' => Carbon::now()->subWeek(),
         'month' => Carbon::now()->subMonth(),
@@ -25,8 +34,24 @@
             'missingRequests',
         ])
         ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+        ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
         ->latest('created_at')
         ->paginate(10)
+        ->appends(request()->query());
+
+    $assignedApps = Application::query()
+        ->with([
+            'program:id,title',
+            'patient:id,user_id',
+            'patient.user:id,email',
+            'reviewer.profile',
+            'missingRequests',
+        ])
+        ->whereNotNull('reviewer_id')
+        ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+        ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
+        ->latest('created_at')
+        ->paginate(10, ['*'], 'assigned_page')
         ->appends(request()->query());
 
     // $apps = Application::query()
@@ -43,8 +68,6 @@
     //     ->orderByDesc('created_at')
     //     ->paginate(10)
     //     ->appends(request()->query());
-
-    $assignedReviewerId = $apps->reviewer_id ?? null;
 
     // --- Helpers ---
     $fmtDate = fn($dt) => $dt ? Carbon::parse($dt)->format('Y-m-d') : '—';
@@ -78,6 +101,7 @@
         })
         ->get();
 
+    $activeTab = request('tab') === 'assigned' ? 'assigned' : 'all';
 @endphp
 
 @extends('admin.layouts.admin')
@@ -89,6 +113,14 @@
     button.bg-\[\#db69a2\] {
         color: #fff !important;
     }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
 </style>
 
 
@@ -99,56 +131,155 @@
                 @include('admin.partials.cards')
 
                 <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
-                    {{-- Header + Filter --}}
-                    <div class="flex justify-between flex-col md:flex-row items-center mb-4 ml-3">
-                        <h2 class="text-xl font-semibold text-[#213430] app-main mb-2 md:mb-0">All Applications List</h2>
-
-                        <form id="applicationsFilters" method="GET" class="flex space-x-4">
-                            <div class="relative w-[140px] md:w-[200px]">
-                                <select name="range" id="rangeFilter"
-                                    class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#91848C] bg-transparent border border-[#91848C] focus:outline-none">
-                                    <option value="">All Time</option>
-                                    <option value="week" {{ $range === 'week' ? 'selected' : '' }}>Last Week</option>
-                                    <option value="month" {{ $range === 'month' ? 'selected' : '' }}>Last Month</option>
-                                </select>
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="relative w-[180px] md:w-[270px]">
-                                <input type="text" name="q" id="searchInput" value="{{ request('q') }}"
-                                    placeholder="Search by name, email, code, ID"
-                                    class="w-full rounded-md px-3 py-2 text-sm text-[#213430] bg-[#F3E8EF] border border-[#91848C] focus:outline-none"
-                                    autocomplete="off" />
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <button type="submit"
-                                class="px-4 py-2 bg-[#DB69A2] text-white rounded-md app-text hover:bg-pink-600">
-                                Apply
+                    {{-- Tabs --}}
+                    <div class="flex flex-wrap">
+                        <div class="w-full md:w-1/2">
+                            <button onclick="showTab('all-apps')" id="tab-all"
+                                class="tab-btn w-full {{ $activeTab === 'all' ? 'bg-[#DB69A2] text-white' : 'bg-[#F3E8EF] text-[#91848C]' }} py-4 px-6 font-normal text-center rounded-t-lg md:rounded-tr-none md:rounded-l-lg transition-colors duration-200">
+                                Applications
                             </button>
-                            @if (request()->filled('range') || request()->filled('q'))
-                                <a href="{{ route('admin.applications') }}"
-                                    class="px-3 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md app-text">
-                                    Reset
-                                </a>
-                            @endif
-                        </form>
+                        </div>
+                        <div class="w-full md:w-1/2">
+                            <button onclick="showTab('assigned-apps')" id="tab-assigned"
+                                class="tab-btn w-full {{ $activeTab === 'assigned' ? 'bg-[#DB69A2] text-white' : 'bg-[#F3E8EF] text-[#91848C]' }} py-4 px-6 font-normal text-center rounded-b-lg md:rounded-b-none md:rounded-tl-none md:rounded-r-lg transition-colors duration-200">
+                                Assigned Applications
+                            </button>
+                        </div>
+                    </div>
+                    <div class="h-[1px] bg-[#DCCFD8] -mt-[1px] mb-6"></div>
+
+                    {{-- Tab: All Applications --}}
+                    <div id="all-apps" class="tab-content {{ $activeTab === 'assigned' ? '' : 'active' }}">
+                        <div class="flex justify-between flex-col md:flex-row items-center mb-4 ml-3 mt-4">
+                            <h2 class="text-xl font-semibold text-[#213430] app-main mb-2 md:mb-0">All Applications List</h2>
+
+                            <form id="applicationsFilters" method="GET"
+                                class="flex flex-wrap gap-3 md:flex-nowrap md:space-x-4 md:gap-0">
+                                <div class="relative w-[140px] md:w-[200px]">
+                                    <select name="range" id="rangeFilter"
+                                        class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#91848C] bg-transparent border border-[#91848C] focus:outline-none">
+                                        <option value="">All Time</option>
+                                        <option value="week" {{ $range === 'week' ? 'selected' : '' }}>Last Week</option>
+                                        <option value="month" {{ $range === 'month' ? 'selected' : '' }}>Last Month</option>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="relative w-[150px] md:w-[200px]">
+                                    <select name="status" id="statusFilter"
+                                        class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#91848C] bg-transparent border border-[#91848C] focus:outline-none">
+                                        <option value="">All Statuses</option>
+                                        @foreach ($statusOptions as $value => $label)
+                                            <option value="{{ $value }}" {{ $selectedStatus === $value ? 'selected' : '' }}>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="relative w-full md:w-[270px] max-w-[320px]">
+                                    <input type="text" name="q" id="searchInput" value="{{ request('q') }}"
+                                        placeholder="Search by name, email, code, ID"
+                                        class="w-full rounded-md px-3 py-2 text-sm text-[#213430] bg-[#F3E8EF] border border-[#91848C] focus:outline-none"
+                                        autocomplete="off" />
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <button type="button" id="exportApplicationsBtn"
+                                    class="px-4 py-2 bg-[#DB69A2] text-white rounded-md app-text hover:bg-[#FE6EB6] transition">
+                                    Export Excel
+                                </button>
+                                @if (request()->filled('range') || request()->filled('q') || request()->filled('status'))
+                                    <a href="{{ route('admin.applications') }}"
+                                        class="px-3 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md app-text">
+                                        Reset
+                                    </a>
+                                @endif
+                            </form>
+                        </div>
+
+                        {{-- AJAX Table Wrapper --}}
+                        <div id="applicationsTableWrapper">
+                            @include('admin.applications._table', ['apps' => $apps, 'range' => $range])
+                        </div>
                     </div>
 
-                    {{-- AJAX Table Wrapper --}}
-                    <div id="applicationsTableWrapper">
-                        @include('admin.applications._table', ['apps' => $apps, 'range' => $range])
+                    {{-- Tab: Assigned Applications --}}
+                    <div id="assigned-apps" class="tab-content {{ $activeTab === 'assigned' ? 'active' : '' }}">
+                        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-4 ml-3 mt-4">
+                            <div>
+                                <h2 class="text-xl font-semibold text-[#213430] app-main">Assigned Applications</h2>
+                                <p class="text-xs text-[#5F4E57] mt-1">Everything with a reviewer already attached.</p>
+                            </div>
+                            <form method="GET" class="flex flex-wrap gap-3 md:flex-nowrap md:space-x-4 md:gap-0">
+                                <input type="hidden" name="tab" value="assigned">
+                                <div class="relative w-[140px] md:w-[200px]">
+                                    <select name="range"
+                                        class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#91848C] bg-transparent border border-[#91848C] focus:outline-none">
+                                        <option value="">All Time</option>
+                                        <option value="week" {{ $range === 'week' ? 'selected' : '' }}>Last Week</option>
+                                        <option value="month" {{ $range === 'month' ? 'selected' : '' }}>Last Month</option>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="relative w-[150px] md:w-[200px]">
+                                    <select name="status"
+                                        class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#91848C] bg-transparent border border-[#91848C] focus:outline-none">
+                                        <option value="">All Statuses</option>
+                                        @foreach ($statusOptions as $value => $label)
+                                            <option value="{{ $value }}" {{ $selectedStatus === $value ? 'selected' : '' }}>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="assigned_page" value="{{ request('assigned_page', 1) }}">
+                                <button type="submit"
+                                    class="px-4 py-2 bg-[#DB69A2] text-white rounded-md app-text hover:bg-[#FE6EB6] transition">
+                                    Apply
+                                </button>
+                                @if (request()->filled('range') || request()->filled('status'))
+                                    <a href="{{ route('admin.applications', ['tab' => 'assigned']) }}"
+                                        class="px-3 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md app-text">
+                                        Reset
+                                    </a>
+                                @endif
+                            </form>
+                        </div>
+
+                        <div id="assignedTableWrapper">
+                            @include('admin.applications._table', ['apps' => $assignedApps, 'range' => $range])
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,6 +377,7 @@
         const CSRF_TOKEN = '{{ csrf_token() }}';
         const LIST_URL = "{{ route('admin.applications.list') }}";
         const APPLICATIONS_BASE_URL = "{{ url('admin/applications') }}";
+        const EXPORT_URL = "{{ route('admin.applications.export') }}";
 
         function showToast(message, type = 'success') {
             const icon = type === 'success' ?
@@ -465,27 +597,36 @@
             });
         }
 
+        function getFilterParams(extra = {}) {
+            return Object.assign({
+                q: $('#searchInput').val(),
+                range: $('#rangeFilter').val(),
+                status: $('#statusFilter').val(),
+            }, extra);
+        }
+
         // Handle typing in search
         const handleSearch = debounce(function() {
-            const q = $('#searchInput').val();
-            const range = $('#rangeFilter').val();
-            loadApplications({
-                q,
-                range
-            });
+            loadApplications(getFilterParams());
         }, 300);
 
         $('#searchInput').on('input', handleSearch);
 
-        // Handle range apply via form submit (AJAX)
+        // Change range/status filters immediately
+        $('#rangeFilter, #statusFilter').on('change', function() {
+            loadApplications(getFilterParams());
+        });
+
+        // Handle filter submit via Enter key (AJAX)
         $('#applicationsFilters').on('submit', function(e) {
             e.preventDefault();
-            const q = $('#searchInput').val();
-            const range = $('#rangeFilter').val();
-            loadApplications({
-                q,
-                range
-            });
+            loadApplications(getFilterParams());
+        });
+
+        $('#exportApplicationsBtn').on('click', function() {
+            const params = getFilterParams();
+            const query = $.param(params);
+            window.location.href = EXPORT_URL + (query ? ('?' + query) : '');
         });
 
         // Intercept pagination links inside the wrapper
@@ -495,16 +636,42 @@
             const isPagination = /[?&]page=/.test(href) || $(this).closest('.flex.justify-end').length > 0;
             if (isPagination) {
                 e.preventDefault();
-                // Preserve current q and range if not present
+                // Preserve current filters while paginating
                 const url = new URL(href, window.location.origin);
-                const params = {
-                    q: $('#searchInput').val(),
-                    range: $('#rangeFilter').val(),
+                const params = getFilterParams({
                     page: url.searchParams.get('page') || 1
-                };
+                });
                 loadApplications(params);
             }
         });
+
+        /* =========================
+           Tabs (mirror sponsors/events)
+        ========================= */
+        function showApplicationsTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-[#DB69A2]', 'text-white');
+                btn.classList.add('bg-[#F3E8EF]', 'text-[#91848C]');
+            });
+
+            const target = document.getElementById(tabId);
+            if (target) target.classList.add('active');
+
+            const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-[#DB69A2]', 'text-white');
+                activeBtn.classList.remove('bg-[#F3E8EF]', 'text-[#91848C]');
+            }
+        }
+
+        document.getElementById('tab-all')?.setAttribute('data-tab', 'all-apps');
+        document.getElementById('tab-assigned')?.setAttribute('data-tab', 'assigned-apps');
+
+        document.getElementById('tab-all')?.addEventListener('click', () => showApplicationsTab('all-apps'));
+        document.getElementById('tab-assigned')?.addEventListener('click', () => showApplicationsTab('assigned-apps'));
+
+        showApplicationsTab("{{ $activeTab === 'assigned' ? 'assigned-apps' : 'all-apps' }}");
     </script>
 
 @endsection

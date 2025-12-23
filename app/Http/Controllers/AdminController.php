@@ -13,8 +13,10 @@ use App\Models\Event;
 use App\Models\Program;
 use App\Models\SiteSetting;
 use App\Models\UserProfile;
+use App\Models\ProgramRegistration;
+use App\Models\EventSponsorship;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -95,7 +97,7 @@ class AdminController extends Controller
 
     public function assigned()
     {
-        return redirect()->route('admin.applications', ['tab' => 'assigned']);
+        return redirect()->route('admin.applications', ['view' => 'assigned']);
     }
 
     public function deleteApplication($id)
@@ -139,20 +141,28 @@ class AdminController extends Controller
 
     public function reviewers(Request $request)
     {
-        $status      = strtolower((string) $request->query('status', 'active'));
-        $reviewerId  = trim((string) $request->query('reviewer_id', ''));
-        $email       = trim((string) $request->query('email', ''));
-        $searchQuery = trim((string) $request->query('q', ''));
+        $status      = strtolower((string) $request->query('status', 'all'));
+        $searchQuery = trim((string) $request->query('search', ''));
+        $assignedReviewer = (int) $request->query('assigned_reviewer', 0);
 
-        if (! in_array($status, ['active', 'inactive', 'all'], true)) {
-            $status = 'active';
+        if (! in_array($status, ['active', 'inactive', 'assigned', 'all'], true)) {
+            $status = 'all';
         }
 
-        $reviewers = User::query()
+        $baseQuery = User::query()
             ->whereHas('role', function ($query) {
                 $query->where('name', 'casemanager');
             })
-            ->whereHas('profile')
+            ->whereHas('profile');
+
+        $reviewerCounts = [
+            'active'   => (clone $baseQuery)->whereHas('profile', fn($profile) => $profile->where('status', 1))->count(),
+            'inactive' => (clone $baseQuery)->whereHas('profile', fn($profile) => $profile->where('status', '!=', 1)->orWhereNull('status'))->count(),
+            'all'      => (clone $baseQuery)->count(),
+            'assigned' => (clone $baseQuery)->whereHas('applications')->count(),
+        ];
+
+        $teamMembers = (clone $baseQuery)
             ->with([
                 'profile:id,user_id,full_name,username,phone,status,gender',
                 'applications',
@@ -164,24 +174,21 @@ class AdminController extends Controller
             ->when($status === 'inactive', function ($query) {
                 $query->whereHas('profile', fn($profile) => $profile->where('status', '!=', 1)->orWhereNull('status'));
             })
+            ->when($status === 'assigned', function ($query) {
+                $query->whereHas('applications');
+            })
             ->when($status === 'all', function ($query) {
                 // No additional constraint; include any status
             })
-            ->when($reviewerId !== '', function ($query) use ($reviewerId) {
-                $numericId = (int) ltrim(preg_replace('/\D/', '', $reviewerId), '0');
-
-                if ($numericId > 0) {
-                    $query->where('id', $numericId);
-                } else {
-                    $query->whereRaw('1 = 0');
-                }
-            })
-            ->when($email !== '', function ($query) use ($email) {
-                $query->where('email', 'like', '%' . $email . '%');
-            })
             ->when($searchQuery !== '', function ($query) use ($searchQuery) {
-                $query->where(function ($inner) use ($searchQuery) {
-                    $inner->where('email', 'like', '%' . $searchQuery . '%')
+                $numericId = (int) ltrim(preg_replace('/\D/', '', $searchQuery), '0');
+                $query->where(function ($inner) use ($searchQuery, $numericId) {
+                    if ($numericId > 0) {
+                        $inner->orWhere('id', $numericId);
+                        $inner->orWhere('reviewer_id', 'like', '%' . $numericId . '%');
+                    }
+
+                    $inner->orWhere('email', 'like', '%' . $searchQuery . '%')
                         ->orWhereHas('profile', function ($profileQuery) use ($searchQuery) {
                             $profileQuery->where('full_name', 'like', '%' . $searchQuery . '%')
                                 ->orWhere('username', 'like', '%' . $searchQuery . '%')
@@ -189,11 +196,29 @@ class AdminController extends Controller
                         });
                 });
             })
+            ->when($assignedReviewer > 0, function ($query) use ($assignedReviewer) {
+                $query->where('id', $assignedReviewer)
+                    ->whereHas('applications', fn($apps) => $apps->where('reviewer_id', $assignedReviewer));
+            })
             ->orderByDesc('created_at')
             ->paginate(20)
             ->appends($request->query());
 
-        return view('admin.reviewers', compact('reviewers', 'status', 'reviewerId', 'email', 'searchQuery'));
+        $assignedReviewers = (clone $baseQuery)
+            ->with('profile:id,user_id,full_name')
+            ->whereHas('applications')
+            ->withCount('applications')
+            ->orderByDesc('applications_count')
+            ->get();
+
+        return view('admin.reviewers', compact(
+            'teamMembers',
+            'status',
+            'searchQuery',
+            'reviewerCounts',
+            'assignedReviewers',
+            'assignedReviewer',
+        ));
     }
 
     public function getUnassignedApplications($reviewerId)
@@ -543,9 +568,11 @@ class AdminController extends Controller
     public function applicationsList(Request $request)
     {
         $range  = $request->string('range')->toString();
+        $view   = $request->string('view')->toString();
         $q      = trim($request->string('q')->toString());
         $status = strtolower($request->string('status')->toString());
 
+        $viewMode        = $view === 'assigned' ? 'assigned' : 'all';
         $allowedStatuses = ['pending', 'under_review', 'approved', 'rejected'];
         $statusFilter    = in_array($status, $allowedStatuses, true) ? $status : null;
 
@@ -564,6 +591,7 @@ class AdminController extends Controller
                 'reviewer.profile:id,user_id,full_name,avatar,status',
                 'missingRequests',
             ])
+            ->when($viewMode === 'assigned', fn($q2) => $q2->whereNotNull('reviewer_id'))
             ->when($startDate, fn($q2) => $q2->where('created_at', '>=', $startDate))
             ->when($statusFilter, fn($q2) => $q2->where('status', $statusFilter))
             // search: name, email, code, id
@@ -595,9 +623,11 @@ class AdminController extends Controller
     public function applicationsExport(Request $request)
     {
         $range  = $request->string('range')->toString();
+        $view   = $request->string('view')->toString();
         $q      = trim($request->string('q')->toString());
         $status = strtolower($request->string('status')->toString());
 
+        $viewMode        = $view === 'assigned' ? 'assigned' : 'all';
         $allowedStatuses = ['pending', 'under_review', 'approved', 'rejected'];
         $statusFilter    = in_array($status, $allowedStatuses, true) ? $status : null;
 
@@ -616,6 +646,7 @@ class AdminController extends Controller
                 'reviewer.profile:id,user_id,full_name',
                 'missingRequests',
             ])
+            ->when($viewMode === 'assigned', fn($q2) => $q2->whereNotNull('reviewer_id'))
             ->when($startDate, fn($q2) => $q2->where('created_at', '>=', $startDate))
             ->when($statusFilter, fn($q2) => $q2->where('status', $statusFilter))
             ->when($q !== '', function ($qb) use ($q) {
@@ -686,5 +717,100 @@ class AdminController extends Controller
 
             fclose($handle);
         }, 200, $headers);
+    }
+
+    /**
+     * Unified registrations page for both Program and Event registrations
+     */
+    public function registrations(Request $request)
+    {
+        $tab = $request->query('tab', 'programs'); // 'programs' or 'events'
+        if (!in_array($tab, ['programs', 'events'], true)) {
+            $tab = 'programs';
+        }
+
+        $displayCol = $this->userDisplayColumn();
+
+        // Program Registrations Data
+        $programSelectedStatus = strtolower((string) $request->query('program_status', ProgramRegistration::STATUS_PENDING));
+        $validProgramStatuses = [
+            'all',
+            ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_APPROVED,
+            ProgramRegistration::STATUS_REJECTED,
+        ];
+
+        if (!in_array($programSelectedStatus, $validProgramStatuses, true)) {
+            $programSelectedStatus = ProgramRegistration::STATUS_PENDING;
+        }
+
+        $programQuery = ProgramRegistration::query()
+            ->with(['program:id,title', 'user:id,email'])
+            ->orderByDesc('created_at');
+
+        if ($programSelectedStatus !== 'all') {
+            $programQuery->where('status', $programSelectedStatus);
+        }
+
+        $programRegistrations = $programQuery
+            ->paginate(15, ['*'], 'program_page')
+            ->appends($request->except('program_page'));
+
+        $programCounts = [
+            'pending'  => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING)->count(),
+            'approved' => ProgramRegistration::where('status', ProgramRegistration::STATUS_APPROVED)->count(),
+            'rejected' => ProgramRegistration::where('status', ProgramRegistration::STATUS_REJECTED)->count(),
+            'all'      => ProgramRegistration::count(),
+        ];
+
+        // Event Registrations Data
+        $eventSelectedId = (int) $request->query('event_id');
+        if ($eventSelectedId <= 0) {
+            $eventSelectedId = null;
+        }
+
+        $pendingEventRegistrations = EventSponsorship::with(['event', 'sponsor'])
+            ->when($eventSelectedId, fn($query) => $query->where('event_id', $eventSelectedId))
+            ->where('registration_status', 'pending')
+            ->orderBy('registered_at', 'desc')
+            ->get();
+
+        $eventRegistrations = EventSponsorship::with(['event', 'sponsor'])
+            ->when($eventSelectedId, fn($query) => $query->where('event_id', $eventSelectedId))
+            ->orderBy('registered_at', 'desc')
+            ->paginate(20, ['*'], 'event_page')
+            ->appends($request->except('event_page'));
+
+        $eventsForFilter = Event::orderBy('title')->get(['id', 'title']);
+
+        $eventCounts = [
+            'pending'   => EventSponsorship::where('registration_status', 'pending')->count(),
+            'confirmed' => EventSponsorship::where('registration_status', 'confirmed')->count(),
+            'cancelled' => EventSponsorship::where('registration_status', 'cancelled')->count(),
+            'all'       => EventSponsorship::count(),
+        ];
+
+        return view('admin.registrations.index', [
+            'tab'                        => $tab,
+            'programRegistrations'       => $programRegistrations,
+            'programSelectedStatus'      => $programSelectedStatus,
+            'programCounts'              => $programCounts,
+            'eventRegistrations'         => $eventRegistrations,
+            'pendingEventRegistrations'  => $pendingEventRegistrations,
+            'eventsForFilter'            => $eventsForFilter,
+            'eventSelectedId'            => $eventSelectedId,
+            'eventCounts'                => $eventCounts,
+            'displayCol'                 => $displayCol,
+        ]);
+    }
+
+    private function userDisplayColumn(): string
+    {
+        foreach (['name', 'full_name', 'username'] as $col) {
+            if (Schema::hasColumn('users', $col)) {
+                return $col;
+            }
+        }
+        return 'email'; // guaranteed to exist
     }
 }

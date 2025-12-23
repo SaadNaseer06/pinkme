@@ -22,29 +22,17 @@
                     src="{{ request()->is('admin/applications') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
                     alt="" />Applications</a>
         </li>
-        <li class="{{ request()->is('admin/program-registration-requests*') ? 'active' : '' }}">
-            <a href="{{ route('admin.program_registrations.index') }}"><img
-                    src="{{ request()->is('admin/program-registration-requests*') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
-                    alt="" />Program
-                Registrations</a>
-        </li>
-        <li class="{{ request()->is('admin/events-registrations*') ? 'active' : '' }}">
-            <a href="{{ route('events.registrations.index') }}">
-                <img src="{{ asset('public/images/Calender.svg') }}"
-                     class="{{ request()->is('admin/events-registrations*') ? '' : 'filter invert brightness-0' }}"
-                     alt="" />
-                Event Registrations
+        <li class="{{ request()->is('admin/registrations*') ? 'active' : '' }}">
+            <a href="{{ route('admin.registrations.index') }}">
+                <img src="{{ request()->is('admin/registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
+                     alt="Registrations" />
+                Registrations
             </a>
         </li>
-        <li class="{{ request()->is('admin/reviewers') ? 'active' : '' }}">
+        <li class="{{ request()->is('admin/reviewers*') ? 'active' : '' }}">
             <a href="{{ route('admin.reviewers') }}"><img
-                    src="{{ request()->is('admin/reviewers') ? asset('public/images/patient-pink.svg') : asset('public/images/patient.svg') }}"
-                    alt="" />Reviewers</a>
-        </li>
-        <li class="{{ request()->is('admin/case-managers*') ? 'active' : '' }}">
-            <a href="{{ route('admin.case-managers.index') }}"><img
-                    src="{{ request()->is('admin/case-managers*') ? asset('public/images/patient-pink.svg') : asset('public/images/patient.svg') }}"
-                    alt="" />Case Managers</a>
+                    src="{{ request()->is('admin/reviewers*') ? asset('public/images/review-pink.svg') : asset('public/images/review.svg') }}"
+                    alt="Case Managers" />Case Managers</a>
         </li>
         <li class="{{ request()->is('admin/patients') ? 'active' : '' }}">
             <a href="{{ route('admin.patients') }}"><img
@@ -90,36 +78,19 @@
                     <span class="title">Applications</span>
                 </a>
             </li>
-            <li class="{{ request()->is('admin/program-registration-requests*') ? 'hovered' : '' }}">
-                <a href="{{ route('admin.program_registrations.index') }}">
+            <li class="{{ request()->is('admin/registrations*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.registrations.index') }}">
                     <span class="icon"><img
-                            src="{{ request()->is('admin/program-registration-requests*') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
-                            class="w-5 h-5" /></span>
-                    <span class="title">Program Registrations</span>
+                            src="{{ request()->is('admin/registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
+                            class="w-5 h-5" alt="Registrations" /></span>
+                    <span class="title">Registrations</span>
                 </a>
             </li>
-            <li class="{{ request()->is('admin/events-registrations*') ? 'hovered' : '' }}">
-                <a href="{{ route('events.registrations.index') }}">
-                    <span class="icon">
-                        <img src="{{ asset('public/images/Calender.svg') }}"
-                             class="w-5 h-5 {{ request()->is('admin/events-registrations*') ? '' : 'filter invert brightness-0' }}" />
-                    </span>
-                    <span class="title">Event Registrations</span>
-                </a>
-            </li>
-            <li class="{{ request()->is('admin/reviewers') ? 'hovered' : '' }}">
+            <li class="{{ request()->is('admin/reviewers*') ? 'hovered' : '' }}">
                 <a href="{{ route('admin.reviewers') }}">
                     <span class="icon"><img
-                            src="{{ request()->is('admin/reviewers') ? asset('public/images/patient-pink.svg') : asset('public/images/patient.svg') }}"
-                            class="w-5 h-5" /></span>
-                    <span class="title">Reviewers</span>
-                </a>
-            </li>
-            <li class="{{ request()->is('admin/case-managers*') ? 'hovered' : '' }}">
-                <a href="{{ route('admin.case-managers.index') }}">
-                    <span class="icon"><img
-                            src="{{ request()->is('admin/case-managers*') ? asset('public/images/patient-pink.svg') : asset('public/images/patient.svg') }}"
-                            class="w-5 h-5" /></span>
+                            src="{{ request()->is('admin/reviewers*') ? asset('public/images/review-pink.svg') : asset('public/images/review.svg') }}"
+                            class="w-5 h-5" alt="Case Managers" /></span>
                     <span class="title">Case Managers</span>
                 </a>
             </li>

@@ -114,6 +114,10 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::put('/reviewers/{id}', [AdminController::class, 'updateReviewer'])->name('admin.reviewers.update');
     Route::get('/reviewers/unassigned-applications', [AdminController::class, 'getUnassignedApplications']);
 
+    // Unified Registrations (combines Program and Event registrations)
+    Route::get('/registrations', [AdminController::class, 'registrations'])->name('admin.registrations.index');
+
+    // Legacy routes (kept for backward compatibility)
     Route::get('/program-registration-requests', [AdminProgramRegistrationController::class, 'index'])->name('admin.program_registrations.index');
     Route::get('/program-registration-requests/{registration}', [AdminProgramRegistrationController::class, 'show'])->name('admin.program_registrations.show');
     Route::post('/program-registration-requests/{registration}/approve', [AdminProgramRegistrationController::class, 'approve'])->name('admin.program_registrations.approve');

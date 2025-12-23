@@ -9,7 +9,15 @@
                 <div
                     class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4 border-b border-[#DCCFD8] pb-4">
                     <div>
-                        <h2 class="text-2xl font-semibold text-[#213430] app-main">Program Registration Requests</h2>
+                        <h2 id="programRegHeading" class="text-2xl font-semibold text-[#213430] app-main">
+                            {{ $selectedStatus === 'approved'
+                                ? 'Approved Program Registrations'
+                                : ($selectedStatus === 'rejected'
+                                    ? 'Rejected Program Registrations'
+                                    : ($selectedStatus === 'all'
+                                        ? 'All Program Registrations'
+                                        : 'Pending Program Registrations')) }}
+                        </h2>
                         <p class="text-sm text-[#91848C] app-text mt-1">
                             Review and manage patient submissions for sponsorship programs.
                         </p>
@@ -24,7 +32,7 @@
 
                 <form method="GET" class="flex flex-col md:flex-row md:items-center gap-3 mb-6">
                     <div class="relative w-full md:w-48">
-                        <select name="status"
+                        <select name="status" id="programRegStatus"
                             class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#91848C] focus:outline-none">
                             <option value="pending" {{ $selectedStatus === 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved
@@ -114,4 +122,24 @@
             </div>
         </div>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const statusSelect = document.getElementById('programRegStatus');
+            const heading = document.getElementById('programRegHeading');
+            const labels = {
+                pending: 'Pending Program Registrations',
+                approved: 'Approved Program Registrations',
+                rejected: 'Rejected Program Registrations',
+                all: 'All Program Registrations'
+            };
+
+            if (statusSelect && heading) {
+                statusSelect.addEventListener('change', () => {
+                    const next = labels[statusSelect.value] || 'Program Registration Requests';
+                    heading.textContent = next;
+                });
+            }
+        });
+    </script>
 @endsection

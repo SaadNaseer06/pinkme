@@ -469,6 +469,11 @@ class AdminController extends Controller
             $query->where('name', 'sponsor');
         })->with(['profile', 'sponsorDetail'])->paginate(20);
 
+        return view('admin.sponsors', compact('sponsors'));
+    }
+
+    public function programsAndEvents()
+    {
         $events = Event::with(['sponsors'])
             ->withCount('sponsors')
             ->withSum('sponsorships as total_raised', 'amount')
@@ -483,7 +488,7 @@ class AdminController extends Controller
             ->orderByDesc('event_time')
             ->get();
 
-        return view('admin.sponsors', compact('sponsors', 'events', 'programs'));
+        return view('admin.programs_events', compact('events', 'programs'));
     }
 
     public function settings()

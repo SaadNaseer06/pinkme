@@ -39,10 +39,15 @@
                     src="{{ request()->is('admin/patients') ? asset('public/images/patient-pink.svg') : asset('public/images/patient.svg') }}"
                     alt="" />Patients</a>
         </li>
-        <li class="{{ request()->is('admin/sponsors') ? 'active' : '' }}">
+        <li class="{{ request()->is('admin/sponsors*') ? 'active' : '' }}">
             <a href="{{ route('admin.sponsors') }}"><img
-                    src="{{ request()->is('admin/sponsors') ? asset('public/images/Sponsor-pink.svg') : asset('public/images/Sponsor.svg') }}"
-                    alt="" />Sponsers & Events</a>
+                    src="{{ request()->is('admin/sponsors*') ? asset('public/images/Sponsor-pink.svg') : asset('public/images/Sponsor.svg') }}"
+                    alt="" />Sponsors</a>
+        </li>
+        <li class="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') || request()->is('admin/events*') || request()->is('admin/events-registrations*') ? 'active' : '' }}">
+            <a href="{{ route('admin.programs-events') }}"><img
+                    src="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') || request()->is('admin/events*') || request()->is('admin/events-registrations*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                    alt="" />Programs & Events</a>
         </li>
         <li class="{{ request()->is('admin/settings') ? 'active' : '' }}">
             <a href="{{ route('admin.settings') }}"><img
@@ -102,12 +107,21 @@
                     <span class="title">Patients</span>
                 </a>
             </li>
-            <li class="{{ request()->is('admin/sponsors') ? 'hovered' : '' }}">
+            <li class="{{ request()->is('admin/sponsors*') ? 'hovered' : '' }}">
                 <a href="{{ route('admin.sponsors') }}">
                     <span class="icon"><img
-                            src="{{ request()->is('admin/sponsors') ? asset('public/images/Sponsor-pink.svg') : asset('public/images/Sponsor.svg') }}"
+                            src="{{ request()->is('admin/sponsors*') ? asset('public/images/Sponsor-pink.svg') : asset('public/images/Sponsor.svg') }}"
                             class="w-5 h-5" /></span>
-                    <span class="title">Sponsors & Events</span>
+                    <span class="title">Sponsors</span>
+                </a>
+            </li>
+            <li
+                class="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') || request()->is('admin/events*') || request()->is('admin/events-registrations*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.programs-events') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') || request()->is('admin/events*') || request()->is('admin/events-registrations*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                            class="w-5 h-5" /></span>
+                    <span class="title">Programs & Events</span>
                 </a>
             </li>
             <li class="{{ request()->is('admin/settings') ? 'hovered' : '' }}">

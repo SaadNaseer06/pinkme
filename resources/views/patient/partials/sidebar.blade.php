@@ -37,6 +37,13 @@
                 Programs & Aids
             </a>
         </li>
+        <li class="{{ request()->routeIs('patient.webinars') ? 'active' : '' }}">
+            <a href="{{ route('patient.webinars') }}">
+                <img src="{{ request()->routeIs('patient.webinars') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                    alt="">
+                Webinars
+            </a>
+        </li>
 
         <li class="{{ request()->routeIs('patient.patientChats') ? 'active' : '' }}">
             <a href="{{ route('patient.patientChats') }}">
@@ -107,6 +114,14 @@
                             src="{{ request()->routeIs('patient.programsAndAids') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
                             alt="" /></span>
                     <span class="title">Programs & Aids</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('patient.webinars') ? 'hovered' : '' }}">
+                <a href="{{ route('patient.webinars') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('patient.webinars') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                            alt="" /></span>
+                    <span class="title">Webinars</span>
                 </a>
             </li>
             <li class="{{ request()->routeIs('patient.patientChats') ? 'hovered' : '' }}">

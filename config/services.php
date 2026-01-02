@@ -41,4 +41,10 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'google_calendar' => [
+        'credentials_path' => null,
+        'credentials_json' => null,
+        'calendar_id' => null,
+    ],
+
 ];

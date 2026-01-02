@@ -10,12 +10,17 @@ use App\Models\Sponsorship;
 use App\Models\SponsorshipProgram;
 use App\Models\Program;
 use App\Models\User;
+use App\Models\Webinar;
+use App\Models\WebinarRegistration;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use App\Mail\WebinarRegistrationConfirmation;
 
 class SponsorController extends Controller
 {
@@ -1009,5 +1014,105 @@ class SponsorController extends Controller
             'confirmedAmount',
             'pendingAmount'
         ));
+    }
+
+    /**
+     * List available webinars for sponsors.
+     */
+    public function webinars()
+    {
+        $user = Auth::user();
+
+        $webinars = Webinar::query()
+            ->whereIn('audience', ['both', 'sponsor'])
+            ->withCount([
+                'registrations as attendee_count' => fn($query) => $query->where('status', 'registered'),
+            ])
+            ->with(['registrations' => fn($query) => $query->where('user_id', $user->id)])
+            ->orderBy('scheduled_at')
+            ->get()
+            ->map(function (Webinar $webinar) {
+                $registration = $webinar->registrations->first();
+                $webinar->current_registration = $registration;
+                $webinar->is_registered = $registration?->isRegistered() ?? false;
+                $webinar->can_join = $webinar->isJoinable();
+                return $webinar;
+            });
+
+        return view('sponsor.webinars', compact('webinars'));
+    }
+
+    /**
+     * Register sponsor for a webinar.
+     */
+    public function joinWebinar(Webinar $webinar)
+    {
+        $user = Auth::user();
+
+        if (!$webinar->isJoinable()) {
+            return back()->with('error', 'Registration for this webinar is closed.');
+        }
+
+        $existing = WebinarRegistration::where('webinar_id', $webinar->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($existing && $existing->isRegistered()) {
+            return back()->with('error', 'You are already registered for this webinar.');
+        }
+
+        WebinarRegistration::updateOrCreate(
+            [
+                'webinar_id' => $webinar->id,
+                'user_id' => $user->id,
+            ],
+            [
+                'status' => 'registered',
+                'role_name' => $user->role->name ?? null,
+                'joined_at' => null,
+            ]
+        );
+
+        $this->sendWebinarRegistrationEmail($webinar, $user);
+
+        return back()->with('success', 'You have joined this webinar.');
+    }
+
+    /**
+     * Cancel sponsor registration for a webinar.
+     */
+    public function cancelWebinar(Webinar $webinar)
+    {
+        $user = Auth::user();
+
+        $registration = WebinarRegistration::where('webinar_id', $webinar->id)
+            ->where('user_id', $user->id)
+            ->where('status', 'registered')
+            ->first();
+
+        if (!$registration) {
+            return back()->with('error', 'No active registration found for this webinar.');
+        }
+
+        if ($webinar->scheduled_at && $webinar->scheduled_at->isPast()) {
+            return back()->with('error', 'Cannot cancel past webinars.');
+        }
+
+        $registration->update(['status' => 'cancelled']);
+
+        return back()->with('success', 'Your webinar registration has been cancelled.');
+    }
+
+    private function sendWebinarRegistrationEmail(Webinar $webinar, $user): void
+    {
+        try {
+            Mail::to($user->email)->send(new WebinarRegistrationConfirmation($webinar, $user));
+        } catch (\Throwable $e) {
+            Log::warning('Failed to send webinar registration email', [
+                'user_id' => $user->id ?? null,
+                'webinar_id' => $webinar->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

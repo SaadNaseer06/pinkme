@@ -85,6 +85,69 @@
         </div>
     </div>
 </header>
+<script>
+    // Profile dropdown toggle
+    function toggleProfileDropdown(e) {
+        e.stopPropagation();
+
+        const wrapper = e.currentTarget.closest(".profileWrapper");
+        const dropdown = wrapper?.querySelector(".profileDropdown");
+        if (!dropdown) {
+            return;
+        }
+
+        // Hide all other dropdowns first
+        document.querySelectorAll(".profileDropdown").forEach((dd) => {
+            if (dd !== dropdown) dd.classList.add("hidden");
+        });
+
+        dropdown.classList.toggle("hidden");
+    }
+
+    document.addEventListener("click", (e) => {
+        document.querySelectorAll(".profileDropdown").forEach((dd) => {
+            const wrapper = dd.closest(".profileWrapper");
+            if (wrapper && !wrapper.contains(e.target)) {
+                dd.classList.add("hidden");
+            }
+        });
+    });
+
+    // Fullscreen toggle
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener("click", () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch((err) => {
+                    console.error(`Error enabling fullscreen: ${err.message} (${err.name})`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+    }
+
+    // Mobile sidebar toggle
+    document.addEventListener("DOMContentLoaded", () => {
+        const mobileSidebar = document.getElementById("mobileSidebar");
+        const hamburgerBtns = document.querySelectorAll(".hamburgerBtn");
+        const closeBtn = document.getElementById("closeBtn");
+
+        if (mobileSidebar && hamburgerBtns.length && closeBtn) {
+            hamburgerBtns.forEach((hamburgerBtn) => {
+                hamburgerBtn.addEventListener("click", () => {
+                    mobileSidebar.classList.add("active");
+                    hamburgerBtns.forEach((btn) => (btn.style.display = "none"));
+                });
+            });
+
+            closeBtn.addEventListener("click", () => {
+                mobileSidebar.classList.remove("active");
+                hamburgerBtns.forEach((btn) => (btn.style.display = "block"));
+            });
+        }
+    });
+</script>
 <header
     class="mt-4 ml-6 mr-6 bg-[#F3E8EF] p-4 flex justify-between items-center rounded-lg overflow-visible tab-head md:hidden tab-header">
 

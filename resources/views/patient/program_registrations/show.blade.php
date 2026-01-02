@@ -238,7 +238,7 @@
             <div class="bg-white/70 rounded-xl p-4 space-y-3">
                 <h2 class="text-lg font-semibold text-[#213430] app-main">Sponsor</h2>
                 <div class="flex items-center gap-3">
-                    <img src="{{ $sponsor->user ? $sponsor->user->avatar_url : asset('public/images/profile.png') }}"
+                    <img src="{{ optional(optional($sponsor)->user)->avatar_url ?? asset('public/images/profile.png') }}"
                         alt="Sponsor logo" class="w-12 h-12 rounded-full object-cover">
                     <div class="text-sm text-[#213430] app-text">
                         <p><span class="font-medium">Name:</span>

@@ -16,6 +16,7 @@
          <li class="{{ request()->routeIs('sponsor.dashboard') ? 'active' : '' }}"><a href="{{ route('sponsor.dashboard') }}"><img src="{{ request()->routeIs('sponsor.dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-Dash.svg') }}"
                      alt="">Dashboard</a></li>
          <li class="{{ request()->routeIs('sponsor.events') ? 'active' : '' }}"><a href="{{ route('sponsor.events') }}"><img src="{{ request()->routeIs('sponsor.events') ? asset('public/images/Sponsor-pink.svg') : asset('public/images/sponsor.svg') }}" alt="">Events</a></li>
+         <li class="{{ request()->routeIs('sponsor.webinars') ? 'active' : '' }}"><a href="{{ route('sponsor.webinars') }}"><img src="{{ request()->routeIs('sponsor.webinars') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}" alt="">Webinars</a></li>
          <li class="{{ request()->routeIs('sponsor.sponsorships') ? 'active' : '' }}"><a href="{{ route('sponsor.sponsorships') }}"><img src="{{ request()->routeIs('sponsor.sponsorships') ? asset('public/images/Sponsor-pink.svg') : asset('public/images/Sponsor.svg') }}" alt="">Sponsorships</a></li>
          <li class="{{ request()->routeIs('sponsor.becomeASponsor') ? 'active' : '' }}"><a href="{{ route('sponsor.becomeASponsor') }}"><img src="{{ request()->routeIs('sponsor.becomeASponsor') ? asset('public/images/affiliate-pink.svg') : asset('public/images/affiliate.svg') }}" alt=""> Become A Sponsor</a>
          </li>
@@ -44,6 +45,12 @@
                  <a href="{{ route('sponsor.events') }}">
                      <span class="icon"><img src="{{ request()->routeIs('sponsor.events') ? asset('public/images/Sponsor-pink.svg') : asset('public/images/sponsor.svg') }}" alt="" /></span>
                      <span class="title">Events</span>
+                 </a>
+             </li>
+             <li class="{{ request()->routeIs('sponsor.webinars') ? 'hovered' : '' }}">
+                 <a href="{{ route('sponsor.webinars') }}">
+                     <span class="icon"><img src="{{ request()->routeIs('sponsor.webinars') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}" alt="" /></span>
+                     <span class="title">Webinars</span>
                  </a>
              </li>
              <li class="{{ request()->routeIs('sponsor.sponsorships') ? 'hovered' : '' }}">

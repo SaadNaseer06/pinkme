@@ -80,6 +80,23 @@ class User extends Authenticatable
         return $this->hasMany(Application::class, 'reviewer_id');
     }
 
+    public function webinarRegistrations()
+    {
+        return $this->hasMany(WebinarRegistration::class);
+    }
+
+    public function webinars()
+    {
+        return $this->belongsToMany(Webinar::class, 'webinar_registrations')
+            ->withPivot(['status', 'role_name', 'joined_at'])
+            ->withTimestamps();
+    }
+
+    public function createdWebinars()
+    {
+        return $this->hasMany(Webinar::class, 'created_by');
+    }
+
     public function scopeReviewers($query)
     {
         return $query->whereHas('profile')

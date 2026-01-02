@@ -27,6 +27,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProgramRegistrationController;
+use App\Http\Controllers\WebinarController;
 use App\Models\Application;
 use App\Models\Program;
 
@@ -136,6 +137,8 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
 
     // Events (table: events) + attach funding programs (pivot: event_sponsorships)
     Route::resource('events', EventController::class);
+    // Webinars (table: webinars) + registrations (table: webinar_registrations)
+    Route::resource('webinars', WebinarController::class)->names('admin.webinars');
 
     // Event registration management
     Route::get('events-registrations', [EventController::class, 'registrations'])->name('events.registrations.index');
@@ -204,6 +207,11 @@ Route::prefix('sponsor')->middleware(['role.restrict'])->group(function () {
     Route::delete('/events/{event}/cancel', [SponsorController::class, 'cancelEventRegistration'])->name('sponsor.events.cancel');
     Route::get('/my-event-registrations', [SponsorController::class, 'myEventRegistrations'])->name('sponsor.events.my-registrations');
 
+    // Webinars
+    Route::get('/webinars', [SponsorController::class, 'webinars'])->name('sponsor.webinars');
+    Route::post('/webinars/{webinar}/register', [SponsorController::class, 'joinWebinar'])->name('sponsor.webinars.register');
+    Route::delete('/webinars/{webinar}/cancel', [SponsorController::class, 'cancelWebinar'])->name('sponsor.webinars.cancel');
+
     Route::get('/reviews', [SponsorController::class, 'reviews'])->name('sponsor.reviews');
     Route::post('/reviews', [SponsorController::class, 'storeReview'])->name('sponsor.reviews.store');
     Route::get('/payment', [SponsorController::class, 'payment'])->name('sponsor.payment');
@@ -260,4 +268,9 @@ Route::prefix('patient')->middleware(['role.restrict'])->group(function () {
     Route::post('/store-application', [ApplicationController::class, 'storeApplication'])->name('patient.storeApplication');
     Route::post('/program/register', [ProgramRegistrationController::class, 'store'])->name('program.register');
     Route::get('/program-registrations/{registration}', [ProgramRegistrationController::class, 'show'])->name('patient.programRegistrations.show');
+
+    // Webinars
+    Route::get('/webinars', [PatientController::class, 'webinars'])->name('patient.webinars');
+    Route::post('/webinars/{webinar}/register', [PatientController::class, 'joinWebinar'])->name('patient.webinars.register');
+    Route::delete('/webinars/{webinar}/cancel', [PatientController::class, 'cancelWebinar'])->name('patient.webinars.cancel');
 });

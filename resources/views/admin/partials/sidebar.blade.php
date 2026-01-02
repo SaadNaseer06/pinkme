@@ -49,6 +49,11 @@
                     src="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') || request()->is('admin/events*') || request()->is('admin/events-registrations*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
                     alt="" />Programs & Events</a>
         </li>
+        <li class="{{ request()->is('admin/webinars*') ? 'active' : '' }}">
+            <a href="{{ route('admin.webinars.index') }}"><img
+                    src="{{ request()->is('admin/webinars*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                    alt="" />Webinars</a>
+        </li>
         <li class="{{ request()->is('admin/settings') ? 'active' : '' }}">
             <a href="{{ route('admin.settings') }}"><img
                     src="{{ request()->is('admin/settings') ? asset('public/images/setting-pink.svg') : asset('public/images/setting.svg') }}"
@@ -122,6 +127,14 @@
                             src="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') || request()->is('admin/events*') || request()->is('admin/events-registrations*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
                             class="w-5 h-5" /></span>
                     <span class="title">Programs & Events</span>
+                </a>
+            </li>
+            <li class="{{ request()->is('admin/webinars*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.webinars.index') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/webinars*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                            class="w-5 h-5" /></span>
+                    <span class="title">Webinars</span>
                 </a>
             </li>
             <li class="{{ request()->is('admin/settings') ? 'hovered' : '' }}">

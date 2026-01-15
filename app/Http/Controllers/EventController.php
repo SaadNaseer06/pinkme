@@ -54,12 +54,11 @@ class EventController extends Controller
         $data = $r->validate([
             'title'                 => ['required', 'string', 'max:255'],
             'description'           => ['nullable', 'string'],
-            'date'                  => ['required', 'date'],
+            'start_date'            => ['required', 'date'],
+            'end_date'              => ['nullable', 'date', 'after_or_equal:start_date'],
             'location'              => ['nullable', 'string', 'max:255'],
             'funding_goal'          => ['nullable', 'numeric', 'min:0'],
-            'status'                => ['required', 'in:upcoming,ongoing,completed,cancelled'],
             'event_highlights'      => ['nullable', 'string'],
-            'registration_deadline' => ['nullable', 'date', 'before:date'],
             'image'                 => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             
             // optional initial sponsorship
@@ -73,16 +72,18 @@ class EventController extends Controller
             $imagePath = $r->file('image')->store('events', 'public');
         }
 
+        $status = $this->resolveEventStatus(null, $data['start_date'], $data['end_date'] ?? null);
+
         $event = Event::create([
             'title'                 => $data['title'],
             'description'           => $data['description'] ?? null,
-            'date'                  => $data['date'],
+            'date'                  => $data['start_date'],
             'location'              => $data['location'] ?? null,
             'funding_goal'          => $data['funding_goal'] ?? null,
-            'status'                => $data['status'],
+            'status'                => $status,
             'event_highlights'      => $data['event_highlights'] ?? null,
             'image'                 => $imagePath,
-            'registration_deadline' => $data['registration_deadline'] ?? null,
+            'registration_deadline' => $data['end_date'] ?? null,
         ]);
 
         if (!empty($data['sponsor_id']) && !empty($data['amount'])) {
@@ -103,12 +104,12 @@ class EventController extends Controller
         $data = $r->validate([
             'title'                 => ['required', 'string', 'max:255'],
             'description'           => ['nullable', 'string'],
-            'date'                  => ['required', 'date'],
+            'start_date'            => ['required', 'date'],
+            'end_date'              => ['nullable', 'date', 'after_or_equal:start_date'],
             'location'              => ['nullable', 'string', 'max:255'],
             'funding_goal'          => ['nullable', 'numeric', 'min:0'],
-            'status'                => ['required', 'in:upcoming,ongoing,completed,cancelled'],
+            'status'                => ['nullable', 'in:cancelled'],
             'event_highlights'      => ['nullable', 'string'],
-            'registration_deadline' => ['nullable', 'date', 'before:date'],
             'image'                 => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             
             // optional additional sponsorship
@@ -116,16 +117,18 @@ class EventController extends Controller
             'amount'                => ['nullable', 'numeric', 'min:0.01'],
         ]);
 
+        $status = $this->resolveEventStatus($data['status'] ?? null, $data['start_date'], $data['end_date'] ?? null);
+
         // Handle image upload
         $updateData = [
             'title'                 => $data['title'],
             'description'           => $data['description'] ?? null,
-            'date'                  => $data['date'],
+            'date'                  => $data['start_date'],
             'location'              => $data['location'] ?? null,
             'funding_goal'          => $data['funding_goal'] ?? null,
-            'status'                => $data['status'],
+            'status'                => $status,
             'event_highlights'      => $data['event_highlights'] ?? null,
-            'registration_deadline' => $data['registration_deadline'] ?? null,
+            'registration_deadline' => $data['end_date'] ?? null,
         ];
 
         if ($r->hasFile('image')) {
@@ -196,6 +199,30 @@ class EventController extends Controller
             }
         }
         return 'email'; // guaranteed to exist
+    }
+
+    private function resolveEventStatus(?string $forcedStatus, ?string $startDate, ?string $endDate): string
+    {
+        if ($forcedStatus === 'cancelled') {
+            return 'cancelled';
+        }
+
+        $start = $startDate ? \Carbon\Carbon::parse($startDate) : null;
+        $end = $endDate ? \Carbon\Carbon::parse($endDate) : $start;
+
+        if (!$start) {
+            return 'upcoming';
+        }
+
+        if (now()->lt($start)) {
+            return 'upcoming';
+        }
+
+        if ($end && now()->gt($end)) {
+            return 'completed';
+        }
+
+        return 'ongoing';
     }
     
     /**

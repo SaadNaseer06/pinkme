@@ -12,7 +12,6 @@ class ProgramRegistrationController extends Controller
 {
     public function store(Request $request)
     {
-        $programOptions = ['breast_cancer_treatment', 'mastectomy_wellness', 'pinkme_food_hunger'];
         $quarterOptions = ['q1', 'q2', 'q3', 'q4'];
         $incomeOptions = ['employed', 'self_employed', 'disabled', 'retired', 'student'];
         $authorizationOptions = ['full_name', 'story_anonymous', 'story_full', 'photos', 'contact_details'];
@@ -29,9 +28,9 @@ class ProgramRegistrationController extends Controller
             'medical_condition' => 'nullable|string|max:1000',
             'assistance_type' => 'nullable|string|max:255',
             'justification' => 'nullable|string|max:1000',
-            'quarter' => 'required|string|in:' . implode(',', $quarterOptions),
+            'quarter' => 'nullable|string|in:' . implode(',', $quarterOptions),
             'programs_applied' => 'required|array|min:1',
-            'programs_applied.*' => 'in:' . implode(',', $programOptions),
+            'programs_applied.*' => 'string|max:255',
             'active_treatment' => 'required|boolean',
             'pregnant' => 'required|boolean',
             'family_history' => 'nullable|string|max:500',

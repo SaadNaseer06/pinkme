@@ -58,7 +58,7 @@
                     <h1 class="text-lg font-semibold text-gray-800 app-text ">
                         All Applications
                     </h1>
-                    <h2 class="text-md text-gray-400 app-text">{{ $totalApplications }}</h2>
+                    <h2 class="text-md text-gray-400 app-text">{{ $totalRegistrations }}</h2>
                 </div>
             </div>
             <!--- Box 2 -->
@@ -68,7 +68,7 @@
                     <h1 class="text-lg font-semibold text-gray-800 app-text">
                         Pending Applications
                     </h1>
-                    <h2 class="text-md text-gray-400 app-text">{{ $pendingApplications }}</h2>
+                    <h2 class="text-md text-gray-400 app-text">{{ $pendingRegistrations }}</h2>
                 </div>
             </div>
             <!--- Box 3 -->
@@ -78,7 +78,7 @@
                     <h1 class="text-lg font-semibold text-gray-800 app-text">
                         Approved Applications
                     </h1>
-                    <h2 class="text-md text-gray-400 app-text">{{ $approvedApplications }}</h2>
+                    <h2 class="text-md text-gray-400 app-text">{{ $approvedRegistrations }}</h2>
                 </div>
             </div>
             <!--- Box 4 -->
@@ -88,7 +88,7 @@
                     <h1 class="text-lg font-semibold text-gray-800 app-text">
                         Rejected Applications
                     </h1>
-                    <h2 class="text-md text-gray-400 app-text">{{ $rejectedApplications }}</h2>
+                    <h2 class="text-md text-gray-400 app-text">{{ $rejectedRegistrations }}</h2>
                 </div>
             </div>
         </div>
@@ -115,13 +115,13 @@
 
                     <button
                         class="bg-[#F1C7DE] text-pink-800 px-4 py-2 rounded-md text-lg font-medium app-text md:hidden flex icon-text"
-                        onclick="window.location='{{ route('patient.createApplication') }}'">
+                        onclick="window.location='{{ route('patient.programsAndAids') }}'">
                         +
                     </button>
                     <button
-                        onclick="this.innerHTML='Please wait...'; window.location='{{ route('patient.createApplication') }}'"
+                        onclick="this.innerHTML='Please wait...'; window.location='{{ route('patient.programsAndAids') }}'"
                         class="bg-[#F1C7DE] text-pink-800 px-8 py-2 rounded-md text-sm font-medium app-text md:flex hidden items-center justify-center">
-                        + Add New
+                        Browse Programs
                     </button>
                     <div class="flex items-center space-x-1 bg-pink-500 px-4 py-2 rounded-md md:hidden flex">
                         <img src="{{ asset('public/images/export.svg') }}" alt="" />
@@ -155,7 +155,7 @@
                         </tr>
                     </thead>
                     <tbody class="text-gray-700">
-                        @forelse($applications as $application)
+                        @forelse($registrations as $registration)
                             <tr class="border-t border-[#e0cfd8]">
                                 <!--<td class="p-2">-->
                                 <!--    <input type="checkbox"-->
@@ -166,52 +166,35 @@
                                         <!--<img src="{{ asset('public/images/profile-1.png') }}" alt=""-->
                                         <!--    class="w-8 h-8 rounded-full" />-->
                                         <span
-                                            class="text-[#91848C] text-[16px] font-light app-text">{{ $application->title }}</span>
+                                            class="text-[#91848C] text-[16px] font-light app-text">{{ $registration->program->title ?? 'N/A' }}</span>
                                     </div>
                                 </td>
                                 <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text pad-left">
-                                    APP-{{ str_pad($application->id, 5, '0', STR_PAD_LEFT) }}
+                                    APP-{{ str_pad($registration->id, 5, '0', STR_PAD_LEFT) }}
                                 </td>
                                 <td class="p-2 align-middle">
                                     @php
-                                        $status = $application->status;
+                                        $status = strtolower((string) $registration->status);
                                         $statusClasses = [
-                                            'Approved' => 'bg-[#C5E8D1] text-[#20B354]',
-                                            'Rejected' => 'bg-[#E8C5C5] text-[#B32020]',
-                                            'Pending' => 'bg-[#E4D7DF] text-[#91848C]',
-                                            'Under Review' => 'bg-[#E4D7DF] text-[#91848C]',
+                                            'approved' => 'bg-[#C5E8D1] text-[#20B354]',
+                                            'rejected' => 'bg-[#E8C5C5] text-[#B32020]',
+                                            'pending' => 'bg-[#E4D7DF] text-[#91848C]',
                                         ];
-
-                                        // New: Check for missing document requests
-                                        $hasMissingDocRequest = $application->missingRequests->isNotEmpty();
                                     @endphp
 
-                                    @if ($hasMissingDocRequest)
-                                        {{-- Custom badge if missing docs are requested --}}
-                                        <span
-                                            class="bg-[#FFF2CC] text-[#D9980D] text-[16px] font-light px-4 py-2 rounded-sm text-xs font-medium app-text">
-                                            Missing Docs Requested
-                                        </span>
-                                    @else
-                                        <span
-                                            class="{{ $statusClasses[$status] ?? 'bg-gray-200 text-gray-700' }} text-[16px] font-light px-4 py-2 rounded-sm text-xs font-medium app-text">
-                                            {{ $status }}
-                                        </span>
-                                    @endif
+                                    <span
+                                        class="{{ $statusClasses[$status] ?? 'bg-gray-200 text-gray-700' }} text-[16px] font-light px-4 py-2 rounded-sm text-xs font-medium app-text">
+                                        {{ ucfirst($status ?: 'pending') }}
+                                    </span>
                                 </td>
                                 <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
-                                    {{ $application->patient->user->email ?? 'N/A' }}
+                                    {{ $registration->email ?? 'N/A' }}
                                 </td>
                                 <td class="p-2">
                                     <div class="flex items-center gap-2">
                                         <button class="bg-[#E4D7DF] px-4 py-2 rounded">
-                                            <a href="{{ route('patient.viewApplication', $application->id) }}">
+                                            <a href="{{ route('patient.programRegistrations.show', $registration) }}">
                                                 <i class="fas fa-eye text-[#91848C]"></i>
-                                            </a>
-                                        </button>
-                                        <button class="bg-[#F1C7DE] px-4 py-2 rounded">
-                                            <a href="{{ route('patient.editApplication', $application->id) }}">
-                                                <i class="fas fa-pen text-[#DB69A2]"></i>
                                             </a>
                                         </button>
                                         {{-- Delete button (optional, add route/controller if needed) --}}
@@ -237,7 +220,7 @@
             </div>
             <!-- Pagination -->
             <div class="mt-6 flex justify-end">
-                {{ $applications->links() }}
+                {{ $registrations->links() }}
             </div>
         </div>
     </main>

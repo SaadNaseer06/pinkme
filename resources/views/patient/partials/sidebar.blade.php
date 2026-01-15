@@ -22,9 +22,9 @@
         </li>
 
         <li
-            class="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.editApplication') || request()->routeIs('patient.viewApplication') || request()->routeIs('patient.createApplication') ? 'active' : '' }}">
+            class="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.programRegistrations.show') ? 'active' : '' }}">
             <a href="{{ route('patient.myApplication') }}">
-                <img src="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.editApplication') || request()->routeIs('patient.viewApplication') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
+                <img src="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.programRegistrations.show') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
                     alt="">
                 My Applications
             </a>
@@ -99,10 +99,10 @@
                 </a>
             </li>
             <li
-                class="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.editApplication') || request()->routeIs('patient.viewApplication') ? 'hovered' : '' }}">
+                class="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.programRegistrations.show') ? 'hovered' : '' }}">
                 <a href="{{ route('patient.myApplication') }}">
                     <span class="icon">
-                        <img src="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.editApplication') || request()->routeIs('patient.viewApplication') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
+                        <img src="{{ request()->routeIs('patient.myApplication') || request()->routeIs('patient.programRegistrations.show') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
                             alt="" />
                     </span>
                     <span class="title">My Application</span>

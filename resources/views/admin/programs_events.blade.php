@@ -227,6 +227,22 @@
                                                 : ($event->date
                                                     ? \Carbon\Carbon::parse($event->date)
                                                     : null);
+                                        $eventEnd =
+                                            $event->registration_deadline instanceof \Carbon\Carbon
+                                                ? $event->registration_deadline
+                                                : ($event->registration_deadline
+                                                    ? \Carbon\Carbon::parse($event->registration_deadline)
+                                                    : null);
+                                        $eventStatus = $event->status;
+                                        if (!$eventStatus && $eventDate) {
+                                            if (now()->lt($eventDate)) {
+                                                $eventStatus = 'upcoming';
+                                            } elseif ($eventEnd && now()->gt($eventEnd)) {
+                                                $eventStatus = 'completed';
+                                            } else {
+                                                $eventStatus = 'ongoing';
+                                            }
+                                        }
                                         $rawDescription = $event->description ?? '';
                                         $eventDescriptionText = trim(strip_tags($rawDescription));
                                         $eventDescriptionHtml = trim(
@@ -246,7 +262,10 @@
                                             'image' => $eventImage,
                                             'date' => $eventDate ? $eventDate->format('l, F d, Y') : null,
                                             'time' => $eventDate ? $eventDate->format('h:i A') : null,
+                                            'end_date' => $eventEnd ? $eventEnd->format('l, F d, Y') : null,
+                                            'end_time' => $eventEnd ? $eventEnd->format('h:i A') : null,
                                             'location' => $event->location,
+                                            'status' => $eventStatus,
                                             'sponsor_count' =>
                                                 $event->sponsors_count ?? ($event->sponsors?->count() ?? 0),
                                             'total_raised' => $event->total_raised ?? 0,
@@ -397,17 +416,27 @@
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Time</span>
                                         <p class="text-[#213430]" id="detailModalTime">Loading time...</p>
                                     </div>
+                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                        id="detailModalEndDateWrapper" hidden>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">End Date</span>
+                                        <p class="text-[#213430]" id="detailModalEndDate">Loading end date...</p>
+                                    </div>
+                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                        id="detailModalEndTimeWrapper" hidden>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">End Time</span>
+                                        <p class="text-[#213430]" id="detailModalEndTime">Loading end time...</p>
+                                    </div>
                                 </div>
                             </div>
 
                             <div>
                                 <h3 class="text-lg font-medium text-[#213430] mb-3 app-main">At a glance</h3>
                                 <div class="grid gap-3 sm:grid-cols-2" id="detailModalInfoGrid">
-                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                    {{-- <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
                                         id="detailModalLocationWrapper" hidden>
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Location</span>
                                         <p class="text-[#213430]" id="detailModalLocation">&mdash;</p>
-                                    </div>
+                                    </div> --}}
                                     <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
                                         id="detailModalStatusWrapper" hidden>
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Status</span>
@@ -418,14 +447,14 @@
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Payment Type</span>
                                         <p class="text-[#213430]" id="detailModalPayment">&mdash;</p>
                                     </div>
-                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                    {{-- <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
                                         id="detailModalSponsorsWrapper" hidden>
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Sponsors</span>
                                         <p class="text-[#213430]" id="detailModalSponsors">&mdash;</p>
-                                    </div>
+                                    </div> --}}
                                     <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
                                         id="detailModalRegistrationsWrapper" hidden>
-                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Registrations</span>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Patient Registrations</span>
                                         <p class="text-[#213430]" id="detailModalRegistrations">—</p>
                                     </div>
                                 </div>
@@ -526,8 +555,12 @@
 
             const scheduleWrapper = document.getElementById('detailModalScheduleWrapper');
             const timeWrapper = document.getElementById('detailModalTimeWrapper');
+            const endDateWrapper = document.getElementById('detailModalEndDateWrapper');
+            const endTimeWrapper = document.getElementById('detailModalEndTimeWrapper');
             const dateEl = document.getElementById('detailModalDate');
             const timeEl = document.getElementById('detailModalTime');
+            const endDateEl = document.getElementById('detailModalEndDate');
+            const endTimeEl = document.getElementById('detailModalEndTime');
 
             if (date) {
                 dateEl.textContent = date;
@@ -543,6 +576,22 @@
             } else {
                 timeEl.textContent = 'Time not specified';
                 timeWrapper.setAttribute('hidden', 'hidden');
+            }
+
+            if (data.end_date) {
+                endDateEl.textContent = data.end_date;
+                endDateWrapper.removeAttribute('hidden');
+            } else {
+                endDateEl.textContent = 'End date not specified';
+                endDateWrapper.setAttribute('hidden', 'hidden');
+            }
+
+            if (data.end_time) {
+                endTimeEl.textContent = data.end_time;
+                endTimeWrapper.removeAttribute('hidden');
+            } else {
+                endTimeEl.textContent = 'End time not specified';
+                endTimeWrapper.setAttribute('hidden', 'hidden');
             }
 
             const applyValue = (wrapperId, value, formatter) => {

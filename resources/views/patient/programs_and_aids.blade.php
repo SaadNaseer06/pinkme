@@ -194,9 +194,9 @@
     </div>
 
     <!-- Registration Popup Modal -->
-    <div id="popupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start sm:items-center justify-center overflow-y-auto py-6 px-4 hidden">
+    <div id="popupModal" class="fixed inset-0 z-50 hidden flex items-start sm:items-center justify-center bg-black/60 px-4 py-6 overflow-y-auto">
         <!-- Modal Box -->
-        <div class="bg-[#F3E8EF] p-6 rounded-lg w-full max-w-4xl relative overflow-y-auto max-h-[120vh] shadow-lg">
+        <div class="bg-[#F3E8EF] p-6 rounded-lg w-full max-w-4xl relative overflow-y-auto max-h-[90vh] shadow-xl border border-[#DCCFD8]">
 
             <!-- Close Button -->
             <button onclick="document.getElementById('popupModal').classList.add('hidden')"
@@ -212,44 +212,12 @@
                 @csrf
                 <input type="hidden" name="program_id" id="program_id" value="">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 gap-4">
                     <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
-                        <h3 class="text-md font-semibold text-[#213430] app-main">Choose the grant quarter</h3>
-                        <div class="space-y-2 text-sm app-text text-[#213430]">
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="quarter" value="q1" class="text-[#DB69A2]" required>
-                                <span>Quarter One (January thru March)</span>
-                            </label>
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="quarter" value="q2" class="text-[#DB69A2]">
-                                <span>Quarter Two (April thru June)</span>
-                            </label>
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="quarter" value="q3" class="text-[#DB69A2]">
-                                <span>Quarter Three (July thru September)</span>
-                            </label>
-                            <label class="flex items-center gap-2">
-                                <input type="radio" name="quarter" value="q4" class="text-[#DB69A2]">
-                                <span>Quarter Four (October thru December)</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
-                        <h3 class="text-md font-semibold text-[#213430] app-main">Programs you’re applying for</h3>
-                        <div class="space-y-2 text-sm app-text text-[#213430]">
-                            <label class="flex items-start gap-2">
-                                <input type="checkbox" name="programs_applied[]" value="breast_cancer_treatment" class="mt-1 text-[#DB69A2]">
-                                <span>Breast Cancer Treatment Assistance Program (up to $1,500)</span>
-                            </label>
-                            <label class="flex items-start gap-2">
-                                <input type="checkbox" name="programs_applied[]" value="mastectomy_wellness" class="mt-1 text-[#DB69A2]">
-                                <span>Pink Mastectomy and Wellness Assistance Program (up to $4,500)</span>
-                            </label>
-                            <label class="flex items-start gap-2">
-                                <input type="checkbox" name="programs_applied[]" value="pinkme_food_hunger" class="mt-1 text-[#DB69A2]">
-                                <span>PINK “ME” Food & Hunger Grant (groceries or deliveries)</span>
-                            </label>
+                        <h3 class="text-md font-semibold text-[#213430] app-main">Programs you're applying for</h3>
+                        <div class="text-sm app-text text-[#213430]">
+                            <p id="selected-program-name" class="font-medium">�</p>
+                            <input type="hidden" name="programs_applied[]" id="programs_applied_value" value="">
                         </div>
                     </div>
                 </div>
@@ -653,6 +621,7 @@
         }
 
         let currentProgramId = null;
+        let currentProgramTitle = "";
 
         function openModal(id) {
             currentProgramId = id; // Save for use when opening register modal
@@ -666,6 +635,7 @@
                 })
                 .then(res => res.json())
                 .then(data => {
+                    currentProgramTitle = data.title || "";
                     document.querySelector('#registerModal .modal-title').textContent = data.title || '—';
                     document.querySelector('#registerModal .modal-description').textContent = data.description || '—';
                     document.querySelector('#registerModal .modal-date').textContent = data.event_date || '—';
@@ -682,6 +652,14 @@
                     }
 
                     renderCustomFields(data.custom_fields || []);
+                    const selectedProgramName = document.getElementById('selected-program-name');
+                    const selectedProgramValue = document.getElementById('programs_applied_value');
+                    if (selectedProgramName) {
+                        selectedProgramName.textContent = currentProgramTitle || 'N/A';
+                    }
+                    if (selectedProgramValue) {
+                        selectedProgramValue.value = currentProgramTitle || "";
+                    }
                     // Update register button state based on registration history
                     const registerButton = document.getElementById('register-btn');
                     const viewButton = document.getElementById('registration-view-btn');
@@ -749,6 +727,14 @@
         function openRegistrationForm() {
             // set the hidden input value in the popup modal form
             document.getElementById('program_id').value = currentProgramId;
+            const selectedProgramName = document.getElementById('selected-program-name');
+            const selectedProgramValue = document.getElementById('programs_applied_value');
+            if (selectedProgramName) {
+                selectedProgramName.textContent = currentProgramTitle || 'N/A';
+            }
+            if (selectedProgramValue) {
+                selectedProgramValue.value = currentProgramTitle || "";
+            }
 
             // hide details modal, show registration modal
             document.getElementById('registerModal').classList.add('hidden');

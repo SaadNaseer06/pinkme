@@ -11,7 +11,8 @@
     $formAction = $isEdit ? route('events.update', $event) : route('events.store');
     $titleValue = old('title', $isEdit ? $event->title : '');
     $descriptionValue = old('description', $isEdit ? $event->description : '');
-    $dateValue = old('date', $isEdit && $event->date ? $event->date->format('Y-m-d\TH:i') : '');
+    $startDateValue = old('start_date', $isEdit && $event->date ? $event->date->format('Y-m-d\TH:i') : '');
+    $endDateValue = old('end_date', $isEdit && $event->registration_deadline ? $event->registration_deadline->format('Y-m-d\TH:i') : '');
     $locationValue = old('location', $isEdit ? $event->location : '');
     $selectedSponsor = old('sponsor_id', '');
     $hasSponsor = $selectedSponsor !== '' && $selectedSponsor !== null;
@@ -127,12 +128,12 @@
                         <div class="space-y-6 px-6 py-6">
                             <div class="grid gap-6 md:grid-cols-2">
                                 <div>
-                                    <label class="mb-1 block text-sm font-medium text-[#213430]">Date & Time <span
+                                    <label class="mb-1 block text-sm font-medium text-[#213430]">Start Date <span
                                             class="text-[#DB69A2]">*</span></label>
-                                    <input id="event-date" name="date" type="datetime-local" value="{{ $dateValue }}"
+                                    <input id="start-date" name="start_date" type="datetime-local" value="{{ $startDateValue }}"
                                         class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
                                         required>
-                                    @error('date')
+                                    @error('start_date')
                                         <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
                                     @enderror
                                 </div>
@@ -162,15 +163,14 @@
                                         <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
                                     @enderror
                                 </div>
+                                @if ($isEdit)
                                 <div>
                                     <label class="mb-1 block text-sm font-medium text-[#213430]">Event Status</label>
                                     <div class="relative">
                                         <select name="status"
                                             class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
-                                            <option value="upcoming" @selected(old('status', $isEdit ? $event->status : 'upcoming') == 'upcoming')>Upcoming</option>
-                                            <option value="ongoing" @selected(old('status', $isEdit ? $event->status : '') == 'ongoing')>Ongoing</option>
-                                            <option value="completed" @selected(old('status', $isEdit ? $event->status : '') == 'completed')>Completed</option>
-                                            <option value="cancelled" @selected(old('status', $isEdit ? $event->status : '') == 'cancelled')>Cancelled</option>
+                                            <option value="" @selected(old('status', $event->status) != 'cancelled')>Auto (based on dates)</option>
+                                            <option value="cancelled" @selected(old('status', $event->status) == 'cancelled')>Cancelled</option>
                                         </select>
                                         <span
                                             class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[#91848C]">
@@ -185,18 +185,17 @@
                                         <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
                                     @enderror
                                 </div>
-                            </div>
+                                @endif
 
                             <div>
-                                <label class="mb-1 block text-sm font-medium text-[#213430]">Registration Deadline</label>
-                                <input id="registration-deadline" name="registration_deadline" type="datetime-local"
-                                    value="{{ old('registration_deadline', $isEdit && $event->registration_deadline ? $event->registration_deadline->format('Y-m-d\TH:i') : '') }}"
+                                <label class="mb-1 block text-sm font-medium text-[#213430]">Event End Date</label>
+                                <input id="end-date" name="end_date" type="datetime-local"
+                                    value="{{ $endDateValue }}"
                                     class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
-                                @error('registration_deadline')
+                                @error('end_date')
                                     <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
                                 @enderror
-                                <p id="deadline-error" class="mt-1 text-xs text-[#DB69A2] hidden">Registration deadline
-                                    must be before the event date</p>
+                                <p id="end-date-error" class="mt-1 text-xs text-[#DB69A2] hidden">End date must be after the start date</p>
                             </div>
 
                             <div>
@@ -210,8 +209,7 @@
                             </div>
 
                             <div class="rounded-xl bg-[#FDF7FB] px-4 py-3 text-xs text-[#6C5B68]">
-                                Registration deadline should be before the event date to allow proper planning. Leave blank
-                                for no deadline.
+                                End date should be after the start date. Leave blank if the event is a single-day session.
                             </div>
                         </div>
                     </section>
@@ -403,64 +401,57 @@
                 });
             }
 
-            // Date validation: Registration deadline must be before event date
-            var eventDateInput = document.getElementById('event-date');
-            var registrationDeadlineInput = document.getElementById('registration-deadline');
-            var deadlineError = document.getElementById('deadline-error');
+            // Date validation: End date must be after the start date
+            var eventDateInput = document.getElementById('start-date');
+            var endDateInput = document.getElementById('end-date');
+            var endDateError = document.getElementById('end-date-error');
             var form = document.getElementById('create-event-form');
 
             function validateDates() {
-                if (!eventDateInput || !registrationDeadlineInput || !deadlineError) {
+                if (!eventDateInput || !endDateInput || !endDateError) {
                     return true;
                 }
 
-                var eventDate = eventDateInput.value;
-                var registrationDeadline = registrationDeadlineInput.value;
+                var startDate = eventDateInput.value;
+                var endDate = endDateInput.value;
 
-                // If registration deadline is empty, it's valid (optional field)
-                if (!registrationDeadline) {
-                    deadlineError.classList.add('hidden');
-                    registrationDeadlineInput.classList.remove('border-[#DB69A2]');
+                if (!endDate) {
+                    endDateError.classList.add('hidden');
+                    endDateInput.classList.remove('border-[#DB69A2]');
                     return true;
                 }
 
-                // If event date is empty, we can't validate
-                if (!eventDate) {
+                if (!startDate) {
                     return true;
                 }
 
-                // Compare dates
-                if (new Date(registrationDeadline) >= new Date(eventDate)) {
-                    deadlineError.classList.remove('hidden');
-                    registrationDeadlineInput.classList.add('border-[#DB69A2]');
+                if (new Date(endDate) < new Date(startDate)) {
+                    endDateError.classList.remove('hidden');
+                    endDateInput.classList.add('border-[#DB69A2]');
                     return false;
-                } else {
-                    deadlineError.classList.add('hidden');
-                    registrationDeadlineInput.classList.remove('border-[#DB69A2]');
-                    return true;
                 }
+
+                endDateError.classList.add('hidden');
+                endDateInput.classList.remove('border-[#DB69A2]');
+                return true;
             }
 
-            // Validate on input change
             if (eventDateInput) {
                 eventDateInput.addEventListener('change', validateDates);
                 eventDateInput.addEventListener('input', validateDates);
             }
 
-            if (registrationDeadlineInput) {
-                registrationDeadlineInput.addEventListener('change', validateDates);
-                registrationDeadlineInput.addEventListener('input', validateDates);
+            if (endDateInput) {
+                endDateInput.addEventListener('change', validateDates);
+                endDateInput.addEventListener('input', validateDates);
             }
 
-            // Validate on form submit
             if (form) {
                 form.addEventListener('submit', function(e) {
                     if (!validateDates()) {
                         e.preventDefault();
-                        registrationDeadlineInput.focus();
-
-                        // Scroll to the error
-                        registrationDeadlineInput.scrollIntoView({
+                        endDateInput.focus();
+                        endDateInput.scrollIntoView({
                             behavior: 'smooth',
                             block: 'center'
                         });
@@ -468,7 +459,6 @@
                 });
             }
 
-            // Set minimum date for event date (current date/time)
             if (eventDateInput) {
                 var now = new Date();
                 var year = now.getFullYear();
@@ -478,42 +468,23 @@
                 var minutes = String(now.getMinutes()).padStart(2, '0');
                 var minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
                 eventDateInput.setAttribute('min', minDateTime);
-
-                // Also set min for registration deadline (can't be in the past)
-                if (registrationDeadlineInput) {
-                    registrationDeadlineInput.setAttribute('min', minDateTime);
-                }
             }
 
-            // Set max date for registration deadline based on event date
-            if (eventDateInput && registrationDeadlineInput) {
-                var updateDeadlineLimits = function() {
-                    var eventDateValue = eventDateInput.value;
-
-                    if (eventDateValue) {
-                        // Set max to event date
-                        registrationDeadlineInput.setAttribute('max', eventDateValue);
-
-                        // If registration deadline is already set and is after event date, clear it
-                        var currentDeadline = registrationDeadlineInput.value;
-                        if (currentDeadline && new Date(currentDeadline) >= new Date(eventDateValue)) {
-                            registrationDeadlineInput.value = '';
-                            deadlineError.classList.remove('hidden');
-                            setTimeout(function() {
-                                deadlineError.classList.add('hidden');
-                            }, 3000);
-                        }
+            if (eventDateInput && endDateInput) {
+                var updateEndDateMin = function() {
+                    var startDateValue = eventDateInput.value;
+                    if (startDateValue) {
+                        endDateInput.setAttribute('min', startDateValue);
                     } else {
-                        registrationDeadlineInput.removeAttribute('max');
+                        endDateInput.removeAttribute('min');
                     }
                 };
 
-                eventDateInput.addEventListener('change', updateDeadlineLimits);
-                eventDateInput.addEventListener('input', updateDeadlineLimits);
+                eventDateInput.addEventListener('change', updateEndDateMin);
+                eventDateInput.addEventListener('input', updateEndDateMin);
 
-                // Set initial max if event date already has value
                 if (eventDateInput.value) {
-                    updateDeadlineLimits();
+                    updateEndDateMin();
                 }
             }
         });

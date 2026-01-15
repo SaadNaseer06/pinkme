@@ -17,11 +17,11 @@
                     src="{{ request()->is('admin/dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-Dash.svg') }}"
                     alt="" />Dashboard</a>
         </li>
-        <li class="{{ request()->is('admin/applications') ? 'active' : '' }}">
+        {{-- <li class="{{ request()->is('admin/applications') ? 'active' : '' }}">
             <a href="{{ route('admin.applications') }}"><img
                     src="{{ request()->is('admin/applications') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
                     alt="" />Applications</a>
-        </li>
+        </li> --}}
         <li class="{{ request()->is('admin/registrations*') ? 'active' : '' }}">
             <a href="{{ route('admin.registrations.index') }}">
                 <img src="{{ request()->is('admin/registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
@@ -76,7 +76,7 @@
                     <span class="title">Dashboard</span>
                 </a>
             </li>
-            <li
+            {{-- <li
                 class="{{ request()->is('admin/applications*') || request()->routeIs('admin.viewApplication') ? 'hovered' : '' }}">
                 <a href="{{ route('admin.applications') }}">
                     <span class="icon">
@@ -87,7 +87,7 @@
                     </span>
                     <span class="title">Applications</span>
                 </a>
-            </li>
+            </li> --}}
             <li class="{{ request()->is('admin/registrations*') ? 'hovered' : '' }}">
                 <a href="{{ route('admin.registrations.index') }}">
                     <span class="icon"><img

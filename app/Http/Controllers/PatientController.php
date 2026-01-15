@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Application;
+use App\Models\ProgramRegistration;
 use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\SponsorshipProgram;
@@ -98,23 +99,25 @@ class PatientController extends Controller
     public function myApplications()
     {
         $user = Auth::user();
-        $patient = Patient::where('user_id', $user->id)->first();
 
-        if (!$patient) {
-            $patient = Patient::create(['user_id' => $user->id]);
-        }
+        $baseQuery = ProgramRegistration::where('user_id', $user->id)->with('program');
 
-        $applications = Application::where('patient_id', $patient->id)
-            ->with(['program', 'reviewer.profile', 'documents'])
-            ->orderBy('submission_date', 'desc')
+        $registrations = (clone $baseQuery)
+            ->orderByDesc('created_at')
             ->paginate(10);
 
-        $totalApplications = $applications->count();
-        $pendingApplications = $applications->where('status', 'Pending')->count();
-        $approvedApplications = $applications->where('status', 'Approved')->count();
-        $rejectedApplications = $applications->where('status', 'Rejected')->count();
+        $totalRegistrations = (clone $baseQuery)->count();
+        $pendingRegistrations = (clone $baseQuery)->where('status', ProgramRegistration::STATUS_PENDING)->count();
+        $approvedRegistrations = (clone $baseQuery)->where('status', ProgramRegistration::STATUS_APPROVED)->count();
+        $rejectedRegistrations = (clone $baseQuery)->where('status', ProgramRegistration::STATUS_REJECTED)->count();
 
-        return view('patient.my_application', compact('applications', 'totalApplications', 'pendingApplications', 'approvedApplications', 'rejectedApplications'));
+        return view('patient.my_application', compact(
+            'registrations',
+            'totalRegistrations',
+            'pendingRegistrations',
+            'approvedRegistrations',
+            'rejectedRegistrations'
+        ));
     }
 
     public function programsAndAids()

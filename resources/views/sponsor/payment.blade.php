@@ -10,8 +10,8 @@
                     <h1 class="text-2xl font-semibold text-[#213430]">Payment History</h1>
                     <p class="text-sm text-[#91848C]">Track and manage your sponsorship contributions here.</p>
                 </div>
-                <a href="{{ route('sponsor.becomeASponsor') }}" class="inline-flex items-center justify-center rounded-lg bg-[#DB69A2] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#C4568E]">
-                    Sponsor A Program
+                <a href="{{ route('sponsor.events') }}" class="inline-flex items-center justify-center rounded-lg bg-[#DB69A2] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#C4568E]">
+                    Sponsor An Event
                 </a>
             </div>
 
@@ -21,7 +21,7 @@
                     <p class="mt-2 text-2xl font-semibold text-[#DB69A2]">${{ number_format($totals['total_amount'], 2) }}</p>
                 </div>
                 <div class="rounded-2xl border border-[#E5CADB] bg-white px-5 py-4 shadow-sm">
-                    <p class="text-xs uppercase tracking-wide text-[#91848C]">Programs Sponsored</p>
+                    <p class="text-xs uppercase tracking-wide text-[#91848C]">Events Sponsored</p>
                     <p class="mt-2 text-2xl font-semibold text-[#213430]">{{ number_format($totals['programs_supported']) }}</p>
                 </div>
                 <div class="rounded-2xl border border-[#E5CADB] bg-white px-5 py-4 shadow-sm">
@@ -83,7 +83,7 @@
                     <table class="min-w-full divide-y divide-[#E5CADB]">
                         <thead class="bg-[#F9EFF5] text-xs uppercase tracking-wide text-[#91848C]">
                             <tr>
-                                <th class="px-5 py-3 text-left">Program</th>
+                                <th class="px-5 py-3 text-left">Event</th>
                                 <th class="px-5 py-3 text-left">Date</th>
                                 <th class="px-5 py-3 text-left">Amount</th>
                                 <th class="px-5 py-3 text-left">Funding Record</th>
@@ -92,21 +92,17 @@
                         <tbody class="divide-y divide-[#F1DCE8] text-sm text-[#213430]">
                             @forelse ($payments as $payment)
                                 @php
-                                    $programModel = $payment->program ?? $payment->sponsorshipProgram;
-                                    $programTitle = optional($programModel)->title ?? 'Program';
-                                    if ($payment->program && $payment->program->program_fund) {
-                                        $fundingSummary = 'Program fund: $' . number_format((float) $payment->program->program_fund, 2);
-                                    } elseif ($payment->sponsorshipProgram) {
-                                        $goalAmount = (float) ($payment->sponsorshipProgram->goal_amount ?? 0);
-                                        $raisedAmount = (float) ($payment->sponsorshipProgram->raised_amount ?? 0);
-                                        $fundingSummary = 'Goal: $' . number_format($goalAmount, 2) . ' | Raised: $' . number_format($raisedAmount, 2);
-                                    } else {
-                                        $fundingSummary = 'One-time contribution';
-                                    }
+                                    $eventTitle = optional($payment->event)->title ?? 'Event';
+                                    $goalAmount = (float) ($payment->event?->funding_goal ?? 0);
+                                    $raisedAmount = (float) ($payment->event?->confirmed_sponsorship_total ?? 0);
+                                    $fundingSummary = $goalAmount > 0
+                                        ? 'Goal: $' . number_format($goalAmount, 2) . ' | Raised: $' . number_format($raisedAmount, 2)
+                                        : 'One-time contribution';
+                                    $paymentDate = $payment->registered_at ?? $payment->created_at;
                                 @endphp
                                 <tr class="hover:bg-[#FDF4FA] transition">
-                                    <td class="px-5 py-4 font-medium">{{ $programTitle }}</td>
-                                    <td class="px-5 py-4">{{ \Carbon\Carbon::parse($payment->date)->format('M d, Y') }}</td>
+                                    <td class="px-5 py-4 font-medium">{{ $eventTitle }}</td>
+                                    <td class="px-5 py-4">{{ $paymentDate ? \Carbon\Carbon::parse($paymentDate)->format('M d, Y') : '--' }}</td>
                                     <td class="px-5 py-4 font-semibold text-[#DB69A2]">${{ number_format($payment->amount, 2) }}</td>
                                     <td class="px-5 py-4 text-[#91848C]">{{ $fundingSummary }}</td>
                                 </tr>
@@ -114,7 +110,7 @@
                                 <tr>
                                     <td colspan="4" class="px-5 py-6 text-center text-[#91848C]">
                                         You have not recorded any sponsorship payments yet.
-                                        <a href="{{ route('sponsor.becomeASponsor') }}" class="text-[#DB69A2] underline">Sponsor a program</a> to make your first contribution.
+                                        <a href="{{ route('sponsor.events') }}" class="text-[#DB69A2] underline">Sponsor an event</a> to make your first contribution.
                                     </td>
                                 </tr>
                             @endforelse

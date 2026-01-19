@@ -269,7 +269,8 @@
                                             'sponsor_count' =>
                                                 $event->sponsors_count ?? ($event->sponsors?->count() ?? 0),
                                             'total_raised' => $event->total_raised ?? 0,
-                                            'fund_goal' => null,
+                                            'fund_goal' => $event->funding_goal,
+                                            'payment_type' => $event->payment_type,
                                             'show_url' => route('events.show', $event),
                                         ];
                                     @endphp

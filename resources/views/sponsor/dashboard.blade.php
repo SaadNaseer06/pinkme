@@ -55,10 +55,8 @@
                                         @php
                                             $profile = optional($sponsor->profile);
                                             $avatar = $profile && $profile->avatar ? Storage::url($profile->avatar) : asset('public/images/patient-7.png');
-                                            $latestSponsorship = optional($sponsor->sponsorships->first());
-                                            $latestTarget = optional(
-                                                $latestSponsorship->program ?? $latestSponsorship->sponsorshipProgram
-                                            );
+                                            $latestSponsorship = optional($sponsor->eventSponsorships->first());
+                                            $latestTarget = optional($latestSponsorship->event);
                                             $eventType = $latestTarget->title ?? 'N/A';
                                             $firstDate = $sponsor->first_contribution_date ? Carbon::parse($sponsor->first_contribution_date) : null;
                                             $lastDate = $sponsor->last_contribution_date ? Carbon::parse($sponsor->last_contribution_date) : null;
@@ -90,7 +88,7 @@
                                                 {{ $profile->country ?? 'N/A' }}
                                             </td>
                                             <td class="p-2 align-middle text-[#91848C] text-center text-[16px] font-light app-text">
-                                                {{ $sponsor->sponsorships_count }}
+                                                {{ $sponsor->event_sponsorships_count ?? 0 }}
                                             </td>
                                             <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                                 ${{ number_format($sponsor->total_contribution ?? 0, 0) }}
@@ -138,10 +136,8 @@
                                             $profile = optional($sponsor->profile);
                                             $detail = optional($sponsor->sponsorDetail);
                                             $logo = $detail && $detail->logo ? Storage::url($detail->logo) : asset('public/images/patient-4.png');
-                                            $latestSponsorship = optional($sponsor->sponsorships->first());
-                                            $latestTarget = optional(
-                                                $latestSponsorship->program ?? $latestSponsorship->sponsorshipProgram
-                                            );
+                                            $latestSponsorship = optional($sponsor->eventSponsorships->first());
+                                            $latestTarget = optional($latestSponsorship->event);
                                             $eventType = $latestTarget->title ?? 'N/A';
                                             $firstDate = $sponsor->first_contribution_date ? Carbon::parse($sponsor->first_contribution_date) : null;
                                             $lastDate = $sponsor->last_contribution_date ? Carbon::parse($sponsor->last_contribution_date) : null;
@@ -173,7 +169,7 @@
                                                 {{ $profile->country ?? 'N/A' }}
                                             </td>
                                             <td class="p-2 app-text align-middle text-[#91848C] text-[16px] font-light">
-                                                {{ $sponsor->sponsorships_count }}
+                                                {{ $sponsor->event_sponsorships_count ?? 0 }}
                                             </td>
                                             <td class="p-2 app-text align-middle text-[#91848C] text-[16px] font-light">
                                                 ${{ number_format($sponsor->total_contribution ?? 0, 0) }}
@@ -376,6 +372,5 @@
         </div>
     </main>
 @endsection
-
 
 

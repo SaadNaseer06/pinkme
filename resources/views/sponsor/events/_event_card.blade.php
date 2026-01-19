@@ -35,7 +35,7 @@
     $timeLabel = $event->time_label ?? Carbon::parse($event->date)->format('g:i A');
 @endphp
 
-<div class="event-entry" data-event-status="{{ $status }}">
+<div class="event-entry" data-event-status="{{ $status }}" data-event-type="{{ $event->payment_type ?? 'flexible' }}">
     <div class="bg-[#F3E8EF] rounded-lg p-4 mb-4 flex items-center justify-between md:flex hidden">
         <div class="flex items-center">
             <div
@@ -47,7 +47,12 @@
                 <img src="{{ $image }}" alt="{{ $event->title }}" class="w-full h-full object-cover" />
             </div>
             <div>
-                <h3 class="text-xl font-semibold text-[#213430] mb-1 program-h">{{ $event->title }}</h3>
+                <div class="flex items-center gap-2 mb-1">
+                    <h3 class="text-xl font-semibold text-[#213430] program-h">{{ $event->title }}</h3>
+                    <span class="inline-flex items-center rounded-full bg-[#DB69A2] px-3 py-1 text-xs font-medium text-white">
+                        {{ $event->payment_type === 'full' ? 'Full Sponsorship' : 'Flexible Sponsorship' }}
+                    </span>
+                </div>
                 <p class="text-sm text-[#91848C] program-p">{{ Str::limit($descriptionSummary, 150) }}</p>
             </div>
         </div>
@@ -95,7 +100,12 @@
             </div>
         </div>
         <div class="flex flex-col gap-1 text-left">
-            <h3 class="text-[15px] font-semibold text-[#213430]">{{ $event->title }}</h3>
+            <div class="flex items-center gap-2">
+                <h3 class="text-[15px] font-semibold text-[#213430]">{{ $event->title }}</h3>
+                <span class="inline-flex items-center rounded-full bg-[#DB69A2] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">
+                    {{ $event->payment_type === 'full' ? 'Full' : 'Flexible' }}
+                </span>
+            </div>
             <p class="text-[13px] font-light text-[#91848C]">{{ Str::limit($descriptionSummary, 110) }}</p>
             <div class="flex gap-2 flex-col">
                 <button type="button"

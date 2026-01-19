@@ -29,7 +29,7 @@
             <img src="{{ asset('public/images/Sponsor-3.svg') }}" alt="" class="h-8 w-8 status-cards-img">
         </div>
         <div>
-            <h3 class="text-[#213430] font-semibold status-cards-h1">Support Program</h3>
+            <h3 class="text-[#213430] font-semibold status-cards-h1">Total Events</h3>
             <p class="text-md font-normal text-[#B32020] text-right status-cards-p">{{ number_format($stats['support_programs'] ?? 0) }}</p>
         </div>
     </div>

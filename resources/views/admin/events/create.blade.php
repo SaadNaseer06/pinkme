@@ -20,6 +20,7 @@
     $sponsorshipBadgeClasses = $hasSponsor ? 'bg-[#F3B9DA] text-[#B74F86]' : 'bg-[#F8D4E6] text-[#C25E95]';
     $sponsorshipBadgeLabel = $hasSponsor ? 'Enabled' : 'Skipped';
     $amountWrapperClasses = $hasSponsor ? '' : 'opacity-50';
+    $paymentTypeValue = old('payment_type', $isEdit ? $event->payment_type : 'flexible');
 @endphp
 
 @section('title', $pageTitle)
@@ -160,6 +161,27 @@
                                             class="w-full rounded-xl border border-[#DCCFD8] bg-white pl-9 pr-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                                     </div>
                                     @error('funding_goal')
+                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-sm font-medium text-[#213430]">Sponsorship Type</label>
+                                    <div class="relative">
+                                        <select name="payment_type"
+                                            class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                                            <option value="flexible" @selected($paymentTypeValue === 'flexible')>Flexible (multiple sponsors)</option>
+                                            <option value="full" @selected($paymentTypeValue === 'full')>Full (single sponsor)</option>
+                                        </select>
+                                        <span
+                                            class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[#91848C]">
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd"
+                                                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </span>
+                                    </div>
+                                    @error('payment_type')
                                         <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
                                     @enderror
                                 </div>

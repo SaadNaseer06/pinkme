@@ -26,7 +26,9 @@
                         <div class="relative md:w-60 w-[160px]">
                             <select name="eventFilter" id="eventFilter"
                                 class="appearance-none w-full bg-[#F3E8EF] rounded-md pl-4 pr-10 py-2 text-sm text-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#db69a2] app-text">
-                                <option value="all">All Events</option>
+                                <option value="all" @selected(($selectedType ?? null) === null)>All Events</option>
+                                <option value="flexible" @selected(($selectedType ?? null) === 'flexible')>Flexible Sponsorship</option>
+                                <option value="full" @selected(($selectedType ?? null) === 'full')>Full Sponsorship</option>
                                 <option value="upcoming">Upcoming</option>
                                 <option value="inProgress">In Progress</option>
                                 <option value="past">Past</option>
@@ -307,13 +309,24 @@
                     });
 
                     if (eventFilter) {
-                        eventFilter.addEventListener('change', () => {
+                        const applyFilter = () => {
                             const value = eventFilter.value;
                             document.querySelectorAll('[data-event-status]').forEach((wrapper) => {
-                                const shouldShow = value === 'all' || wrapper.dataset.eventStatus === value;
+                                const matchesStatus = value === 'all' || wrapper.dataset.eventStatus === value;
+                                const matchesType = value === 'flexible' || value === 'full'
+                                    ? wrapper.dataset.eventType === value
+                                    : true;
+                                const shouldShow = value === 'all'
+                                    ? true
+                                    : (value === 'flexible' || value === 'full')
+                                        ? matchesType
+                                        : matchesStatus;
                                 wrapper.classList.toggle('hidden', !shouldShow);
                             });
-                        });
+                        };
+
+                        eventFilter.addEventListener('change', applyFilter);
+                        applyFilter();
                     }
 
                     document.getElementById('fullscreenBtn')?.addEventListener('click', () => {

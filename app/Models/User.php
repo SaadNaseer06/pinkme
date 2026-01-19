@@ -50,6 +50,11 @@ class User extends Authenticatable
         return $this->hasMany(Sponsorship::class, 'sponsor_id');
     }
 
+    public function eventSponsorships()
+    {
+        return $this->hasMany(EventSponsorship::class, 'sponsor_id');
+    }
+
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');

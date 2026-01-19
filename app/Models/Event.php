@@ -17,6 +17,7 @@ class Event extends Model
         'date',
         'location',
         'funding_goal',
+        'payment_type',
         'status',
         'event_highlights',
         'image',
@@ -133,6 +134,12 @@ class Event extends Model
     {
         // Check if event is not cancelled or completed
         if (in_array($this->status, ['cancelled', 'completed'])) {
+            return false;
+        }
+
+        if ($this->payment_type === 'full' && $this->sponsorships()
+            ->whereIn('registration_status', ['pending', 'confirmed'])
+            ->exists()) {
             return false;
         }
 

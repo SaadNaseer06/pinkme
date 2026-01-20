@@ -9,6 +9,7 @@ use App\Models\Patient;
 use App\Models\Message;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Models\ProgramRegistration;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -116,6 +117,146 @@ class CaseManagerController extends Controller
             ->paginate(15);
 
         return view('case_manager.my_application', compact('applications'));
+    }
+
+    public function programRegistrations(Request $request)
+    {
+        $selectedStatus = strtolower((string) $request->query('status', ProgramRegistration::STATUS_PENDING));
+        $validStatuses = [
+            'all',
+            ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_APPROVED,
+            ProgramRegistration::STATUS_REJECTED,
+        ];
+
+        if (!in_array($selectedStatus, $validStatuses, true)) {
+            $selectedStatus = ProgramRegistration::STATUS_PENDING;
+        }
+
+        $query = ProgramRegistration::query()
+            ->with(['program:id,title', 'user:id,email'])
+            ->where('assigned_case_manager_id', Auth::id())
+            ->orderByDesc('created_at');
+
+        if ($selectedStatus !== 'all') {
+            $query->where('status', $selectedStatus);
+        }
+
+        $registrations = $query
+            ->paginate(15)
+            ->appends($request->query());
+
+        $counts = [
+            'pending' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())
+                ->where('status', ProgramRegistration::STATUS_PENDING)
+                ->count(),
+            'approved' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())
+                ->where('status', ProgramRegistration::STATUS_APPROVED)
+                ->count(),
+            'rejected' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())
+                ->where('status', ProgramRegistration::STATUS_REJECTED)
+                ->count(),
+            'all' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())->count(),
+        ];
+
+        return view('case_manager.program_registrations.index', [
+            'registrations' => $registrations,
+            'selectedStatus' => $selectedStatus,
+            'counts' => $counts,
+        ]);
+    }
+
+    public function showProgramRegistration(ProgramRegistration $registration)
+    {
+        if ($registration->assigned_case_manager_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $registration->load(['program', 'user', 'reviewer', 'assignedCaseManager']);
+
+        return view('case_manager.program_registrations.show', [
+            'registration' => $registration,
+        ]);
+    }
+
+    public function approveProgramRegistration(ProgramRegistration $registration, Request $request)
+    {
+        if ($registration->assigned_case_manager_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($registration->status !== ProgramRegistration::STATUS_PENDING) {
+            return redirect()
+                ->route('case_manager.program_registrations.show', $registration)
+                ->with('error', 'This registration has already been processed.');
+        }
+
+        $data = $request->validate([
+            'note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $registration->loadMissing(['program', 'user']);
+
+        $registration->update([
+            'status' => ProgramRegistration::STATUS_APPROVED,
+            'review_note' => $data['note'] ?? null,
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        if ($registration->user) {
+            UserNotification::create([
+                'user_id' => $registration->user_id,
+                'title' => 'Program Registration Approved',
+                'message' => 'Your registration for "' . ($registration->program->title ?? 'a program') . '" has been approved.',
+                'priority' => UserNotification::PRIORITY_IMPORTANT,
+                'link_url' => route('patient.programRegistrations.show', $registration),
+            ]);
+        }
+
+        return redirect()
+            ->route('case_manager.program_registrations.show', $registration)
+            ->with('success', 'The registration has been approved.');
+    }
+
+    public function rejectProgramRegistration(ProgramRegistration $registration, Request $request)
+    {
+        if ($registration->assigned_case_manager_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($registration->status !== ProgramRegistration::STATUS_PENDING) {
+            return redirect()
+                ->route('case_manager.program_registrations.show', $registration)
+                ->with('error', 'This registration has already been processed.');
+        }
+
+        $data = $request->validate([
+            'note' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $registration->loadMissing(['program', 'user']);
+
+        $registration->update([
+            'status' => ProgramRegistration::STATUS_REJECTED,
+            'review_note' => $data['note'],
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        if ($registration->user) {
+            UserNotification::create([
+                'user_id' => $registration->user_id,
+                'title' => 'Program Registration Rejected',
+                'message' => 'Your registration for "' . ($registration->program->title ?? 'a program') . '" has been rejected. Reason: ' . $data['note'],
+                'priority' => UserNotification::PRIORITY_IMPORTANT,
+                'link_url' => route('patient.programRegistrations.show', $registration),
+            ]);
+        }
+
+        return redirect()
+            ->route('case_manager.program_registrations.show', $registration)
+            ->with('success', 'The registration has been rejected.');
     }
 
     public function viewAssignedApplication($id)
@@ -338,12 +479,23 @@ class CaseManagerController extends Controller
     {
         $user = Auth::user();
 
-        $patientUsers = User::query()
-            ->whereHas('patient', function ($query) use ($user) {
-                $query->whereHas('applications', function ($inner) use ($user) {
-                    $inner->where('reviewer_id', $user->id);
-                });
+        $applicationPatientIds = Patient::query()
+            ->whereHas('applications', function ($query) use ($user) {
+                $query->where('reviewer_id', $user->id);
             })
+            ->pluck('user_id');
+
+        $registrationPatientIds = ProgramRegistration::query()
+            ->where('assigned_case_manager_id', $user->id)
+            ->pluck('user_id');
+
+        $patientUserIds = $applicationPatientIds
+            ->merge($registrationPatientIds)
+            ->unique()
+            ->values();
+
+        $patientUsers = User::query()
+            ->whereIn('id', $patientUserIds)
             ->with(['profile', 'patient'])
             ->get();
 

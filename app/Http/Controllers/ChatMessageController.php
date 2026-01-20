@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\MessageSent;
 use App\Models\Application;
 use App\Models\Message;
+use App\Models\ProgramRegistration;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -102,7 +103,11 @@ class ChatMessageController extends Controller
                     $query->where('user_id', $authUser->id);
                 })->where('reviewer_id', $contact->id)->exists();
 
-                if (! $hasRelationship) {
+                $hasRegistration = ProgramRegistration::where('user_id', $authUser->id)
+                    ->where('assigned_case_manager_id', $contact->id)
+                    ->exists();
+
+                if (! $hasRelationship && ! $hasRegistration) {
                     abort(403);
                 }
             }
@@ -120,7 +125,11 @@ class ChatMessageController extends Controller
                     $query->where('user_id', $contact->id);
                 })->exists();
 
-            if (! $hasRelationship) {
+            $hasRegistration = ProgramRegistration::where('assigned_case_manager_id', $authUser->id)
+                ->where('user_id', $contact->id)
+                ->exists();
+
+            if (! $hasRelationship && ! $hasRegistration) {
                 abort(403);
             }
 

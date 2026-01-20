@@ -52,6 +52,8 @@ class ProgramRegistration extends Model
         'reviewed_by',
         'reviewed_at',
         'review_note',
+        'assigned_case_manager_id',
+        'assigned_at',
     ];
 
     protected $casts = [
@@ -66,6 +68,7 @@ class ProgramRegistration extends Model
         'income_document_paths' => 'array',
         'dob' => 'date',
         'reviewed_at' => 'datetime',
+        'assigned_at' => 'datetime',
     ];
     
     /**
@@ -90,6 +93,14 @@ class ProgramRegistration extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    /**
+     * Case manager assigned to handle this registration.
+     */
+    public function assignedCaseManager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_case_manager_id');
     }
     
     /**

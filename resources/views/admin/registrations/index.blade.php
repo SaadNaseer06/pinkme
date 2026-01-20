@@ -236,33 +236,34 @@
                 </div>
 
                 <!-- Table -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-pink-100">
+                <div class="overflow-x-auto overflow-y-visible border border-gray-200 rounded-xl bg-white shadow-sm">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-[#F7EEF3] border-b border-pink-200">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-pink-800 uppercase tracking-wider">Applicant</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-pink-800 uppercase tracking-wider">Program</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-pink-800 uppercase tracking-wider">Submitted</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-pink-800 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-pink-800 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em]">Applicant</th>
+                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em]">Program</th>
+                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em]">Submitted</th>
+                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em]">Status</th>
+                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em]">Assigned</th>
+                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em] w-24">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="divide-y divide-gray-100">
                             @forelse($programRegistrations as $registration)
-                                <tr class="hover:bg-pink-50 transition">
-                                    <td class="px-6 py-4">
+                                <tr class="hover:bg-[#FBF5F8] transition">
+                                    <td class="px-6 py-4 align-top">
                                         <div class="flex flex-col">
-                                            <span class="font-medium text-gray-900">{{ $registration->full_name }}</span>
+                                            <span class="font-semibold text-gray-900">{{ $registration->full_name }}</span>
                                             <span class="text-xs text-gray-500">{{ $registration->email }}</span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="px-6 py-4 text-sm text-gray-900 align-top">
                                         {{ $registration->program->title ?? 'N/A' }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                    <td class="px-6 py-4 text-sm text-gray-600 align-top">
                                         {{ $registration->created_at?->format('M d, Y h:i A') ?? 'N/A' }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-top">
                                         @php
                                             $status = strtolower($registration->status);
                                             $badgeClasses = match ($status) {
@@ -271,20 +272,46 @@
                                                 default => 'bg-pink-100 text-pink-800',
                                             };
                                         @endphp
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $badgeClasses }}">
+                                        <span class="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold rounded-full {{ $badgeClasses }}">
                                             {{ ucfirst($status) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-medium">
-                                        <a href="{{ route('admin.program_registrations.show', $registration) }}"
-                                            class="text-pink-600 hover:text-pink-800 font-semibold">
-                                            View Details
-                                        </a>
+                                    <td class="px-6 py-4 text-sm text-gray-700 align-top">
+                                        {{ $registration->assignedCaseManager?->profile?->full_name ?? $registration->assignedCaseManager?->email ?? 'Unassigned' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm font-medium align-top w-24">
+                                        <div class="inline-flex">
+                                            <button type="button" data-actions-toggle
+                                                class="inline-flex items-center justify-center h-8 w-8 rounded-full border border-gray-400 text-gray-600 hover:bg-gray-100 transition"
+                                                aria-haspopup="true" aria-expanded="false" title="Actions">
+                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6h.01M12 12h.01M12 18h.01" />
+                                                </svg>
+                                            </button>
+                                            <div data-actions-menu
+                                                class="hidden absolute right-0 mt-2 w-48 rounded-xl border border-gray-200 bg-white shadow-xl z-30 max-h-56 overflow-y-auto">
+                                                <div class="p-2">
+                                                    <a href="{{ route('admin.program_registrations.show', $registration) }}"
+                                                        class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+                                                        {{-- <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-pink-100 text-pink-600 text-xs">V</span> --}}
+                                                        View Details
+                                                    </a>
+                                                    <button type="button"
+                                                        data-assign-trigger
+                                                        data-assign-url="{{ route('admin.program_registrations.assign', $registration) }}"
+                                                        data-assign-current="{{ $registration->assigned_case_manager_id ?? '' }}"
+                                                        class="w-full flex items-center gap-2 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
+                                                        {{-- <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-pink-100 text-pink-600 text-xs">A</span> --}}
+                                                        Assign Case Manager
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
                                         No program registrations found for the selected filter.
                                     </td>
                                 </tr>
@@ -298,6 +325,50 @@
                         {{ $programRegistrations->links() }}
                     </div>
                 @endif
+            </div>
+        </div>
+
+        <div id="assignModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-2xl w-full max-w-md shadow-xl p-6">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Assign Case Manager</h3>
+                        <p class="text-sm text-gray-500 mt-1">Select a case manager to handle this registration.</p>
+                    </div>
+                    <button type="button" id="assignModalClose"
+                        class="h-8 w-8 inline-flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="assignModalForm" method="POST" action="" class="mt-5 space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-[0.12em]">Assign To</label>
+                        <select name="case_manager_id"
+                            class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
+                            <option value="">Unassigned</option>
+                            @foreach ($caseManagers as $manager)
+                                <option value="{{ $manager->id }}">
+                                    {{ $manager->profile->full_name ?? $manager->email }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-2">
+                        <button type="button" id="assignModalCancel"
+                            class="px-4 py-2 rounded-md border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 rounded-md bg-pink-600 text-white text-sm font-semibold hover:bg-pink-700">
+                            Confirm & Assign
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -418,21 +489,21 @@
                 </div>
 
                 <!-- Table -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-pink-100">
+                <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gradient-to-r from-pink-50 via-pink-100 to-pink-50 border-b border-pink-200">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-pink-800 uppercase tracking-wider">Event & Sponsor</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-pink-800 uppercase tracking-wider">Amount</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-pink-800 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-pink-800 uppercase tracking-wider">Dates</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-pink-800 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-semibold text-pink-900 uppercase tracking-[0.08em]">Event & Sponsor</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-semibold text-pink-900 uppercase tracking-[0.08em]">Amount</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-semibold text-pink-900 uppercase tracking-[0.08em]">Status</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-semibold text-pink-900 uppercase tracking-[0.08em]">Dates</th>
+                                <th class="px-6 py-4 text-left text-[11px] font-semibold text-pink-900 uppercase tracking-[0.08em]">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-white divide-y divide-gray-100">
                             @forelse($eventRegistrations as $registration)
-                                <tr class="hover:bg-pink-50 transition">
-                                    <td class="px-6 py-4">
+                                <tr class="hover:bg-pink-50/60 transition">
+                                    <td class="px-6 py-4 align-top">
                                         <div>
                                             <div class="text-sm font-medium text-gray-900">
                                                 {{ $registration->event->title }}
@@ -447,10 +518,10 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900">
+                                    <td class="px-6 py-4 text-sm text-gray-900 align-top">
                                         ${{ number_format($registration->amount, 2) }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-top">
                                         @php
                                             $statusClasses = match ($registration->registration_status) {
                                                 'confirmed' => 'bg-green-100 text-green-800',
@@ -459,24 +530,24 @@
                                                 default => 'bg-gray-100 text-gray-800',
                                             };
                                         @endphp
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusClasses }}">
+                                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full {{ $statusClasses }}">
                                             {{ $registration->status_text }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                    <td class="px-6 py-4 text-sm text-gray-600 align-top">
                                         <div>Registered: {{ $registration->formatted_registered_at }}</div>
                                         @if ($registration->confirmed_at)
                                             <div>Confirmed: {{ $registration->formatted_confirmed_at }}</div>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-medium">
-                                        <div class="flex space-x-3">
+                                    <td class="px-6 py-4 text-sm font-medium align-top">
+                                        <div class="flex flex-wrap gap-2">
                                             @if ($registration->canBeApproved())
                                                 <form method="POST" action="{{ route('events.registrations.approve', $registration) }}">
                                                     @csrf
                                                     <button type="submit"
                                                         onclick="return confirm('Approve this registration?')"
-                                                        class="inline-flex items-center px-3 py-1.5 text-green-600 hover:text-green-800 font-semibold rounded-md hover:bg-green-50 transition-colors">
+                                                        class="inline-flex items-center px-3 py-1.5 text-green-700 hover:text-green-900 font-semibold rounded-md hover:bg-green-50 transition-colors">
                                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                                         </svg>
@@ -489,7 +560,7 @@
                                                 <form method="POST" action="{{ route('events.registrations.reject', $registration) }}">
                                                     @csrf
                                                     <button type="submit" onclick="return confirm('Reject this registration?')"
-                                                        class="inline-flex items-center px-3 py-1.5 text-red-600 hover:text-red-800 font-semibold rounded-md hover:bg-red-50 transition-colors">
+                                                        class="inline-flex items-center px-3 py-1.5 text-red-700 hover:text-red-900 font-semibold rounded-md hover:bg-red-50 transition-colors">
                                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                         </svg>
@@ -499,7 +570,7 @@
                                             @endif
 
                                             <a href="{{ route('events.show', $registration->event) }}"
-                                                class="inline-flex items-center px-3 py-1.5 text-pink-600 hover:text-pink-800 font-semibold rounded-md hover:bg-pink-50 transition-colors">
+                                                class="inline-flex items-center px-3 py-1.5 text-pink-700 hover:text-pink-900 font-semibold rounded-md hover:bg-pink-50 transition-colors">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -605,6 +676,91 @@
                 });
             });
 
+            const actionToggles = document.querySelectorAll('[data-actions-toggle]');
+            const assignTriggers = document.querySelectorAll('[data-assign-trigger]');
+            const assignModal = document.getElementById('assignModal');
+            const assignModalForm = document.getElementById('assignModalForm');
+            const assignModalClose = document.getElementById('assignModalClose');
+            const assignModalCancel = document.getElementById('assignModalCancel');
+
+            function closeActionMenus() {
+                document.querySelectorAll('[data-actions-menu]').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+                document.querySelectorAll('[data-actions-toggle]').forEach(toggle => {
+                    toggle.setAttribute('aria-expanded', 'false');
+                });
+            }
+
+            actionToggles.forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const menu = this.parentElement.querySelector('[data-actions-menu]');
+                    if (!menu) {
+                        return;
+                    }
+                    const isOpen = !menu.classList.contains('hidden');
+                    closeActionMenus();
+                    if (!isOpen) {
+                        menu.classList.remove('hidden');
+                        this.setAttribute('aria-expanded', 'true');
+                    }
+                });
+            });
+
+            document.addEventListener('click', function() {
+                closeActionMenus();
+            });
+
+            function openAssignModal(url, currentId) {
+                if (!assignModal || !assignModalForm) {
+                    return;
+                }
+                assignModalForm.action = url;
+                const select = assignModalForm.querySelector('select[name="case_manager_id"]');
+                if (select) {
+                    select.value = currentId || '';
+                }
+                assignModal.classList.remove('hidden');
+                assignModal.classList.add('flex');
+            }
+
+            function closeAssignModal() {
+                if (!assignModal) {
+                    return;
+                }
+                assignModal.classList.add('hidden');
+                assignModal.classList.remove('flex');
+            }
+
+            assignTriggers.forEach(trigger => {
+                trigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = this.getAttribute('data-assign-url');
+                    const currentId = this.getAttribute('data-assign-current');
+                    closeActionMenus();
+                    if (url) {
+                        openAssignModal(url, currentId);
+                    }
+                });
+            });
+
+            if (assignModal) {
+                assignModal.addEventListener('click', function(e) {
+                    if (e.target === assignModal) {
+                        closeAssignModal();
+                    }
+                });
+            }
+
+            if (assignModalClose) {
+                assignModalClose.addEventListener('click', closeAssignModal);
+            }
+
+            if (assignModalCancel) {
+                assignModalCancel.addEventListener('click', closeAssignModal);
+            }
+
             // Handle browser back/forward buttons
             window.addEventListener('popstate', function(event) {
                 const urlParams = new URLSearchParams(window.location.search);
@@ -614,4 +770,3 @@
         });
     </script>
 @endsection
-

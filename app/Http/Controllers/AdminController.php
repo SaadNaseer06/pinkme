@@ -750,7 +750,7 @@ class AdminController extends Controller
         }
 
         $programQuery = ProgramRegistration::query()
-            ->with(['program:id,title', 'user:id,email'])
+            ->with(['program:id,title', 'user:id,email', 'assignedCaseManager.profile'])
             ->orderByDesc('created_at');
 
         if ($programSelectedStatus !== 'all') {
@@ -795,6 +795,11 @@ class AdminController extends Controller
             'all'       => EventSponsorship::count(),
         ];
 
+        $caseManagerRoleId = Role::where('name', 'casemanager')->value('id');
+        $caseManagers = $caseManagerRoleId
+            ? User::where('role_id', $caseManagerRoleId)->with('profile')->orderBy('email')->get()
+            : collect();
+
         return view('admin.registrations.index', [
             'tab'                        => $tab,
             'programRegistrations'       => $programRegistrations,
@@ -806,6 +811,7 @@ class AdminController extends Controller
             'eventSelectedId'            => $eventSelectedId,
             'eventCounts'                => $eventCounts,
             'displayCol'                 => $displayCol,
+            'caseManagers'               => $caseManagers,
         ]);
     }
 

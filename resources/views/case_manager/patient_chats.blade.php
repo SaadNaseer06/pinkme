@@ -17,7 +17,7 @@
                     first message from their profile.</p>
             </div>
         @else
-            <div class="flex flex-col lg:flex-row lg:max-h-[850px] max-w-7xl mx-auto gap-6">
+            <div class="flex flex-col lg:flex-row lg:max-h-[850px] max-w-8xl mx-auto gap-6">
                 <!-- Contact sidebar -->
                 <aside class="w-full lg:w-96 bg-[#F3E8EF] rounded-2xl flex flex-col overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-[#E4D6DF] flex items-center justify-between">

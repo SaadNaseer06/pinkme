@@ -135,9 +135,16 @@ class PatientController extends Controller
         $user = Auth::user();
         $patient = Patient::firstOrCreate(['user_id' => $user->id]);
 
-        $caseManagerIds = Application::where('patient_id', $patient->id)
+        $applicationCaseManagers = Application::where('patient_id', $patient->id)
             ->whereNotNull('reviewer_id')
-            ->pluck('reviewer_id')
+            ->pluck('reviewer_id');
+
+        $registrationCaseManagers = ProgramRegistration::where('user_id', $user->id)
+            ->whereNotNull('assigned_case_manager_id')
+            ->pluck('assigned_case_manager_id');
+
+        $caseManagerIds = $applicationCaseManagers
+            ->merge($registrationCaseManagers)
             ->unique()
             ->values();
 
@@ -146,12 +153,12 @@ class PatientController extends Controller
             ->with(['profile', 'role'])
             ->get();
 
-        if ($contacts->isEmpty()) {
-            $contacts = User::query()
-                ->whereHas('role', fn ($query) => $query->where('name', 'admin'))
-                ->with(['profile', 'role'])
-                ->get();
-        }
+        $adminContacts = User::query()
+            ->whereHas('role', fn ($query) => $query->where('name', 'admin'))
+            ->with(['profile', 'role'])
+            ->get();
+
+        $contacts = $contacts->merge($adminContacts)->unique('id')->values();
 
         if ($contacts->isEmpty()) {
             return view('patient.patient_chats', [

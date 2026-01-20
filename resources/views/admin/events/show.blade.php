@@ -92,7 +92,7 @@
         </div>
 
         {{-- Primary content --}}
-        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_2fr] gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(1,1fr)_2fr] gap-6">
             <section class="rounded-2xl bg-white shadow-sm border border-[#F1E5EF]">
                 <header class="flex flex-wrap items-center justify-between gap-4 border-b border-[#F1E5EF] px-6 py-5">
                     <div>
@@ -169,7 +169,7 @@
             </section>
 
             {{-- Add sponsorship form --}}
-            <aside class="rounded-2xl bg-white shadow-sm border border-[#F1E5EF] h-fit">
+            {{-- <aside class="rounded-2xl bg-white shadow-sm border border-[#F1E5EF] h-fit">
                 <div class="border-b border-[#F1E5EF] px-6 py-5">
                     <h3 class="text-lg font-semibold text-[#213430]">Add Sponsorship</h3>
                     <p class="text-sm text-[#6C5B68]">Log a new commitment from a sponsor and keep totals up to date.</p>
@@ -226,11 +226,11 @@
                         Record Sponsorship
                     </button>
                 </form>
-            </aside>
+            </aside> --}}
         </div>
 
         <div class="flex flex-wrap items-center justify-between gap-4 pt-4">
-            <a href="{{ route('events.index') }}"
+            <a href="{{ route('admin.programs-events') }}"
                 class="inline-flex items-center gap-2 rounded-xl border border-[#DCCFD8] px-4 py-2 text-sm font-medium text-[#6C5B68] hover:bg-[#FDF7FB] transition">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />

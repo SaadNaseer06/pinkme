@@ -58,6 +58,35 @@
                     </span>
                 </div>
 
+                <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1]">
+                    <h3 class="text-xl font-semibold text-[#213430] app-main">Assign Case Manager</h3>
+                    <p class="text-sm text-[#6C5F67] app-text mt-1">
+                        Assign a case manager to handle this registration.
+                    </p>
+                    <form method="POST" action="{{ route('admin.program_registrations.assign', $registration) }}" class="mt-4 flex flex-col md:flex-row md:items-center gap-3">
+                        @csrf
+                        <select name="case_manager_id"
+                            class="w-full md:w-80 rounded-md px-3 py-2 text-sm text-[#213430] bg-white border border-[#91848C] focus:outline-none">
+                            <option value="">Unassigned</option>
+                            @foreach ($caseManagers as $manager)
+                                <option value="{{ $manager->id }}" @selected($registration->assigned_case_manager_id === $manager->id)>
+                                    {{ $manager->profile->full_name ?? $manager->email }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <button type="submit"
+                            class="px-4 py-2 bg-[#DB69A2] text-white rounded-md text-sm font-medium hover:bg-[#c95791] transition app-text">
+                            Save Assignment
+                        </button>
+                    </form>
+                    <div class="mt-3 text-sm text-[#6C5F67] app-text">
+                        Current: {{ $registration->assignedCaseManager?->profile?->full_name ?? $registration->assignedCaseManager?->email ?? 'Unassigned' }}
+                        @if ($registration->assigned_at)
+                            <span class="text-[#91848C]">• assigned {{ $registration->assigned_at->format('d M Y, h:i A') }}</span>
+                        @endif
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 border border-[#E6D8E1]">
                     <h3 class="text-xl font-semibold text-[#213430] app-main">Applicant</h3>
@@ -243,7 +272,7 @@
                 @endif
 
                 <div class="flex justify-between items-center pt-5 border-t border-[#DCCFD8]">
-                    <a href="{{ route('admin.program_registrations.index', ['status' => $status === 'pending' ? 'pending' : 'all']) }}"
+                    <a href="{{ route('admin.registrations.index', ['status' => $status === 'pending' ? 'pending' : 'all']) }}"
                         class="inline-flex items-center gap-2 text-base text-[#6C5F67] hover:text-[#213430] app-text">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">

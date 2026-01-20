@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProgramRegistration;
+use App\Models\Role;
+use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,10 +59,16 @@ class AdminProgramRegistrationController extends Controller
      */
     public function show(ProgramRegistration $registration)
     {
-        $registration->load(['program', 'user', 'reviewer']);
+        $registration->load(['program', 'user', 'reviewer', 'assignedCaseManager.profile']);
+
+        $caseManagerRoleId = Role::where('name', 'casemanager')->value('id');
+        $caseManagers = $caseManagerRoleId
+            ? User::where('role_id', $caseManagerRoleId)->with('profile')->orderBy('email')->get()
+            : collect();
 
         return view('admin.program_registrations.show', [
             'registration' => $registration,
+            'caseManagers' => $caseManagers,
         ]);
     }
 
@@ -140,5 +148,37 @@ class AdminProgramRegistrationController extends Controller
         return redirect()
             ->route('admin.program_registrations.show', $registration)
             ->with('success', 'The registration has been rejected.');
+    }
+
+    /**
+     * Assign a case manager to a registration.
+     */
+    public function assignCaseManager(ProgramRegistration $registration, Request $request)
+    {
+        $data = $request->validate([
+            'case_manager_id' => ['nullable', 'integer', 'exists:users,id'],
+        ]);
+
+        if (!empty($data['case_manager_id'])) {
+            $caseManagerRoleId = Role::where('name', 'casemanager')->value('id');
+            $isCaseManager = $caseManagerRoleId
+                ? User::where('id', $data['case_manager_id'])->where('role_id', $caseManagerRoleId)->exists()
+                : false;
+
+            if (!$isCaseManager) {
+                return redirect()
+                    ->route('admin.program_registrations.show', $registration)
+                    ->with('error', 'Selected user is not a case manager.');
+            }
+        }
+
+        $registration->update([
+            'assigned_case_manager_id' => $data['case_manager_id'] ?? null,
+            'assigned_at' => !empty($data['case_manager_id']) ? now() : null,
+        ]);
+
+        return redirect()
+            ->route('admin.program_registrations.show', $registration)
+            ->with('success', 'Case manager assignment updated.');
     }
 }

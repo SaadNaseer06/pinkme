@@ -16,12 +16,11 @@
                 href="{{ route('case_manager.dashboard') }}"><img
                     src="{{ request()->routeIs('case_manager.dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-dash.svg') }}"
                     alt="">Dashboard</a></li>
-        <li
-            class="{{ request()->routeIs('case_manager.myApplication', 'case_manager.viewAssignedApplication') ? 'active' : '' }}">
-            <a href="{{ route('case_manager.myApplication') }}">
-                <img src="{{ request()->routeIs('case_manager.myApplication', 'case_manager.viewAssignedApplication') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
+        <li class="{{ request()->routeIs('case_manager.program_registrations.*') ? 'active' : '' }}">
+            <a href="{{ route('case_manager.program_registrations.index') }}">
+                <img src="{{ request()->routeIs('case_manager.program_registrations.*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
                     alt="">
-                My Applications
+                Program Registrations
             </a>
         </li>
         <li class="{{ request()->routeIs('case_manager.patientProfiles') ? 'active' : '' }}"><a
@@ -57,12 +56,12 @@
                     <span class="title">Dashboard</span>
                 </a>
             </li>
-            <li class="{{ request()->routeIs('case_manager.myApplication') ? 'hovered' : '' }}">
-                <a href="{{ route('case_manager.myApplication') }}">
+            <li class="{{ request()->routeIs('case_manager.program_registrations.*') ? 'hovered' : '' }}">
+                <a href="{{ route('case_manager.program_registrations.index') }}">
                     <span class="icon"><img
-                            src="{{ request()->routeIs('case_manager.myApplication') ? asset('public/images/App-app.svg') : asset('public/images/My_Application.svg') }}"
+                            src="{{ request()->routeIs('case_manager.program_registrations.*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
                             alt="" /></span>
-                    <span class="title">My Application</span>
+                    <span class="title">Program Registrations</span>
                 </a>
             </li>
             <li class="{{ request()->routeIs('case_manager.patientProfiles') ? 'hovered' : '' }}">

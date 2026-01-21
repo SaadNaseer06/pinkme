@@ -42,7 +42,8 @@
                 <div class="flex flex-wrap gap-2">
                     <button type="button" data-quick-field="title" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Title</button>
                     <button type="button" data-quick-field="description" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Description</button>
-                    <button type="button" data-quick-field="event_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Date</button>
+                    <button type="button" data-quick-field="application_start_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Application Start</button>
+                    <button type="button" data-quick-field="application_end_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Application End</button>
                     <button type="button" data-quick-field="event_time" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Time</button>
                     <button type="button" data-quick-field="status" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Status</button>
                     <button type="button" data-quick-field="payment_type" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Payment</button>
@@ -83,8 +84,9 @@
                     class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                     <option value="title">Title</option>
                     <option value="description">Description</option>
-                    <option value="event_date">Date</option>
                     <option value="event_time">Time</option>
+                    <option value="application_start_date">Application Start Date</option>
+                    <option value="application_end_date">Application End Date</option>
                     <option value="status">Status</option>
                     <option value="payment_type">Payment Type</option>
                     <option value="program_fund">Fund Goal</option>
@@ -151,8 +153,9 @@
             const fieldPresets = {
                 title: { label: 'Title', type: 'short_text' },
                 description: { label: 'Description', type: 'long_text' },
-                event_date: { label: 'Date', type: 'date' },
                 event_time: { label: 'Time', type: 'time' },
+                application_start_date: { label: 'Application Start Date', type: 'date' },
+                application_end_date: { label: 'Application End Date', type: 'date' },
                 status: { label: 'Status', type: 'short_text' },
                 payment_type: { label: 'Payment Type', type: 'short_text' },
                 program_fund: { label: 'Fund Goal', type: 'money' },
@@ -323,7 +326,7 @@
 
                 const pickDefaultName = () => {
                     const used = new Set(selectedNames());
-                    const order = ['title', 'description', 'event_date', 'event_time', 'status', 'payment_type', 'program_fund', 'link', 'custom_note'];
+                    const order = ['title', 'description', 'application_start_date', 'application_end_date', 'event_time', 'status', 'payment_type', 'program_fund', 'link', 'custom_note'];
                     const next = order.find((n) => !used.has(n));
                     return next || null;
                 };

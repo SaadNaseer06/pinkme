@@ -1,5 +1,34 @@
 @extends('admin.layouts.admin')
 
+@push('head')
+    <style>
+        .action-spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: action-spin 0.7s linear infinite;
+            margin-left: 6px;
+        }
+
+        .is-loading .action-spinner {
+            display: inline-block;
+        }
+
+        .is-loading .action-text {
+            opacity: 0.8;
+        }
+
+        @keyframes action-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+@endpush
+
 @section('content')
     <div class="container mx-auto py-6">
         <div class="flex justify-between flex-col gap-4 md:flex-row md:items-center mb-6">
@@ -71,22 +100,24 @@
                                     </p>
                                 </div>
                                 <div class="flex flex-col space-y-2">
-                                    <form method="POST" action="{{ route('events.registrations.approve', $registration) }}"
+                                    <form method="POST" action="{{ route('events.registrations.approve', $registration) }}" data-action-loader
                                         class="inline">
                                         @csrf
                                         <button type="submit"
                                             onclick="return confirm('Are you sure you want to approve this registration?')"
                                             class="bg-pink-600 text-white px-3 py-1 text-sm rounded hover:bg-pink-700 transition">
-                                            Approve
+                                            <span class="action-text">Approve</span>
+                                            <span class="action-spinner" aria-hidden="true"></span>
                                         </button>
                                     </form>
-                                    <form method="POST" action="{{ route('events.registrations.reject', $registration) }}"
+                                    <form method="POST" action="{{ route('events.registrations.reject', $registration) }}" data-action-loader
                                         class="inline">
                                         @csrf
                                         <button type="submit"
                                             onclick="return confirm('Are you sure you want to reject this registration?')"
                                             class="bg-red-600 text-white px-3 py-1 text-sm rounded hover:bg-red-700 transition">
-                                            Reject
+                                            <span class="action-text">Reject</span>
+                                            <span class="action-spinner" aria-hidden="true"></span>
                                         </button>
                                     </form>
                                 </div>
@@ -182,7 +213,7 @@
                                 <td class="px-6 py-4 text-sm font-medium">
                                     <div class="flex space-x-3">
                                         @if ($registration->canBeApproved())
-                                            <form method="POST"
+                                            <form method="POST" data-action-loader
                                                 action="{{ route('events.registrations.approve', $registration) }}">
                                                 @csrf
                                                 <button type="submit"
@@ -193,13 +224,14 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2" d="M5 13l4 4L19 7" />
                                                     </svg>
-                                                    Approve
+                                                    <span class="action-text">Approve</span>
+                                                    <span class="action-spinner" aria-hidden="true"></span>
                                                 </button>
                                             </form>
                                         @endif
 
                                         @if ($registration->canBeRejected())
-                                            <form method="POST"
+                                            <form method="POST" data-action-loader
                                                 action="{{ route('events.registrations.reject', $registration) }}">
                                                 @csrf
                                                 <button type="submit" onclick="return confirm('Reject this registration?')"
@@ -209,7 +241,8 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                     </svg>
-                                                    {{ $registration->registration_status === 'confirmed' ? 'Cancel' : 'Reject' }}
+                                                    <span class="action-text">{{ $registration->registration_status === 'confirmed' ? 'Cancel' : 'Reject' }}</span>
+                                                    <span class="action-spinner" aria-hidden="true"></span>
                                                 </button>
                                             </form>
                                         @endif
@@ -325,4 +358,21 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('submit', (event) => {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement)) return;
+            if (!form.matches('[data-action-loader]')) return;
+
+            const button = form.querySelector('button[type="submit"]');
+            if (!button) return;
+
+            button.classList.add('is-loading');
+            button.setAttribute('disabled', 'disabled');
+            button.setAttribute('aria-busy', 'true');
+        }, true);
+    </script>
+@endpush
 

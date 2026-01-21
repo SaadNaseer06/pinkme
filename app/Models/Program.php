@@ -12,6 +12,8 @@ class Program extends Model
         'description',
         'event_date',
         'event_time',
+        'application_start_date',
+        'application_end_date',
         'banner',
         'status',
         'program_fund',
@@ -22,6 +24,8 @@ class Program extends Model
     protected $casts = [
         'event_date' => 'date',
         'event_time' => 'datetime:H:i:s',
+        'application_start_date' => 'date',
+        'application_end_date' => 'date',
         'program_fund' => 'decimal:2',
         'custom_fields' => 'array',
     ];

@@ -42,6 +42,35 @@
 
 @section('title', 'Program Registration Request')
 
+@push('head')
+    <style>
+        .action-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: action-spin 0.7s linear infinite;
+            margin-left: 8px;
+        }
+
+        .is-loading .action-spinner {
+            display: inline-block;
+        }
+
+        .is-loading .action-text {
+            opacity: 0.8;
+        }
+
+        @keyframes action-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+@endpush
+
 @section('content')
     <main class="flex-1">
         <div class="max-w-full mx-auto">
@@ -165,7 +194,10 @@
                     <div class="flex items-center justify-between gap-3 bg-[#FAF7FA] rounded-md px-4 py-3">
                         <span class="text-[#213430] font-medium">Treatment Verification Letter</span>
                         @if ($registration->treatment_letter)
-                            <a href="{{ $registration->treatment_letter['url'] }}" target="_blank" class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                            <div class="flex items-center gap-3">
+                                <a href="{{ $registration->treatment_letter['url'] }}" target="_blank" class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                                <a href="{{ $registration->treatment_letter['url'] }}" download class="inline-flex items-center text-[#213430] font-semibold hover:underline">Download</a>
+                            </div>
                         @else
                             <span class="text-[#6C5F67]">Not provided</span>
                         @endif
@@ -182,7 +214,10 @@
                                 @foreach ($registration->bill_statements as $bill)
                                     <li class="flex items-center justify-between gap-2">
                                         <span class="text-[#213430] truncate">{{ $bill['filename'] }}</span>
-                                        <a href="{{ $bill['url'] }}" target="_blank" class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                                        <div class="flex items-center gap-3">
+                                            <a href="{{ $bill['url'] }}" target="_blank" class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                                            <a href="{{ $bill['url'] }}" download class="inline-flex items-center text-[#213430] font-semibold hover:underline">Download</a>
+                                        </div>
                                     </li>
                                 @endforeach
                             </ul>
@@ -202,7 +237,10 @@
                                 @foreach ($registration->income_documents as $income)
                                     <li class="flex items-center justify-between gap-2">
                                         <span class="text-[#213430] truncate">{{ $income['filename'] }}</span>
-                                        <a href="{{ $income['url'] }}" target="_blank" class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                                        <div class="flex items-center gap-3">
+                                            <a href="{{ $income['url'] }}" target="_blank" class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                                            <a href="{{ $income['url'] }}" download class="inline-flex items-center text-[#213430] font-semibold hover:underline">Download</a>
+                                        </div>
                                     </li>
                                 @endforeach
                             </ul>
@@ -220,8 +258,12 @@
                                 @foreach ($registration->documents as $document)
                                     <li class="flex items-center justify-between gap-2">
                                         <span class="text-[#213430] truncate">{{ $document['filename'] }}</span>
-                                        <a href="{{ $document['url'] }}" target="_blank"
-                                            class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                                        <div class="flex items-center gap-3">
+                                            <a href="{{ $document['url'] }}" target="_blank"
+                                                class="inline-flex items-center text-[#B3477D] font-semibold hover:underline">Preview</a>
+                                            <a href="{{ $document['url'] }}" download
+                                                class="inline-flex items-center text-[#213430] font-semibold hover:underline">Download</a>
+                                        </div>
                                     </li>
                                 @endforeach
                             </ul>
@@ -234,25 +276,27 @@
                 <div class="bg-white rounded-lg p-5 md:p-6 space-y-6 border border-[#E6D8E1]">
                     <h3 class="text-xl font-semibold text-[#213430] app-main">Admin Review</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <form method="POST" action="{{ route('admin.program_registrations.approve', $registration) }}" class="bg-[#F8F2F6] rounded-lg p-4 space-y-3 border border-[#E6D8E1]">
+                        <form method="POST" action="{{ route('admin.program_registrations.approve', $registration) }}" data-action-loader class="bg-[#F8F2F6] rounded-lg p-4 space-y-3 border border-[#E6D8E1]">
                             @csrf
                             <h4 class="font-semibold text-[#213430] app-main">Approve Registration</h4>
                             <p class="text-base text-[#6C5F67] app-text">Optional: add a short note for the applicant.</p>
                             <textarea name="note" rows="3" class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#DB69A2]" placeholder="Optional note"></textarea>
                             <button type="submit"
                                 class="w-full inline-flex justify-center items-center px-4 py-3 bg-[#20B354] text-white rounded-md text-base font-semibold hover:bg-[#1A9444] transition">
-                                Approve Request
+                                <span class="action-text">Approve Request</span>
+                                <span class="action-spinner" aria-hidden="true"></span>
                             </button>
                         </form>
 
-                        <form method="POST" action="{{ route('admin.program_registrations.reject', $registration) }}" class="bg-[#F8F2F6] rounded-lg p-4 space-y-3 border border-[#E6D8E1]">
+                        <form method="POST" action="{{ route('admin.program_registrations.reject', $registration) }}" data-action-loader class="bg-[#F8F2F6] rounded-lg p-4 space-y-3 border border-[#E6D8E1]">
                             @csrf
                             <h4 class="font-semibold text-[#213430] app-main">Reject Registration</h4>
                             <p class="text-base text-[#6C5F67] app-text">Provide a short reason to keep for the record.</p>
                             <textarea name="note" rows="3" required class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#DB69A2]" placeholder="Reason for rejection"></textarea>
                             <button type="submit"
                                 class="w-full inline-flex justify-center items-center px-4 py-3 bg-[#B32020] text-white rounded-md text-base font-semibold hover:bg-[#8F1A1A] transition">
-                                Reject Request
+                                <span class="action-text">Reject Request</span>
+                                <span class="action-spinner" aria-hidden="true"></span>
                             </button>
                         </form>
                     </div>
@@ -286,3 +330,20 @@
         </div>
     </main>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('submit', (event) => {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement)) return;
+            if (!form.matches('[data-action-loader]')) return;
+
+            const button = form.querySelector('button[type="submit"]');
+            if (!button) return;
+
+            button.classList.add('is-loading');
+            button.setAttribute('disabled', 'disabled');
+            button.setAttribute('aria-busy', 'true');
+        }, true);
+    </script>
+@endpush

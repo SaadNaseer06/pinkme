@@ -16,6 +16,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\UserNotification;
+use App\Mail\ProgramRegistrationStatus;
+use Illuminate\Support\Facades\Mail;
 
 class CaseManagerController extends Controller
 {
@@ -214,6 +216,11 @@ class CaseManagerController extends Controller
             ]);
         }
 
+        $recipientEmail = $registration->user?->email ?? $registration->email;
+        if ($recipientEmail) {
+            Mail::to($recipientEmail)->send(new ProgramRegistrationStatus($registration, 'Approved', $data['note'] ?? null));
+        }
+
         return redirect()
             ->route('case_manager.program_registrations.show', $registration)
             ->with('success', 'The registration has been approved.');
@@ -252,6 +259,11 @@ class CaseManagerController extends Controller
                 'priority' => UserNotification::PRIORITY_IMPORTANT,
                 'link_url' => route('patient.programRegistrations.show', $registration),
             ]);
+        }
+
+        $recipientEmail = $registration->user?->email ?? $registration->email;
+        if ($recipientEmail) {
+            Mail::to($recipientEmail)->send(new ProgramRegistrationStatus($registration, 'Rejected', $data['note']));
         }
 
         return redirect()

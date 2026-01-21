@@ -8,6 +8,10 @@
             <div class="max-w-8xl mx-auto space-y-8">
                 <div class="flex items-center justify-between">
                     <h1 class="text-2xl font-semibold text-[#213430] app-main">Sponsors</h1>
+                    <a href="{{ route('admin.sponsors.create') }}"
+                        class="inline-flex items-center px-4 py-2 rounded-md bg-[#DB69A2] text-white text-sm font-medium hover:bg-[#c95791] transition">
+                        Add Sponsor
+                    </a>
                 </div>
                 <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
                             <div x-data="{ showFilters: false }" class="mb-4 ml-3">

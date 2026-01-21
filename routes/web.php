@@ -166,6 +166,8 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::get('/patients/{patient}/applications', [AdminController::class, 'patientApplications'])->name('admin.patients.applications');
     Route::get('/programs-events', [AdminController::class, 'programsAndEvents'])->name('admin.programs-events');
     Route::get('/sponsors', [AdminController::class, 'sponsors'])->name('admin.sponsors');
+    Route::get('/sponsors/create', [AdminSponsorController::class, 'create'])->name('admin.sponsors.create');
+    Route::post('/sponsors', [AdminSponsorController::class, 'store'])->name('admin.sponsors.store');
     Route::get('/sponsors/{sponsor}', [AdminSponsorController::class, 'show'])->name('admin.sponsors.show');
     Route::get('/sponsors/{sponsor}/edit', [AdminSponsorController::class, 'edit'])->name('admin.sponsors.edit');
     Route::put('/sponsors/{sponsor}', [AdminSponsorController::class, 'update'])->name('admin.sponsors.update');

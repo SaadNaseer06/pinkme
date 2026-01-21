@@ -7,10 +7,12 @@ use App\Models\Event;
 use App\Models\EventSponsorship;
 use App\Models\SponsorshipProgram;
 use App\Models\User;
+use App\Mail\EventRegistrationStatus;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class EventController extends Controller
 {
@@ -273,6 +275,11 @@ class EventController extends Controller
         }
         
         $registration->approve();
+
+        $registration->loadMissing(['event', 'sponsor.profile']);
+        if ($registration->sponsor?->email) {
+            Mail::to($registration->sponsor->email)->send(new EventRegistrationStatus($registration, 'Approved'));
+        }
         
         return back()->with('success', 'Event registration approved successfully!');
     }
@@ -287,6 +294,11 @@ class EventController extends Controller
         }
         
         $registration->reject();
+
+        $registration->loadMissing(['event', 'sponsor.profile']);
+        if ($registration->sponsor?->email) {
+            Mail::to($registration->sponsor->email)->send(new EventRegistrationStatus($registration, 'Rejected'));
+        }
         
         return back()->with('success', 'Event registration rejected.');
     }

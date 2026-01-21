@@ -39,7 +39,8 @@
                             <ul class="list-disc list-inside space-y-1">
                                 <li>Title / Summary</li>
                                 <li>Description</li>
-                                <li>Date &amp; Time</li>
+                                <li>Application window (start &amp; end dates)</li>
+                                <li>Time</li>
                                 <li>Status (upcoming, ongoing, completed)</li>
                                 <li>Payment type (full or flexible) &amp; Fund goal</li>
                                 <li>Location / Meeting link / Facilitator</li>
@@ -72,16 +73,21 @@
                             <li class="flex items-start gap-3">
                                 <span
                                     class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">2</span>
-                                Include Date and Time fields to power reminders.
+                                Include a Time field if reminders need a schedule.
                             </li>
                             <li class="flex items-start gap-3">
                                 <span
                                     class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">3</span>
-                                Add Payment type and Fund goal fields if sponsors need that context.
+                                Add application start and end dates to define the intake window.
                             </li>
                             <li class="flex items-start gap-3">
                                 <span
                                     class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">4</span>
+                                Add Payment type and Fund goal fields if sponsors need that context.
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">5</span>
                                 Upload a banner image so the program is instantly recognizable.
                             </li>
                         </ul>
@@ -91,7 +97,7 @@
                         <h3 class="text-base font-semibold text-[#213430]">Quick tips</h3>
                         <p class="mt-3 text-sm text-[#6C5B68]">Everything is custom now - only add what your program needs. Backend-required values are derived from your fields. Banner upload stays separate below.</p>
                         <p class="mt-4 text-xs uppercase tracking-wider text-[#91848C]">Recommended minimum</p>
-                        <p class="mt-1 text-sm text-[#6C5B68]">Title, Description, Date, Time, Status, Payment type, Fund goal + optional banner.</p>
+                        <p class="mt-1 text-sm text-[#6C5B68]">Title, Description, Date, Time, Application start/end, Status, Payment type, Fund goal + optional banner.</p>
                     </div>
                 </aside>
             </form>

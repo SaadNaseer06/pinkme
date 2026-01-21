@@ -4,12 +4,80 @@ namespace App\Http\Controllers;
 
 use App\Models\SponsorDetail;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AdminSponsorController extends Controller
 {
+    public function create()
+    {
+        return view('admin.sponsor.create');
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            // profile
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name'  => ['required', 'string', 'max:255'],
+            'phone'      => ['required', 'string', 'max:50'],
+            // sponsor detail
+            'company_name'        => ['nullable', 'string', 'max:255'],
+            'company_email'       => ['nullable', 'email', 'max:255'],
+            'company_phone'       => ['nullable', 'string', 'max:50'],
+            'registration_number' => ['nullable', 'string', 'max:255'],
+            'company_type'        => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $sponsorRoleId = Role::where('name', 'sponsor')->value('id');
+        if (!$sponsorRoleId) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['role' => 'Sponsor role is not configured.']);
+        }
+
+        $sponsor = null;
+        DB::transaction(function () use ($data, $sponsorRoleId, &$sponsor) {
+            $sponsor = User::create([
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'role_id' => $sponsorRoleId,
+            ]);
+
+            $profile = $sponsor->profile()->create([
+                'first_name' => $data['first_name'] ?? null,
+                'last_name'  => $data['last_name'] ?? null,
+                'full_name'  => trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')),
+                'phone'      => $data['phone'] ?? null,
+                'status'     => 1,
+            ]);
+
+            $hasCompanyData = !empty($data['company_name'])
+                || !empty($data['company_email'])
+                || !empty($data['company_phone'])
+                || !empty($data['registration_number'])
+                || !empty($data['company_type']);
+
+            if ($hasCompanyData) {
+                $sponsor->sponsorDetail()->create([
+                    'company_name'        => $data['company_name'] ?? null,
+                    'company_email'       => $data['company_email'] ?? null,
+                    'company_phone'       => $data['company_phone'] ?? null,
+                    'registration_number' => $data['registration_number'] ?? null,
+                    'company_type'        => $data['company_type'] ?? null,
+                ]);
+            }
+        });
+
+        return redirect()->route('admin.sponsors.show', $sponsor)->with('success', 'Sponsor created successfully.');
+    }
+
     public function show(User $sponsor)
     {
         if (($sponsor->role->name ?? null) !== 'sponsor') {

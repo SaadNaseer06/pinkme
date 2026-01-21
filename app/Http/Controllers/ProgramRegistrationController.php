@@ -59,28 +59,64 @@ class ProgramRegistrationController extends Controller
             'documents.*' => 'nullable|file|max:5120',
         ]);
 
+        $now = now()->format('Ymd_His');
+        $userId = Auth::id() ?? 'guest';
+        $makeFilename = function (string $label, string $extension) use ($userId, $now) {
+            $safeLabel = preg_replace('/[^a-z0-9_]+/i', '_', $label);
+            $safeExt = strtolower($extension ?: 'bin');
+            return strtolower($safeLabel . '_' . $userId . '_' . $now . '_' . Str::random(6) . '.' . $safeExt);
+        };
+
         $treatmentLetterPath = $request->file('treatment_verification_letter')
-            ? $request->file('treatment_verification_letter')->store('program_documents/treatment_letters', 'public')
+            ? $request->file('treatment_verification_letter')->storeAs(
+                'program_documents/treatment_letters',
+                $makeFilename(
+                    'program_' . $request->program_id . '_treatment_letter',
+                    $request->file('treatment_verification_letter')->getClientOriginalExtension()
+                ),
+                'public'
+            )
             : null;
 
         $billStatements = [];
         if ($request->hasFile('bill_statements')) {
             foreach ($request->file('bill_statements') as $bill) {
-                $billStatements[] = $bill->store('program_documents/bill_statements', 'public');
+                $billStatements[] = $bill->storeAs(
+                    'program_documents/bill_statements',
+                    $makeFilename(
+                        'program_' . $request->program_id . '_bill_statement',
+                        $bill->getClientOriginalExtension()
+                    ),
+                    'public'
+                );
             }
         }
 
         $incomeDocuments = [];
         if ($request->hasFile('income_documents')) {
             foreach ($request->file('income_documents') as $doc) {
-                $incomeDocuments[] = $doc->store('program_documents/income', 'public');
+                $incomeDocuments[] = $doc->storeAs(
+                    'program_documents/income',
+                    $makeFilename(
+                        'program_' . $request->program_id . '_income_document',
+                        $doc->getClientOriginalExtension()
+                    ),
+                    'public'
+                );
             }
         }
 
         $additionalDocuments = [];
         if ($request->hasFile('documents')) {
             foreach ($request->file('documents') as $doc) {
-                $additionalDocuments[] = $doc->store('program_documents', 'public');
+                $additionalDocuments[] = $doc->storeAs(
+                    'program_documents',
+                    $makeFilename(
+                        'program_' . $request->program_id . '_document',
+                        $doc->getClientOriginalExtension()
+                    ),
+                    'public'
+                );
             }
         }
 
@@ -94,7 +130,10 @@ class ProgramRegistrationController extends Controller
         $signatureData = $request->input('signature_data');
         if ($signatureData) {
             if (preg_match('/^data:image\\/(png|jpeg);base64,/', $signatureData)) {
-                $signaturePath = 'program_documents/signatures/' . Str::uuid()->toString() . '.png';
+                $signaturePath = 'program_documents/signatures/' . $makeFilename(
+                    'program_' . $request->program_id . '_signature',
+                    'png'
+                );
                 $encoded = substr($signatureData, strpos($signatureData, ',') + 1);
                 Storage::disk('public')->put($signaturePath, base64_decode($encoded));
             } else {

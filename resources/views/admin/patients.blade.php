@@ -47,7 +47,7 @@
                 <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
                     {{-- Header + Filters --}}
                     <div class="flex justify-between flex-col md:flex-row items-center mb-4 ml-3">
-                        <h2 class="text-xl font-semibold text-[#213430] app-main mb-2 md:mb-0">Patients</h2>
+                        <h2 class="text-xl font-semibold text-[#213430] app-main mb-2 md:mb-0">Patients List</h2>
 
                         {{-- ROUTE: adjust if your route name differs --}}
                         <form id="patientsFiltersForm" method="GET" action="{{ route('admin.patients') }}"

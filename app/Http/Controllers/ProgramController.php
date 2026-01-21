@@ -105,6 +105,8 @@ class ProgramController extends Controller
             'description' => ['nullable', 'string'],
             'event_date'  => ['nullable', 'date'],
             'event_time'  => ['nullable', 'date_format:H:i'],
+            'application_start_date' => ['nullable', 'date'],
+            'application_end_date' => ['nullable', 'date'],
             'status'      => ['nullable', 'in:upcoming,ongoing,completed'],
             'payment_type' => ['nullable', 'in:full,flexible'],
             'program_fund' => ['nullable', 'numeric', 'min:0'],
@@ -129,6 +131,15 @@ class ProgramController extends Controller
             $inlineTitle = $this->stringValue($r->input('title'));
             $hasTitleValue = ($inlineTitle !== '') || (bool) $titleValue;
 
+            $fieldValue = function (string $name) use ($fields, $r) {
+                $direct = $r->input($name);
+                if (!empty($direct)) {
+                    return $direct;
+                }
+                $match = $fields->first(fn ($field) => ($field['name'] ?? null) === $name);
+                return $match['value'] ?? null;
+            };
+
             // Prevent duplicate field names
             $names = $fields->pluck('name')->filter()->map(fn ($n) => strtolower(trim($n)));
             $duplicateNames = $names->count() !== $names->unique()->count()
@@ -145,6 +156,20 @@ class ProgramController extends Controller
 
             if (!empty($duplicateNames)) {
                 $validator->errors()->add('custom_fields', 'Do not repeat the same field: ' . implode(', ', $duplicateNames) . '.');
+            }
+
+            $startDate = $fieldValue('application_start_date');
+            $endDate = $fieldValue('application_end_date');
+            if ($startDate && $endDate) {
+                try {
+                    $start = Carbon::parse($startDate);
+                    $end = Carbon::parse($endDate);
+                    if ($end->lt($start)) {
+                        $validator->errors()->add('custom_fields', 'Application end date must be on or after the start date.');
+                    }
+                } catch (\Throwable $e) {
+                    $validator->errors()->add('custom_fields', 'Application dates must be valid.');
+                }
             }
         });
 
@@ -175,6 +200,8 @@ class ProgramController extends Controller
             'description' => ['nullable', 'string'],
             'event_date'  => ['nullable', 'date'],
             'event_time'  => ['nullable', 'date_format:H:i'],
+            'application_start_date' => ['nullable', 'date'],
+            'application_end_date' => ['nullable', 'date'],
             'status'      => ['nullable', 'in:upcoming,ongoing,completed'],
             'payment_type' => ['nullable', 'in:full,flexible'],
             'program_fund' => ['nullable', 'numeric', 'min:0'],
@@ -199,6 +226,15 @@ class ProgramController extends Controller
             $inlineTitle = $this->stringValue($r->input('title'));
             $hasTitleValue = ($inlineTitle !== '') || (bool) $titleValue;
 
+            $fieldValue = function (string $name) use ($fields, $r) {
+                $direct = $r->input($name);
+                if (!empty($direct)) {
+                    return $direct;
+                }
+                $match = $fields->first(fn ($field) => ($field['name'] ?? null) === $name);
+                return $match['value'] ?? null;
+            };
+
             // Prevent duplicate field names
             $names = $fields->pluck('name')->filter()->map(fn ($n) => strtolower(trim($n)));
             $duplicateNames = $names->count() !== $names->unique()->count()
@@ -215,6 +251,20 @@ class ProgramController extends Controller
 
             if (!empty($duplicateNames)) {
                 $validator->errors()->add('custom_fields', 'Do not repeat the same field: ' . implode(', ', $duplicateNames) . '.');
+            }
+
+            $startDate = $fieldValue('application_start_date');
+            $endDate = $fieldValue('application_end_date');
+            if ($startDate && $endDate) {
+                try {
+                    $start = Carbon::parse($startDate);
+                    $end = Carbon::parse($endDate);
+                    if ($end->lt($start)) {
+                        $validator->errors()->add('custom_fields', 'Application end date must be on or after the start date.');
+                    }
+                } catch (\Throwable $e) {
+                    $validator->errors()->add('custom_fields', 'Application dates must be valid.');
+                }
             }
         });
 
@@ -253,6 +303,8 @@ class ProgramController extends Controller
             'description',
             'event_date',
             'event_time',
+            'application_start_date',
+            'application_end_date',
             'status',
             'payment_type',
             'program_fund',
@@ -315,6 +367,8 @@ class ProgramController extends Controller
         $description = $data['description'] ?? $existing?->description;
         $eventDate = $data['event_date'] ?? optional($existing?->event_date)->format('Y-m-d');
         $eventTime = $data['event_time'] ?? ($existing?->event_time ? \Carbon\Carbon::parse($existing->event_time)->format('H:i') : null);
+        $applicationStartDate = $data['application_start_date'] ?? optional($existing?->application_start_date)->format('Y-m-d');
+        $applicationEndDate = $data['application_end_date'] ?? optional($existing?->application_end_date)->format('Y-m-d');
         $status = $data['status'] ?? $existing?->status ?? 'upcoming';
         $paymentType = $data['payment_type'] ?? $existing?->payment_type ?? 'full';
         $programFund = $data['program_fund'] ?? $existing?->program_fund ?? 0;
@@ -341,6 +395,12 @@ class ProgramController extends Controller
                     break;
                 case 'event_time':
                     $eventTime = $value ?: $eventTime;
+                    break;
+                case 'application_start_date':
+                    $applicationStartDate = $value ?: $applicationStartDate;
+                    break;
+                case 'application_end_date':
+                    $applicationEndDate = $value ?: $applicationEndDate;
                     break;
                 case 'status':
                     $candidate = strtolower($this->stringValue($value));
@@ -370,6 +430,8 @@ class ProgramController extends Controller
         $data['description'] = $description ?: 'Details will be shared soon.';
         $data['event_date'] = $this->normalizeDate($eventDate);
         $data['event_time'] = $this->normalizeTime($eventTime);
+        $data['application_start_date'] = $this->normalizeNullableDate($applicationStartDate);
+        $data['application_end_date'] = $this->normalizeNullableDate($applicationEndDate);
         $data['status'] = $status ?: 'upcoming';
         $data['payment_type'] = $paymentType ?: 'full';
         $data['program_fund'] = $programFund ?? 0;
@@ -392,6 +454,19 @@ class ProgramController extends Controller
         }
     }
 
+    private function normalizeNullableDate($value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($value)->toDateString();
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     private function normalizeTime($value): string
     {
         try {
@@ -408,6 +483,8 @@ class ProgramController extends Controller
             'description' => 'Description',
             'event_date' => 'Date',
             'event_time' => 'Time',
+            'application_start_date' => 'Application Start Date',
+            'application_end_date' => 'Application End Date',
             'status' => 'Status',
             'payment_type' => 'Payment Type',
             'program_fund' => 'Fund Goal',

@@ -40,7 +40,7 @@
         </div>
         <div>
             <h3 class="text-[#213430] font-semibold status-cards-h1">
-                Approve Applications
+                Approved Applications
             </h3>
             <p class="text-md font-normal text-[#20B354] text-right status-cards-p">
                 {{ number_format($stats['approved_applications'] ?? 0) }}

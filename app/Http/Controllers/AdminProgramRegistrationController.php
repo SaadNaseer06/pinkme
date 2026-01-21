@@ -6,8 +6,10 @@ use App\Models\ProgramRegistration;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Mail\ProgramRegistrationStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class AdminProgramRegistrationController extends Controller
 {
@@ -106,6 +108,11 @@ class AdminProgramRegistrationController extends Controller
             ]);
         }
 
+        $recipientEmail = $registration->user?->email ?? $registration->email;
+        if ($recipientEmail) {
+            Mail::to($recipientEmail)->send(new ProgramRegistrationStatus($registration, 'Approved', $data['note'] ?? null));
+        }
+
         return redirect()
             ->route('admin.program_registrations.show', $registration)
             ->with('success', 'The registration has been approved.');
@@ -143,6 +150,11 @@ class AdminProgramRegistrationController extends Controller
                 'priority' => UserNotification::PRIORITY_IMPORTANT,
                 'link_url' => route('patient.programRegistrations.show', $registration),
             ]);
+        }
+
+        $recipientEmail = $registration->user?->email ?? $registration->email;
+        if ($recipientEmail) {
+            Mail::to($recipientEmail)->send(new ProgramRegistrationStatus($registration, 'Rejected', $data['note']));
         }
 
         return redirect()

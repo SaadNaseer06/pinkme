@@ -36,7 +36,7 @@
                         <p class="mt-3 max-w-2xl text-sm lg:text-base">{{ $heroSubtitle }}</p>
                     </div>
                     <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-                        <a href="{{ route('admin.sponsors') }}"
+                        <a href="{{ route('admin.programs-events') }}"
                             class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/20 px-5 py-3 text-sm font-medium text-white backdrop-blur transition hover:bg-white/30">Back
                             to events</a>
                         <button type="submit" form="create-event-form"

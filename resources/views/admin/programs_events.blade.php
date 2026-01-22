@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Programs & Events')
 
@@ -47,6 +47,16 @@
                                 <h2 class="text-2xl font-semibold text-[#213430] program-main">Support Programs</h2>
                                 @if ($programs->count() > 0)
                                     <div class="flex items-center space-x-4">
+                                        <form method="GET" class="flex items-center gap-2">
+                                            <label for="programSort" class="text-sm text-[#6C5B68]">Sort by</label>
+                                            <select id="programSort" name="program_sort" onchange="this.form.submit()"
+                                                class="rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                                                <option value="latest" @selected(($programSort ?? 'latest') === 'latest')>Latest</option>
+                                                <option value="oldest" @selected(($programSort ?? 'latest') === 'oldest')>Oldest</option>
+                                                <option value="date_desc" @selected(($programSort ?? 'latest') === 'date_desc')>Date (newest first)</option>
+                                                <option value="date_asc" @selected(($programSort ?? 'latest') === 'date_asc')>Date (oldest first)</option>
+                                            </select>
+                                        </form>
                                         <a href="{{ route('programs.create') }}"
                                             class="flex items-center bg-[#db69a2] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#c25891] transition-colors duration-200">
                                             <span>Add New Program</span>
@@ -73,8 +83,6 @@
                                         $image = $program->banner
                                             ? asset('storage/app/public/' . $program->banner)
                                             : $program->image_url ?? asset('public/images/program-3.png');
-                                        $paymentLabel =
-                                            $program->payment_type === 'flexible' ? 'Flexible Payment' : 'Full Payment';
                                         $detail = [
                                             'type' => 'program',
                                             'title' => $program->title,
@@ -84,10 +92,6 @@
                                             'time' => $programTime ? $programTime->format('h:i A') : null,
                                             'status' => $program->status,
                                             'registrations' => $program->registrations_count ?? 0,
-                                            'total_raised' => $program->total_raised ?? 0,
-                                            'fund_goal' => $program->program_fund,
-                                            'payment_type' => $program->payment_type,
-                                            'payment_label' => $paymentLabel,
                                             'show_url' => route('programs.edit', $program),
                                         ];
                                     @endphp
@@ -105,8 +109,6 @@
                                                         {{ $program->title }}</h3>
                                                     <span
                                                         class="inline-flex items-center rounded-full bg-white/60 px-3 py-1 text-xs font-medium text-[#DB69A2] capitalize">{{ $program->status }}</span>
-                                                    <span
-                                                        class="inline-flex items-center rounded-full bg-[#DB69A2] px-3 py-1 text-xs font-medium text-white">{{ $paymentLabel }}</span>
                                                 </div>
                                                 <p class="text-sm text-[#91848C] program-p">
                                                     {{ Str::limit($program->description, 150) }}</p>
@@ -118,20 +120,12 @@
                                                     <span><i class="fas fa-users mr-1"></i>Registrations:
                                                         {{ $program->registrations_count ?? 0 }}</span>
                                                 </div>
-                                                <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-[#6C5B68]">
-                                                    <span
-                                                        class="inline-flex items-center rounded-md bg-white/70 px-2.5 py-1 font-medium">Raised:
-                                                        ${{ number_format($program->total_raised ?? 0, 2) }}</span>
-                                                    <span
-                                                        class="inline-flex items-center rounded-md bg-white/70 px-2.5 py-1 font-medium">Goal:
-                                                        ${{ number_format($program->program_fund ?? 0, 2) }}</span>
-                                                </div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <a href="{{ route('programs.edit', $program) }}"
                                                 class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-[#213430] shadow-sm hover:bg-[#F6EDF5] transition">Edit</a>
-                                            <button onclick='openDetailModal(@json($detail))'
+                                            <button onclick='openProgramDetailModal(@json($detail))'
                                                 class="bg-[#DB69A2] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#c25891] transition">View
                                                 Details</button>
                                         </div>
@@ -150,8 +144,6 @@
                                                     <div class="flex flex-col items-end gap-1">
                                                         <span
                                                             class="inline-flex items-center rounded-full bg-white/60 px-2 py-0.5 text-[10px] font-semibold text-[#DB69A2] capitalize">{{ $program->status }}</span>
-                                                        <span
-                                                            class="inline-flex items-center rounded-full bg-[#DB69A2] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">{{ $paymentLabel }}</span>
                                                     </div>
                                                 </div>
                                                 <p class="text-xs text-[#91848C] mt-1 program-p">
@@ -163,14 +155,11 @@
                                                             class="far fa-clock mr-1"></i>{{ $programTime?->format('h:i A') ?? 'Time TBA' }}</span>
                                                     <span><i class="fas fa-users mr-1"></i>Regs:
                                                         {{ $program->registrations_count ?? 0 }}</span>
-                                                    <span><i
-                                                            class="fas fa-hand-holding-usd mr-1"></i>${{ number_format($program->total_raised ?? 0, 2) }}
-                                                        / ${{ number_format($program->program_fund ?? 0, 2) }}</span>
                                                 </div>
                                                 <div class="flex gap-2">
                                                     <a href="{{ route('programs.edit', $program) }}"
                                                         class="flex-1 text-center border border-[#213430] text-[#213430] text-xs py-2 rounded-md program-btn">Edit</a>
-                                                    <button onclick='openDetailModal(@json($detail))'
+                                                    <button onclick='openProgramDetailModal(@json($detail))'
                                                         class="flex-1 text-center bg-[#DB69A2] text-white text-xs py-2 rounded-md program-btn">View</button>
                                                 </div>
                                             </div>
@@ -344,7 +333,7 @@
                                                             <button type="submit"
                                                                 class="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 transition">Delete</button>
                                                         </form>
-                                                        <button onclick='openDetailModal(@json($detail))'
+                                                        <button onclick='openEventDetailModal(@json($detail))'
                                                             class="inline-flex items-center justify-center rounded-md border border-transparent bg-[#DB69A2] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#c25891] transition">View</button>
                                                     </div>
                                                 </div>
@@ -373,22 +362,21 @@
             </div>
 
         <!-- Modals -->
-        <!-- Event/Program Details Modal -->
-        <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
-            <div id="detailModalPanel"
+        <!-- Program Details Modal -->
+        <div id="programDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div id="programDetailModalPanel"
                 class="fixed top-0 right-0 h-full w-full max-w-xl bg-[#F3E8EF] shadow-lg rounded-l-2xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
                 <div class="p-4">
                     <div class="border border-[#DCCFD8] rounded-xl bg-white/70 shadow-sm">
                         <div class="flex items-start justify-between p-5 border-b border-[#DCCFD8]">
                             <div>
-                                <p class="text-xs uppercase tracking-wider text-[#91848C]" id="detailModalType">Loading
-                                    type...</p>
-                                <h2 class="text-2xl font-semibold text-gray-900 program-main" id="detailModalTitle">
+                                <p class="text-xs uppercase tracking-wider text-[#91848C]" id="programDetailModalType">Program</p>
+                                <h2 class="text-2xl font-semibold text-gray-900 program-main" id="programDetailModalTitle">
                                     Loading...
                                 </h2>
                             </div>
-                            <button onclick="closeDetailModal()" class="text-[#91848C] hover:text-[#213430] transition"
-                                aria-label="Close details">
+                            <button onclick="closeProgramDetailModal()"
+                                class="text-[#91848C] hover:text-[#213430] transition" aria-label="Close program details">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                     fill="currentColor">
                                     <path fill-rule="evenodd"
@@ -398,94 +386,153 @@
                             </button>
                         </div>
                         <div class="w-full h-64 overflow-hidden">
-                            <img id="detailModalImage" src="{{ asset('public/images/program-details.png') }}"
+                            <img id="programDetailModalImage" src="{{ asset('public/images/program-details.png') }}"
                                 alt="" class="w-full h-full object-cover" />
                         </div>
                         <div class="p-5 space-y-6 text-sm">
-                            <p class="text-[#4A3F47] leading-relaxed" id="detailModalDescription">Loading description...
-                            </p>
+                            <p class="text-[#4A3F47] leading-relaxed" id="programDetailModalDescription">Loading description...</p>
 
-                            <div id="detailModalScheduleWrapper">
+                            <div id="programDetailModalScheduleWrapper">
                                 <h3 class="text-lg font-medium text-[#213430] mb-3 app-main">Schedule</h3>
                                 <div class="grid gap-4 sm:grid-cols-2">
                                     <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3">
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Date</span>
-                                        <p class="text-[#213430]" id="detailModalDate">Loading date...</p>
+                                        <p class="text-[#213430]" id="programDetailModalDate">Loading date...</p>
                                     </div>
                                     <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
-                                        id="detailModalTimeWrapper">
+                                        id="programDetailModalTimeWrapper">
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Time</span>
-                                        <p class="text-[#213430]" id="detailModalTime">Loading time...</p>
-                                    </div>
-                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
-                                        id="detailModalEndDateWrapper" hidden>
-                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">End Date</span>
-                                        <p class="text-[#213430]" id="detailModalEndDate">Loading end date...</p>
-                                    </div>
-                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
-                                        id="detailModalEndTimeWrapper" hidden>
-                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">End Time</span>
-                                        <p class="text-[#213430]" id="detailModalEndTime">Loading end time...</p>
+                                        <p class="text-[#213430]" id="programDetailModalTime">Loading time...</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div>
                                 <h3 class="text-lg font-medium text-[#213430] mb-3 app-main">At a glance</h3>
-                                <div class="grid gap-3 sm:grid-cols-2" id="detailModalInfoGrid">
-                                    {{-- <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
-                                        id="detailModalLocationWrapper" hidden>
-                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Location</span>
-                                        <p class="text-[#213430]" id="detailModalLocation">&mdash;</p>
-                                    </div> --}}
+                                <div class="grid gap-3 sm:grid-cols-2" id="programDetailModalInfoGrid">
                                     <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
-                                        id="detailModalStatusWrapper" hidden>
+                                        id="programDetailModalStatusWrapper" hidden>
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Status</span>
-                                        <p class="text-[#213430]" id="detailModalStatus">&mdash;</p>
+                                        <p class="text-[#213430]" id="programDetailModalStatus">&mdash;</p>
                                     </div>
                                     <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
-                                        id="detailModalPaymentWrapper" hidden>
-                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Payment Type</span>
-                                        <p class="text-[#213430]" id="detailModalPayment">&mdash;</p>
-                                    </div>
-                                    {{-- <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
-                                        id="detailModalSponsorsWrapper" hidden>
-                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Sponsors</span>
-                                        <p class="text-[#213430]" id="detailModalSponsors">&mdash;</p>
-                                    </div> --}}
-                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
-                                        id="detailModalRegistrationsWrapper" hidden>
-                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Patient Registrations</span>
-                                        <p class="text-[#213430]" id="detailModalRegistrations">—</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="detailModalFundingWrapper"
-                                class="rounded-lg border border-[#DCCFD8] bg-white px-4 py-4" hidden>
-                                <div class="flex flex-wrap items-center gap-4">
-                                    <div>
-                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Raised so far</span>
-                                        <p class="text-lg font-semibold text-[#213430]" id="detailModalRaised">$0.00</p>
-                                    </div>
-                                    <div id="detailModalGoalWrapper">
-                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Funding goal</span>
-                                        <p class="text-lg font-semibold text-[#213430]" id="detailModalGoal">$0.00</p>
+                                        id="programDetailModalRegistrationsWrapper" hidden>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Applications Received</span>
+                                        <p class="text-[#213430]" id="programDetailModalRegistrations">0</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="flex flex-wrap justify-end gap-3 pt-2">
-                                <button onclick="closeDetailModal()"
+                                <button onclick="closeProgramDetailModal()"
                                     class="px-5 py-3 bg-transparent border border-[#DCCFD8] text-[#91848C] rounded-md app-text">Cancel</button>
-                                <a id="detailModalPrimaryLink" href="#"
+                                <a id="programDetailModalPrimaryLink" href="#"
                                     class="px-6 py-3 bg-[#DB69A2] text-white rounded-lg hover:bg-[#c25891] transition app-text hidden"
-                                    target="_self">Open record</a>
+                                    target="_self">Open program</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Event Details Modal -->
+        <div id="eventDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div id="eventDetailModalPanel"
+                class="fixed top-0 right-0 h-full w-full max-w-xl bg-[#F3E8EF] shadow-lg rounded-l-2xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+                <div class="p-4">
+                    <div class="border border-[#DCCFD8] rounded-xl bg-white/70 shadow-sm">
+                        <div class="flex items-start justify-between p-5 border-b border-[#DCCFD8]">
+                            <div>
+                                <p class="text-xs uppercase tracking-wider text-[#91848C]" id="eventDetailModalType">Event</p>
+                                <h2 class="text-2xl font-semibold text-gray-900 program-main" id="eventDetailModalTitle">
+                                    Loading...
+                                </h2>
+                            </div>
+                            <button onclick="closeEventDetailModal()"
+                                class="text-[#91848C] hover:text-[#213430] transition" aria-label="Close event details">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 8.586l4.95-4.95a1 1 0 111.414 1.414L11.414 10l4.95 4.95a1 1 0 01-1.414 1.414L10 11.414l-4.95 4.95a1 1 0 01-1.414-1.414L8.586 10l-4.95-4.95A1 1 0 115.05 3.636L10 8.586z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="w-full h-64 overflow-hidden">
+                            <img id="eventDetailModalImage" src="{{ asset('public/images/program-details.png') }}"
+                                alt="" class="w-full h-full object-cover" />
+                        </div>
+                        <div class="p-5 space-y-6 text-sm">
+                            <p class="text-[#4A3F47] leading-relaxed" id="eventDetailModalDescription">Loading description...</p>
+
+                            <div id="eventDetailModalScheduleWrapper">
+                                <h3 class="text-lg font-medium text-[#213430] mb-3 app-main">Schedule</h3>
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3">
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Date</span>
+                                        <p class="text-[#213430]" id="eventDetailModalDate">Loading date...</p>
+                                    </div>
+                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                        id="eventDetailModalTimeWrapper">
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Time</span>
+                                        <p class="text-[#213430]" id="eventDetailModalTime">Loading time...</p>
+                                    </div>
+                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                        id="eventDetailModalEndDateWrapper" hidden>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">End Date</span>
+                                        <p class="text-[#213430]" id="eventDetailModalEndDate">Loading end date...</p>
+                                    </div>
+                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                        id="eventDetailModalEndTimeWrapper" hidden>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">End Time</span>
+                                        <p class="text-[#213430]" id="eventDetailModalEndTime">Loading end time...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-medium text-[#213430] mb-3 app-main">At a glance</h3>
+                                <div class="grid gap-3 sm:grid-cols-2" id="eventDetailModalInfoGrid">
+                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                        id="eventDetailModalStatusWrapper" hidden>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Status</span>
+                                        <p class="text-[#213430]" id="eventDetailModalStatus">&mdash;</p>
+                                    </div>
+                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                        id="eventDetailModalPaymentWrapper" hidden>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Payment Type</span>
+                                        <p class="text-[#213430]" id="eventDetailModalPayment">&mdash;</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="eventDetailModalFundingWrapper"
+                                class="rounded-lg border border-[#DCCFD8] bg-white px-4 py-4" hidden>
+                                <div class="flex flex-wrap items-center gap-4">
+                                    <div>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Raised so far</span>
+                                        <p class="text-lg font-semibold text-[#213430]" id="eventDetailModalRaised">$0.00</p>
+                                    </div>
+                                    <div id="eventDetailModalGoalWrapper">
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Funding goal</span>
+                                        <p class="text-lg font-semibold text-[#213430]" id="eventDetailModalGoal">$0.00</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap justify-end gap-3 pt-2">
+                                <button onclick="closeEventDetailModal()"
+                                    class="px-5 py-3 bg-transparent border border-[#DCCFD8] text-[#91848C] rounded-md app-text">Cancel</button>
+                                <a id="eventDetailModalPrimaryLink" href="#"
+                                    class="px-6 py-3 bg-[#DB69A2] text-white rounded-lg hover:bg-[#c25891] transition app-text hidden"
+                                    target="_self">Open event</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 @endsection
 
 @push('scripts')
@@ -526,11 +573,92 @@
             localStorage.setItem('programEventsActiveTab', tabId);
         }
 
-        // Universal Detail Modal functions
-        function openDetailModal(payload) {
+        // Detail modal functions
+        const applyValue = (wrapperId, valueId, value, formatter) => {
+            const wrapper = document.getElementById(wrapperId);
+            if (!wrapper) return;
+            const target = valueId ? document.getElementById(valueId) : wrapper.querySelector('p');
+            if (value === undefined || value === null || value === '') {
+                wrapper.setAttribute('hidden', 'hidden');
+                if (target) target.textContent = 'N/A';
+                return;
+            }
+            wrapper.removeAttribute('hidden');
+            if (target) target.textContent = typeof formatter === 'function' ? formatter(value) : value;
+        };
+
+        const toCurrency = (val) => {
+            const num = typeof val === 'number' ? val : parseFloat(val);
+            if (Number.isFinite(num)) {
+                return `$${num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            }
+            return null;
+        };
+
+        const toTitleCase = (value) => {
+            if (value === undefined || value === null) return '';
+            const str = value.toString().replace(/_/g, ' ');
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        };
+
+        function openProgramDetailModal(payload) {
+            openDetailModal(payload, {
+                modalId: 'programDetailModal',
+                panelId: 'programDetailModalPanel',
+                typeId: 'programDetailModalType',
+                titleId: 'programDetailModalTitle',
+                descriptionId: 'programDetailModalDescription',
+                imageId: 'programDetailModalImage',
+                scheduleWrapperId: 'programDetailModalScheduleWrapper',
+                dateId: 'programDetailModalDate',
+                timeId: 'programDetailModalTime',
+                timeWrapperId: 'programDetailModalTimeWrapper',
+                statusWrapperId: 'programDetailModalStatusWrapper',
+                statusValueId: 'programDetailModalStatus',
+                registrationsWrapperId: 'programDetailModalRegistrationsWrapper',
+                registrationsValueId: 'programDetailModalRegistrations',
+                primaryLinkId: 'programDetailModalPrimaryLink',
+                typeLabel: 'Program',
+                showEndDates: false,
+            });
+        }
+
+        function openEventDetailModal(payload) {
+            openDetailModal(payload, {
+                modalId: 'eventDetailModal',
+                panelId: 'eventDetailModalPanel',
+                typeId: 'eventDetailModalType',
+                titleId: 'eventDetailModalTitle',
+                descriptionId: 'eventDetailModalDescription',
+                imageId: 'eventDetailModalImage',
+                scheduleWrapperId: 'eventDetailModalScheduleWrapper',
+                dateId: 'eventDetailModalDate',
+                timeId: 'eventDetailModalTime',
+                timeWrapperId: 'eventDetailModalTimeWrapper',
+                endDateWrapperId: 'eventDetailModalEndDateWrapper',
+                endDateId: 'eventDetailModalEndDate',
+                endTimeWrapperId: 'eventDetailModalEndTimeWrapper',
+                endTimeId: 'eventDetailModalEndTime',
+                statusWrapperId: 'eventDetailModalStatusWrapper',
+                statusValueId: 'eventDetailModalStatus',
+                paymentWrapperId: 'eventDetailModalPaymentWrapper',
+                paymentValueId: 'eventDetailModalPayment',
+                registrationsWrapperId: 'eventDetailModalRegistrationsWrapper',
+                registrationsValueId: 'eventDetailModalRegistrations',
+                fundingWrapperId: 'eventDetailModalFundingWrapper',
+                raisedId: 'eventDetailModalRaised',
+                goalWrapperId: 'eventDetailModalGoalWrapper',
+                goalId: 'eventDetailModalGoal',
+                primaryLinkId: 'eventDetailModalPrimaryLink',
+                typeLabel: 'Event',
+                showEndDates: true,
+            });
+        }
+
+        function openDetailModal(payload, config) {
             const data = payload || {};
-            const modal = document.getElementById('detailModal');
-            const panel = document.getElementById('detailModalPanel');
+            const modal = document.getElementById(config.modalId);
+            const panel = document.getElementById(config.panelId);
 
             const title = data.title || 'Record details';
             const type = data.type ? data.type.toString().replace(/_/g, ' ') : '';
@@ -542,132 +670,139 @@
             const date = data.date || null;
             const time = data.time || null;
 
-            document.getElementById('detailModalTitle').textContent = title;
-            document.getElementById('detailModalType').textContent = prettyType;
-            const descriptionEl = document.getElementById('detailModalDescription');
-            if (descriptionHtml) {
-                descriptionEl.innerHTML = descriptionHtml;
-            } else {
-                descriptionEl.textContent = description;
+            const typeEl = document.getElementById(config.typeId);
+            if (typeEl) {
+                typeEl.textContent = config.typeLabel || prettyType;
             }
-            const imageEl = document.getElementById('detailModalImage');
-            imageEl.src = imageUrl;
-            imageEl.alt = title;
+            const titleEl = document.getElementById(config.titleId);
+            if (titleEl) {
+                titleEl.textContent = title;
+            }
+            const descriptionEl = document.getElementById(config.descriptionId);
+            if (descriptionEl) {
+                if (descriptionHtml) {
+                    descriptionEl.innerHTML = descriptionHtml;
+                } else {
+                    descriptionEl.textContent = description;
+                }
+            }
+            const imageEl = document.getElementById(config.imageId);
+            if (imageEl) {
+                imageEl.src = imageUrl;
+                imageEl.alt = title;
+            }
 
-            const scheduleWrapper = document.getElementById('detailModalScheduleWrapper');
-            const timeWrapper = document.getElementById('detailModalTimeWrapper');
-            const endDateWrapper = document.getElementById('detailModalEndDateWrapper');
-            const endTimeWrapper = document.getElementById('detailModalEndTimeWrapper');
-            const dateEl = document.getElementById('detailModalDate');
-            const timeEl = document.getElementById('detailModalTime');
-            const endDateEl = document.getElementById('detailModalEndDate');
-            const endTimeEl = document.getElementById('detailModalEndTime');
+            const scheduleWrapper = document.getElementById(config.scheduleWrapperId);
+            const timeWrapper = document.getElementById(config.timeWrapperId);
+            const dateEl = document.getElementById(config.dateId);
+            const timeEl = document.getElementById(config.timeId);
 
-            if (date) {
-                dateEl.textContent = date;
+            if (dateEl) {
+                if (date) {
+                    dateEl.textContent = date;
+                } else {
+                    dateEl.textContent = 'Date not specified';
+                }
+            }
+            if (scheduleWrapper) {
                 scheduleWrapper.removeAttribute('hidden');
-            } else {
-                dateEl.textContent = 'Date not specified';
-                scheduleWrapper.removeAttribute('hidden');
             }
 
-            if (time) {
-                timeEl.textContent = time;
-                timeWrapper.removeAttribute('hidden');
-            } else {
-                timeEl.textContent = 'Time not specified';
-                timeWrapper.setAttribute('hidden', 'hidden');
-            }
-
-            if (data.end_date) {
-                endDateEl.textContent = data.end_date;
-                endDateWrapper.removeAttribute('hidden');
-            } else {
-                endDateEl.textContent = 'End date not specified';
-                endDateWrapper.setAttribute('hidden', 'hidden');
-            }
-
-            if (data.end_time) {
-                endTimeEl.textContent = data.end_time;
-                endTimeWrapper.removeAttribute('hidden');
-            } else {
-                endTimeEl.textContent = 'End time not specified';
-                endTimeWrapper.setAttribute('hidden', 'hidden');
-            }
-
-            const applyValue = (wrapperId, value, formatter) => {
-                const wrapper = document.getElementById(wrapperId);
-                if (!wrapper) return;
-                const target = wrapper.querySelector('p');
-                if (value === undefined || value === null || value === '') {
-                    wrapper.setAttribute('hidden', 'hidden');
-                    if (target) target.textContent = 'N/A';
-                    return;
+            if (timeEl && timeWrapper) {
+                if (time) {
+                    timeEl.textContent = time;
+                    timeWrapper.removeAttribute('hidden');
+                } else {
+                    timeEl.textContent = 'Time not specified';
+                    timeWrapper.setAttribute('hidden', 'hidden');
                 }
-                wrapper.removeAttribute('hidden');
-                if (target) target.textContent = typeof formatter === 'function' ? formatter(value) : value;
-            };
+            }
 
-            applyValue('detailModalLocationWrapper', data.location, (val) => val);
-            applyValue('detailModalStatusWrapper', data.status, (val) => {
-                const str = val.toString();
-                return str.charAt(0).toUpperCase() + str.slice(1);
-            });
-            const paymentRaw = data.payment_label || data.payment_type;
-            const hasPaymentLabel = Boolean(data.payment_label);
-            applyValue('detailModalPaymentWrapper', paymentRaw, (val) => {
-                if (hasPaymentLabel) {
-                    return val;
+            if (config.showEndDates) {
+                const endDateWrapper = document.getElementById(config.endDateWrapperId);
+                const endTimeWrapper = document.getElementById(config.endTimeWrapperId);
+                const endDateEl = document.getElementById(config.endDateId);
+                const endTimeEl = document.getElementById(config.endTimeId);
+
+                if (endDateEl && endDateWrapper) {
+                    if (data.end_date) {
+                        endDateEl.textContent = data.end_date;
+                        endDateWrapper.removeAttribute('hidden');
+                    } else {
+                        endDateEl.textContent = '';
+                        endDateWrapper.setAttribute('hidden', 'hidden');
+                    }
                 }
-                const str = val.toString().replace(/_/g, ' ');
-                return str.charAt(0).toUpperCase() + str.slice(1);
-            });
-            applyValue('detailModalSponsorsWrapper', data.sponsor_count, (val) =>
-                `${val} sponsor${parseInt(val, 10) === 1 ? '' : 's'}`);
-            applyValue('detailModalRegistrationsWrapper', data.registrations, (val) => `${val}`);
 
-            const fundingWrapper = document.getElementById('detailModalFundingWrapper');
-            const goalWrapper = document.getElementById('detailModalGoalWrapper');
-            const raisedEl = document.getElementById('detailModalRaised');
-            const goalEl = document.getElementById('detailModalGoal');
-
-            const toCurrency = (val) => {
-                const num = typeof val === 'number' ? val : parseFloat(val);
-                if (Number.isFinite(num)) {
-                    return `$${num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                if (endTimeEl && endTimeWrapper) {
+                    if (data.end_time) {
+                        endTimeEl.textContent = data.end_time;
+                        endTimeWrapper.removeAttribute('hidden');
+                    } else {
+                        endTimeEl.textContent = '';
+                        endTimeWrapper.setAttribute('hidden', 'hidden');
+                    }
                 }
-                return null;
-            };
+            }
+
+            applyValue(config.statusWrapperId, config.statusValueId, data.status, (val) => toTitleCase(val));
+
+            if (config.paymentWrapperId && config.paymentValueId) {
+                const paymentRaw = data.payment_label || data.payment_type;
+                const hasPaymentLabel = Boolean(data.payment_label);
+                applyValue(config.paymentWrapperId, config.paymentValueId, paymentRaw, (val) => {
+                    if (hasPaymentLabel) {
+                        return val;
+                    }
+                    return toTitleCase(val);
+                });
+            }
+
+            applyValue(
+                config.registrationsWrapperId,
+                config.registrationsValueId,
+                data.registrations,
+                (val) => `${val}`
+            );
+
+            const fundingWrapper = document.getElementById(config.fundingWrapperId);
+            const goalWrapper = document.getElementById(config.goalWrapperId);
+            const raisedEl = document.getElementById(config.raisedId);
+            const goalEl = document.getElementById(config.goalId);
 
             const raisedText = toCurrency(data.total_raised);
             const goalText = toCurrency(data.fund_goal);
 
-            if (raisedText || goalText) {
-                fundingWrapper.removeAttribute('hidden');
-                raisedEl.textContent = raisedText || '$0.00';
-                if (goalText) {
-                    goalWrapper.removeAttribute('hidden');
-                    goalEl.textContent = goalText;
+            if (fundingWrapper && raisedEl && goalEl && goalWrapper) {
+                if (raisedText || goalText) {
+                    fundingWrapper.removeAttribute('hidden');
+                    raisedEl.textContent = raisedText || '$0.00';
+                    if (goalText) {
+                        goalWrapper.removeAttribute('hidden');
+                        goalEl.textContent = goalText;
+                    } else {
+                        goalWrapper.setAttribute('hidden', 'hidden');
+                        goalEl.textContent = '';
+                    }
                 } else {
+                    fundingWrapper.setAttribute('hidden', 'hidden');
+                    raisedEl.textContent = '$0.00';
                     goalWrapper.setAttribute('hidden', 'hidden');
                     goalEl.textContent = '';
                 }
-            } else {
-                fundingWrapper.setAttribute('hidden', 'hidden');
-                raisedEl.textContent = '$0.00';
-                goalWrapper.setAttribute('hidden', 'hidden');
-                goalEl.textContent = '';
             }
 
-            const primaryLink = document.getElementById('detailModalPrimaryLink');
-            if (data.show_url) {
-                primaryLink.href = data.show_url;
-                primaryLink.textContent = data.type === 'event' ? 'Open event' : (data.type === 'program' ? 'Open program' :
-                    'Open record');
-                primaryLink.classList.remove('hidden');
-            } else {
-                primaryLink.href = '#';
-                primaryLink.classList.add('hidden');
+            const primaryLink = document.getElementById(config.primaryLinkId);
+            if (primaryLink) {
+                if (data.show_url) {
+                    primaryLink.href = data.show_url;
+                    primaryLink.textContent = data.type === 'event' ? 'Open event' : (data.type === 'program' ? 'Open program' :
+                        'Open record');
+                    primaryLink.classList.remove('hidden');
+                } else {
+                    primaryLink.href = '#';
+                    primaryLink.classList.add('hidden');
+                }
             }
 
             if (modal && panel) {
@@ -679,9 +814,9 @@
             }
         }
 
-        function closeDetailModal() {
-            const modal = document.getElementById('detailModal');
-            const panel = document.getElementById('detailModalPanel');
+        function closeDetailModal(modalId, panelId) {
+            const modal = document.getElementById(modalId);
+            const panel = document.getElementById(panelId);
             if (modal && panel) {
                 panel.classList.remove('translate-x-0');
                 panel.classList.add('translate-x-full');
@@ -691,11 +826,23 @@
             }
         }
 
+        function closeProgramDetailModal() {
+            closeDetailModal('programDetailModal', 'programDetailModalPanel');
+        }
+
+        function closeEventDetailModal() {
+            closeDetailModal('eventDetailModal', 'eventDetailModalPanel');
+        }
+
         // Close detail modal when clicking outside the panel
         window.addEventListener("click", function(e) {
-            const detailModal = document.getElementById('detailModal');
-            if (e.target === detailModal) {
-                closeDetailModal();
+            const programModal = document.getElementById('programDetailModal');
+            const eventModal = document.getElementById('eventDetailModal');
+            if (e.target === programModal) {
+                closeProgramDetailModal();
+            }
+            if (e.target === eventModal) {
+                closeEventDetailModal();
             }
         });
     </script>

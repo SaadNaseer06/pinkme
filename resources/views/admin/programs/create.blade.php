@@ -15,7 +15,7 @@
                         <p class="mt-3 text-sm lg:text-base max-w-xl opacity-95">Build every field you need - titles, descriptions, dates, payments, and more - using the flexible field builder below, then add an optional banner image.</p>
                     </div>
                     <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-                        <a href="{{ route('admin.sponsors') }}"
+                        <a href="{{ route('admin.programs-events') }}"
                             class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/25 px-5 py-3 text-sm font-medium text-white backdrop-blur transition hover:bg-white/30">Back
                             to programs</a>
                         <button type="submit" form="create-program-form"
@@ -41,8 +41,9 @@
                                 <li>Description</li>
                                 <li>Application window (start &amp; end dates)</li>
                                 <li>Time</li>
+                                <li>Maximum applications (e.g. 10)</li>
                                 <li>Status (upcoming, ongoing, completed)</li>
-                                <li>Payment type (full or flexible) &amp; Fund goal</li>
+                                <li>Maximum applications and status</li>
                                 <li>Location / Meeting link / Facilitator</li>
                             </ul>
                         </div>
@@ -83,11 +84,16 @@
                             <li class="flex items-start gap-3">
                                 <span
                                     class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">4</span>
-                                Add Payment type and Fund goal fields if sponsors need that context.
+                                Add a maximum applications field to cap submissions.
                             </li>
                             <li class="flex items-start gap-3">
                                 <span
                                     class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">5</span>
+                                Add maximum applications and status to control availability.
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">6</span>
                                 Upload a banner image so the program is instantly recognizable.
                             </li>
                         </ul>
@@ -97,7 +103,7 @@
                         <h3 class="text-base font-semibold text-[#213430]">Quick tips</h3>
                         <p class="mt-3 text-sm text-[#6C5B68]">Everything is custom now - only add what your program needs. Backend-required values are derived from your fields. Banner upload stays separate below.</p>
                         <p class="mt-4 text-xs uppercase tracking-wider text-[#91848C]">Recommended minimum</p>
-                        <p class="mt-1 text-sm text-[#6C5B68]">Title, Description, Date, Time, Application start/end, Status, Payment type, Fund goal + optional banner.</p>
+                        <p class="mt-1 text-sm text-[#6C5B68]">Title, Description, Time, Application start/end, Maximum applications, Status + optional banner.</p>
                     </div>
                 </aside>
             </form>

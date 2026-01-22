@@ -14,10 +14,9 @@ class Program extends Model
         'event_time',
         'application_start_date',
         'application_end_date',
+        'max_applications',
         'banner',
         'status',
-        'program_fund',
-        'payment_type', // 'full' or 'flexible'
         'custom_fields',
     ];
 
@@ -26,7 +25,7 @@ class Program extends Model
         'event_time' => 'datetime:H:i:s',
         'application_start_date' => 'date',
         'application_end_date' => 'date',
-        'program_fund' => 'decimal:2',
+        'max_applications' => 'integer',
         'custom_fields' => 'array',
     ];
 
@@ -39,4 +38,5 @@ class Program extends Model
     {
         return $this->hasMany(ProgramRegistration::class);
     }
+
 }

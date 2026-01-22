@@ -8,7 +8,7 @@
 <section class="rounded-2xl border border-[#E9DCE7] bg-white shadow-sm">
     <div class="flex flex-col gap-1 border-b border-[#F1E5EF] px-6 py-5">
         <h2 class="text-lg font-semibold text-[#213430]">Additional Program Fields</h2>
-        <p class="mt-1 text-sm text-[#6C5B68]">Pick a field name from the list (title, description, dates, payment, fund, etc.) so it maps correctly everywhere.</p>
+        <p class="mt-1 text-sm text-[#6C5B68]">Pick a field name from the list (title, description, dates, fund, etc.) so it maps correctly everywhere.</p>
     </div>
 
     <div class="px-6 py-6">
@@ -46,8 +46,7 @@
                     <button type="button" data-quick-field="application_end_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Application End</button>
                     <button type="button" data-quick-field="event_time" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Time</button>
                     <button type="button" data-quick-field="status" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Status</button>
-                    <button type="button" data-quick-field="payment_type" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Payment</button>
-                    <button type="button" data-quick-field="program_fund" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Fund goal</button>
+                    <button type="button" data-quick-field="max_applications" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Max Applications</button>
                 </div>
                 <p class="text-xs text-[#91848C]">Quick-add drops in the right label and type. Edit values on the right.</p>
             </div>
@@ -88,8 +87,7 @@
                     <option value="application_start_date">Application Start Date</option>
                     <option value="application_end_date">Application End Date</option>
                     <option value="status">Status</option>
-                    <option value="payment_type">Payment Type</option>
-                    <option value="program_fund">Fund Goal</option>
+                    <option value="max_applications">Maximum Applications</option>
                     <option value="link">Link</option>
                     <option value="custom_note">Additional Note</option>
                 </select>
@@ -157,8 +155,7 @@
                 application_start_date: { label: 'Application Start Date', type: 'date' },
                 application_end_date: { label: 'Application End Date', type: 'date' },
                 status: { label: 'Status', type: 'short_text' },
-                payment_type: { label: 'Payment Type', type: 'short_text' },
-                program_fund: { label: 'Fund Goal', type: 'money' },
+                max_applications: { label: 'Maximum Applications', type: 'number' },
                 link: { label: 'Link', type: 'link' },
                 custom_note: { label: 'Additional Note', type: 'long_text' },
             };
@@ -226,13 +223,13 @@
                     select.innerHTML = `
                         <option value="upcoming">Upcoming</option>
                         <option value="ongoing">Ongoing</option>
-                        <option value="completed">Completed</option>
                     `;
-                    select.value = (value && ['upcoming', 'ongoing', 'completed'].includes(String(value).toLowerCase()))
+                    select.value = (value && ['upcoming', 'ongoing'].includes(String(value).toLowerCase()))
                         ? String(value).toLowerCase()
                         : 'upcoming';
                     return select;
                 }
+
 
                 if (type === 'long_text') {
                     const wrapper = document.createElement('div');
@@ -326,7 +323,7 @@
 
                 const pickDefaultName = () => {
                     const used = new Set(selectedNames());
-                    const order = ['title', 'description', 'application_start_date', 'application_end_date', 'event_time', 'status', 'payment_type', 'program_fund', 'link', 'custom_note'];
+                    const order = ['title', 'description', 'application_start_date', 'application_end_date', 'event_time', 'max_applications', 'status', 'link', 'custom_note'];
                     const next = order.find((n) => !used.has(n));
                     return next || null;
                 };

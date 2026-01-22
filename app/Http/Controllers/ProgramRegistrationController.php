@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProgramRegistration;
+use App\Models\Program;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -58,6 +59,16 @@ class ProgramRegistrationController extends Controller
             'documents' => 'nullable|array',
             'documents.*' => 'nullable|file|max:5120',
         ]);
+
+        $program = Program::findOrFail($request->program_id);
+        if ($program->max_applications) {
+            $currentCount = ProgramRegistration::where('program_id', $program->id)->count();
+            if ($currentCount >= $program->max_applications) {
+                return redirect()->back()->withErrors([
+                    'program_id' => 'This program is no longer accepting applications.',
+                ]);
+            }
+        }
 
         $now = now()->format('Ymd_His');
         $userId = Auth::id() ?? 'guest';
@@ -180,6 +191,13 @@ class ProgramRegistrationController extends Controller
             'income_document_paths' => $incomeDocuments,
             'status' => ProgramRegistration::STATUS_PENDING,
         ]);
+
+        if ($program->max_applications) {
+            $currentCount = ProgramRegistration::where('program_id', $program->id)->count();
+            if ($currentCount >= $program->max_applications && $program->status !== 'completed') {
+                $program->update(['status' => 'completed']);
+            }
+        }
 
         // Flash a professional success message back to the session and redirect
         return redirect()->back()->with(

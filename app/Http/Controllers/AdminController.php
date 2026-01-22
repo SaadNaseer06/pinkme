@@ -472,7 +472,7 @@ class AdminController extends Controller
         return view('admin.sponsors', compact('sponsors'));
     }
 
-    public function programsAndEvents()
+    public function programsAndEvents(Request $request)
     {
         $events = Event::with(['sponsors'])
             ->withCount('sponsors')
@@ -480,15 +480,34 @@ class AdminController extends Controller
             ->orderByDesc('date')
             ->get();
 
-        $programs = Program::with(['registrations'])
-            ->withCount('registrations')
-            ->withSum('sponsorships as total_raised', 'amount')
-            ->orderByRaw("CASE WHEN payment_type = 'full' THEN 0 WHEN payment_type = 'flexible' THEN 1 ELSE 2 END")
-            ->orderByDesc('event_date')
-            ->orderByDesc('event_time')
-            ->get();
+        $programSort = $request->query('program_sort', 'latest');
+        $allowedSorts = ['latest', 'oldest', 'date_asc', 'date_desc'];
+        if (!in_array($programSort, $allowedSorts, true)) {
+            $programSort = 'latest';
+        }
 
-        return view('admin.programs_events', compact('events', 'programs'));
+        $programQuery = Program::with(['registrations'])
+            ->withCount('registrations')
+            ->withSum('sponsorships as total_raised', 'amount');
+
+        switch ($programSort) {
+            case 'oldest':
+                $programQuery->orderBy('created_at');
+                break;
+            case 'date_asc':
+                $programQuery->orderBy('event_date')->orderBy('event_time');
+                break;
+            case 'date_desc':
+                $programQuery->orderByDesc('event_date')->orderByDesc('event_time');
+                break;
+            default:
+                $programQuery->orderByDesc('created_at');
+                break;
+        }
+
+        $programs = $programQuery->get();
+
+        return view('admin.programs_events', compact('events', 'programs', 'programSort'));
     }
 
     public function settings()

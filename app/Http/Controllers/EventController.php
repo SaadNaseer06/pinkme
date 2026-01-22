@@ -100,7 +100,7 @@ class EventController extends Controller
             ]);
         }
 
-        return redirect()->route('events.show', $event)->with('success', 'Event created successfully.');
+        return redirect()->route('admin.programs-events', $event)->with('success', 'Event created successfully.');
     }
 
     public function update(Request $r, Event $event)

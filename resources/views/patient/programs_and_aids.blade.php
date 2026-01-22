@@ -1,4 +1,4 @@
-@extends('patient.layouts.app')
+﻿@extends('patient.layouts.app')
 
 @section('title', 'Programs & Aids')
 
@@ -201,7 +201,7 @@
             <!-- Close Button -->
             <button onclick="document.getElementById('popupModal').classList.add('hidden')"
                 class="absolute top-4 right-4 text-[#91848C] hover:text-black text-2xl font-bold">
-                ×
+                &times;
             </button>
 
             <!-- Modal Title -->
@@ -216,7 +216,7 @@
                     <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
                         <h3 class="text-md font-semibold text-[#213430] app-main">Programs you're applying for</h3>
                         <div class="text-sm app-text text-[#213430]">
-                            <p id="selected-program-name" class="font-medium">�</p>
+                            <p id="selected-program-name" class="font-medium">—</p>
                             <input type="hidden" name="programs_applied[]" id="programs_applied_value" value="">
                         </div>
                     </div>
@@ -482,7 +482,6 @@
             </form>
         </div>
     </div>
-
 @endsection
 
 @push('scripts')
@@ -499,8 +498,6 @@
             event_date: 'Date',
             event_time: 'Time',
             status: 'Status',
-            payment_type: 'Payment Type',
-            program_fund: 'Fund Goal',
             custom_note: 'Note',
             link: 'Link',
         };
@@ -518,22 +515,22 @@
                 case 'money':
                     valueNode.textContent = isNumeric
                         ? `$${asNumber.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                        : (rawValue ?? '—');
+                        : (rawValue ?? 'â€”');
                     break;
                 case 'number':
-                    valueNode.textContent = isNumeric ? asNumber.toLocaleString() : (rawValue ?? '—');
+                    valueNode.textContent = isNumeric ? asNumber.toLocaleString() : (rawValue ?? 'â€”');
                     break;
                 case 'date': {
                     const parsed = rawValue ? new Date(rawValue) : null;
                     valueNode.textContent = parsed && !isNaN(parsed.valueOf())
                         ? parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-                        : (rawValue ?? '—');
+                        : (rawValue ?? 'â€”');
                     break;
                 }
                 case 'time':
                     valueNode.textContent = typeof rawValue === 'string' && rawValue.length >= 5
                         ? rawValue.slice(0, 5)
-                        : (rawValue ?? '—');
+                        : (rawValue ?? 'â€”');
                     break;
                 case 'link':
                     valueNode.href = rawValue || '#';
@@ -549,7 +546,7 @@
                         : 'text-sm text-[#B32020] font-semibold';
                     break;
                 default:
-                    valueNode.textContent = rawValue ?? '—';
+                    valueNode.textContent = rawValue ?? 'â€”';
             }
 
             if (!valueNode.className) {
@@ -564,16 +561,20 @@
                 return;
             }
 
+            const filteredFields = Array.isArray(fields)
+                ? fields.filter((field) => !['payment_type', 'program_fund', 'max_applications'].includes(field?.name))
+                : [];
+
             customFieldsContainer.innerHTML = '';
 
-            if (!Array.isArray(fields) || fields.length === 0) {
+            if (filteredFields.length === 0) {
                 customFieldsEmptyState.classList.remove('hidden');
                 return;
             }
 
             customFieldsEmptyState.classList.add('hidden');
 
-            fields.forEach((field) => {
+            filteredFields.forEach((field) => {
                 const row = document.createElement('div');
                 row.className = 'flex items-start justify-between gap-3 rounded-lg border border-[#DCCFD8] bg-white px-3 py-3';
 
@@ -636,10 +637,10 @@
                 .then(res => res.json())
                 .then(data => {
                     currentProgramTitle = data.title || "";
-                    document.querySelector('#registerModal .modal-title').textContent = data.title || '—';
-                    document.querySelector('#registerModal .modal-description').textContent = data.description || '—';
-                    document.querySelector('#registerModal .modal-date').textContent = data.event_date || '—';
-                    document.querySelector('#registerModal .modal-time').textContent = data.event_time || '—';
+                    document.querySelector('#registerModal .modal-title').textContent = data.title || 'â€”';
+                    document.querySelector('#registerModal .modal-description').textContent = data.description || 'â€”';
+                    document.querySelector('#registerModal .modal-date').textContent = data.event_date || 'â€”';
+                    document.querySelector('#registerModal .modal-time').textContent = data.event_time || 'â€”';
 
                     const fallbackBanner = "{{ asset('public/images/program-details.png') }}";
                     const bannerEl = document.querySelector('#registerModal .modal-banner');

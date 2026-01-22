@@ -37,7 +37,22 @@ class ProgramController extends Controller
 
         $validated['user_id'] = Auth::id();
 
+        $program = Program::findOrFail($validated['program_id']);
+        if ($program->max_applications) {
+            $currentCount = ProgramRegistration::where('program_id', $program->id)->count();
+            if ($currentCount >= $program->max_applications) {
+                return back()->with('error', 'Applications for this program are closed.');
+            }
+        }
+
         ProgramRegistration::create($validated);
+
+        if ($program->max_applications) {
+            $currentCount = ProgramRegistration::where('program_id', $program->id)->count();
+            if ($currentCount >= $program->max_applications && $program->status !== 'completed') {
+                $program->update(['status' => 'completed']);
+            }
+        }
 
         return back()->with('success', 'You have successfully registered for the program.');
     }
@@ -107,9 +122,8 @@ class ProgramController extends Controller
             'event_time'  => ['nullable', 'date_format:H:i'],
             'application_start_date' => ['nullable', 'date'],
             'application_end_date' => ['nullable', 'date'],
+            'max_applications' => ['nullable', 'integer', 'min:1'],
             'status'      => ['nullable', 'in:upcoming,ongoing,completed'],
-            'payment_type' => ['nullable', 'in:full,flexible'],
-            'program_fund' => ['nullable', 'numeric', 'min:0'],
             'banner'      => ['nullable', 'image', 'max:2048'],
             'custom_fields' => ['array'],
             'custom_fields.*.name' => ['required', 'string', 'max:60', Rule::in($this->allowedFieldNames())],
@@ -184,7 +198,7 @@ class ProgramController extends Controller
 
         Program::create($data);
 
-        return redirect()->route('admin.sponsors')->with('success', 'Program created.');
+        return redirect()->route('admin.programs-events')->with('success', 'Program created.');
     }
 
     public function edit(Program $program)
@@ -202,9 +216,8 @@ class ProgramController extends Controller
             'event_time'  => ['nullable', 'date_format:H:i'],
             'application_start_date' => ['nullable', 'date'],
             'application_end_date' => ['nullable', 'date'],
+            'max_applications' => ['nullable', 'integer', 'min:1'],
             'status'      => ['nullable', 'in:upcoming,ongoing,completed'],
-            'payment_type' => ['nullable', 'in:full,flexible'],
-            'program_fund' => ['nullable', 'numeric', 'min:0'],
             'banner'      => ['nullable', 'image', 'max:2048'],
             'custom_fields' => ['array'],
             'custom_fields.*.name' => ['required', 'string', 'max:60', Rule::in($this->allowedFieldNames())],
@@ -282,7 +295,7 @@ class ProgramController extends Controller
 
         $program->update($data);
 
-        return redirect()->route('admin.sponsors')->with('success', 'Program updated.');
+        return redirect()->route('admin.programs-events')->with('success', 'Program updated.');
     }
 
     /**
@@ -305,9 +318,8 @@ class ProgramController extends Controller
             'event_time',
             'application_start_date',
             'application_end_date',
+            'max_applications',
             'status',
-            'payment_type',
-            'program_fund',
             'custom_note',
             'link',
         ];
@@ -369,9 +381,8 @@ class ProgramController extends Controller
         $eventTime = $data['event_time'] ?? ($existing?->event_time ? \Carbon\Carbon::parse($existing->event_time)->format('H:i') : null);
         $applicationStartDate = $data['application_start_date'] ?? optional($existing?->application_start_date)->format('Y-m-d');
         $applicationEndDate = $data['application_end_date'] ?? optional($existing?->application_end_date)->format('Y-m-d');
+        $maxApplications = $data['max_applications'] ?? $existing?->max_applications;
         $status = $data['status'] ?? $existing?->status ?? 'upcoming';
-        $paymentType = $data['payment_type'] ?? $existing?->payment_type ?? 'full';
-        $programFund = $data['program_fund'] ?? $existing?->program_fund ?? 0;
 
         foreach ($fields as &$field) {
             $name = $field['name'] ?? null;
@@ -402,21 +413,15 @@ class ProgramController extends Controller
                 case 'application_end_date':
                     $applicationEndDate = $value ?: $applicationEndDate;
                     break;
+                case 'max_applications':
+                    if ($value !== null && $value !== '') {
+                        $maxApplications = is_numeric($value) ? (int) $value : $maxApplications;
+                    }
+                    break;
                 case 'status':
                     $candidate = strtolower($this->stringValue($value));
                     if (in_array($candidate, ['upcoming', 'ongoing', 'completed'], true)) {
                         $status = $candidate;
-                    }
-                    break;
-                case 'payment_type':
-                    $candidate = strtolower($this->stringValue($value));
-                    if (in_array($candidate, ['full', 'flexible'], true)) {
-                        $paymentType = $candidate;
-                    }
-                    break;
-                case 'program_fund':
-                    if ($value !== null && $value !== '') {
-                        $programFund = is_numeric($value) ? (float) $value : $programFund;
                     }
                     break;
                 default:
@@ -432,9 +437,8 @@ class ProgramController extends Controller
         $data['event_time'] = $this->normalizeTime($eventTime);
         $data['application_start_date'] = $this->normalizeNullableDate($applicationStartDate);
         $data['application_end_date'] = $this->normalizeNullableDate($applicationEndDate);
+        $data['max_applications'] = $maxApplications !== null ? (int) $maxApplications : null;
         $data['status'] = $status ?: 'upcoming';
-        $data['payment_type'] = $paymentType ?: 'full';
-        $data['program_fund'] = $programFund ?? 0;
         $data['custom_fields'] = array_values($fields);
 
         return $data;
@@ -485,9 +489,8 @@ class ProgramController extends Controller
             'event_time' => 'Time',
             'application_start_date' => 'Application Start Date',
             'application_end_date' => 'Application End Date',
+            'max_applications' => 'Maximum Applications',
             'status' => 'Status',
-            'payment_type' => 'Payment Type',
-            'program_fund' => 'Fund Goal',
             'custom_note' => 'Note',
             'link' => 'Link',
             default => 'Detail',

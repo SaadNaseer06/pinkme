@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\SponsorDetail;
 use App\Models\User;
 use App\Models\Role;
+use App\Mail\SponsorCredentials;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class AdminSponsorController extends Controller
 {
@@ -74,6 +77,17 @@ class AdminSponsorController extends Controller
                 ]);
             }
         });
+
+        try {
+            $loginUrl = route('login');
+            Mail::to($sponsor->email)->send(new SponsorCredentials($sponsor, $data['password'], $loginUrl));
+        } catch (\Throwable $e) {
+            Log::warning('Failed to send sponsor credentials email', [
+                'sponsor_id' => $sponsor->id ?? null,
+                'email' => $sponsor->email ?? null,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return redirect()->route('admin.sponsors.show', $sponsor)->with('success', 'Sponsor created successfully.');
     }

@@ -137,7 +137,6 @@
                     <h3 class="text-xl font-semibold text-[#213430] app-main">Program</h3>
                     <div class="text-base text-[#213430] app-text leading-relaxed">
                         <p><span class="font-medium">Program Title:</span> {{ $registration->program->title ?? 'N/A' }}</p>
-                        <p><span class="font-medium">Medical Condition:</span> {{ $registration->medical_condition ?? 'N/A' }}</p>
                         <p><span class="font-medium">Assistance Type:</span> {{ $registration->assistance_type ?? 'N/A' }}</p>
                     </div>
                     <div class="mt-3">

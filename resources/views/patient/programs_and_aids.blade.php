@@ -52,7 +52,7 @@
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
                             @php
-                                $bannerUrl = $program->banner ? url('storage/' . ltrim($program->banner, '/')) : asset('public/images/program-details.png');
+                                $bannerUrl = $program->banner ? url('storage/app/public/' . ltrim($program->banner, '/')) : asset('public/images/program-details.png');
                             @endphp
                             <img src="{{ $bannerUrl }}" alt="{{ $program->title }}"
                                 class="w-full h-full object-cover" />
@@ -88,7 +88,7 @@
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
                             @php
-                                $bannerUrl = $program->banner ? url('storage/' . ltrim($program->banner, '/')) : asset('public/images/program-details.png');
+                                $bannerUrl = $program->banner ? url('storage/app/public/' . ltrim($program->banner, '/')) : asset('public/images/program-details.png');
                             @endphp
                             <img src="{{ $bannerUrl }}" alt="{{ $program->title }}"
                                 class="w-full h-full object-cover" />
@@ -212,12 +212,65 @@
                 @csrf
                 <input type="hidden" name="program_id" id="program_id" value="">
 
-                <div class="grid grid-cols-1 gap-4">
-                    <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
-                        <h3 class="text-md font-semibold text-[#213430] app-main">Programs you're applying for</h3>
-                        <div class="text-sm app-text text-[#213430]">
-                            <p id="selected-program-name" class="font-medium">—</p>
-                            <input type="hidden" name="programs_applied[]" id="programs_applied_value" value="">
+                <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Application Periods</h3>
+                    <p class="text-sm text-[#213430] app-text">
+                        The Breast Cancer Treatment Financial Assistance Program opens during the following application windows:
+                    </p>
+                    <ul class="list-disc pl-5 text-sm text-[#213430] app-text space-y-1">
+                        <li><span class="font-medium">Option 1:</span> May through June</li>
+                        <li><span class="font-medium">Option 2:</span> November through December</li>
+                    </ul>
+                    <div class="text-sm text-[#213430] app-text space-y-1">
+                        <p>Breast Cancer Treatment Assistance Program (up to $500)</p>
+                        <p>Survivor Health and Wellness Assistance Program (up to $250)</p>
+                    </div>
+                </div>
+
+                <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm app-text text-[#213430]">
+                        <div class="space-y-3">
+                            <p class="font-medium">
+                                Choose one grant quarter (select only one option - grants are paid over the course of 3 months): *
+                            </p>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="quarter" value="q1" class="text-[#DB69A2]" required>
+                                    <span>Quarter One (January thru March)</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="quarter" value="q2" class="text-[#DB69A2]">
+                                    <span>Quarter Two (April thru June)</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="quarter" value="q3" class="text-[#DB69A2]">
+                                    <span>Quarter Three (July thru September)</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="quarter" value="q4" class="text-[#DB69A2]">
+                                    <span>Quarter Four (October thru December)</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <p class="font-medium">Please indicate which program you are applying for: *</p>
+                            <p class="text-xs text-[#91848C] app-text">
+                                Selected from the program list: <span id="selected-program-name" class="font-medium text-[#213430]">-</span>
+                            </p>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" name="programs_applied[]" value="Breast Cancer Treatment Assistance Program" class="text-[#DB69A2]">
+                                    <span>Breast Cancer Treatment Assistance Program (up to $500)</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" name="programs_applied[]" value="Survivor Health and Wellness Assistance Program" class="text-[#DB69A2]">
+                                    <span>Survivor Health and Wellness Assistance Program (up to $250)</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" name="programs_applied[]" value='PINK "ME" Up Food+No Hunger Grant' class="text-[#DB69A2]">
+                                    <span>PINK "ME" Up Food+No Hunger Grant (Groceries are delivered to your home address)</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -237,6 +290,12 @@
                                     <span>No</span>
                                 </label>
                             </div>
+                            <p class="text-xs text-[#91848C] app-text">
+                                Active treatment is defined as the period after a positive diagnosis of breast cancer has been made (with a diagnostic biopsy),
+                                and during which therapies are being administered, including surgical procedures to remove the cancer (e.g., single or bi-lateral
+                                mastectomy, lumpectomy, axillary dissection, or sentinel node biopsy), chemotherapy or radiation. Active treatment does not include
+                                reconstruction surgeries or long-term hormonal therapies.
+                            </p>
                         </div>
                         <div class="space-y-2">
                             <p class="font-medium">Are you pregnant?</p>
@@ -624,6 +683,22 @@
         let currentProgramId = null;
         let currentProgramTitle = "";
 
+        const syncProgramSelection = () => {
+            const checkboxes = document.querySelectorAll('input[name="programs_applied[]"]');
+            if (!checkboxes.length) {
+                return;
+            }
+            const hasChecked = Array.from(checkboxes).some((checkbox) => checkbox.checked);
+            const normalizedTitle = (currentProgramTitle || '').trim().toLowerCase();
+            if (!normalizedTitle || hasChecked) {
+                return;
+            }
+            checkboxes.forEach((checkbox) => {
+                const normalizedValue = (checkbox.value || '').trim().toLowerCase();
+                checkbox.checked = normalizedValue === normalizedTitle;
+            });
+        };
+
         function openModal(id) {
             currentProgramId = id; // Save for use when opening register modal
 
@@ -654,13 +729,10 @@
 
                     renderCustomFields(data.custom_fields || []);
                     const selectedProgramName = document.getElementById('selected-program-name');
-                    const selectedProgramValue = document.getElementById('programs_applied_value');
                     if (selectedProgramName) {
                         selectedProgramName.textContent = currentProgramTitle || 'N/A';
                     }
-                    if (selectedProgramValue) {
-                        selectedProgramValue.value = currentProgramTitle || "";
-                    }
+                    syncProgramSelection();
                     // Update register button state based on registration history
                     const registerButton = document.getElementById('register-btn');
                     const viewButton = document.getElementById('registration-view-btn');
@@ -729,13 +801,10 @@
             // set the hidden input value in the popup modal form
             document.getElementById('program_id').value = currentProgramId;
             const selectedProgramName = document.getElementById('selected-program-name');
-            const selectedProgramValue = document.getElementById('programs_applied_value');
             if (selectedProgramName) {
                 selectedProgramName.textContent = currentProgramTitle || 'N/A';
             }
-            if (selectedProgramValue) {
-                selectedProgramValue.value = currentProgramTitle || "";
-            }
+            syncProgramSelection();
 
             // hide details modal, show registration modal
             document.getElementById('registerModal').classList.add('hidden');
@@ -811,6 +880,13 @@
         const form = document.querySelector('#popupModal form');
         form?.addEventListener('submit', (e) => {
             syncSignature();
+            const programCheckboxes = Array.from(document.querySelectorAll('input[name="programs_applied[]"]'));
+            const hasProgramSelected = programCheckboxes.some((checkbox) => checkbox.checked);
+            if (!hasProgramSelected) {
+                e.preventDefault();
+                alert('Please select at least one program before submitting.');
+                return;
+            }
             if (!signatureInput.value) {
                 e.preventDefault();
                 alert('Please add your signature before submitting.');

@@ -1,4 +1,4 @@
-﻿@extends('patient.layouts.app')
+@extends('patient.layouts.app')
 
 @section('title', 'Patient Chats')
 
@@ -78,6 +78,7 @@
                     data-current-user-id="{{ auth()->id() }}" data-active-contact-id="{{ $activeContact['id'] }}"
                     data-fetch-url="{{ route('chat.messages.index', ['contact' => $activeContact['id']]) }}"
                     data-send-url="{{ route('chat.messages.store', ['contact' => $activeContact['id']]) }}"
+                    data-activity-url="{{ route('chat.activity') }}"
                     data-default-avatar="{{ asset('public/images/chat-profile.png') }}"
                     data-self-avatar="{{ auth()->user()->avatar_url }}">
                     <header class="flex items-center justify-between px-6 py-4 border-b border-[#E4D6DF]">

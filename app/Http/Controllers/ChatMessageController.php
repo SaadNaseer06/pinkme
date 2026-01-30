@@ -9,13 +9,20 @@ use App\Models\ProgramRegistration;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ChatMessageController extends Controller
 {
+    /** Cache key prefix for "user is currently in chat" - used to avoid sending email when they're online in chat. */
+    public const CHAT_ACTIVE_CACHE_KEY = 'chat_active_user_';
+    public const CHAT_ACTIVE_TTL_MINUTES = 2;
+
     public function index(Request $request, User $contact): JsonResponse
     {
         $user = $request->user();
         $this->authorizeConversation($user, $contact);
+
+        $this->markUserActiveInChat($user->id);
 
         Message::markThreadAsRead($user->id, $contact->id);
 
@@ -86,6 +93,26 @@ class ChatMessageController extends Controller
         return response()->json([
             'message' => $message->toFrontendPayload(),
         ], 201);
+    }
+
+    /**
+     * Ping when the user is viewing the chat (so we don't email them for new messages while they're in chat).
+     */
+    public function activity(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $this->markUserActiveInChat($user->id);
+        return response()->json(['ok' => true]);
+    }
+
+    protected function markUserActiveInChat(int $userId): void
+    {
+        Cache::put(self::CHAT_ACTIVE_CACHE_KEY . $userId, now()->timestamp, now()->addMinutes(self::CHAT_ACTIVE_TTL_MINUTES));
+    }
+
+    public static function isUserActiveInChat(int $userId): bool
+    {
+        return Cache::has(self::CHAT_ACTIVE_CACHE_KEY . $userId);
     }
 
     protected function authorizeConversation(User $authUser, User $contact): void

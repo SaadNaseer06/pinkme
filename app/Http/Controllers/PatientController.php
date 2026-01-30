@@ -7,6 +7,7 @@ use App\Models\Application;
 use App\Models\ProgramRegistration;
 use App\Models\Invoice;
 use App\Models\Patient;
+use App\Models\Program;
 use App\Models\SponsorshipProgram;
 use App\Models\Message;
 use App\Models\Webinar;
@@ -127,7 +128,17 @@ class PatientController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
-        return view('patient.programs_and_aids', compact('programs'));
+        // Programs & Aids: use effective status (date-based) so applications go live on opening date
+        $upcomingPrograms = Program::effectiveUpcoming()
+            ->orderBy('application_start_date')
+            ->orderBy('event_date')
+            ->get();
+        $ongoingPrograms = Program::effectiveOngoing()
+            ->orderBy('application_end_date')
+            ->orderBy('event_date')
+            ->get();
+
+        return view('patient.programs_and_aids', compact('programs', 'upcomingPrograms', 'ongoingPrograms'));
     }
 
     public function patientChats(Request $request)

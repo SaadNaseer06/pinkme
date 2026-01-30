@@ -15,6 +15,8 @@ class EventSponsorship extends Model
         'message',
         'registered_at',
         'confirmed_at',
+        'stripe_checkout_session_id',
+        'payment_status',
     ];
 
     protected $casts = [

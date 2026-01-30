@@ -22,7 +22,7 @@
                     <h3 class="text-lg font-medium text-[#213430] mb-2">Profile</h3>
                     <p class="text-sm text-[#6C5B68]"><span class="font-semibold">Name:</span> {{ $sponsor->profile->full_name ?? trim(($sponsor->profile->first_name ?? '').' '.($sponsor->profile->last_name ?? '')) }}</p>
                     <p class="text-sm text-[#6C5B68]"><span class="font-semibold">Phone:</span> {{ $sponsor->profile->phone ?? '—' }}</p>
-                    <p class="text-sm text-[#6C5B68]"><span class="font-semibold">Status:</span> {{ (($sponsor->profile->status ?? 0) == 1) ? 'Active' : 'Inactive' }}</p>
+                    <p class="text-sm text-[#6C5B68]"><span class="font-semibold">Status:</span> {{ $sponsorStatus }} <span class="text-xs text-[#91848C]">(from payment)</span></p>
                 </div>
             </div>
         </div>

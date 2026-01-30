@@ -40,6 +40,17 @@ class ChatConversation {
 
         this.scrollToBottom();
         this.subscribeToUpdates();
+        this.startActivityPing();
+    }
+
+    /** Ping so we're marked "in chat" and don't get new-message emails while viewing chat. */
+    startActivityPing() {
+        const activityUrl = this.root?.dataset?.activityUrl || '/chat/activity';
+        const ping = () => {
+            axios.post(activityUrl).catch(() => {});
+        };
+        ping();
+        this._activityInterval = setInterval(ping, 60000);
     }
 
     async handleSubmit(event) {

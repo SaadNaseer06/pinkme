@@ -72,13 +72,26 @@
                 data-event-id="{{ $event->id }}">
                 Quick View
             </button>
-            @if ($event->isRegistrationOpen() || $event->isSponsorRegistered(auth()->id()))
+            @if ($event->isSponsorRegistered(auth()->id()))
                 <a href="{{ route('sponsor.events.show', $event) }}"
                     style="background: #DB69A2; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; transition: background 0.3s ease;"
                     onmouseover="this.style.background='linear-gradient(to right, #C63A85, #B02A72)'"
                     onmouseout="this.style.background='linear-gradient(to right, #DB69A2, #C63A85)'">
-                    {{ $event->isSponsorRegistered(auth()->id()) ? 'View Registration' : 'Register Now' }}
+                    View Registration
                 </a>
+            @elseif ($event->isRegistrationOpen())
+                <button type="button"
+                    onclick="typeof openRegisterModal === 'function' && openRegisterModal(this)"
+                    data-register-event-id="{{ $event->id }}"
+                    data-register-title="{{ e($event->title) }}"
+                    data-register-payment-type="{{ $event->payment_type ?? 'flexible' }}"
+                    data-register-remaining="{{ $event->remaining_funding ?? 0 }}"
+                    data-register-funding-goal="{{ $event->funding_goal ?? 0 }}"
+                    style="background: #DB69A2; color: white; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; display: inline-block; transition: background 0.3s ease;"
+                    onmouseover="this.style.background='linear-gradient(to right, #C63A85, #B02A72)'"
+                    onmouseout="this.style.background='linear-gradient(to right, #DB69A2, #C63A85)'">
+                    Register Now
+                </button>
             @else
                 <a href="{{ route('sponsor.events.show', $event) }}"
                     class="bg-gray-400 text-white py-3 px-6 rounded-lg program-btn">
@@ -124,13 +137,26 @@
                     data-event-id="{{ $event->id }}">
                     Quick View
                 </button>
-                @if ($event->isRegistrationOpen() || $event->isSponsorRegistered(auth()->id()))
+                @if ($event->isSponsorRegistered(auth()->id()))
                     <a href="{{ route('sponsor.events.show', $event) }}"
                         style="background: linear-gradient(to right, #DB69A2, #C63A85); color: white; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; text-align: center; text-decoration: none; display: inline-block; transition: background 0.3s ease;"
                         onmouseover="this.style.background='linear-gradient(to right, #C63A85, #B02A72)'"
                         onmouseout="this.style.background='linear-gradient(to right, #DB69A2, #C63A85)'">
-                        {{ $event->isSponsorRegistered(auth()->id()) ? 'View Registration' : 'Register Now' }}
+                        View Registration
                     </a>
+                @elseif ($event->isRegistrationOpen())
+                    <button type="button"
+                        onclick="typeof openRegisterModal === 'function' && openRegisterModal(this)"
+                        data-register-event-id="{{ $event->id }}"
+                        data-register-title="{{ e($event->title) }}"
+                        data-register-payment-type="{{ $event->payment_type ?? 'flexible' }}"
+                        data-register-remaining="{{ $event->remaining_funding ?? 0 }}"
+                        data-register-funding-goal="{{ $event->funding_goal ?? 0 }}"
+                        style="background: linear-gradient(to right, #DB69A2, #C63A85); color: white; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; text-align: center; border: none; cursor: pointer; display: inline-block; width: 100%;"
+                        onmouseover="this.style.background='linear-gradient(to right, #C63A85, #B02A72)'"
+                        onmouseout="this.style.background='linear-gradient(to right, #DB69A2, #C63A85)'">
+                        Register Now
+                    </button>
                 @else
                     <a href="{{ route('sponsor.events.show', $event) }}"
                         class="bg-gray-400 text-white py-2 px-4 rounded-lg text-sm text-center">

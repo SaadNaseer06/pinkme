@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Mail\WebinarRegistrationConfirmation;
+use Stripe\Stripe;
+use Stripe\Checkout\Session as StripeSession;
 
 class SponsorController extends Controller
 {
@@ -232,7 +234,6 @@ class SponsorController extends Controller
     }
 
     public function becomeASponsor()
-
     {
         return redirect()->route('sponsor.events', ['type' => 'full']);
     }
@@ -560,25 +561,24 @@ class SponsorController extends Controller
     }
     
     /**
-     * Register sponsor for an event
+     * Register sponsor for an event — create Stripe Checkout Session and redirect to payment
      */
-    public function registerForEvent(Request $request, \App\Models\Event $event)
+    public function registerForEvent(Request $request, Event $event)
     {
         $user = Auth::user();
         
-        // Check if registration is still open
+
         if (!$event->isRegistrationOpen()) {
             return back()->with('error', 'Registration for this event is no longer open.');
         }
-        
-        // Check if sponsor is already registered
+
         if ($event->isSponsorRegistered($user->id)) {
             return back()->with('error', 'You are already registered for this event.');
         }
-        
+
         $data = $request->validate([
-            'amount'             => ['required', 'numeric', 'min:0.01'],
-            'message'            => ['nullable', 'string', 'max:500'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'message' => ['nullable', 'string', 'max:500'],
         ]);
 
         if ($event->payment_type === 'full' && $event->sponsorships()
@@ -587,25 +587,168 @@ class SponsorController extends Controller
             return back()->with('error', 'This event already has a sponsor registration.');
         }
 
-        if ($event->payment_type === 'full' && $event->funding_goal && $data['amount'] + 1e-6 < $event->remaining_funding) {
-            return back()->with('error', 'Full sponsorship requires covering the remaining funding goal ($' . number_format($event->remaining_funding, 2) . ').');
+        // Full sponsorship: use remaining funding amount (no user amount choice)
+        if ($event->payment_type === 'full') {
+            if (!$event->funding_goal || $event->remaining_funding <= 0) {
+                return back()->with('error', 'This event is already fully funded.');
+            }
+            $data['amount'] = (float) $event->remaining_funding;
+        } else {
+            // Flexible: validate amount against remaining if there is a goal
+            if ($event->funding_goal && $data['amount'] > $event->remaining_funding) {
+                return back()->with('error', 'Sponsorship amount exceeds remaining funding needed ($' . number_format($event->remaining_funding, 2) . ').');
+            }
         }
-        
-        // Check if amount doesn't exceed remaining funding needed
-        if ($event->funding_goal && $data['amount'] > $event->remaining_funding) {
-            return back()->with('error', 'Sponsorship amount exceeds remaining funding needed ($' . number_format($event->remaining_funding, 2) . ').');
+
+        $amountCents = (int) round($data['amount'] * 100);
+        if ($amountCents < 50) {
+            return back()->with('error', 'Minimum payment amount is $0.50.');
         }
-        
-        // Create event sponsorship registration
-        $event->sponsorships()->create([
-            'sponsor_id' => $user->id,
-            'amount' => $data['amount'],
-            'registration_status' => 'pending',
-            'message' => $data['message'] ?? null,
+
+        $stripeSecret = config('services.stripe.secret');
+        if (empty($stripeSecret)) {
+            Log::warning('Stripe secret not configured; cannot process event sponsorship payment.');
+            return back()->withInput()->with('error', 'Payment is not configured. Please contact the administrator.');
+        }
+
+        // Do NOT create event_sponsorships record here — only after payment succeeds (in success callback)
+        Stripe::setApiKey($stripeSecret);
+        $successUrl = rtrim(route('sponsor.events.registration.success'), '/') . '?session_id={CHECKOUT_SESSION_ID}';
+        $cancelUrl = route('sponsor.events.registration.cancel', ['event_id' => $event->id]);
+        $messageForMetadata = $data['message'] ?? '';
+        if (strlen($messageForMetadata) > 500) {
+            $messageForMetadata = substr($messageForMetadata, 0, 500);
+        }
+
+        try {
+            $session = StripeSession::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => config('services.stripe.currency', 'usd'),
+                        'product_data' => [
+                            'name' => 'Event sponsorship: ' . $event->title,
+                            'description' => 'Sponsorship amount for ' . $event->title,
+                        ],
+                        'unit_amount' => $amountCents,
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+                'metadata' => [
+                    'event_id' => (string) $event->id,
+                    'sponsor_id' => (string) $user->id,
+                    'amount' => (string) $data['amount'],
+                    'message' => $messageForMetadata,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Stripe Checkout Session create failed: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Unable to start payment. Please try again or contact support.');
+        }
+
+        return redirect($session->url);
+    }
+
+    /**
+     * Success URL after Stripe Checkout — create event_sponsorship only after payment is confirmed
+     */
+    public function eventRegistrationSuccess(Request $request)
+    {
+        $sessionId = trim((string) $request->query('session_id'));
+        if ($sessionId === '') {
+            return redirect()->route('sponsor.events')->with('error', 'Invalid session.');
+        }
+
+        $stripeSecret = config('services.stripe.secret');
+        if (empty($stripeSecret)) {
+            return redirect()->route('sponsor.events')->with('error', 'Unable to verify payment.');
+        }
+
+        Stripe::setApiKey($stripeSecret);
+        try {
+            $stripeSession = StripeSession::retrieve($sessionId);
+        } catch (\Throwable $e) {
+            Log::error('Stripe session retrieve failed on success callback', [
+                'message' => $e->getMessage(),
+                'session_id_prefix' => substr($sessionId, 0, 12),
+            ]);
+            return redirect()->route('sponsor.events')->with('error', 'Unable to verify payment.');
+        }
+
+        if ($stripeSession->payment_status !== 'paid') {
+            return redirect()->route('sponsor.events')->with('error', 'Payment was not completed. No registration was created.');
+        }
+
+        $metadata = $stripeSession->metadata ?? (object) [];
+        $eventId = isset($metadata->event_id) ? (int) $metadata->event_id : 0;
+        $sponsorId = isset($metadata->sponsor_id) ? (int) $metadata->sponsor_id : 0;
+        $amount = isset($metadata->amount) ? (float) $metadata->amount : 0;
+        $message = isset($metadata->message) ? (string) $metadata->message : null;
+
+        if (!$eventId || !$sponsorId || $amount < 0.5) {
+            return redirect()->route('sponsor.events')->with('error', 'Invalid payment session.');
+        }
+
+        // Idempotent: if we already created a sponsorship for this session, show success
+        $existing = EventSponsorship::where('stripe_checkout_session_id', $sessionId)->first();
+        if ($existing) {
+            return redirect()->route('sponsor.events.show', $existing->event_id)->with('success', 'Your payment was already confirmed.');
+        }
+
+        $event = Event::find($eventId);
+        if (!$event) {
+            return redirect()->route('sponsor.events')->with('error', 'Event not found.');
+        }
+
+        $sponsorship = $event->sponsorships()->create([
+            'sponsor_id' => $sponsorId,
+            'amount' => $amount,
+            'registration_status' => 'confirmed',
+            'payment_status' => 'paid',
+            'message' => $message ?: null,
             'registered_at' => now(),
+            'confirmed_at' => now(),
+            'stripe_checkout_session_id' => $sessionId,
         ]);
-        
-        return back()->with('success', 'Your event registration has been submitted successfully! You will be notified once it\'s confirmed.');
+
+        $sponsor = $sponsorship->sponsor;
+        if ($sponsor && $sponsor->profile) {
+            $sponsor->profile->update(['status' => 1]);
+        }
+
+        return redirect()->route('sponsor.events.show', $event->id)->with('success', 'Thank you! Your payment was successful and your sponsorship is confirmed.');
+    }
+
+    /**
+     * Cancel URL when user abandons Stripe Checkout
+     */
+    public function eventRegistrationCancel(Request $request)
+    {
+        $eventId = $request->query('event_id');
+        if ($eventId) {
+            return redirect()->route('sponsor.events.show', $eventId)->with('info', 'Payment was cancelled. You can try again when you are ready.');
+        }
+        return redirect()->route('sponsor.events')->with('info', 'Payment was cancelled.');
+    }
+
+    /**
+     * Confirm sponsorship and set sponsor profile status to approved (1) after successful payment
+     */
+    private function confirmSponsorshipAfterPayment(EventSponsorship $sponsorship): void
+    {
+        $sponsorship->update([
+            'registration_status' => 'confirmed',
+            'payment_status' => 'paid',
+            'confirmed_at' => now(),
+        ]);
+
+        $sponsor = $sponsorship->sponsor;
+        if ($sponsor && $sponsor->profile) {
+            $sponsor->profile->update(['status' => 1]);
+        }
     }
     
     /**
@@ -622,6 +765,11 @@ class SponsorController extends Controller
         
         if (!$sponsorship) {
             return back()->with('error', 'No active registration found for this event.');
+        }
+        
+        // Do not allow cancellation of paid sponsorships
+        if ($sponsorship->payment_status === 'paid') {
+            return back()->with('error', 'Cannot cancel a paid sponsorship. Please contact support if you need assistance.');
         }
         
         // Only allow cancellation if event hasn't started yet

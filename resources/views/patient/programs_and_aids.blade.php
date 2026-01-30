@@ -1,4 +1,4 @@
-﻿@extends('patient.layouts.app')
+@extends('patient.layouts.app')
 
 @section('title', 'Programs & Aids')
 
@@ -8,9 +8,7 @@
         $registeredProgramIds = \App\Models\ProgramRegistration::where('user_id', auth()->id())
             ->pluck('program_id')
             ->toArray();
-
-        $upcomingPrograms = \App\Models\Program::where('status', 'upcoming')->get();
-        $ongoingPrograms = \App\Models\Program::where('status', 'ongoing')->get();
+        // $upcomingPrograms and $ongoingPrograms come from controller (effective date-based status)
     @endphp
     <main class="flex-1 overflow-hidden">
         {{-- @if (session('success'))
@@ -155,6 +153,20 @@
                     <div>
                         <h3 class="text-lg font-medium text-[#213430] mb-4 app-main">Program Details</h3>
                         <div class="bg-[#F3E8EF] p-4 rounded-lg space-y-3 border border-[#DCCFD8]">
+                            <div id="program-status-row" class="flex items-start justify-between gap-3 rounded-lg border border-[#DCCFD8] bg-white px-3 py-3">
+                                <span class="text-sm font-semibold text-[#213430]">Status</span>
+                                <span class="modal-effective-status text-sm font-medium text-[#213430]">-</span>
+                            </div>
+                            <div id="program-application-window-row" class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-3 py-3 hidden">
+                                <div class="flex justify-between gap-3">
+                                    <span class="text-sm font-semibold text-[#213430]">Application opening</span>
+                                    <span class="modal-application-start text-sm text-[#213430]">-</span>
+                                </div>
+                                <div class="flex justify-between gap-3">
+                                    <span class="text-sm font-semibold text-[#213430]">Application closing</span>
+                                    <span class="modal-application-end text-sm text-[#213430]">-</span>
+                                </div>
+                            </div>
                             <div data-custom-fields class="space-y-3"></div>
                             <p data-custom-fields-empty class="text-sm text-[#91848C] app-text">No additional details have been added yet.</p>
                         </div>
@@ -230,25 +242,16 @@
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm app-text text-[#213430]">
                         <div class="space-y-3">
-                            <p class="font-medium">
-                                Choose one grant quarter (select only one option - grants are paid over the course of 3 months): *
-                            </p>
+                            <p class="font-medium">Choose one application period (select only one option; grants are paid over the course of 3 months): *</p>
+                            <p class="text-xs text-[#91848C] app-text">Option 1: May through June · Option 2: November through December</p>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="quarter" value="q1" class="text-[#DB69A2]" required>
-                                    <span>Quarter One (January thru March)</span>
+                                    <input type="radio" name="quarter" value="option1" class="text-[#DB69A2]" required>
+                                    <span>Option 1: May through June</span>
                                 </label>
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="quarter" value="q2" class="text-[#DB69A2]">
-                                    <span>Quarter Two (April thru June)</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="radio" name="quarter" value="q3" class="text-[#DB69A2]">
-                                    <span>Quarter Three (July thru September)</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="radio" name="quarter" value="q4" class="text-[#DB69A2]">
-                                    <span>Quarter Four (October thru December)</span>
+                                    <input type="radio" name="quarter" value="option2" class="text-[#DB69A2]">
+                                    <span>Option 2: November through December</span>
                                 </label>
                             </div>
                         </div>
@@ -259,16 +262,12 @@
                             </p>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="programs_applied[]" value="Breast Cancer Treatment Assistance Program" class="text-[#DB69A2]">
+                                    <input type="checkbox" name="programs_applied[]" value="Breast Cancer Treatment Assistance Program (up to $500)" class="text-[#DB69A2]">
                                     <span>Breast Cancer Treatment Assistance Program (up to $500)</span>
                                 </label>
                                 <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="programs_applied[]" value="Survivor Health and Wellness Assistance Program" class="text-[#DB69A2]">
+                                    <input type="checkbox" name="programs_applied[]" value="Survivor Health and Wellness Assistance Program (up to $250)" class="text-[#DB69A2]">
                                     <span>Survivor Health and Wellness Assistance Program (up to $250)</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="programs_applied[]" value='PINK "ME" Up Food+No Hunger Grant' class="text-[#DB69A2]">
-                                    <span>PINK "ME" Up Food+No Hunger Grant (Groceries are delivered to your home address)</span>
                                 </label>
                             </div>
                         </div>
@@ -296,19 +295,6 @@
                                 mastectomy, lumpectomy, axillary dissection, or sentinel node biopsy), chemotherapy or radiation. Active treatment does not include
                                 reconstruction surgeries or long-term hormonal therapies.
                             </p>
-                        </div>
-                        <div class="space-y-2">
-                            <p class="font-medium">Are you pregnant?</p>
-                            <div class="flex items-center gap-4">
-                                <label class="flex items-center gap-2">
-                                    <input type="radio" name="pregnant" value="1" class="text-[#DB69A2]" required>
-                                    <span>Yes</span>
-                                </label>
-                                <label class="flex items-center gap-2">
-                                    <input type="radio" name="pregnant" value="0" class="text-[#DB69A2]">
-                                    <span>No</span>
-                                </label>
-                            </div>
                         </div>
                         <div>
                             <label class="block font-medium mb-1">Family history of breast cancer?</label>
@@ -428,9 +414,11 @@
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
                     <h3 class="text-md font-semibold text-[#213430] app-main">Your story *</h3>
-                    <p class="text-sm text-[#91848C] app-text">Please share your breast cancer journey. This helps us make a funding decision and will not be shared unless you authorize it below.</p>
-                    <textarea name="story" rows="5" required
-                        class="w-full px-4 py-3 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300"></textarea>
+                    <p class="text-sm text-[#91848C] app-text">Please share your breast cancer journey. This helps us make a funding decision and will not be shared unless you authorize it below. Maximum 1000 words.</p>
+                    <textarea name="story" id="story-field" rows="5" required
+                        class="w-full px-4 py-3 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300"
+                        data-max-words="1000"></textarea>
+                    <p class="text-xs text-[#91848C] app-text"><span id="story-word-count">0</span> / 1000 words</p>
                 </div>
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
@@ -621,7 +609,7 @@
             }
 
             const filteredFields = Array.isArray(fields)
-                ? fields.filter((field) => !['payment_type', 'program_fund', 'max_applications'].includes(field?.name))
+                ? fields.filter((field) => !['payment_type', 'program_fund', 'max_applications', 'status'].includes(field?.name))
                 : [];
 
             customFieldsContainer.innerHTML = '';
@@ -717,6 +705,23 @@
                     document.querySelector('#registerModal .modal-date').textContent = data.event_date || 'â€”';
                     document.querySelector('#registerModal .modal-time').textContent = data.event_time || 'â€”';
 
+                    const effectiveStatusEl = document.querySelector('#registerModal .modal-effective-status');
+                    if (effectiveStatusEl) {
+                        effectiveStatusEl.textContent = data.effective_status_label || 'Upcoming';
+                    }
+                    const appWindowRow = document.getElementById('program-application-window-row');
+                    const appStartEl = document.querySelector('#registerModal .modal-application-start');
+                    const appEndEl = document.querySelector('#registerModal .modal-application-end');
+                    if (appWindowRow && appStartEl && appEndEl) {
+                        if (data.application_start_date || data.application_end_date) {
+                            appStartEl.textContent = data.application_start_date || '-';
+                            appEndEl.textContent = data.application_end_date || '-';
+                            appWindowRow.classList.remove('hidden');
+                        } else {
+                            appWindowRow.classList.add('hidden');
+                        }
+                    }
+
                     const fallbackBanner = "{{ asset('public/images/program-details.png') }}";
                     const bannerEl = document.querySelector('#registerModal .modal-banner');
                     const bannerSrc = data.banner ? data.banner : fallbackBanner;
@@ -770,15 +775,20 @@
                             registrationNoteText.textContent = '';
                         }
                     } else {
-                        // Not registered: ensure button is enabled and styled as primary
-                        registerButton.textContent = 'Register Yourself';
-                        registerButton.disabled = false;
-                        registerButton.classList.remove('bg-gray-400', 'opacity-50', 'cursor-not-allowed');
-                        if (!registerButton.classList.contains('bg-pink')) {
-                            registerButton.classList.add('bg-pink');
-                        }
-                        if (!registerButton.classList.contains('hover:bg-pink-dark')) {
-                            registerButton.classList.add('hover:bg-pink-dark');
+                        // Not registered: enable Register only when applications are open
+                        const applicationOpen = data.is_application_open !== false;
+                        if (applicationOpen) {
+                            registerButton.textContent = 'Register Yourself';
+                            registerButton.disabled = false;
+                            registerButton.classList.remove('bg-gray-400', 'opacity-50', 'cursor-not-allowed');
+                            registerButton.classList.add('bg-pink', 'hover:bg-pink-dark');
+                            registerButton.onclick = () => openRegistrationForm();
+                        } else {
+                            registerButton.textContent = data.effective_status === 'upcoming' ? 'Not yet open' : 'Applications closed';
+                            registerButton.disabled = true;
+                            registerButton.classList.remove('bg-pink', 'hover:bg-pink-dark');
+                            registerButton.classList.add('bg-gray-400', 'opacity-50', 'cursor-not-allowed');
+                            registerButton.onclick = null;
                         }
 
                         viewButton.classList.add('hidden');
@@ -835,6 +845,32 @@
         authRadios.forEach((radio) => radio.addEventListener('change', syncPermissions));
         syncPermissions();
 
+        // Story word count (max 1000 words)
+        const storyField = document.getElementById('story-field');
+        const storyWordCountEl = document.getElementById('story-word-count');
+        const MAX_STORY_WORDS = 1000;
+
+        const countWords = (text) => (text || '').trim().split(/\s+/).filter(Boolean).length;
+
+        const updateStoryWordCount = () => {
+            if (!storyField || !storyWordCountEl) return;
+            const text = storyField.value;
+            let words = countWords(text);
+            if (words > MAX_STORY_WORDS) {
+                const trimmed = text.trim().split(/\s+/).slice(0, MAX_STORY_WORDS).join(' ');
+                storyField.value = trimmed;
+                words = MAX_STORY_WORDS;
+            }
+            storyWordCountEl.textContent = words;
+            storyWordCountEl.classList.toggle('text-[#B32020]', words > MAX_STORY_WORDS);
+        };
+
+        if (storyField) {
+            storyField.addEventListener('input', updateStoryWordCount);
+            storyField.addEventListener('paste', () => setTimeout(updateStoryWordCount, 0));
+            updateStoryWordCount();
+        }
+
         // Signature pad
         const signatureCanvas = document.getElementById('signature-pad');
         const signatureInput = document.getElementById('signature_data');
@@ -885,6 +921,11 @@
             if (!hasProgramSelected) {
                 e.preventDefault();
                 alert('Please select at least one program before submitting.');
+                return;
+            }
+            if (storyField && countWords(storyField.value) > MAX_STORY_WORDS) {
+                e.preventDefault();
+                alert('Your story may not exceed 1000 words. Please shorten it.');
                 return;
             }
             if (!signatureInput.value) {

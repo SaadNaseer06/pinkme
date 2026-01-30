@@ -180,7 +180,7 @@
                                                         View Event
                                                     </a>
                                                     
-                                                    @if($registration->event->is_upcoming)
+                                                    @if($registration->event->is_upcoming && ($registration->payment_status ?? 'pending') !== 'paid')
                                                         <form method="POST" action="{{ route('sponsor.events.cancel', $registration->event) }}" 
                                                               onsubmit="return confirm('Are you sure you want to cancel your registration?')">
                                                             @csrf

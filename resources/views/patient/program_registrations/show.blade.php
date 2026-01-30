@@ -36,10 +36,8 @@
     ];
 
     $quarterLabels = [
-        'q1' => 'Quarter One (January thru March)',
-        'q2' => 'Quarter Two (April thru June)',
-        'q3' => 'Quarter Three (July thru September)',
-        'q4' => 'Quarter Four (October thru December)',
+        'option1' => 'Option 1: May through June',
+        'option2' => 'Option 2: November through December',
     ];
 @endphp
 
@@ -68,7 +66,12 @@
                         <h2 class="text-xl font-semibold text-[#213430] app-main">Program Details</h2>
                         <div class="text-base text-[#213430] app-text leading-relaxed">
                             <p><span class="font-medium">Title:</span> {{ optional($program)->title ?? 'N/A' }}</p>
-                            <p><span class="font-medium">Description:</span> {{ optional($program)->description ?? 'N/A' }}</p>
+                            <div class="mt-1">
+                                <span class="font-medium">Description:</span>
+                                <div class="mt-1 max-h-80 overflow-y-auto overflow-x-hidden rounded border border-[#E6D8E1] bg-[#FDF7FB] px-3 py-2 break-words">
+                                    <p class="text-base text-[#213430] app-text">{{ optional($program)->description ?? 'N/A' }}</p>
+                                </div>
+                            </div>
                             <p><span class="font-medium">Event Date:</span>
                                 {{ optional(optional($program)->event_date)->format('d M Y') ?? 'N/A' }}</p>
                             <p><span class="font-medium">Event Time:</span> {{ optional($program)->event_time ?? 'N/A' }}</p>
@@ -103,8 +106,6 @@
                     </p>
                     <p class="text-base text-[#213430] app-text"><span class="font-medium">Active Treatment:</span>
                         {{ $registration->active_treatment ? 'Yes' : 'No' }}</p>
-                    <p class="text-base text-[#213430] app-text"><span class="font-medium">Pregnant:</span>
-                        {{ $registration->pregnant ? 'Yes' : 'No' }}</p>
                     <p class="text-base text-[#213430] app-text"><span class="font-medium">Family History:</span>
                         {{ $registration->family_history ?? 'N/A' }}</p>
                     <p class="text-base text-[#213430] app-text"><span class="font-medium">Received Assistance Before:</span>
@@ -120,8 +121,10 @@
                     <h2 class="text-xl font-semibold text-[#213430] app-main">Your Story & Authorization</h2>
                     <div>
                         <h3 class="font-medium text-[#213430] text-base mb-1 app-text">Story</h3>
-                        <p class="text-base text-[#6C5F67] app-text whitespace-pre-line leading-relaxed">
-                            {{ $registration->story ?? 'No story provided.' }}</p>
+                        <div class="max-h-96 overflow-y-auto overflow-x-hidden rounded border border-[#E6D8E1] bg-[#FDF7FB] px-3 py-2 break-words">
+                            <p class="text-base text-[#6C5F67] app-text whitespace-pre-line leading-relaxed">
+                                {{ $registration->story ?? 'No story provided.' }}</p>
+                        </div>
                     </div>
                     <div>
                         <h3 class="font-medium text-[#213430] text-base mb-1 app-text">Authorization</h3>

@@ -58,7 +58,7 @@ class AdminSponsorController extends Controller
                 'last_name'  => $data['last_name'] ?? null,
                 'full_name'  => trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')),
                 'phone'      => $data['phone'] ?? null,
-                'status'     => 1,
+                'status'     => 0,
             ]);
 
             $hasCompanyData = !empty($data['company_name'])
@@ -98,7 +98,14 @@ class AdminSponsorController extends Controller
             abort(404);
         }
         $sponsor->load(['profile', 'sponsorDetail']);
-        return view('admin.sponsor.show', compact('sponsor'));
+        // Status is driven by payment only: Active if at least one event sponsorship is confirmed and paid
+        $sponsorStatus = $sponsor->eventSponsorships()
+            ->where('registration_status', 'confirmed')
+            ->where('payment_status', 'paid')
+            ->exists()
+            ? 'Active'
+            : 'Inactive';
+        return view('admin.sponsor.show', compact('sponsor', 'sponsorStatus'));
     }
 
     public function edit(User $sponsor)

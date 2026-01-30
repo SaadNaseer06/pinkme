@@ -13,7 +13,7 @@ class ProgramRegistrationController extends Controller
 {
     public function store(Request $request)
     {
-        $quarterOptions = ['q1', 'q2', 'q3', 'q4'];
+        $quarterOptions = ['option1', 'option2'];
         $incomeOptions = ['employed', 'self_employed', 'disabled', 'retired', 'student'];
         $authorizationOptions = ['full_name', 'story_anonymous', 'story_full', 'photos', 'contact_details'];
 
@@ -33,7 +33,6 @@ class ProgramRegistrationController extends Controller
             'programs_applied' => 'required|array|min:1',
             'programs_applied.*' => 'string|max:255',
             'active_treatment' => 'required|boolean',
-            'pregnant' => 'required|boolean',
             'family_history' => 'nullable|string|max:500',
             'assistance_history' => 'nullable|string|max:500',
             'heard_about' => 'nullable|string|max:255',
@@ -45,7 +44,16 @@ class ProgramRegistrationController extends Controller
             'postal_code' => 'required|string|max:20',
             'proof_of_income_status' => 'required|array|min:1',
             'proof_of_income_status.*' => 'in:' . implode(',', $incomeOptions),
-            'story' => 'required|string',
+            'story' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $wordCount = str_word_count($value);
+                    if ($wordCount > 1000) {
+                        $fail("Your story may not exceed 1000 words (currently {$wordCount} words).");
+                    }
+                },
+            ],
             'authorization_choice' => 'required|string|in:allow,decline',
             'authorization_permissions' => 'required_if:authorization_choice,allow|array|min:1',
             'authorization_permissions.*' => 'in:' . implode(',', $authorizationOptions),
@@ -61,6 +69,13 @@ class ProgramRegistrationController extends Controller
         ]);
 
         $program = Program::findOrFail($request->program_id);
+
+        if (!$program->isApplicationOpen()) {
+            return redirect()->back()->withErrors([
+                'program_id' => 'Applications for this program are not open yet or have closed. Please check the application start and end dates.',
+            ]);
+        }
+
         if ($program->max_applications) {
             $currentCount = ProgramRegistration::where('program_id', $program->id)->count();
             if ($currentCount >= $program->max_applications) {
@@ -168,7 +183,7 @@ class ProgramRegistrationController extends Controller
             'quarter_applied' => $request->quarter,
             'programs_applied' => $request->programs_applied,
             'active_treatment' => (bool) $request->active_treatment,
-            'pregnant' => (bool) $request->pregnant,
+            'pregnant' => false,
             'family_history' => $request->family_history,
             'assistance_history' => $request->assistance_history,
             'heard_about' => $request->heard_about,

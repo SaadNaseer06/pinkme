@@ -31,10 +31,8 @@
     ];
 
     $quarterLabels = [
-        'q1' => 'Quarter One (January thru March)',
-        'q2' => 'Quarter Two (April thru June)',
-        'q3' => 'Quarter Three (July thru September)',
-        'q4' => 'Quarter Four (October thru December)',
+        'option1' => 'Option 1: May through June',
+        'option2' => 'Option 2: November through December',
     ];
 @endphp
 
@@ -68,28 +66,36 @@
                 transform: rotate(360deg);
             }
         }
+
+        .long-text-scroll {
+            max-height: 28rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
     </style>
 @endpush
 
 @section('content')
-    <main class="flex-1">
-        <div class="max-w-full mx-auto">
-            <div class="mt-6 bg-[#F6EDF5] rounded-xl p-6 md:p-8 space-y-8 shadow-sm">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[#DCCFD8] pb-5">
-                    <div>
-                        <h2 class="text-3xl font-semibold text-[#213430] app-main">Registration Details</h2>
-                        <p class="text-base text-[#6C5F67] app-text mt-2">
+    <main class="flex-1 min-w-0">
+        <div class="max-w-full mx-auto min-w-0">
+            <div class="mt-6 bg-[#F6EDF5] rounded-xl p-6 md:p-8 space-y-8 shadow-sm min-w-0">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[#DCCFD8] pb-5 min-w-0">
+                    <div class="min-w-0 flex-1">
+                        <h2 class="text-3xl font-semibold text-[#213430] app-main break-words">Registration Details</h2>
+                        <p class="text-base text-[#6C5F67] app-text mt-2 break-words">
                             Submitted on {{ $registration->created_at?->format('d M Y, h:i A') ?? 'N/A' }}
                         </p>
                     </div>
-                    <span class="px-5 py-2 rounded-full text-base font-semibold app-text {{ $badgeClasses }}">
+                    <span class="flex-shrink-0 px-5 py-2 rounded-full text-base font-semibold app-text {{ $badgeClasses }}">
                         Status: {{ ucfirst($status) }}
                     </span>
                 </div>
 
-                <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1]">
+                <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1] min-w-0">
                     <h3 class="text-xl font-semibold text-[#213430] app-main">Assign Case Manager</h3>
-                    <p class="text-sm text-[#6C5F67] app-text mt-1">
+                    <p class="text-sm text-[#6C5F67] app-text mt-1 break-words">
                         Assign a case manager to handle this registration.
                     </p>
                     <form method="POST" action="{{ route('admin.program_registrations.assign', $registration) }}" class="mt-4 flex flex-col md:flex-row md:items-center gap-3">
@@ -116,32 +122,32 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 border border-[#E6D8E1]">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 min-w-0">
+                <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 border border-[#E6D8E1] min-w-0 overflow-hidden">
                     <h3 class="text-xl font-semibold text-[#213430] app-main">Applicant</h3>
-                    <div class="text-base text-[#213430] app-text leading-relaxed">
-                        <p><span class="font-medium">Name:</span> {{ $registration->full_name }}</p>
-                        <p><span class="font-medium">Email:</span> {{ $registration->email ?? 'N/A' }}</p>
-                        <p><span class="font-medium">Phone:</span> {{ $registration->phone ?? 'N/A' }}</p>
-                        <p><span class="font-medium">Date of Birth:</span> {{ $registration->dob?->format('d M Y') ?? 'N/A' }}</p>
-                        <p><span class="font-medium">Referral Type:</span> {{ $registration->referral_type === 'facility' ? 'Healthcare facility referral' : 'Self referral' }}</p>
-                        <p><span class="font-medium">Treatment Facility:</span> {{ $registration->treatment_facility_name ?? 'N/A' }}</p>
-                        <p><span class="font-medium">Address:</span> {{ $registration->street_address ?? 'N/A' }}</p>
-                        <p><span class="font-medium">City / State:</span> {{ $registration->city ?? 'N/A' }} {{ $registration->state ? ', ' . $registration->state : '' }}</p>
-                        <p><span class="font-medium">Postal Code:</span> {{ $registration->postal_code ?? 'N/A' }}</p>
-                        <p><span class="font-medium">Username:</span> {{ $registration->username }}</p>
+                    <div class="text-base text-[#213430] app-text leading-relaxed break-words min-w-0">
+                        <p class="break-words"><span class="font-medium">Name:</span> {{ $registration->full_name }}</p>
+                        <p class="break-words"><span class="font-medium">Email:</span> {{ $registration->email ?? 'N/A' }}</p>
+                        <p class="break-words"><span class="font-medium">Phone:</span> {{ $registration->phone ?? 'N/A' }}</p>
+                        <p class="break-words"><span class="font-medium">Date of Birth:</span> {{ $registration->dob?->format('d M Y') ?? 'N/A' }}</p>
+                        <p class="break-words"><span class="font-medium">Referral Type:</span> {{ $registration->referral_type === 'facility' ? 'Healthcare facility referral' : 'Self referral' }}</p>
+                        <p class="break-words"><span class="font-medium">Treatment Facility:</span> {{ $registration->treatment_facility_name ?? 'N/A' }}</p>
+                        <p class="break-words"><span class="font-medium">Address:</span> {{ $registration->street_address ?? 'N/A' }}</p>
+                        <p class="break-words"><span class="font-medium">City / State:</span> {{ $registration->city ?? 'N/A' }} {{ $registration->state ? ', ' . $registration->state : '' }}</p>
+                        <p class="break-words"><span class="font-medium">Postal Code:</span> {{ $registration->postal_code ?? 'N/A' }}</p>
+                        <p class="break-words"><span class="font-medium">Username:</span> {{ $registration->username }}</p>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 border border-[#E6D8E1]">
+                <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 border border-[#E6D8E1] min-w-0 overflow-hidden">
                     <h3 class="text-xl font-semibold text-[#213430] app-main">Program</h3>
-                    <div class="text-base text-[#213430] app-text leading-relaxed">
-                        <p><span class="font-medium">Program Title:</span> {{ $registration->program->title ?? 'N/A' }}</p>
-                        <p><span class="font-medium">Assistance Type:</span> {{ $registration->assistance_type ?? 'N/A' }}</p>
+                    <div class="text-base text-[#213430] app-text leading-relaxed break-words min-w-0">
+                        <p class="break-words"><span class="font-medium">Program Title:</span> {{ $registration->program->title ?? 'N/A' }}</p>
+                        <p class="break-words"><span class="font-medium">Assistance Type:</span> {{ $registration->assistance_type ?? 'N/A' }}</p>
                     </div>
-                    <div class="mt-3">
+                    <div class="mt-3 min-w-0">
                         <h4 class="font-medium text-[#213430] text-base mb-1 app-text">Programs Applied</h4>
-                        <p class="text-base text-[#213430] app-text leading-relaxed">
+                        <p class="text-base text-[#213430] app-text leading-relaxed break-words">
                             {{ collect($registration->programs_applied ?? [])->map(fn ($p) => $programLabels[$p] ?? $p)->filter()->implode(', ') ?: 'N/A' }}
                         </p>
                         <p class="text-base text-[#213430] app-text"><span class="font-medium">Quarter:</span>
@@ -150,18 +156,19 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg p-5 md:p-6 space-y-4 border border-[#E6D8E1]">
+            <div class="bg-white rounded-lg p-5 md:p-6 space-y-4 border border-[#E6D8E1] min-w-0">
                 <h3 class="text-xl font-semibold text-[#213430] app-main">Application Details</h3>
-                <p class="text-base text-[#213430] app-text"><span class="font-medium">Active Treatment:</span> {{ $registration->active_treatment ? 'Yes' : 'No' }}</p>
-                <p class="text-base text-[#213430] app-text"><span class="font-medium">Pregnant:</span> {{ $registration->pregnant ? 'Yes' : 'No' }}</p>
-                <p class="text-base text-[#213430] app-text"><span class="font-medium">Family History:</span> {{ $registration->family_history ?? 'N/A' }}</p>
-                <p class="text-base text-[#213430] app-text"><span class="font-medium">Received Assistance Before:</span> {{ $registration->assistance_history ?? 'N/A' }}</p>
-                <p class="text-base text-[#213430] app-text"><span class="font-medium">Heard About Us:</span> {{ $registration->heard_about ?? 'N/A' }}</p>
-                <p class="text-base text-[#213430] app-text"><span class="font-medium">Proof of Income Status:</span>
+                <p class="text-base text-[#213430] app-text break-words"><span class="font-medium">Active Treatment:</span> {{ $registration->active_treatment ? 'Yes' : 'No' }}</p>
+                <p class="text-base text-[#213430] app-text break-words"><span class="font-medium">Family History:</span> {{ $registration->family_history ?? 'N/A' }}</p>
+                <p class="text-base text-[#213430] app-text break-words"><span class="font-medium">Received Assistance Before:</span> {{ $registration->assistance_history ?? 'N/A' }}</p>
+                <p class="text-base text-[#213430] app-text break-words"><span class="font-medium">Heard About Us:</span> {{ $registration->heard_about ?? 'N/A' }}</p>
+                <p class="text-base text-[#213430] app-text break-words"><span class="font-medium">Proof of Income Status:</span>
                     {{ collect($registration->proof_of_income_status ?? [])->map(fn ($p) => $incomeLabels[$p] ?? $p)->filter()->implode(', ') ?: 'N/A' }}</p>
                 <div>
                     <h4 class="font-medium text-[#213430] text-base mb-1 app-text">Story</h4>
-                    <p class="text-base text-[#6C5F67] app-text whitespace-pre-line leading-relaxed">{{ $registration->story ?? 'No story provided.' }}</p>
+                    <div class="long-text-scroll rounded border border-[#E6D8E1] bg-[#FDF7FB] px-3 py-2">
+                        <p class="text-base text-[#6C5F67] app-text whitespace-pre-line leading-relaxed break-words">{{ $registration->story ?? 'No story provided.' }}</p>
+                    </div>
                 </div>
                 <div>
                     <h4 class="font-medium text-[#213430] text-base mb-1 app-text">Authorization</h4>
@@ -308,7 +315,9 @@
                         @if ($registration->review_note)
                             <div>
                                 <span class="font-medium">Review Note:</span>
-                                <p class="text-[#6C5F67] whitespace-pre-line app-text">{{ $registration->review_note }}</p>
+                                <div class="long-text-scroll mt-1 rounded border border-[#E6D8E1] bg-[#FDF7FB] px-3 py-2">
+                                    <p class="text-[#6C5F67] whitespace-pre-line app-text break-words">{{ $registration->review_note }}</p>
+                                </div>
                             </div>
                         @endif
                     </div>

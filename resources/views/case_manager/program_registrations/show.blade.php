@@ -31,10 +31,8 @@
     ];
 
     $quarterLabels = [
-        'q1' => 'Quarter One (January thru March)',
-        'q2' => 'Quarter Two (April thru June)',
-        'q3' => 'Quarter Three (July thru September)',
-        'q4' => 'Quarter Four (October thru December)',
+        'option1' => 'Option 1: May through June',
+        'option2' => 'Option 2: November through December',
     ];
 @endphp
 
@@ -106,7 +104,6 @@
                 <div class="bg-white rounded-lg p-5 md:p-6 space-y-4 border border-[#E6D8E1]">
                     <h3 class="text-xl font-semibold text-[#213430] app-main">Application Details</h3>
                     <p class="text-base text-[#213430] app-text"><span class="font-medium">Active Treatment:</span> {{ $registration->active_treatment ? 'Yes' : 'No' }}</p>
-                    <p class="text-base text-[#213430] app-text"><span class="font-medium">Pregnant:</span> {{ $registration->pregnant ? 'Yes' : 'No' }}</p>
                     <p class="text-base text-[#213430] app-text"><span class="font-medium">Family History:</span> {{ $registration->family_history ?? 'N/A' }}</p>
                     <p class="text-base text-[#213430] app-text"><span class="font-medium">Received Assistance Before:</span> {{ $registration->assistance_history ?? 'N/A' }}</p>
                     <p class="text-base text-[#213430] app-text"><span class="font-medium">Heard About Us:</span> {{ $registration->heard_about ?? 'N/A' }}</p>
@@ -114,7 +111,9 @@
                         {{ collect($registration->proof_of_income_status ?? [])->map(fn ($p) => $incomeLabels[$p] ?? $p)->filter()->implode(', ') ?: 'N/A' }}</p>
                     <div>
                         <h4 class="font-medium text-[#213430] text-base mb-1 app-text">Story</h4>
-                        <p class="text-base text-[#6C5F67] app-text whitespace-pre-line leading-relaxed">{{ $registration->story ?? 'No story provided.' }}</p>
+                        <div class="max-h-96 overflow-y-auto overflow-x-hidden rounded border border-[#E6D8E1] bg-[#FDF7FB] px-3 py-2 break-words">
+                            <p class="text-base text-[#6C5F67] app-text whitespace-pre-line leading-relaxed">{{ $registration->story ?? 'No story provided.' }}</p>
+                        </div>
                     </div>
                     <div>
                         <h4 class="font-medium text-[#213430] text-base mb-1 app-text">Authorization</h4>

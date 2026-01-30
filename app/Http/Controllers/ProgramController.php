@@ -38,6 +38,11 @@ class ProgramController extends Controller
         $validated['user_id'] = Auth::id();
 
         $program = Program::findOrFail($validated['program_id']);
+
+        if (!$program->isApplicationOpen()) {
+            return back()->with('error', 'Applications for this program are not open yet or have closed. Please check the application start and end dates.');
+        }
+
         if ($program->max_applications) {
             $currentCount = ProgramRegistration::where('program_id', $program->id)->count();
             if ($currentCount >= $program->max_applications) {
@@ -102,6 +107,11 @@ class ProgramController extends Controller
             'sponsor' => $sponsorPayload,
             'registration' => $registrationPayload,
             'custom_fields' => $program->custom_fields ?? [],
+            'effective_status' => $program->effective_status,
+            'effective_status_label' => $program->effective_status_label,
+            'application_start_date' => $program->application_start_date?->format('d M Y'),
+            'application_end_date' => $program->application_end_date?->format('d M Y'),
+            'is_application_open' => $program->isApplicationOpen(),
         ]);
     }
 

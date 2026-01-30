@@ -99,6 +99,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/chat/conversations/{contact}', [ChatMessageController::class, 'index'])->name('chat.messages.index');
     Route::post('/chat/conversations/{contact}', [ChatMessageController::class, 'store'])->name('chat.messages.store');
+    Route::post('/chat/activity', [ChatMessageController::class, 'activity'])->name('chat.activity');
 });
 
 Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
@@ -207,6 +208,8 @@ Route::prefix('sponsor')->middleware(['role.restrict'])->group(function () {
     // Event Registration Routes
     Route::get('/events/{event}', [SponsorController::class, 'showEvent'])->name('sponsor.events.show');
     Route::post('/events/{event}/register', [SponsorController::class, 'registerForEvent'])->name('sponsor.events.register');
+    Route::get('/events/registration/success', [SponsorController::class, 'eventRegistrationSuccess'])->name('sponsor.events.registration.success');
+    Route::get('/events/registration/cancel', [SponsorController::class, 'eventRegistrationCancel'])->name('sponsor.events.registration.cancel');
     Route::delete('/events/{event}/cancel', [SponsorController::class, 'cancelEventRegistration'])->name('sponsor.events.cancel');
     Route::get('/my-event-registrations', [SponsorController::class, 'myEventRegistrations'])->name('sponsor.events.my-registrations');
 

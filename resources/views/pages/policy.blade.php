@@ -133,7 +133,7 @@
 
         <footer class="relative z-10 mt-auto">
             <div class="max-w-6xl mx-auto px-5 py-8 text-sm text-slate-600 flex flex-col md:flex-row items-center justify-between gap-3">
-                <div>&copy; {{ now()->year }} Pink Me. All rights reserved.</div>
+                <div>&copy; {{ now()->year }} <a href="https://www.pink-me.org/" target="_blank" rel="noopener noreferrer" class="hover:text-primary-600 transition">Pink Me</a>. All rights reserved.</div>
                 <div class="flex items-center gap-4">
                     <a href="{{ route('policy.privacy') }}" class="hover:text-primary-600 transition">Privacy Policy</a>
                     <a href="{{ route('policy.terms') }}" class="hover:text-primary-600 transition">Terms &amp; Conditions</a>

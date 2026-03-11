@@ -724,7 +724,8 @@
                     const formData = new FormData();
                     formData.append('finance_user_id', financeUserId);
                     formData.append('_token', document.querySelector('input[name="_token"]')?.value || document.querySelector('meta[name="csrf-token"]')?.content);
-                    fetch(`/admin/program-registration-requests/${regId}/send-to-finance`, {
+                    const sendToFinanceUrl = @json(rtrim(url('/admin/program-registration-requests'), '/'));
+                    fetch(`${sendToFinanceUrl}/${regId}/send-to-finance`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('input[name="_token"]')?.value,

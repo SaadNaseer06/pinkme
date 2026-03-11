@@ -10,53 +10,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup SSH key
-        run: |
-          # CPANEL_SSH_KEY must be base64-encoded (avoids GitHub multiline secret issues)
-          # Generate with: cat ~/.ssh/id_rsa | base64 -w 0
-          echo "${{ secrets.CPANEL_SSH_KEY }}" | base64 -d > deploy_key
-          chmod 600 deploy_key
-
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.CPANEL_HOST }}
-          username: ${{ secrets.CPANEL_USERNAME }}
-          key_path: deploy_key
-          port: ${{ secrets.CPANEL_SSH_PORT }}
-          script: |
-            set -e
-            cd ${{ secrets.DEPLOY_PATH }}
+        env:
+          SSH_KEY: ${{ secrets.CPANEL_SSH_KEY }}
+        run: |
+          set -e
+          # CPANEL_SSH_KEY must be base64-encoded. Generate with: cat ~/.ssh/id_rsa | base64 -w 0
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
 
-            echo "=== Pulling latest code ==="
-            git pull origin main
+          # Verify key
+          if [ ! -s ~/.ssh/deploy_key ]; then
+            echo "ERROR: Key file is empty. Ensure CPANEL_SSH_KEY is base64-encoded."
+            exit 1
+          fi
 
-            echo "=== Ensuring .env exists ==="
-            if [ ! -f .env ]; then
-              cp .env.example .env
-              echo "Created .env from .env.example"
-            fi
-
-            echo "=== Generating APP_KEY if missing ==="
-            if ! grep -q 'APP_KEY=base64:' .env 2>/dev/null; then
-              php artisan key:generate --force
-              echo "Generated new APP_KEY"
-            fi
-
-            echo "=== Installing dependencies ==="
-            composer install --no-dev --optimize-autoloader --no-interaction
-
-            echo "=== Setting permissions ==="
-            chmod -R 775 storage bootstrap/cache
-
-            echo "=== Running migrations ==="
-            php artisan migrate --force
-
-            echo "=== Clearing and rebuilding caches ==="
-            php artisan config:clear
-            php artisan cache:clear
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-
-            echo "=== Deployment complete ==="
+          # Run deployment commands on remote server
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key \
+            -p ${{ secrets.CPANEL_SSH_PORT }} \
+            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_HOST }} "set -e && cd ${{ secrets.DEPLOY_PATH }} && \
+            echo '=== Pulling latest code ===' && git pull origin main && \
+            ([ -f .env ] || (cp .env.example .env && php artisan key:generate --force)) && \
+            (grep -q 'APP_KEY=base64:' .env || php artisan key:generate --force) && \
+            echo '=== Installing dependencies ===' && composer install --no-dev --optimize-autoloader --no-interaction && \
+            echo '=== Setting permissions ===' && chmod -R 775 storage bootstrap/cache && \
+            echo '=== Running migrations ===' && php artisan migrate --force && \
+            echo '=== Rebuilding caches ===' && php artisan config:clear && php artisan cache:clear && \
+            php artisan config:cache && php artisan route:cache && php artisan view:cache && \
+            echo '=== Deployment complete ==='"

@@ -28,6 +28,8 @@ class AdminFinanceUserController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['username' => $request->filled('username') ? trim($request->username) : null]);
+
         $request->validate([
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
@@ -39,6 +41,9 @@ class AdminFinanceUserController extends Controller
         ]);
 
         $roleId = Role::where('name', 'finance')->value('id');
+        if (!$roleId) {
+            return redirect()->back()->withInput()->withErrors(['email' => 'Finance role not found. Please run: php artisan db:seed --class=RoleSeeder']);
+        }
 
         $user = User::create([
             'email' => $request->email,
@@ -96,7 +101,7 @@ class AdminFinanceUserController extends Controller
         $profile->last_name = $request->last_name;
         $profile->full_name = trim($request->first_name . ' ' . $request->last_name);
         $profile->phone = $request->phone;
-        $profile->username = $request->username;
+        $profile->username = $request->filled('username') ? trim($request->username) : null;
         $profile->status = (int) $request->status;
         $profile->save();
 

@@ -42,7 +42,9 @@ jobs:
             echo '=== Pulling latest code ===' && git pull origin main && \
             ([ -f .env ] || (cp .env.example .env && php artisan key:generate --force)) && \
             (grep -q 'APP_KEY=base64:' .env || php artisan key:generate --force) && \
-            echo '=== Installing dependencies ===' && composer install --no-dev --optimize-autoloader --no-interaction && \
+            echo '=== Installing dependencies ===' && \
+            (command -v composer >/dev/null 2>&1 && composer install --no-dev --optimize-autoloader --no-interaction || \
+            (curl -sS https://getcomposer.org/installer | php -- --install-dir=. --filename=composer.phar && php composer.phar install --no-dev --optimize-autoloader --no-interaction)) && \
             echo '=== Setting permissions ===' && chmod -R 775 storage bootstrap/cache && \
             echo '=== Running migrations ===' && php artisan migrate --force && \
             echo '=== Rebuilding caches ===' && php artisan config:clear && php artisan cache:clear && \

@@ -4,6 +4,8 @@
     </IfModule>
 
     RewriteEngine On
+    # Required when deployed to subdirectory (e.g. /pinkme/)
+    RewriteBase /pinkme/public/
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .

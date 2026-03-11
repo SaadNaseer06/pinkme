@@ -1,4 +1,4 @@
-<!-- Mobile Sidebar -->
+﻿<!-- Mobile Sidebar -->
 <div class="mobile-sidebar" id="mobileSidebar">
     <!-- Close Button -->
     <button class="close-btn" id="closeBtn">
@@ -37,6 +37,7 @@
                 Programs & Aids
             </a>
         </li>
+        {{-- Webinars - commented: sponsor/webinars not important for now
         <li class="{{ request()->routeIs('patient.webinars') ? 'active' : '' }}">
             <a href="{{ route('patient.webinars') }}">
                 <img src="{{ request()->routeIs('patient.webinars') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
@@ -44,6 +45,7 @@
                 Webinars
             </a>
         </li>
+        --}}
 
         <li class="{{ request()->routeIs('patient.patientChats') ? 'active' : '' }}">
             <a href="{{ route('patient.patientChats') }}">
@@ -116,6 +118,7 @@
                     <span class="title">Programs & Aids</span>
                 </a>
             </li>
+            {{-- Webinars - commented: sponsor/webinars not important for now
             <li class="{{ request()->routeIs('patient.webinars') ? 'hovered' : '' }}">
                 <a href="{{ route('patient.webinars') }}">
                     <span class="icon"><img
@@ -124,6 +127,7 @@
                     <span class="title">Webinars</span>
                 </a>
             </li>
+            --}}
             <li class="{{ request()->routeIs('patient.patientChats') ? 'hovered' : '' }}">
                 <a href="{{ route('patient.patientChats') }}">
                     <span class="icon"><img

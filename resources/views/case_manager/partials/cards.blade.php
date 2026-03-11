@@ -1,4 +1,4 @@
-@php
+﻿@php
     use Illuminate\Support\Facades\Auth;
 
     // Query directly in Blade (kept simple as requested)
@@ -23,12 +23,12 @@
 <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-6 status-cards">
     <!-- Total Applications -->
     <div class="bg-[#F3E8EF] rounded-lg px-4 py-4 flex items-center justify-between">
-        <div class="bg-[#DB69A2] p-3 rounded-full mr-4">
+        <div class="bg-[#9E2469] p-3 rounded-full mr-4">
             <img src="{{ asset('public/images/Case-D-1.svg') }}" alt="" class="h-8 w-8 status-cards-img" />
         </div>
         <div>
             <h3 class="text-[#213430] font-semibold status-cards-h1">Total Applications</h3>
-            <p class="text-md font-normal text-[#DB69A2] text-right status-cards-p">
+            <p class="text-md font-normal text-[#9E2469] text-right status-cards-p">
                 {{ $short($totalCount) }}
             </p>
         </div>

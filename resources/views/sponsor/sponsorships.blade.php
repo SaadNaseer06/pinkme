@@ -1,4 +1,4 @@
-@extends('sponsor.layouts.app')
+﻿@extends('sponsor.layouts.app')
 
 @section('title', 'Sponsorship')
 
@@ -129,14 +129,14 @@
                     @if ($ongoingPrograms->count() > 4)
                         <div class="flex space-x-2">
                             <button id="prevBtn"
-                                class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white p-2 rounded-lg">
+                                class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white p-2 rounded-lg">
                                 <svg class="md:h-6 h-4 md:w-6 w-4 arrow-icon" fill="none" stroke="currentColor"
                                     stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M15 18l-6-6 6-6" />
                                 </svg>
                             </button>
                             <button id="nextBtn"
-                                class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white p-2 rounded-lg">
+                                class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white p-2 rounded-lg">
                                 <svg class="md:h-6 h-4 md:w-6 w-4 arrow-icon" fill="none" stroke="currentColor"
                                     stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M9 18l6-6-6-6" />
@@ -175,7 +175,7 @@
                                 @endphp
                                 <div class="carousel-item p-2 min-w-[300px] md:min-w-[330px] lg:min-w-[350px]">
                                     <div
-                                        class="bg-[#F3E8EF] border border-[#DCCFD8] rounded-lg overflow-hidden hover:ring-2 ring-[#db69a2]">
+                                        class="bg-[#F3E8EF] border border-[#DCCFD8] rounded-lg overflow-hidden hover:ring-2 ring-[#9E2469]">
                                         <div class="p-2">
                                             <img src="{{ $image }}" alt="{{ $program->title }}"
                                                 class="w-full h-48 object-cover rounded" />
@@ -185,13 +185,13 @@
                                                 <div class="flex items-center gap-2">
                                                     <h2 class="text-lg font-medium text-[#213430] app-main">
                                                         {{ $program->title }}</h2>
-                                                    {{-- <span class="inline-flex items-center rounded-full bg-[#DB69A2] px-3 py-1 text-xs font-semibold text-white uppercase tracking-wide">Flexible Payment</span> --}}
+                                                    {{-- <span class="inline-flex items-center rounded-full bg-[#9E2469] px-3 py-1 text-xs font-semibold text-white uppercase tracking-wide">Flexible Payment</span> --}}
                                                 </div>
                                                 <p class="text-sm text-[#91848C] app-text">
                                                     {{ Str::limit($program->description, 110) }}</p>
                                             </div>
                                             <button type="button"
-                                                class="w-full py-3 text-[#91848C] font-medium border border-gray-300 rounded hover:bg-[#db69a2] hover:text-white hover:border-transparent rounded-lg app-main"
+                                                class="w-full py-3 text-[#91848C] font-medium border border-gray-300 rounded hover:bg-[#9E2469] hover:text-white hover:border-transparent rounded-lg app-main"
                                                 data-sp-program='@json($payload)'>
                                                 Donate Now
                                             </button>
@@ -263,7 +263,7 @@
                                         <h3 class="text-xl font-semibold text-[#213430] program-h">{{ $program->title }}
                                         </h3>
                                         <span
-                                            class="inline-flex items-center rounded-full bg-[#DB69A2] px-3 py-1 text-xs font-semibold text-white uppercase tracking-wide">Flexible
+                                            class="inline-flex items-center rounded-full bg-[#9E2469] px-3 py-1 text-xs font-semibold text-white uppercase tracking-wide">Flexible
                                             Payment</span>
                                     </div>
                                     <p class="text-sm text-[#91848C] program-p">
@@ -284,7 +284,7 @@
                                     <p class="font-medium text-[#213430] app-text">${{ number_format($left, 0) }}</p>
                                 </div> --}}
                                 <button type="button"
-                                    class="bg-transparent border border-[#213430] text-[#213430] py-3 px-8 rounded-lg program-btn hover:bg-[#db69a2] hover:text-white hover:border-transparent transition"
+                                    class="bg-transparent border border-[#213430] text-[#213430] py-3 px-8 rounded-lg program-btn hover:bg-[#9E2469] hover:text-white hover:border-transparent transition"
                                     data-sp-program='@json($payload)'>
                                     Sponsor Program
                                 </button>
@@ -307,7 +307,7 @@
                                 <div class="flex items-center gap-2">
                                     <h3 class="text-[15px] font-semibold text-[#213430]">{{ $program->title }}</h3>
                                     <span
-                                        class="inline-flex items-center rounded-full bg-[#DB69A2] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">Flexible</span>
+                                        class="inline-flex items-center rounded-full bg-[#9E2469] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">Flexible</span>
                                 </div>
                                 <p class="text-[13px] font-light text-[#91848C]">
                                     {{ Str::limit($program->description, 110) }}</p>
@@ -316,7 +316,7 @@
                                     <span>Raised: ${{ number_format($raised, 0) }}</span>
                                 </div>
                                 <button type="button"
-                                    class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#db69a2] hover:text-white hover:border-none py-2 px-6 rounded-lg"
+                                    class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:text-white hover:border-none py-2 px-6 rounded-lg"
                                     data-sp-program='@json($payload)'>
                                     Sponsor Program
                                 </button>
@@ -349,9 +349,9 @@
                             <div class="bg-[#FCEAF4] p-6 lg:p-8 space-y-6">
                                 <div class="flex items-center gap-4">
                                     <div
-                                        class="flex flex-col items-center justify-center w-20 h-20 border-2 border-[#DB69A2] rounded-2xl bg-white">
-                                        <span class="text-sm text-[#DB69A2]" data-sp-month>{{ $defaultMonthLabel }}</span>
-                                        <span class="text-4xl font-bold text-[#DB69A2]"
+                                        class="flex flex-col items-center justify-center w-20 h-20 border-2 border-[#9E2469] rounded-2xl bg-white">
+                                        <span class="text-sm text-[#9E2469]" data-sp-month>{{ $defaultMonthLabel }}</span>
+                                        <span class="text-4xl font-bold text-[#9E2469]"
                                             data-sp-day>{{ $defaultDayLabel }}</span>
                                     </div>
                                     <div class="space-y-2">
@@ -412,7 +412,7 @@
                                         <div class="mt-2">
                                             <input id="sponsorship-program-amount" name="amount" type="number"
                                                 min="1" step="0.01"
-                                                class="w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-[#213430] focus:border-[#DB69A2] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]/40"
+                                                class="w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-[#213430] focus:border-[#9E2469] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/40"
                                                 value="{{ $overlayAmountValue }}"
                                                 @if ($defaultRemainingValue !== '') max="{{ $defaultRemainingValue }}" @endif
                                                 data-sp-amount>
@@ -424,7 +424,7 @@
                                     </div>
 
                                     <button type="submit"
-                                        class="w-full rounded-xl bg-[#DB69A2] py-3 text-white font-semibold shadow-sm hover:bg-[#c5588f] transition"
+                                        class="w-full rounded-xl bg-[#9E2469] py-3 text-white font-semibold shadow-sm hover:bg-[#c5588f] transition"
                                         data-sp-submit>
                                         Confirm Sponsorship
                                     </button>

@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Sponsors')
 
@@ -9,7 +9,7 @@
                 <div class="flex items-center justify-between">
                     <h1 class="text-2xl font-semibold text-[#213430] app-main">Sponsors</h1>
                     <a href="{{ route('admin.sponsors.create') }}"
-                        class="inline-flex items-center px-4 py-2 rounded-md bg-[#DB69A2] text-white text-sm font-medium hover:bg-[#c95791] transition">
+                        class="inline-flex items-center px-4 py-2 rounded-md bg-[#9E2469] text-white text-sm font-medium hover:bg-[#B52D75] transition">
                         Add Sponsor
                     </a>
                 </div>
@@ -41,12 +41,12 @@
                                             </svg>
                                         </button> --}}
                                         <!-- Mobile Export Button -->
-                                        {{-- <button class="bg-[#db69a2] px-4 py-2 rounded-md text-sm md:hidden">
+                                        {{-- <button class="bg-[#9E2469] px-4 py-2 rounded-md text-sm md:hidden">
                                             <img src="{{ asset('public/images/export.svg') }}" alt="" class="w-4 h-4">
                                         </button> --}}
                                         <!-- Desktop Export Button -->
                                         {{-- <button
-                                            class="hidden md:flex items-center bg-[#db69a2] text-white text-sm px-4 py-1.5 rounded-md app-h">
+                                            class="hidden md:flex items-center bg-[#9E2469] text-white text-sm px-4 py-1.5 rounded-md app-h">
                                             Export
                                             <img src="{{ asset('public/images/export.svg') }}" alt="" class="w-3 h-3 ml-1">
                                         </button> --}}
@@ -113,7 +113,7 @@
                                         <tr class="border-t border-[#e0cfd8]">
                                             <!--<th class="p-2">-->
                                             <!--    <input type="checkbox"-->
-                                            <!--        class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
+                                            <!--        class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
                                             <!--</th>-->
                                             <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">
                                                 All Sponsors
@@ -142,7 +142,7 @@
                                                 <!--<td class="p-2">-->
                                                 <!--    <input type="checkbox" name="selected_sponsors[]"-->
                                                 <!--        value="{{ $sponsor->id }}"-->
-                                                <!--        class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
+                                                <!--        class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
                                                 <!--</td>-->
                                                 <td class="p-2">
                                                     <div class="flex items-center gap-3">
@@ -247,7 +247,7 @@
                                         @endif
                                         @foreach ($sponsors->getUrlRange(1, $sponsors->lastPage()) as $page => $url)
                                             <a href="{{ $url }}"
-                                                class="px-4 py-1 rounded-md {{ $page == $sponsors->currentPage() ? 'bg-[#DB69A2] text-white' : 'bg-transparent text-[#91848C] border border-[#B9B1B6] hover:bg-[#F6EDF5]' }} transition-colors duration-200">
+                                                class="px-4 py-1 rounded-md {{ $page == $sponsors->currentPage() ? 'bg-[#9E2469] text-white' : 'bg-transparent text-[#91848C] border border-[#B9B1B6] hover:bg-[#F6EDF5]' }} transition-colors duration-200">
                                                 {{ $page }}
                                             </a>
                                         @endforeach
@@ -267,7 +267,7 @@
                                             class="px-3 py-1 rounded-md bg-transparent text-[#91848C] border border-[#B9B1B6] opacity-50 cursor-not-allowed">
                                             &lt;
                                         </button>
-                                        <button class="px-4 py-1 rounded-md bg-[#DB69A2] text-white">
+                                        <button class="px-4 py-1 rounded-md bg-[#9E2469] text-white">
                                             1
                                         </button>
                                         <button disabled

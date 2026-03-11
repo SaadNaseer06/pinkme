@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Reviewer Profile')
 
@@ -13,7 +13,7 @@
                     <div class="flex justify-end items-center mb-6">
                         {{-- <h2 class="text-xl font-semibold text-[#213430] app-main">Reviewer Profile</h2> --}}
                         <a href="{{ route('admin.reviewers') }}"
-                            class="text-[#DB69A2] hover:text-[#FE6EB6] transition duration-200">Back to All Reviewers</a>
+                            class="text-[#9E2469] hover:text-[#FE6EB6] transition duration-200">Back to All Reviewers</a>
                     </div>
 
                     <!-- Cards Container -->
@@ -27,7 +27,7 @@
                                 <div class="flex-shrink-0">
                                     <img src="{{ $reviewer->avatar_url }}"
                                         alt="{{ $reviewer->name }}"
-                                        class="w-32 h-32 rounded-full object-cover shadow-md border-4 border-[#DB69A2]">
+                                        class="w-32 h-32 rounded-full object-cover shadow-md border-4 border-[#9E2469]">
                                 </div>
                                 <!-- Reviewer Information -->
                                 <div class="flex flex-col justify-center gap-2">

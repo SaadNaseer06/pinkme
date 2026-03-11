@@ -1,4 +1,4 @@
-@extends('sponsor.layouts.app')
+﻿@extends('sponsor.layouts.app')
 
 @section('title', 'Payment')
 
@@ -10,7 +10,7 @@
                     <h1 class="text-2xl font-semibold text-[#213430]">Payment History</h1>
                     <p class="text-sm text-[#91848C]">Track and manage your sponsorship contributions here.</p>
                 </div>
-                <a href="{{ route('sponsor.events') }}" class="inline-flex items-center justify-center rounded-lg bg-[#DB69A2] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#C4568E]">
+                <a href="{{ route('sponsor.events') }}" class="inline-flex items-center justify-center rounded-lg bg-[#9E2469] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#C4568E]">
                     Sponsor An Event
                 </a>
             </div>
@@ -18,7 +18,7 @@
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div class="rounded-2xl border border-[#E5CADB] bg-white px-5 py-4 shadow-sm">
                     <p class="text-xs uppercase tracking-wide text-[#91848C]">Total Contributed</p>
-                    <p class="mt-2 text-2xl font-semibold text-[#DB69A2]">${{ number_format($totals['total_amount'], 2) }}</p>
+                    <p class="mt-2 text-2xl font-semibold text-[#9E2469]">${{ number_format($totals['total_amount'], 2) }}</p>
                 </div>
                 <div class="rounded-2xl border border-[#E5CADB] bg-white px-5 py-4 shadow-sm">
                     <p class="text-xs uppercase tracking-wide text-[#91848C]">Events Sponsored</p>
@@ -37,7 +37,7 @@
 
             {{-- <div class="grid gap-6 lg:grid-cols-3">
                 <button id="openFormBtn"
-                    class="flex items-center justify-center h-full min-h-[220px] rounded-2xl border border-dashed border-[#C4B2BE] bg-[#F3E8EF] px-6 text-center text-[#213430] shadow-sm hover:border-[#DB69A2] hover:text-[#DB69A2]">
+                    class="flex items-center justify-center h-full min-h-[220px] rounded-2xl border border-dashed border-[#C4B2BE] bg-[#F3E8EF] px-6 text-center text-[#213430] shadow-sm hover:border-[#9E2469] hover:text-[#9E2469]">
                     <div class="flex flex-col items-center space-y-2">
                         <img src="{{ asset('public/images/add-payment.svg') }}" alt="Add" class="w-8 h-8" />
                         <span class="font-semibold">Add Payment Method</span>
@@ -103,14 +103,14 @@
                                 <tr class="hover:bg-[#FDF4FA] transition">
                                     <td class="px-5 py-4 font-medium">{{ $eventTitle }}</td>
                                     <td class="px-5 py-4">{{ $paymentDate ? \Carbon\Carbon::parse($paymentDate)->format('M d, Y') : '--' }}</td>
-                                    <td class="px-5 py-4 font-semibold text-[#DB69A2]">${{ number_format($payment->amount, 2) }}</td>
+                                    <td class="px-5 py-4 font-semibold text-[#9E2469]">${{ number_format($payment->amount, 2) }}</td>
                                     <td class="px-5 py-4 text-[#91848C]">{{ $fundingSummary }}</td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td colspan="4" class="px-5 py-6 text-center text-[#91848C]">
                                         You have not recorded any sponsorship payments yet.
-                                        <a href="{{ route('sponsor.events') }}" class="text-[#DB69A2] underline">Sponsor an event</a> to make your first contribution.
+                                        <a href="{{ route('sponsor.events') }}" class="text-[#9E2469] underline">Sponsor an event</a> to make your first contribution.
                                     </td>
                                 </tr>
                             @endforelse
@@ -141,7 +141,7 @@
                     @foreach (['payment-1.svg', 'payment-2.svg', 'payment-3.svg', 'payment-4.svg'] as $logo)
                         <div class="payment-option relative rounded-lg border border-[#DCCFD8] p-2 cursor-pointer" data-logo="{{ asset('public/images/' . $logo) }}">
                             <img src="{{ asset('public/images/' . $logo) }}" class="h-8" alt="Payment option">
-                            <span class="check-icon absolute -top-2 -right-2 hidden h-5 w-5 rounded-full bg-[#DB69A2] text-white text-xs flex items-center justify-center">&#10003;</span>
+                            <span class="check-icon absolute -top-2 -right-2 hidden h-5 w-5 rounded-full bg-[#9E2469] text-white text-xs flex items-center justify-center">&#10003;</span>
                         </div>
                     @endforeach
                 </div>
@@ -150,49 +150,49 @@
                     @csrf
                     <div>
                         <label class="block text-sm font-medium text-[#213430]">Cardholder Name</label>
-                        <input type="text" id="fullName" name="fullName" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#DB69A2] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="Jane Cooper" />
+                        <input type="text" id="fullName" name="fullName" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#9E2469] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="Jane Cooper" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-[#213430]">Card Number</label>
-                        <input type="text" id="cardInput" name="cardNumber" inputmode="numeric" maxlength="19" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#DB69A2] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="0000 0000 0000 0000" />
+                        <input type="text" id="cardInput" name="cardNumber" inputmode="numeric" maxlength="19" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#9E2469] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="0000 0000 0000 0000" />
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-[#213430]">Expiry</label>
-                            <input type="text" id="expiry" name="expiry" maxlength="5" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#DB69A2] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="MM/YY" />
+                            <input type="text" id="expiry" name="expiry" maxlength="5" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#9E2469] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="MM/YY" />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-[#213430]">CVV</label>
-                            <input type="password" name="cvv" maxlength="4" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#DB69A2] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="123" />
+                            <input type="password" name="cvv" maxlength="4" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#9E2469] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="123" />
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-[#213430]">Country</label>
-                            <input type="text" name="country" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#DB69A2] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="Country" />
+                            <input type="text" name="country" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#9E2469] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="Country" />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-[#213430]">City</label>
-                            <input type="text" name="city" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#DB69A2] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="City" />
+                            <input type="text" name="city" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#9E2469] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="City" />
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-[#213430]">State</label>
-                            <input type="text" name="state" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#DB69A2] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="State" />
+                            <input type="text" name="state" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#9E2469] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="State" />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-[#213430]">Postal Code</label>
-                            <input type="text" name="postal" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#DB69A2] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="Postal Code" />
+                            <input type="text" name="postal" class="mt-1 w-full rounded-xl border border-[#E7CEDA] bg-white px-4 py-3 text-sm focus:border-[#9E2469] focus:outline-none focus:ring-2 focus:ring-[#F0C5DE]" placeholder="Postal Code" />
                         </div>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-[#91848C]">
-                        <input type="checkbox" id="makeDefault" class="h-4 w-4 rounded border border-[#C4B2BE] text-[#DB69A2] focus:ring-[#DB69A2]" />
+                        <input type="checkbox" id="makeDefault" class="h-4 w-4 rounded border border-[#C4B2BE] text-[#9E2469] focus:ring-[#9E2469]" />
                         <label for="makeDefault">Make this my default payment method</label>
                     </div>
                     <div class="flex justify-end gap-3 pt-3">
                         <button type="button" class="rounded-xl border border-[#E7CEDA] px-5 py-2.5 text-sm text-[#91848C] hover:bg-[#F7EDF4]" data-form-cancel>Cancel</button>
-                        <button type="submit" class="rounded-xl bg-[#DB69A2] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#C4568E]">Save Method</button>
+                        <button type="submit" class="rounded-xl bg-[#9E2469] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#C4568E]">Save Method</button>
                     </div>
                 </form>
             </div>
@@ -248,14 +248,14 @@
             paymentOptions.forEach(function (option) {
                 option.addEventListener('click', function () {
                     paymentOptions.forEach(function (other) {
-                        other.classList.remove('border-[#DB69A2]');
+                        other.classList.remove('border-[#9E2469]');
                         var icon = other.querySelector('.check-icon');
                         if (icon) {
                             icon.classList.add('hidden');
                         }
                     });
 
-                    option.classList.add('border-[#DB69A2]');
+                    option.classList.add('border-[#9E2469]');
                     var optionIcon = option.querySelector('.check-icon');
                     if (optionIcon) {
                         optionIcon.classList.remove('hidden');

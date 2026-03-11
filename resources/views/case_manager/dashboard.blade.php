@@ -1,4 +1,4 @@
-@php
+﻿@php
     use Illuminate\Support\Facades\Auth;
     use App\Models\Application;
     use Carbon\Carbon;
@@ -117,7 +117,7 @@
                                 <div class="flex flex-col items-center w-2 h-full bars-width">
                                     <div class="flex flex-col justify-end h-full w-full">
                                         <!-- Applications (pink, top) -->
-                                        <div class="segment segment-apps w-full bg-[#db69a2] rounded-t-full"
+                                        <div class="segment segment-apps w-full bg-[#9E2469] rounded-t-full"
                                             style="height: {{ $bar['apps'] }}%; transition: height .25s ease"
                                             data-height="{{ $bar['apps'] }}"></div>
 
@@ -140,8 +140,8 @@
                     <!-- Legend -->
                     <div class="flex justify-around mt-6 gap-6 flex-wrap text-sm text-[#213430] laptop-slider">
                         <!-- Applications -->
-                        <div class="flex items-center gap-2 text-[14px] laptop-slider-gap" style="color: #db69a2">
-                            <label class="switch mini" style="color: #db69a2">
+                        <div class="flex items-center gap-2 text-[14px] laptop-slider-gap" style="color: #9E2469">
+                            <label class="switch mini" style="color: #9E2469">
                                 <input id="toggle-apps" type="checkbox" checked />
                                 <span class="slider"><span class="circle"></span></span>
                             </label>
@@ -190,12 +190,12 @@
                             <!-- Applications -->
                             <div class="flex items-center justify-between py-4">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-3 h-3 rounded-full bg-[#db69a2]"></div>
+                                    <div class="w-3 h-3 rounded-full bg-[#9E2469]"></div>
                                     <span class="text-md text-[#213430] font-medium app-text ">Applications</span>
                                 </div>
                                 <div class="flex items-center gap-2 w-2/3">
                                     <div class="w-full h-2 bg-[#DCCFD8] rounded-full overflow-hidden bars-height">
-                                        <div class="h-full bg-[#db69a2] rounded-full"
+                                        <div class="h-full bg-[#9E2469] rounded-full"
                                             style="width: {{ $acqPct['applications'] }}%"></div>
                                     </div>
                                     <span

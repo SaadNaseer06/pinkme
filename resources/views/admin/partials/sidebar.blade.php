@@ -1,4 +1,4 @@
-<!-- Mobile Sidebar -->
+﻿<!-- Mobile Sidebar -->
 <div class="mobile-sidebar" id="mobileSidebar">
     <!-- Close Button -->
     <button class="close-btn" id="closeBtn">
@@ -25,8 +25,8 @@
         <li class="{{ request()->is('admin/registrations*') ? 'active' : '' }}">
             <a href="{{ route('admin.registrations.index') }}">
                 <img src="{{ request()->is('admin/registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
-                     alt="Registrations" />
-                Registrations
+                     alt="Applications" />
+                Applications
             </a>
         </li>
         <li class="{{ request()->is('admin/reviewers*') ? 'active' : '' }}">
@@ -34,26 +34,42 @@
                     src="{{ request()->is('admin/reviewers*') ? asset('public/images/review-pink.svg') : asset('public/images/review.svg') }}"
                     alt="Case Managers" />Case Managers</a>
         </li>
+        <li class="{{ request()->is('admin/finance-users*') ? 'active' : '' }}">
+            <a href="{{ route('admin.finance-users.index') }}"><img
+                    src="{{ request()->is('admin/finance-users*') ? asset('public/images/review-pink.svg') : asset('public/images/review.svg') }}"
+                    alt="Finance Users" />Finance Users</a>
+        </li>
         <li class="{{ request()->is('admin/patients') ? 'active' : '' }}">
             <a href="{{ route('admin.patients') }}"><img
                     src="{{ request()->is('admin/patients') ? asset('public/images/patient-pink.svg') : asset('public/images/patient.svg') }}"
                     alt="" />Patients</a>
         </li>
+        {{-- Sponsors - commented: sponsor not important for now
         <li class="{{ request()->is('admin/sponsors*') ? 'active' : '' }}">
             <a href="{{ route('admin.sponsors') }}"><img
                     src="{{ request()->is('admin/sponsors*') ? asset('public/images/Sponsor-pink.svg') : asset('public/images/Sponsor.svg') }}"
                     alt="" />Sponsors</a>
         </li>
-        <li class="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') || request()->is('admin/events*') || request()->is('admin/events-registrations*') ? 'active' : '' }}">
+        --}}
+        <li class="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') ? 'active' : '' }}">
             <a href="{{ route('admin.programs-events') }}"><img
-                    src="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') || request()->is('admin/events*') || request()->is('admin/events-registrations*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
-                    alt="" />Programs & Events</a>
+                    src="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                    alt="" />Programs</a>
         </li>
+        {{-- Event Registrations - commented: sponsor-related, sponsor not wanted for now
+        <li class="{{ request()->is('admin/events-registrations*') ? 'active' : '' }}">
+            <a href="{{ route('events.registrations.index') }}"><img
+                    src="{{ request()->is('admin/events-registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
+                    alt="" />Event Registrations</a>
+        </li>
+        --}}
+        {{-- Webinars - commented: sponsor/webinars not important for now
         <li class="{{ request()->is('admin/webinars*') ? 'active' : '' }}">
             <a href="{{ route('admin.webinars.index') }}"><img
                     src="{{ request()->is('admin/webinars*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
                     alt="" />Webinars</a>
         </li>
+        --}}
         <li class="{{ request()->is('admin/settings') ? 'active' : '' }}">
             <a href="{{ route('admin.settings') }}"><img
                     src="{{ request()->is('admin/settings') ? asset('public/images/setting-pink.svg') : asset('public/images/setting.svg') }}"
@@ -92,8 +108,8 @@
                 <a href="{{ route('admin.registrations.index') }}">
                     <span class="icon"><img
                             src="{{ request()->is('admin/registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
-                            class="w-5 h-5" alt="Registrations" /></span>
-                    <span class="title">Registrations</span>
+                            class="w-5 h-5" alt="Applications" /></span>
+                    <span class="title">Applications</span>
                 </a>
             </li>
             <li class="{{ request()->is('admin/reviewers*') ? 'hovered' : '' }}">
@@ -104,6 +120,14 @@
                     <span class="title">Case Managers</span>
                 </a>
             </li>
+            <li class="{{ request()->is('admin/finance-users*') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.finance-users.index') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/finance-users*') ? asset('public/images/review-pink.svg') : asset('public/images/review.svg') }}"
+                            class="w-5 h-5" alt="Finance Users" /></span>
+                    <span class="title">Finance Users</span>
+                </a>
+            </li>
             <li class="{{ request()->is('admin/patients') ? 'hovered' : '' }}">
                 <a href="{{ route('admin.patients') }}">
                     <span class="icon"><img
@@ -112,6 +136,7 @@
                     <span class="title">Patients</span>
                 </a>
             </li>
+            {{-- Sponsors - commented: sponsor not important for now
             <li class="{{ request()->is('admin/sponsors*') ? 'hovered' : '' }}">
                 <a href="{{ route('admin.sponsors') }}">
                     <span class="icon"><img
@@ -120,15 +145,27 @@
                     <span class="title">Sponsors</span>
                 </a>
             </li>
+            --}}
             <li
-                class="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') || request()->is('admin/events*') || request()->is('admin/events-registrations*') ? 'hovered' : '' }}">
+                class="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') ? 'hovered' : '' }}">
                 <a href="{{ route('admin.programs-events') }}">
                     <span class="icon"><img
-                            src="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') || request()->is('admin/events*') || request()->is('admin/events-registrations*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
+                            src="{{ request()->is('admin/programs-events') || request()->is('admin/programs*') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
                             class="w-5 h-5" /></span>
-                    <span class="title">Programs & Events</span>
+                    <span class="title">Programs</span>
                 </a>
             </li>
+            {{-- Event Registrations - commented: sponsor-related, sponsor not wanted for now
+            <li class="{{ request()->is('admin/events-registrations*') ? 'hovered' : '' }}">
+                <a href="{{ route('events.registrations.index') }}">
+                    <span class="icon"><img
+                            src="{{ request()->is('admin/events-registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
+                            class="w-5 h-5" /></span>
+                    <span class="title">Event Registrations</span>
+                </a>
+            </li>
+            --}}
+            {{-- Webinars - commented: sponsor/webinars not important for now
             <li class="{{ request()->is('admin/webinars*') ? 'hovered' : '' }}">
                 <a href="{{ route('admin.webinars.index') }}">
                     <span class="icon"><img
@@ -137,6 +174,7 @@
                     <span class="title">Webinars</span>
                 </a>
             </li>
+            --}}
             <li class="{{ request()->is('admin/settings') ? 'hovered' : '' }}">
                 <a href="{{ route('admin.settings') }}">
                     <span class="icon"><img

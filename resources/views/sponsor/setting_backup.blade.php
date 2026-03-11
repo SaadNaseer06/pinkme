@@ -1,4 +1,4 @@
-@extends('sponsor.layouts.app')
+﻿@extends('sponsor.layouts.app')
 
 @section('title', 'Settings')
 
@@ -30,7 +30,7 @@
             <div class="flex flex-wrap mb-10">
                 <div class="w-full md:w-1/4">
                     <button type="button" id="tab-personal" onclick="showTab('personal')"
-                        class="tab-btn w-full bg-[#DB69A2] text-white py-4 px-6 font-normal text-center rounded-t-lg md:rounded-tr-none md:rounded-l-lg app-text">
+                        class="tab-btn w-full bg-[#9E2469] text-white py-4 px-6 font-normal text-center rounded-t-lg md:rounded-tr-none md:rounded-l-lg app-text">
                         Personal Information
                     </button>
                 </div>
@@ -75,7 +75,7 @@
                                         </div>
                                     </div>
                                     <label for="avatar"
-                                        class="absolute bottom-[10px] right-[7px] bg-[#DB69A2] text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer">
+                                        class="absolute bottom-[10px] right-[7px] bg-[#9E2469] text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -204,7 +204,7 @@
                                     Cancel
                                 </button>
                                 <button type="submit"
-                                    class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
+                                    class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
                                     Submit
                                 </button>
                             </div>
@@ -322,7 +322,7 @@
                                     Cancel
                                 </button>
                                 <button type="submit"
-                                    class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
+                                    class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
                                     Submit
                                 </button>
                             </div>
@@ -348,7 +348,7 @@
                                         Current Password:
                                     </label>
                                     <label for="forgotPassword"
-                                        class="block font-light text-md text-[#DB69A2] mb-1 app-text">
+                                        class="block font-light text-md text-[#9E2469] mb-1 app-text">
                                         Forgot Password?
                                     </label>
                                 </div>
@@ -384,7 +384,7 @@
                                 Cancel
                             </button>
                             <button type="submit"
-                                class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                                class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300"
                                 app-text>
                                 Submit
                             </button>
@@ -435,12 +435,12 @@
                                 <div class="space-y-2 pl-0 md:pl-2">
                                     <div class="flex items-center space-x-2">
                                         <input type="checkbox"
-                                            class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
+                                            class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
                                         <span class="text-sm text-gray-800 app-text">You have new notifications.</span>
                                     </div>
                                     <div class="flex items-center space-x-2">
                                         <input type="checkbox"
-                                            class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
+                                            class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
                                         <span class="text-sm text-gray-800 app-text">You're sent a direct message</span>
                                     </div>
                                 </div>
@@ -455,7 +455,7 @@
                                 Cancel
                             </button>
                             <button type="submit"
-                                class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
+                                class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
                                 Submit
                             </button>
                         </div>
@@ -495,7 +495,7 @@
                                         Cancel
                                     </button>
                                     <button type="submit"
-                                        class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
+                                        class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
                                         Submit
                                     </button>
                                 </div>
@@ -530,7 +530,7 @@
                                         Cancel
                                     </button>
                                     <button type="submit"
-                                        class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
+                                        class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
                                         Submit
                                     </button>
                                 </div>

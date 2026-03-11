@@ -1,13 +1,15 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('content')
     <div class="container mx-auto px-4 py-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-semibold text-gray-800">Events</h1>
             <div class="flex space-x-3">
+                {{-- Event Registrations - commented: sponsor-related, sponsor not wanted for now
                 <a href="{{ route('events.registrations.index') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
                     Event Registrations
                 </a>
+                --}}
                 <a href="{{ route('events.create') }}" class="bg-pink-600 text-white px-4 py-2 rounded-md hover:bg-pink-700">
                     Add New Event
                 </a>

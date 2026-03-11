@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Invoice;
 use App\Models\Program;
-
 
 class Application extends Model
 {
@@ -21,6 +21,7 @@ class Application extends Model
     protected $fillable = [
         'patient_id',
         'reviewer_id',
+        'finance_user_id',
         'program_id',
         'title',
         'age',
@@ -41,6 +42,16 @@ class Application extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewer_id');
+    }
+
+    public function financeUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'finance_user_id');
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 
     public function program(): BelongsTo

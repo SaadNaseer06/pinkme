@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Add Case Manager')
 
@@ -10,7 +10,7 @@
                 <!-- Back Button and Title -->
                 <div class="mb-6 flex items-center gap-4">
                     <a href="{{ route('admin.case-managers.index') }}"
-                        class="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-[#e0cfd8] text-[#91848C] hover:bg-[#F9EEF6] hover:text-[#DB69A2] transition">
+                        class="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-[#e0cfd8] text-[#91848C] hover:bg-[#F9EEF6] hover:text-[#9E2469] transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -32,19 +32,19 @@
                         <div>
                             {{-- <h3 class="text-lg font-semibold text-[#213430] mb-4 app-h flex items-center gap-2">
                                 <span
-                                    class="w-8 h-8 bg-[#DB69A2] text-white rounded-full flex items-center justify-center text-sm">1</span>
+                                    class="w-8 h-8 bg-[#9E2469] text-white rounded-full flex items-center justify-center text-sm">1</span>
                                 Personal Information
                             </h3> --}}
                             <div class="grid gap-6 md:grid-cols-2">
                                 <div>
                                     <label class="block text-sm font-medium text-[#213430] mb-2 app-h">
-                                        First Name <span class="text-[#DB69A2]">*</span>
+                                        First Name <span class="text-[#9E2469]">*</span>
                                     </label>
                                     <input type="text" name="first_name" value="{{ old('first_name') }}" required
-                                        class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#DB69A2] focus:border-[#DB69A2] transition app-text"
+                                        class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-[#9E2469] transition app-text"
                                         placeholder="Enter first name">
                                     @error('first_name')
-                                        <p class="text-xs text-[#DB69A2] mt-2 flex items-center gap-1">
+                                        <p class="text-xs text-[#9E2469] mt-2 flex items-center gap-1">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -56,13 +56,13 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-[#213430] mb-2 app-h">
-                                        Last Name <span class="text-[#DB69A2]">*</span>
+                                        Last Name <span class="text-[#9E2469]">*</span>
                                     </label>
                                     <input type="text" name="last_name" value="{{ old('last_name') }}" required
-                                        class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#DB69A2] focus:border-[#DB69A2] transition app-text"
+                                        class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-[#9E2469] transition app-text"
                                         placeholder="Enter last name">
                                     @error('last_name')
-                                        <p class="text-xs text-[#DB69A2] mt-2 flex items-center gap-1">
+                                        <p class="text-xs text-[#9E2469] mt-2 flex items-center gap-1">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -79,13 +79,13 @@
                         <div>
                             {{-- <h3 class="text-lg font-semibold text-[#213430] mb-4 app-h flex items-center gap-2">
                                 <span
-                                    class="w-8 h-8 bg-[#DB69A2] text-white rounded-full flex items-center justify-center text-sm">2</span>
+                                    class="w-8 h-8 bg-[#9E2469] text-white rounded-full flex items-center justify-center text-sm">2</span>
                                 Account Credentials
                             </h3> --}}
                             <div class="grid gap-6 md:grid-cols-2">
                                 <div>
                                     <label class="block text-sm font-medium text-[#213430] mb-2 app-h">
-                                        Email Address <span class="text-[#DB69A2]">*</span>
+                                        Email Address <span class="text-[#9E2469]">*</span>
                                     </label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -96,11 +96,11 @@
                                             </svg>
                                         </div>
                                         <input type="email" name="email" value="{{ old('email') }}" required
-                                            class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white pl-10 pr-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#DB69A2] focus:border-[#DB69A2] transition app-text"
+                                            class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white pl-10 pr-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-[#9E2469] transition app-text"
                                             placeholder="example@email.com">
                                     </div>
                                     @error('email')
-                                        <p class="text-xs text-[#DB69A2] mt-2 flex items-center gap-1">
+                                        <p class="text-xs text-[#9E2469] mt-2 flex items-center gap-1">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -112,7 +112,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-[#213430] mb-2 app-h">
-                                        Password <span class="text-[#DB69A2]">*</span>
+                                        Password <span class="text-[#9E2469]">*</span>
                                     </label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -123,11 +123,11 @@
                                             </svg>
                                         </div>
                                         <input type="password" name="password" required
-                                            class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white pl-10 pr-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#DB69A2] focus:border-[#DB69A2] transition app-text"
+                                            class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white pl-10 pr-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-[#9E2469] transition app-text"
                                             placeholder="Enter secure password">
                                     </div>
                                     @error('password')
-                                        <p class="text-xs text-[#DB69A2] mt-2 flex items-center gap-1">
+                                        <p class="text-xs text-[#9E2469] mt-2 flex items-center gap-1">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -144,13 +144,13 @@
                         <div>
                             {{-- <h3 class="text-lg font-semibold text-[#213430] mb-4 app-h flex items-center gap-2">
                                 <span
-                                    class="w-8 h-8 bg-[#DB69A2] text-white rounded-full flex items-center justify-center text-sm">3</span>
+                                    class="w-8 h-8 bg-[#9E2469] text-white rounded-full flex items-center justify-center text-sm">3</span>
                                 Contact Information
                             </h3> --}}
                             <div class="grid gap-6 md:grid-cols-2">
                                 <div>
                                     <label class="block text-sm font-medium text-[#213430] mb-2 app-h">
-                                        Phone Number <span class="text-[#DB69A2]">*</span>
+                                        Phone Number <span class="text-[#9E2469]">*</span>
                                     </label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -161,11 +161,11 @@
                                             </svg>
                                         </div>
                                         <input type="text" name="phone" value="{{ old('phone') }}" required
-                                            class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white pl-10 pr-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#DB69A2] focus:border-[#DB69A2] transition app-text"
+                                            class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white pl-10 pr-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-[#9E2469] transition app-text"
                                             placeholder="+1 (555) 000-0000">
                                     </div>
                                     @error('phone')
-                                        <p class="text-xs text-[#DB69A2] mt-2 flex items-center gap-1">
+                                        <p class="text-xs text-[#9E2469] mt-2 flex items-center gap-1">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -189,11 +189,11 @@
                                             </svg>
                                         </div>
                                         <input type="text" name="username" value="{{ old('username') }}"
-                                            class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white pl-10 pr-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#DB69A2] focus:border-[#DB69A2] transition app-text"
+                                            class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white pl-10 pr-4 py-3 text-sm text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-[#9E2469] transition app-text"
                                             placeholder="Enter username">
                                     </div>
                                     @error('username')
-                                        <p class="text-xs text-[#DB69A2] mt-2 flex items-center gap-1">
+                                        <p class="text-xs text-[#9E2469] mt-2 flex items-center gap-1">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -210,17 +210,17 @@
                         <div>
                             {{-- <h3 class="text-lg font-semibold text-[#213430] mb-4 app-h flex items-center gap-2">
                                 <span
-                                    class="w-8 h-8 bg-[#DB69A2] text-white rounded-full flex items-center justify-center text-sm">4</span>
+                                    class="w-8 h-8 bg-[#9E2469] text-white rounded-full flex items-center justify-center text-sm">4</span>
                                 Account Status
                             </h3> --}}
                             <div class="grid gap-6 md:grid-cols-2">
                                 <div>
                                     <label class="block text-sm font-medium text-[#213430] mb-2 app-h">
-                                        Status <span class="text-[#DB69A2]">*</span>
+                                        Status <span class="text-[#9E2469]">*</span>
                                     </label>
                                     <div class="relative">
                                         <select name="status"
-                                            class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] appearance-none focus:outline-none focus:ring-2 focus:ring-[#DB69A2] focus:border-[#DB69A2] transition app-text cursor-pointer">
+                                            class="w-full rounded-lg border-2 border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] appearance-none focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-[#9E2469] transition app-text cursor-pointer">
                                             <option value="1" selected>Active</option>
                                             <option value="0">Inactive</option>
                                         </select>
@@ -233,7 +233,7 @@
                                         </div>
                                     </div>
                                     @error('status')
-                                        <p class="text-xs text-[#DB69A2] mt-2 flex items-center gap-1">
+                                        <p class="text-xs text-[#9E2469] mt-2 flex items-center gap-1">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -251,15 +251,15 @@
                         <!-- Action Buttons -->
                         <div class="flex items-center justify-between pt-6 border-t-2 border-[#e0cfd8]">
                             <p class="text-sm text-[#91848C] app-text">
-                                <span class="text-[#DB69A2]">*</span> Required fields
+                                <span class="text-[#9E2469]">*</span> Required fields
                             </p>
                             <div class="flex gap-3">
                                 <a href="{{ route('admin.case-managers.index') }}"
-                                    class="px-6 py-3 border-2 border-[#DCCFD8] text-[#91848C] rounded-lg text-sm font-semibold hover:bg-white hover:border-[#DB69A2] hover:text-[#DB69A2] transition app-h">
+                                    class="px-6 py-3 border-2 border-[#DCCFD8] text-[#91848C] rounded-lg text-sm font-semibold hover:bg-white hover:border-[#9E2469] hover:text-[#9E2469] transition app-h">
                                     Cancel
                                 </a>
                                 <button type="submit"
-                                    class="px-6 py-3 bg-[#DB69A2] hover:bg-[#C63A85] text-white rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition transform hover:scale-105 app-h flex items-center gap-2">
+                                    class="px-6 py-3 bg-[#9E2469] hover:bg-[#B52D75] text-white rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition transform hover:scale-105 app-h flex items-center gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

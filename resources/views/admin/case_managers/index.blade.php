@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Case Managers')
 
@@ -18,7 +18,7 @@
                         <div class="flex justify-between items-center">
                             <h2 class="text-xl font-semibold text-[#213430] app-main">All Case Managers List</h2>
                             <a href="{{ route('admin.case-managers.create') }}"
-                                class="bg-[#db69a2] text-white px-4 py-2 rounded-md text-sm hover:bg-[#C63A85] transition">
+                                class="bg-[#9E2469] text-white px-4 py-2 rounded-md text-sm hover:bg-[#B52D75] transition">
                                 Add Case Manager
                             </a>
                         </div>

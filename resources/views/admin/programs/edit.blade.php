@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Edit Program')
 
@@ -6,7 +6,7 @@
     <div class="max-w-8xl mx-auto">
         <div class="space-y-8">
             <div
-                class="rounded-2xl bg-gradient-to-r from-[#C63A85] via-[#DB69A2] to-[#E8A8C8] text-white p-8 shadow-lg relative">
+                class="rounded-2xl bg-gradient-to-r from-[#B52D75] via-[#9E2469] to-[#E8A8C8] text-white p-8 shadow-lg relative">
                 <div class="absolute inset-0 bg-black/10 rounded-2xl"></div>
                 <div class="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                     <div class="max-w-xl" style="text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);">
@@ -19,7 +19,7 @@
                             class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/25 px-5 py-3 text-sm font-medium text-white backdrop-blur transition hover:bg-white/30">Back
                             to programs</a>
                         <button type="submit" form="edit-program-form"
-                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#DB69A2] shadow-md shadow-white/40 transition hover:bg-[#FFF1F7]">Update
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#9E2469] shadow-md shadow-white/40 transition hover:bg-[#FFF1F7]">Update
                             Program</button>
                     </div>
                 </div>
@@ -69,32 +69,32 @@
                         <ul class="mt-4 space-y-3 text-sm text-[#6C5B68]">
                             <li class="flex items-start gap-3">
                                 <span
-                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">1</span>
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#9E2469]">1</span>
                                 Ensure a Title field exists for display.
                             </li>
                             <li class="flex items-start gap-3">
                                 <span
-                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">2</span>
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#9E2469]">2</span>
                                 Include a Time field for reminders if needed.
                             </li>
                             <li class="flex items-start gap-3">
                                 <span
-                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">3</span>
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#9E2469]">3</span>
                                 Add application start and end dates to define the intake window.
                             </li>
                             <li class="flex items-start gap-3">
                                 <span
-                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">4</span>
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#9E2469]">4</span>
                                 Add a maximum applications field to cap submissions.
                             </li>
                             <li class="flex items-start gap-3">
                                 <span
-                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">5</span>
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#9E2469]">5</span>
                                 Add maximum applications and status to control availability.
                             </li>
                             <li class="flex items-start gap-3">
                                 <span
-                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">6</span>
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#9E2469]">6</span>
                                 Refresh the banner if you want a new cover image.
                             </li>
                         </ul>

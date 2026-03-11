@@ -191,7 +191,7 @@ class ChatConversation {
     buildMessageBubble(message, isOwn) {
         const { content, attachment } = message ?? {};
         const bubble = document.createElement('div');
-        bubble.className = `${isOwn ? 'bg-[#DB69A2] text-white rounded-br-sm text-left' : 'bg-white text-[#4C4047] border border-[#E5D2DE] rounded-bl-sm'} text-sm leading-relaxed px-4 py-3 rounded-2xl shadow-sm`;
+        bubble.className = `${isOwn ? 'bg-[#9E2469] text-white rounded-br-sm text-left' : 'bg-white text-[#4C4047] border border-[#E5D2DE] rounded-bl-sm'} text-sm leading-relaxed px-4 py-3 rounded-2xl shadow-sm`;
 
         if (content && content.trim().length > 0) {
             const textBlock = document.createElement('div');
@@ -221,7 +221,7 @@ class ChatConversation {
                 const link = document.createElement('a');
                 link.href = attachment.url;
                 link.target = '_blank';
-                link.className = `inline-flex items-center gap-2 text-sm ${isOwn ? 'text-white' : 'text-[#DB69A2]'} hover:underline`;
+                link.className = `inline-flex items-center gap-2 text-sm ${isOwn ? 'text-white' : 'text-[#9E2469]'} hover:underline`;
 
                 const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 icon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');

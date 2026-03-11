@@ -1,4 +1,4 @@
-@extends('sponsor.layouts.app')
+﻿@extends('sponsor.layouts.app')
 
 @section('title', 'My Event Registrations')
 
@@ -64,7 +64,7 @@
                 <div class="mb-6">
                     <div class="border-b border-[#DCCFD8]">
                         <nav class="-mb-px flex space-x-8">
-                            <button class="tab-button active py-2 px-1 border-b-2 border-[#DB69A2] font-medium text-sm text-[#DB69A2] app-text" 
+                            <button class="tab-button active py-2 px-1 border-b-2 border-[#9E2469] font-medium text-sm text-[#9E2469] app-text" 
                                     data-tab="confirmed">
                                 Confirmed ({{ $confirmed->count() }})
                             </button>
@@ -152,7 +152,7 @@
                                                                 </span>
                                                             </div>
                                                             <div class="w-full bg-gray-200 rounded-full h-2">
-                                                                <div class="bg-[#DB69A2] h-2 rounded-full" 
+                                                                <div class="bg-[#9E2469] h-2 rounded-full" 
                                                                      style="width: {{ $registration->event->funding_progress }}%"></div>
                                                             </div>
                                                         </div>
@@ -176,7 +176,7 @@
 
                                                 <div class="flex flex-col gap-2 ml-6">
                                                     <a href="{{ route('sponsor.events.show', $registration->event) }}" 
-                                                       class="inline-flex items-center px-3 py-2 bg-[#DB69A2] text-white text-sm rounded-lg hover:bg-[#C63A85] transition app-text">
+                                                       class="inline-flex items-center px-3 py-2 bg-[#9E2469] text-white text-sm rounded-lg hover:bg-[#B52D75] transition app-text">
                                                         View Event
                                                     </a>
                                                     
@@ -207,7 +207,7 @@
                             <h3 class="text-lg font-medium text-[#213430] mb-2 program-main">No Confirmed Registrations</h3>
                             <p class="text-[#91848C] app-text">You don't have any confirmed event registrations yet.</p>
                             <a href="{{ route('sponsor.events') }}" 
-                               class="inline-block mt-4 px-6 py-2 bg-[#DB69A2] text-white rounded-lg hover:bg-[#C63A85] transition app-text">
+                               class="inline-block mt-4 px-6 py-2 bg-[#9E2469] text-white rounded-lg hover:bg-[#B52D75] transition app-text">
                                 Browse Events
                             </a>
                         </div>
@@ -266,7 +266,7 @@
 
                                                 <div class="ml-6">
                                                     <a href="{{ route('sponsor.events.show', $registration->event) }}" 
-                                                       class="inline-flex items-center px-3 py-2 bg-[#DB69A2] text-white text-sm rounded-lg hover:bg-[#C63A85] transition app-text">
+                                                       class="inline-flex items-center px-3 py-2 bg-[#9E2469] text-white text-sm rounded-lg hover:bg-[#B52D75] transition app-text">
                                                         View Event
                                                     </a>
                                                 </div>
@@ -356,7 +356,7 @@
 
                 <div class="mt-8 text-center">
                     <a href="{{ route('sponsor.events') }}" 
-                       class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#DB69A2] to-[#C63A85] text-white rounded-lg hover:from-[#C63A85] hover:to-[#B02A72] transition app-text">
+                       class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#9E2469] to-[#B52D75] text-white rounded-lg hover:from-[#B52D75] hover:to-[#B02A72] transition app-text">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                   d="M15 19l-7-7 7-7"></path>
@@ -379,12 +379,12 @@
                     
                     // Remove active class from all buttons
                     tabButtons.forEach(btn => {
-                        btn.classList.remove('active', 'border-[#DB69A2]', 'text-[#DB69A2]');
+                        btn.classList.remove('active', 'border-[#9E2469]', 'text-[#9E2469]');
                         btn.classList.add('border-transparent', 'text-[#91848C]');
                     });
                     
                     // Add active class to clicked button
-                    this.classList.add('active', 'border-[#DB69A2]', 'text-[#DB69A2]');
+                    this.classList.add('active', 'border-[#9E2469]', 'text-[#9E2469]');
                     this.classList.remove('border-transparent', 'text-[#91848C]');
                     
                     // Hide all tab contents

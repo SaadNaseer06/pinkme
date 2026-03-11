@@ -6,12 +6,12 @@
 
 <!-- Top Navigation Bar -->
 <header
-    class="mt-4 ml-6 mr-6 bg-[#F3E8EF] p-4 flex justify-between items-center rounded-lg overflow-visible tab-head md:flex hidden tab-header-1">
+    class="mt-4 mr-6 bg-[#F3E8EF] p-4 justify-between items-center rounded-lg overflow-visible tab-head md:flex hidden tab-header-1">
     <!-- Search Bar -->
     <div class="relative">
         {{-- <input type="text" placeholder="Type here to search..."
-            class="pl-4 pr-10 py-2 rounded-md bg-transparent text-[#B9B1B6] text-sm border border-[#B9B1B6] focus:outline-none focus:border-[#DB69A2] focus:ring-1 focus:ring-[#DB69A2] tab-search" />
-        <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#DB69A2]">
+            class="pl-4 pr-10 py-2 rounded-md bg-transparent text-[#B9B1B6] text-sm border border-[#B9B1B6] focus:outline-none focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469] tab-search" />
+        <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#9E2469]">
             <i class="fas fa-search"></i>
         </button> --}}
     </div>
@@ -37,12 +37,12 @@
                 </div>
                 <div class="text-left">
                     <p class="text-sm font-normal text-[#213430]">{{ $fullName }}</p>
-                    <p class="text-xs text-[#DB69A2]">Online</p>
+                    <p class="text-xs text-[#9E2469]">Online</p>
                 </div>
             </div>
 
             <div class="hidden fixed right-10 mt-2 w-72 bg-[#F7EBF3] rounded-xl z-50 profileDropdown">
-                <div class="px-4 py-3 bg-[#DB69A2] rounded-t-xl">
+                <div class="px-4 py-3 bg-[#9E2469] rounded-t-xl">
                     <p class="text-white text-sm font-semibold">All Notification</p>
                     <p class="text-white text-xs font-light">Available</p>
                 </div>
@@ -71,7 +71,7 @@
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit"
-                            class="w-full text-center bg-[#db69a2] text-white text-sm font-semibold py-2 rounded-md flex items-center justify-center gap-2">
+                            class="w-full text-center bg-[#9E2469] text-white text-sm font-semibold py-2 rounded-md flex items-center justify-center gap-2">
                             Sign Out
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
@@ -176,12 +176,12 @@
                     </div>
                     <div class="text-left">
                         <p class="text-sm font-normal text-[#213430]">{{ $fullName }}</p>
-                        <p class="text-xs text-[#DB69A2]">Online</p>
+                        <p class="text-xs text-[#9E2469]">Online</p>
                     </div>
                 </div>
 
                 <div class="hidden fixed right-10 mt-2 w-72 bg-[#F7EBF3] rounded-xl z-50 profileDropdown">
-                    <div class="px-4 py-3 bg-[#DB69A2] rounded-t-xl">
+                    <div class="px-4 py-3 bg-[#9E2469] rounded-t-xl">
                         <p class="text-white text-sm font-semibold">All Notification</p>
                         <p class="text-white text-xs font-light">Available</p>
                     </div>
@@ -210,7 +210,7 @@
 
                     <div class="px-4 pb-3">
                         <button
-                            class="w-full text-center bg-[#db69a2] text-white text-sm font-semibold py-2 rounded-md flex items-center justify-center gap-2">
+                            class="w-full text-center bg-[#9E2469] text-white text-sm font-semibold py-2 rounded-md flex items-center justify-center gap-2">
                             Sign Out
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
                                 viewBox="0 0 24 24">
@@ -226,8 +226,8 @@
     <!-- Search Bar -->
     <div class="relative mt-4">
         {{-- <input type="text" placeholder="Type here to search..."
-            class="pl-4 pr-10 py-2 rounded-md bg-transparent text-[#B9B1B6] text-sm border border-[#B9B1B6] focus:outline-none focus:border-[#DB69A2] focus:ring-1 focus:ring-[#DB69A2] tab-search" />
-        <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#DB69A2]">
+            class="pl-4 pr-10 py-2 rounded-md bg-transparent text-[#B9B1B6] text-sm border border-[#B9B1B6] focus:outline-none focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469] tab-search" />
+        <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#9E2469]">
             <i class="fas fa-search"></i>
         </button> --}}
     </div>

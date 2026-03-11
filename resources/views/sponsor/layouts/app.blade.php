@@ -9,6 +9,7 @@
     <meta name="current-user-id" content="{{ optional(auth()->user())->id }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     @vite(['resources/css/app.css', 'resources/css/custom.css', 'resources/js/app.js'])
+    @include('partials.theme-variables')
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
@@ -26,8 +27,8 @@
                     colors: {
                         pink: {
                             light: "#F9F4F8",
-                            DEFAULT: "#E35A9B",
-                            dark: "#D1478A",
+                            DEFAULT: "#9E2469",
+                            dark: "#7B1D52",
                         },
                     },
                     fontFamily: {
@@ -39,9 +40,9 @@
     </script>
 </head>
 
-<body class="bg-[#FFF8FC] font-sans flex min-h-screen">
+<body class="bg-[#FFF8FC] font-sans flex min-h-screen gap-0">
     @include('sponsor.partials.sidebar')
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col min-w-0">
         @include('sponsor.partials.topbar')
         <main class="flex-1 p-6">
         @include('partials.flash')

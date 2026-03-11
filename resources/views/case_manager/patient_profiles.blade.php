@@ -1,4 +1,4 @@
-@extends('case_manager.layouts.app')
+﻿@extends('case_manager.layouts.app')
 
 @section('title', 'Patient Profiles')
 
@@ -37,7 +37,7 @@
                         {{ optional($patient->user->profile)->date_of_birth ? \Carbon\Carbon::parse($patient->user->profile->date_of_birth)->age . ' years' : '—' }}
                     </p>
 
-                    <p class="text-[#DB69A2] text-sm mt-1 cards-p">
+                    <p class="text-[#9E2469] text-sm mt-1 cards-p">
                         {{ $user->email }}
                     </p>
 
@@ -47,24 +47,24 @@
 
                     <div class="flex justify-center gap-2 mt-4 cards-icon">
                         <i
-                            class="fab fa-facebook-f bg-[#EBDAE5] px-3 py-2 rounded-md text-[#DB69A2]
-                            hover:text-white hover:bg-[#db69a2] cursor-pointer"></i>
+                            class="fab fa-facebook-f bg-[#EBDAE5] px-3 py-2 rounded-md text-[#9E2469]
+                            hover:text-white hover:bg-[#9E2469] cursor-pointer"></i>
                         <i
-                            class="fab fa-twitter bg-[#EBDAE5] px-3 py-2 rounded-md text-[#DB69A2]
-                            hover:text-white hover:bg-[#db69a2] cursor-pointer"></i>
+                            class="fab fa-twitter bg-[#EBDAE5] px-3 py-2 rounded-md text-[#9E2469]
+                            hover:text-white hover:bg-[#9E2469] cursor-pointer"></i>
                         <i
-                            class="fab fa-instagram bg-[#EBDAE5] px-3 py-2 rounded-md text-[#DB69A2]
-                            hover:text-white hover:bg-[#db69a2] cursor-pointer"></i>
+                            class="fab fa-instagram bg-[#EBDAE5] px-3 py-2 rounded-md text-[#9E2469]
+                            hover:text-white hover:bg-[#9E2469] cursor-pointer"></i>
                         <i
-                            class="fab fa-google bg-[#EBDAE5] px-3 py-2 rounded-md text-[#DB69A2]
-                            hover:text-white hover:bg-[#db69a2] cursor-pointer"></i>
+                            class="fab fa-google bg-[#EBDAE5] px-3 py-2 rounded-md text-[#9E2469]
+                            hover:text-white hover:bg-[#9E2469] cursor-pointer"></i>
                     </div>
 
                     @if ($application)
                         <a href="{{ route('case_manager.viewAssignedApplication', $application->id) }}">
                             <button
-                                class="mt-6 bg-[#EBDAE5] text-[#DB69A2] px-6 py-2 rounded-md text-sm font-medium
-                                hover:text-white hover:bg-[#db69a2] cards-btn">
+                                class="mt-6 bg-[#EBDAE5] text-[#9E2469] px-6 py-2 rounded-md text-sm font-medium
+                                hover:text-white hover:bg-[#9E2469] cards-btn">
                                 View Application
                             </button>
                         </a>

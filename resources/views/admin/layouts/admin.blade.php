@@ -12,6 +12,7 @@
         rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
+    @include('partials.theme-variables')
     @vite('resources/js/app.js')
     @stack('head')
     <!-- Font Awesome CDN -->
@@ -28,8 +29,8 @@
                     colors: {
                         pink: {
                             light: "#F9F4F8",
-                            DEFAULT: "#E35A9B",
-                            dark: "#D1478A",
+                            DEFAULT: "#9E2469",
+                            dark: "#7B1D52",
                         },
                     },
                     fontFamily: {
@@ -46,7 +47,7 @@
             max-width: 400px;
             background: #fff;
             color: #22223B;
-            border-left: 6px solid #db69a2;
+            border-left: 6px solid #9E2469;
             box-shadow: 0 4px 24px rgba(50, 17, 40, 0.10);
             padding: 18px 16px 16px 16px;
             border-radius: 8px;
@@ -94,9 +95,9 @@
     </style>
 </head>
 
-<body class="bg-[#FFF8FC] font-sans flex min-h-screen">
+<body class="bg-[#FFF8FC] font-sans flex min-h-screen gap-0">
     @include('admin.partials.sidebar')
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col min-w-0">
         @include('admin.partials.topbar')
         <main class="flex-1 p-6">
             @include('partials.flash')

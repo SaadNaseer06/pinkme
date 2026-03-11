@@ -1,4 +1,4 @@
-@extends('patient.layouts.app')
+﻿@extends('patient.layouts.app')
 
 @section('title', 'Add Application')
 
@@ -139,7 +139,7 @@
                             class="px-6 py-2 bg-[#FFF7FC] text-[#91848C] border border-gray-300 rounded-md hover:bg-gray-50">
                             Cancel
                         </a>
-                        <button type="submit" class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:opacity-90">
+                        <button type="submit" class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:opacity-90">
                             Submit
                         </button>
                     </div>

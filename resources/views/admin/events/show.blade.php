@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @php
     $eventDate = $event->date ? \Carbon\Carbon::parse($event->date) : null;
@@ -17,7 +17,7 @@
     <div class="max-w-8xl mx-auto space-y-8">
         {{-- Event hero --}}
         <div
-            class="rounded-2xl bg-gradient-to-r from-[#C63A85] via-[#DB69A2] to-[#F9C6E2] text-white p-8 shadow-xl relative overflow-hidden">
+            class="rounded-2xl bg-gradient-to-r from-[#B52D75] via-[#9E2469] to-[#F9C6E2] text-white p-8 shadow-xl relative overflow-hidden">
             <div class="absolute inset-0 bg-black/10"></div>
             <div class="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div class="space-y-4 max-w-3xl">
@@ -80,7 +80,7 @@
                         <p class="mt-1 text-2xl font-semibold">${{ $totalRaised }}</p>
                     </div>
                     <a href="{{ route('events.edit', $event) }}"
-                        class="col-span-2 inline-flex items-center justify-center gap-2 rounded-xl bg-white text-[#DB69A2] px-4 py-2 text-sm font-semibold shadow-lg shadow-white/30 hover:bg-[#FFF6FB] transition">
+                        class="col-span-2 inline-flex items-center justify-center gap-2 rounded-xl bg-white text-[#9E2469] px-4 py-2 text-sm font-semibold shadow-lg shadow-white/30 hover:bg-[#FFF6FB] transition">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -99,7 +99,7 @@
                         <h2 class="text-lg font-semibold text-[#213430]">Sponsorship Ledger</h2>
                         <p class="text-sm text-[#6C5B68]">Track every contribution connected to this event.</p>
                     </div>
-                    <span class="inline-flex items-center gap-2 rounded-full bg-[#FBE7F1] px-4 py-2 text-sm text-[#C63A85] font-medium">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-[#FBE7F1] px-4 py-2 text-sm text-[#B52D75] font-medium">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8v4l2.5 2.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -137,7 +137,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                class="inline-flex items-center gap-1 rounded-lg border border-[#F4C9DD] px-3 py-1.5 text-xs font-medium text-[#C63A85] hover:bg-[#FBE7F1] transition">
+                                                class="inline-flex items-center gap-1 rounded-lg border border-[#F4C9DD] px-3 py-1.5 text-xs font-medium text-[#B52D75] hover:bg-[#FBE7F1] transition">
                                                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -151,7 +151,7 @@
                                 <tr>
                                     <td colspan="4" class="px-6 py-8 text-center">
                                         <div class="inline-flex flex-col items-center gap-3 text-[#6C5B68]">
-                                            <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#FBE7F1] text-[#C63A85]">
+                                            <span class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#FBE7F1] text-[#B52D75]">
                                                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2m2 0a2 2 0 002-2v-5a2 2 0 00-1-1.732l-6-3.464a2 2 0 00-2 0l-6 3.464A2 2 0 005 10v5a2 2 0 002 2m10 0H7" />
@@ -180,7 +180,7 @@
                         <label class="text-sm font-medium text-[#213430]">Sponsor</label>
                         <div class="relative">
                             <select name="sponsor_id"
-                                class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                                class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                                 @foreach ($sponsors as $s)
                                     <option value="{{ $s->id }}">{{ $s->name ?? $s->email }} (ID: {{ $s->id }})</option>
                                 @endforeach
@@ -194,7 +194,7 @@
                             </span>
                         </div>
                         @error('sponsor_id')
-                            <p class="text-xs text-[#DB69A2]">{{ $message }}</p>
+                            <p class="text-xs text-[#9E2469]">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -203,7 +203,7 @@
                         <div class="relative">
                             <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[#91848C]">$</span>
                             <input name="amount" type="number" min="0.01" step="0.01" placeholder="2500"
-                                class="w-full rounded-xl border border-[#DCCFD8] bg-white pl-8 pr-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                                class="w-full rounded-xl border border-[#DCCFD8] bg-white pl-8 pr-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                             <span class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[#91848C]">
                                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd"
@@ -213,12 +213,12 @@
                             </span>
                         </div>
                         @error('amount')
-                            <p class="text-xs text-[#DB69A2]">{{ $message }}</p>
+                            <p class="text-xs text-[#9E2469]">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <button type="submit"
-                        class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C63A85] to-[#DB69A2] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#DB69A2]/30 transition hover:from-[#D1478A] hover:to-[#E06CAB]">
+                        class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#B52D75] to-[#9E2469] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[#9E2469]/30 transition hover:from-[#D1478A] hover:to-[#E06CAB]">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4v16m8-8H4" />

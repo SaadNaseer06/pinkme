@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', $webinar->exists ? 'Edit Webinar' : 'Create Webinar')
 

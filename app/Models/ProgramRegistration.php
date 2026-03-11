@@ -54,6 +54,8 @@ class ProgramRegistration extends Model
         'review_note',
         'assigned_case_manager_id',
         'assigned_at',
+        'finance_user_id',
+        'sent_to_finance_at',
     ];
 
     protected $casts = [
@@ -69,6 +71,7 @@ class ProgramRegistration extends Model
         'dob' => 'date',
         'reviewed_at' => 'datetime',
         'assigned_at' => 'datetime',
+        'sent_to_finance_at' => 'datetime',
     ];
     
     /**
@@ -101,6 +104,22 @@ class ProgramRegistration extends Model
     public function assignedCaseManager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_case_manager_id');
+    }
+
+    /**
+     * Finance user assigned for budget allocation.
+     */
+    public function financeUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'finance_user_id');
+    }
+
+    /**
+     * Invoices generated for this registration (budget allocation).
+     */
+    public function registrationInvoices()
+    {
+        return $this->hasMany(RegistrationInvoice::class);
     }
     
     /**

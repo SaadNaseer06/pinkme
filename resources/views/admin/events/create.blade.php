@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @php
     $isEdit = isset($event);
@@ -28,7 +28,7 @@
 @section('content')
     <div class="max-w-8xl mx-auto">
         <div class="space-y-8">
-            <div class="rounded-2xl bg-gradient-to-r from-[#C63A85] via-[#DB69A2] to-[#F9C6E2] p-8 text-white shadow-lg">
+            <div class="rounded-2xl bg-gradient-to-r from-[#B52D75] via-[#9E2469] to-[#F9C6E2] p-8 text-white shadow-lg">
                 <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                     <div class="max-w-2xl" style="text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);">
                         <p class="uppercase tracking-widest text-xs font-semibold">Events & Activations</p>
@@ -40,7 +40,7 @@
                             class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/20 px-5 py-3 text-sm font-medium text-white backdrop-blur transition hover:bg-white/30">Back
                             to events</a>
                         <button type="submit" form="create-event-form"
-                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#DB69A2] shadow-md shadow-white/40 transition hover:bg-[#FFF1F7]">{{ $submitLabel }}</button>
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#9E2469] shadow-md shadow-white/40 transition hover:bg-[#FFF1F7]">{{ $submitLabel }}</button>
                     </div>
                 </div>
             </div>
@@ -63,22 +63,22 @@
                         <div class="space-y-6 px-6 py-6">
                             <div>
                                 <label class="mb-1 block text-sm font-medium text-[#213430]">Event Title <span
-                                        class="text-[#DB69A2]">*</span></label>
+                                        class="text-[#9E2469]">*</span></label>
                                 <input name="title" type="text" value="{{ $titleValue }}"
                                     placeholder="e.g. Pink Ribbon Charity Walk"
-                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
+                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
                                     required>
                                 @error('title')
-                                    <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
                                 <label class="mb-1 block text-sm font-medium text-[#213430]">Event Description</label>
                                 <textarea name="description" id="event-description" rows="5"
                                     placeholder="Share the agenda, audience, and key highlights participants should know."
-                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">{!! $descriptionValue !!}</textarea>
+                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">{!! $descriptionValue !!}</textarea>
                                 @error('description')
-                                    <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                 @enderror
                             </div>
 
@@ -103,7 +103,7 @@
                                         </svg>
                                         <div class="flex text-sm text-[#6C5B68]">
                                             <label for="image"
-                                                class="relative cursor-pointer rounded-md font-medium text-[#DB69A2] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#DB69A2] focus-within:ring-offset-2 hover:text-[#C63A85]">
+                                                class="relative cursor-pointer rounded-md font-medium text-[#9E2469] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#9E2469] focus-within:ring-offset-2 hover:text-[#B52D75]">
                                                 <span>Upload event image</span>
                                                 <input id="image" name="image" type="file" class="sr-only"
                                                     accept="image/*">
@@ -114,7 +114,7 @@
                                     </div>
                                 </div>
                                 @error('image')
-                                    <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
@@ -130,21 +130,21 @@
                             <div class="grid gap-6 md:grid-cols-2">
                                 <div>
                                     <label class="mb-1 block text-sm font-medium text-[#213430]">Start Date <span
-                                            class="text-[#DB69A2]">*</span></label>
+                                            class="text-[#9E2469]">*</span></label>
                                     <input id="start-date" name="start_date" type="datetime-local" value="{{ $startDateValue }}"
-                                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
+                                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
                                         required>
                                     @error('start_date')
-                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                     @enderror
                                 </div>
                                 <div>
                                     <label class="mb-1 block text-sm font-medium text-[#213430]">Event Location</label>
                                     <input name="location" type="text" value="{{ $locationValue }}"
                                         placeholder="Venue or virtual link"
-                                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                                     @error('location')
-                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                     @enderror
                                 </div>
                             </div>
@@ -158,17 +158,17 @@
                                         <input name="funding_goal" type="number" min="0" step="0.01"
                                             value="{{ old('funding_goal', $isEdit ? $event->funding_goal : '') }}"
                                             placeholder="25000"
-                                            class="w-full rounded-xl border border-[#DCCFD8] bg-white pl-9 pr-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                                            class="w-full rounded-xl border border-[#DCCFD8] bg-white pl-9 pr-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                                     </div>
                                     @error('funding_goal')
-                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                     @enderror
                                 </div>
                                 <div>
                                     <label class="mb-1 block text-sm font-medium text-[#213430]">Sponsorship Type</label>
                                     <div class="relative">
                                         <select name="payment_type"
-                                            class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                                            class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                                             <option value="flexible" @selected($paymentTypeValue === 'flexible')>Flexible (multiple sponsors)</option>
                                             <option value="full" @selected($paymentTypeValue === 'full')>Full (single sponsor)</option>
                                         </select>
@@ -182,7 +182,7 @@
                                         </span>
                                     </div>
                                     @error('payment_type')
-                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                     @enderror
                                 </div>
                                 @if ($isEdit)
@@ -190,7 +190,7 @@
                                     <label class="mb-1 block text-sm font-medium text-[#213430]">Event Status</label>
                                     <div class="relative">
                                         <select name="status"
-                                            class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                                            class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                                             <option value="" @selected(old('status', $event->status) != 'cancelled')>Auto (based on dates)</option>
                                             <option value="cancelled" @selected(old('status', $event->status) == 'cancelled')>Cancelled</option>
                                         </select>
@@ -204,7 +204,7 @@
                                         </span>
                                     </div>
                                     @error('status')
-                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                     @enderror
                                 </div>
                                 @endif
@@ -213,20 +213,20 @@
                                 <label class="mb-1 block text-sm font-medium text-[#213430]">Event End Date</label>
                                 <input id="end-date" name="end_date" type="datetime-local"
                                     value="{{ $endDateValue }}"
-                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                                 @error('end_date')
-                                    <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                 @enderror
-                                <p id="end-date-error" class="mt-1 text-xs text-[#DB69A2] hidden">End date must be after the start date</p>
+                                <p id="end-date-error" class="mt-1 text-xs text-[#9E2469] hidden">End date must be after the start date</p>
                             </div>
 
                             <div>
                                 <label class="mb-1 block text-sm font-medium text-[#213430]">Event Highlights</label>
                                 <textarea name="event_highlights" rows="3"
                                     placeholder="Key features, speakers, activities (use • to separate highlights)"
-                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">{{ old('event_highlights', $isEdit ? $event->event_highlights : '') }}</textarea>
+                                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">{{ old('event_highlights', $isEdit ? $event->event_highlights : '') }}</textarea>
                                 @error('event_highlights')
-                                    <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                    <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                 @enderror
                             </div>
 
@@ -239,7 +239,7 @@
                     <section class="rounded-2xl border border-[#E9DCE7] bg-white shadow-sm">
                         <div class="border-b border-[#F1E5EF] px-6 py-5 flex flex-col gap-1">
                             <h2 class="text-lg font-semibold text-[#213430]">Launch Sponsorship <span
-                                    class="text-xs font-medium uppercase tracking-wider text-[#DB69A2]">Optional</span>
+                                    class="text-xs font-medium uppercase tracking-wider text-[#9E2469]">Optional</span>
                             </h2>
                             <p class="text-sm text-[#6C5B68]">Highlight a sponsor who has already pledged support.</p>
                         </div>
@@ -249,7 +249,7 @@
                                     <label class="mb-1 block text-sm font-medium text-[#213430]">Select Sponsor</label>
                                     <div class="relative">
                                         <select id="sponsor-select" name="sponsor_id"
-                                            class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
+                                            class="w-full appearance-none rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
                                             {{ $sponsors->isEmpty() ? 'disabled' : '' }}>
                                             <option value="">Select sponsor</option>
                                             @forelse ($sponsors as $sponsor)
@@ -269,7 +269,7 @@
                                         </span>
                                     </div>
                                     @error('sponsor_id')
-                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                     @enderror
                                 </div>
 
@@ -285,11 +285,11 @@
                                             class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[#91848C]">$</span>
                                         <input id="amount-input" name="amount" type="number" min="0.01"
                                             step="0.01" value="{{ $amountValue }}" placeholder="2500"
-                                            class="w-full rounded-xl border border-[#DCCFD8] bg-white pl-9 pr-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
+                                            class="w-full rounded-xl border border-[#DCCFD8] bg-white pl-9 pr-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70"
                                             {{ $hasSponsor ? '' : 'disabled' }}>
                                     </div>
                                     @error('amount')
-                                        <p class="mt-1 text-xs text-[#DB69A2]">{{ $message }}</p>
+                                        <p class="mt-1 text-xs text-[#9E2469]">{{ $message }}</p>
                                     @enderror
                                 </div>
 
@@ -310,17 +310,17 @@
                         <ul class="mt-4 space-y-3 text-sm text-[#6C5B68]">
                             <li class="flex items-start gap-3">
                                 <span
-                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">1</span>
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#9E2469]">1</span>
                                 Confirm your venue capacity and any accessibility details before publishing.
                             </li>
                             <li class="flex items-start gap-3">
                                 <span
-                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">2</span>
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#9E2469]">2</span>
                                 Lock in at least one sponsor to secure upfront funding for supplies.
                             </li>
                             <li class="flex items-start gap-3">
                                 <span
-                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#DB69A2]">3</span>
+                                    class="mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F8D4E6] text-xs font-semibold text-[#9E2469]">3</span>
                                 Share the event link internally for final proofreading before it goes live.
                             </li>
                         </ul>
@@ -439,7 +439,7 @@
 
                 if (!endDate) {
                     endDateError.classList.add('hidden');
-                    endDateInput.classList.remove('border-[#DB69A2]');
+                    endDateInput.classList.remove('border-[#9E2469]');
                     return true;
                 }
 
@@ -449,12 +449,12 @@
 
                 if (new Date(endDate) < new Date(startDate)) {
                     endDateError.classList.remove('hidden');
-                    endDateInput.classList.add('border-[#DB69A2]');
+                    endDateInput.classList.add('border-[#9E2469]');
                     return false;
                 }
 
                 endDateError.classList.add('hidden');
-                endDateInput.classList.remove('border-[#DB69A2]');
+                endDateInput.classList.remove('border-[#9E2469]');
                 return true;
             }
 

@@ -1,4 +1,4 @@
-@extends('patient.layouts.app')
+﻿@extends('patient.layouts.app')
 
 @section('title', 'Profile')
 
@@ -20,15 +20,15 @@
                     <!-- Profile details in three columns -->
                     <div class="grid grid-cols-3 gap-2 w-full mt-6">
                         <div class="text-center border-r border-[#DCCFD8]">
-                            <p class="text-sm text-[#db69a2] mb-1 app-text">Gender</p>
+                            <p class="text-sm text-[#9E2469] mb-1 app-text">Gender</p>
                             <p class="text-md font-medium app-text">Female</p>
                         </div>
                         <div class="text-center border-r border-[#DCCFD8] -ml-2">
-                            <p class="text-sm text-[#db69a2] mb-1 app-text">Date of Birth</p>
+                            <p class="text-sm text-[#9E2469] mb-1 app-text">Date of Birth</p>
                             <p class="text-md font-medium app-text">05/10/2003</p>
                         </div>
                         <div class="text-center">
-                            <p class="text-sm text-[#db69a2] mb-1 app-text">Condition</p>
+                            <p class="text-sm text-[#9E2469] mb-1 app-text">Condition</p>
                             <p class="text-md font-medium app-text">Heart Disease</p>
                         </div>
                     </div>
@@ -44,7 +44,7 @@
                                 Manage your basic personal details.
                             </p>
                         </div>
-                        <a href="Patient-Dashboard-6.html" class="text-[#db69a2] text-md app-text mt-2">Edit Profile</a>
+                        <a href="Patient-Dashboard-6.html" class="text-[#9E2469] text-md app-text mt-2">Edit Profile</a>
                     </div>
                     <div class="border-b border-[#DCCFD8]"></div>
 
@@ -171,7 +171,7 @@
                         <div class="flex items-center gap-2 group cursor-pointer">
                             <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
                             <img src="{{ asset('public/images/document-pink.svg') }}" alt="" class="w-6 h-6 hidden group-hover:block" />
-                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
+                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#9E2469]">
                                 Mamogram_Report_Jan.pdf
                             </span>
                         </div>
@@ -194,7 +194,7 @@
                             <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
                             <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
-                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
+                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#9E2469]">
                                 Mamogram_Report_Feb.pdf
                             </span>
                         </div>
@@ -217,7 +217,7 @@
                             <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
                             <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
-                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
+                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#9E2469]">
                                 Mamogram_Report_Mar.pdf
                             </span>
                         </div>
@@ -242,7 +242,7 @@
                             <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
                             <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
-                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
+                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#9E2469]">
                                 Mamogram_Report_Apr.pdf
                             </span>
                         </div>
@@ -265,7 +265,7 @@
                             <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
                             <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
-                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
+                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#9E2469]">
                                 Mamogram_Report_May.pdf
                             </span>
                         </div>
@@ -288,7 +288,7 @@
                             <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
                             <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
-                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
+                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#9E2469]">
                                 Mamogram_Report_Jun.pdf
                             </span>
                         </div>
@@ -311,7 +311,7 @@
                             <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
                             <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                 class="w-6 h-6 hidden group-hover:block" />
-                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
+                            <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#9E2469]">
                                 Mamogram_Report_Jul.pdf
                             </span>
                         </div>
@@ -337,7 +337,7 @@
                 <h2 class="text-lg font-medium text-[#213430] app-main">
                     All Applications List
                 </h2>
-                <h2 class="text-md font-normal text-[#db69a2]  underline app-text">View All</h2>
+                <h2 class="text-md font-normal text-[#9E2469]  underline app-text">View All</h2>
             </div>
 
             <div class="table-container">
@@ -346,7 +346,7 @@
                         <tr class="border-t border-[#e0cfd8]">
                             <th class="p-2">
                                 <input type="checkbox"
-                                    class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
+                                    class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
                             </th>
 
                             <th class="p-2 text-lg text-[#91848C] font-normal app-text">
@@ -367,7 +367,7 @@
                         <tr class="border-t border-[#e0cfd8]">
                             <td class="p-2">
                                 <input type="checkbox"
-                                    class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
+                                    class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
                             </td>
 
 
@@ -400,7 +400,7 @@
                         <tr class="border-t border-[#e0cfd8]">
                             <td class="p-2">
                                 <input type="checkbox"
-                                    class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
+                                    class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
                             </td>
 
                             <td class="p-2">
@@ -432,7 +432,7 @@
                         <tr class="border-t border-[#e0cfd8]">
                             <td class="p-2">
                                 <input type="checkbox"
-                                    class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
+                                    class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
                             </td>
 
                             <td class="p-2">

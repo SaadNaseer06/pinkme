@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -21,14 +21,14 @@
                         primary: {
                             50: '#fdf2f8',
                             100: '#fce7f3',
-                            200: '#fbcfe8',
-                            300: '#f9a8d4',
-                            400: '#f472b6',
-                            500: '#ec4899',
-                            600: '#db2777',
-                            700: '#be185d',
-                            800: '#9d174d',
-                            900: '#831843',
+                            200: '#f5d0e8',
+                            300: '#e9a8d4',
+                            400: '#d472b6',
+                            500: '#9E2469',
+                            600: '#8a1f5a',
+                            700: '#7D1D54',
+                            800: '#5a1540',
+                            900: '#3d0e2b',
                         }
                     }
                 },
@@ -56,13 +56,13 @@
         }
 
         .form-input:focus {
-            border-color: #DB69A2;
-            box-shadow: 0 0 0 3px rgba(219, 105, 162, 0.1);
+            border-color: #9E2469;
+            box-shadow: 0 0 0 3px rgba(158, 36, 105, 0.1);
             transform: translateY(-1px);
         }
 
         .btn-primary {
-            background: linear-gradient(90deg, #DB69A2 0%, #FE6EB6 100%);
+            background: linear-gradient(90deg, #9E2469 0%, #B52D75 100%);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -72,8 +72,8 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(219, 39, 119, 0.3);
-            background: #FE6EB6;
+            box-shadow: 0 10px 25px rgba(158, 36, 105, 0.3);
+            background: #B52D75;
             color: #fff;
         }
 
@@ -309,13 +309,13 @@
 
         .nav-tab.active {
             background: #fff;
-            color: #DB69A2;
-            border-color: #DB69A2;
+            color: #9E2469;
+            border-color: #9E2469;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar {
-            background: #DB69A2;
+            background: #9E2469;
             position: relative;
             display: flex;
             flex-direction: column;
@@ -355,8 +355,8 @@
         .sidebar-tab.active,
         .sidebar-tab:focus {
             background: #fff;
-            color: #DB69A2;
-            border-color: #DB69A2;
+            color: #9E2469;
+            border-color: #9E2469;
             box-shadow: 0 4px 16px 0 rgba(219, 105, 162, 0.10);
         }
 
@@ -391,7 +391,7 @@
         }
 
         .mobile-tab-btn.active {
-            background: linear-gradient(90deg, #DB69A2 0%, #FE6EB6 100%);
+            background: linear-gradient(90deg, #9E2469 0%, #FE6EB6 100%);
             color: #fff;
             border-color: rgba(255, 255, 255, 0.25);
             box-shadow: 0 16px 32px rgba(219, 105, 162, 0.35);
@@ -447,7 +447,7 @@
         }
 
         .tab-btn.bg-primary-600 {
-            background: #DB69A2 !important;
+            background: #9E2469 !important;
             color: #fff !important;
         }
 
@@ -464,8 +464,8 @@
 
         .nav-tab.active {
             background: #fff;
-            color: #DB69A2;
-            border-color: #DB69A2;
+            color: #9E2469;
+            border-color: #9E2469;
         }
 
         .nav-tab {
@@ -477,7 +477,7 @@
         }
 
         .form-checkbox:checked {
-            accent-color: #DB69A2;
+            accent-color: #9E2469;
         }
 
         .sidebar-divider {
@@ -559,16 +559,16 @@
                             <p class="text-gray-600 text-lg mobile-h2">Create your account to get started</p>
                         </div>
 
-                        <!-- Role Selection Tabs -->
+                        <!-- Role Selection Tabs - Sponsor tab commented: sponsor not important for now -->
                         <div class="flex mb-8 bg-gray-100 rounded-xl p-1">
                             <button onclick="showTab('personal')"
                                 class="tab-btn flex-1 py-3 px-4 font-medium text-center rounded-lg transition-all duration-300 mobile-h2 bg-primary-600 text-white">
                                 Patient
                             </button>
-                            <button onclick="showTab('company')"
+                            {{-- <button onclick="showTab('company')"
                                 class="tab-btn flex-1 py-3 px-4 font-medium text-center rounded-lg transition-all duration-300 mobile-h2 text-gray-600 hover:text-gray-800">
                                 Sponsor
-                            </button>
+                            </button> --}}
                         </div>
 
                         <!-- Tab Contents -->
@@ -684,7 +684,7 @@
                                 </form>
                             </div>
 
-                            <!-- Sponsor Signup Form -->
+                            {{-- Sponsor Signup Form - commented: sponsor not important for now
                             <div id="company" class="tab-content hidden animate-fade-in">
                                 <!-- Individual Sponsor Form -->
                                 <form method="POST" action="{{ route('register') }}"
@@ -934,6 +934,7 @@
                                     </button>
                                 </form>
                             </div>
+                            --}}
                         </div>
                     </div>
 

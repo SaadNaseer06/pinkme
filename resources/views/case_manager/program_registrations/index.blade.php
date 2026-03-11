@@ -1,4 +1,4 @@
-@php
+﻿@php
     use App\Models\ProgramRegistration;
 @endphp
 
@@ -49,7 +49,7 @@
                         </div>
                     </div>
                     <button type="submit"
-                        class="px-4 py-2 bg-[#DB69A2] text-white rounded-md text-sm font-medium hover:bg-[#c95791] transition app-text">
+                        class="px-4 py-2 bg-[#9E2469] text-white rounded-md text-sm font-medium hover:bg-[#B52D75] transition app-text">
                         Apply Filter
                     </button>
                     @if ($selectedStatus !== 'pending')
@@ -92,7 +92,7 @@
                                             $badgeClasses = match ($status) {
                                                 ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354]',
                                                 ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020]',
-                                                default => 'bg-[#FDE8F3] text-[#DB69A2]',
+                                                default => 'bg-[#FDE8F3] text-[#9E2469]',
                                             };
                                         @endphp
                                         <span class="rounded-full text-xs font-semibold app-text {{ $badgeClasses }}">
@@ -101,7 +101,7 @@
                                     </td>
                                     <td class="p-3 text-center">
                                         <a href="{{ route('case_manager.program_registrations.show', $registration) }}"
-                                            class="inline-flex items-center px-3 py-2 text-sm text-[#DB69A2] border border-[#DB69A2] rounded-md hover:bg-[#DB69A2] hover:text-white transition app-text">
+                                            class="inline-flex items-center px-3 py-2 text-sm text-[#9E2469] border border-[#9E2469] rounded-md hover:bg-[#9E2469] hover:text-white transition app-text">
                                             View Details
                                         </a>
                                     </td>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminCaseManagerController;
+use App\Http\Controllers\AdminFinanceUserController;
 use App\Http\Controllers\EnrollProgramController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ReviewersController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CaseManagerController;
+use App\Http\Controllers\FinanceUserController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProgramController;
@@ -38,12 +40,14 @@ Route::get('/', function () {
         switch ($roleName) {
             case 'admin':
                 return redirect()->route('admin.dashboard');
-            case 'sponsor':
-                return redirect()->route('sponsor.dashboard');
+            // case 'sponsor':
+            //     return redirect()->route('sponsor.dashboard');
             case 'casemanager':
                 return redirect()->route('case_manager.dashboard');
             case 'patient':
                 return redirect()->route('patient.dashboard');
+            case 'finance':
+                return redirect()->route('finance.dashboard');
             default:
                 return redirect()->route('register', ['tab' => 'login']);
         }
@@ -118,6 +122,7 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
 
     // Unified Registrations (combines Program and Event registrations)
     Route::get('/registrations', [AdminController::class, 'registrations'])->name('admin.registrations.index');
+    Route::get('/registrations/list', [AdminController::class, 'registrationsList'])->name('admin.registrations.list');
 
     // Legacy routes (kept for backward compatibility)
     Route::get('/program-registration-requests', [AdminProgramRegistrationController::class, 'index'])->name('admin.program_registrations.index');
@@ -125,10 +130,13 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::post('/program-registration-requests/{registration}/approve', [AdminProgramRegistrationController::class, 'approve'])->name('admin.program_registrations.approve');
     Route::post('/program-registration-requests/{registration}/reject', [AdminProgramRegistrationController::class, 'reject'])->name('admin.program_registrations.reject');
     Route::post('/program-registration-requests/{registration}/assign', [AdminProgramRegistrationController::class, 'assignCaseManager'])->name('admin.program_registrations.assign');
+    Route::post('/program-registration-requests/{registration}/send-to-finance', [AdminController::class, 'sendRegistrationToFinance'])->name('admin.program_registrations.sendToFinance');
+    Route::get('/program-registration-requests/{registration}/invoices/{invoice}', [AdminController::class, 'showRegistrationInvoice'])->name('admin.registration_invoices.show');
+    Route::get('/program-registration-requests/{registration}/invoices/{invoice}/download', [AdminController::class, 'downloadRegistrationInvoice'])->name('admin.registration_invoices.download');
 
-    // Sponsors' funding programs (table: sponsorship_programs)
-    Route::get('sponsorship-programs/create', [SponsorshipProgramController::class, 'create'])->name('sp.create');
-    Route::post('sponsorship-programs',        [SponsorshipProgramController::class, 'store'])->name('sp.store');
+    // Sponsors' funding programs (table: sponsorship_programs) - commented: sponsor not important for now
+    // Route::get('sponsorship-programs/create', [SponsorshipProgramController::class, 'create'])->name('sp.create');
+    // Route::post('sponsorship-programs',        [SponsorshipProgramController::class, 'store'])->name('sp.store');
 
     // Enrollable programs/workshops (tables: programs, program_registrations)
     Route::resource('programs', ProgramController::class);
@@ -137,17 +145,23 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::resource('case-managers', AdminCaseManagerController::class)
         ->names('admin.case-managers');
 
+    // Finance Users (admin management of finance users)
+    Route::resource('finance-users', AdminFinanceUserController::class)
+        ->parameters(['finance-users' => 'finance_user'])
+        ->names('admin.finance-users');
+
     // Events (table: events) + attach funding programs (pivot: event_sponsorships)
     Route::resource('events', EventController::class);
-    // Webinars (table: webinars) + registrations (table: webinar_registrations)
-    Route::resource('webinars', WebinarController::class)->names('admin.webinars');
+    // Webinars (table: webinars) + registrations (table: webinar_registrations) - commented: sponsor/webinars not important for now
+    // Route::resource('webinars', WebinarController::class)->names('admin.webinars');
 
-    // Event registration management
-    Route::get('events-registrations', [EventController::class, 'registrations'])->name('events.registrations.index');
-    Route::post('events-registrations/{registration}/approve', [EventController::class, 'approveRegistration'])->name('events.registrations.approve');
-    Route::post('events-registrations/{registration}/reject', [EventController::class, 'rejectRegistration'])->name('events.registrations.reject');
-    Route::post('events/{event}/sponsorships',                 [EventController::class, 'storeSponsorship'])->name('events.sponsorships.store');
-    Route::delete('events/{event}/sponsorships/{sponsorship}', [EventController::class, 'destroySponsorship'])->name('events.sponsorships.destroy');
+    // Event registration management - commented: sponsor-related, sponsor not wanted for now
+    // Route::get('events-registrations', [EventController::class, 'registrations'])->name('events.registrations.index');
+    // Route::post('events-registrations/{registration}/approve', [EventController::class, 'approveRegistration'])->name('events.registrations.approve');
+    // Route::post('events-registrations/{registration}/reject', [EventController::class, 'rejectRegistration'])->name('events.registrations.reject');
+    // Event sponsorships - commented: sponsor not important for now
+    // Route::post('events/{event}/sponsorships',                 [EventController::class, 'storeSponsorship'])->name('events.sponsorships.store');
+    // Route::delete('events/{event}/sponsorships/{sponsorship}', [EventController::class, 'destroySponsorship'])->name('events.sponsorships.destroy');
     // Reviewers routes
     Route::resource('reviewers', ReviewersController::class);
     // Additional reviewer routes
@@ -166,13 +180,14 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::put('/patients/{patient}', [AdminController::class, 'updatePatient'])->name('admin.patients.update');
     Route::get('/patients/{patient}/applications', [AdminController::class, 'patientApplications'])->name('admin.patients.applications');
     Route::get('/programs-events', [AdminController::class, 'programsAndEvents'])->name('admin.programs-events');
-    Route::get('/sponsors', [AdminController::class, 'sponsors'])->name('admin.sponsors');
-    Route::get('/sponsors/create', [AdminSponsorController::class, 'create'])->name('admin.sponsors.create');
-    Route::post('/sponsors', [AdminSponsorController::class, 'store'])->name('admin.sponsors.store');
-    Route::get('/sponsors/{sponsor}', [AdminSponsorController::class, 'show'])->name('admin.sponsors.show');
-    Route::get('/sponsors/{sponsor}/edit', [AdminSponsorController::class, 'edit'])->name('admin.sponsors.edit');
-    Route::put('/sponsors/{sponsor}', [AdminSponsorController::class, 'update'])->name('admin.sponsors.update');
-    Route::delete('/sponsors/{sponsor}', [AdminSponsorController::class, 'destroy'])->name('admin.sponsors.destroy');
+    // Sponsors - commented: sponsor user not important for now
+    // Route::get('/sponsors', [AdminController::class, 'sponsors'])->name('admin.sponsors');
+    // Route::get('/sponsors/create', [AdminSponsorController::class, 'create'])->name('admin.sponsors.create');
+    // Route::post('/sponsors', [AdminSponsorController::class, 'store'])->name('admin.sponsors.store');
+    // Route::get('/sponsors/{sponsor}', [AdminSponsorController::class, 'show'])->name('admin.sponsors.show');
+    // Route::get('/sponsors/{sponsor}/edit', [AdminSponsorController::class, 'edit'])->name('admin.sponsors.edit');
+    // Route::put('/sponsors/{sponsor}', [AdminSponsorController::class, 'update'])->name('admin.sponsors.update');
+    // Route::delete('/sponsors/{sponsor}', [AdminSponsorController::class, 'destroy'])->name('admin.sponsors.destroy');
     Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
     Route::put('/settings/{tab}', [SiteSettingController::class, 'update'])
         ->whereIn('tab', ['general', 'privacy', 'terms'])
@@ -197,38 +212,41 @@ Route::prefix('api')->name('api.')->group(function () {
 });
 
 
-Route::prefix('sponsor')->middleware(['role.restrict'])->group(function () {
-    // Sponsor Dashboard Routes
-    Route::get('/dashboard', [SponsorController::class, 'dashboard'])->name('sponsor.dashboard');
-    Route::get('/events', [SponsorController::class, 'events'])->name('sponsor.events');
-    Route::get('/sponsorships', [SponsorController::class, 'sponsorships'])->name('sponsor.sponsorships');
-    Route::get('/become-a-sponsor', [SponsorController::class, 'becomeASponsor'])->name('sponsor.becomeASponsor');
-    Route::post('/sponsorships', [SponsorController::class, 'storeSponsorship'])->name('sponsor.sponsorships.store');
+// Sponsor routes - commented: sponsor user not important for now
+// Route::prefix('sponsor')->middleware(['role.restrict'])->group(function () {
+//     Route::get('/dashboard', [SponsorController::class, 'dashboard'])->name('sponsor.dashboard');
+//     Route::get('/events', [SponsorController::class, 'events'])->name('sponsor.events');
+//     Route::get('/sponsorships', [SponsorController::class, 'sponsorships'])->name('sponsor.sponsorships');
+//     Route::get('/become-a-sponsor', [SponsorController::class, 'becomeASponsor'])->name('sponsor.becomeASponsor');
+//     Route::post('/sponsorships', [SponsorController::class, 'storeSponsorship'])->name('sponsor.sponsorships.store');
+//     Route::get('/events/{event}', [SponsorController::class, 'showEvent'])->name('sponsor.events.show');
+//     Route::post('/events/{event}/register', [SponsorController::class, 'registerForEvent'])->name('sponsor.events.register');
+//     Route::get('/events/registration/success', [SponsorController::class, 'eventRegistrationSuccess'])->name('sponsor.events.registration.success');
+//     Route::get('/events/registration/cancel', [SponsorController::class, 'eventRegistrationCancel'])->name('sponsor.events.registration.cancel');
+//     Route::delete('/events/{event}/cancel', [SponsorController::class, 'cancelEventRegistration'])->name('sponsor.events.cancel');
+//     Route::get('/my-event-registrations', [SponsorController::class, 'myEventRegistrations'])->name('sponsor.events.my-registrations');
+//     Route::get('/webinars', [SponsorController::class, 'webinars'])->name('sponsor.webinars');
+//     Route::post('/webinars/{webinar}/register', [SponsorController::class, 'joinWebinar'])->name('sponsor.webinars.register');
+//     Route::delete('/webinars/{webinar}/cancel', [SponsorController::class, 'cancelWebinar'])->name('sponsor.webinars.cancel');
+//     Route::get('/reviews', [SponsorController::class, 'reviews'])->name('sponsor.reviews');
+//     Route::post('/reviews', [SponsorController::class, 'storeReview'])->name('sponsor.reviews.store');
+//     Route::get('/payment', [SponsorController::class, 'payment'])->name('sponsor.payment');
+//     Route::get('/setting', [SponsorController::class, 'setting'])->name('sponsor.setting');
+//     Route::put('/settings', [SponsorController::class, 'updateSettings'])->name('sponsor.settings.update');
+//     Route::put('/settings/password', [SponsorController::class, 'updatePassword'])->name('sponsor.settings.password');
+//     Route::put('/settings/notifications', [SponsorController::class, 'updateNotifications'])->name('sponsor.settings.notifications');
+//     Route::put('/settings/account', [SponsorController::class, 'updateAccount'])->name('sponsor.settings.account');
+//     Route::put('/settings/social', [SponsorController::class, 'updateSocial'])->name('sponsor.settings.social');
+// });
 
-    // Event Registration Routes
-    Route::get('/events/{event}', [SponsorController::class, 'showEvent'])->name('sponsor.events.show');
-    Route::post('/events/{event}/register', [SponsorController::class, 'registerForEvent'])->name('sponsor.events.register');
-    Route::get('/events/registration/success', [SponsorController::class, 'eventRegistrationSuccess'])->name('sponsor.events.registration.success');
-    Route::get('/events/registration/cancel', [SponsorController::class, 'eventRegistrationCancel'])->name('sponsor.events.registration.cancel');
-    Route::delete('/events/{event}/cancel', [SponsorController::class, 'cancelEventRegistration'])->name('sponsor.events.cancel');
-    Route::get('/my-event-registrations', [SponsorController::class, 'myEventRegistrations'])->name('sponsor.events.my-registrations');
 
-    // Webinars
-    Route::get('/webinars', [SponsorController::class, 'webinars'])->name('sponsor.webinars');
-    Route::post('/webinars/{webinar}/register', [SponsorController::class, 'joinWebinar'])->name('sponsor.webinars.register');
-    Route::delete('/webinars/{webinar}/cancel', [SponsorController::class, 'cancelWebinar'])->name('sponsor.webinars.cancel');
-
-    Route::get('/reviews', [SponsorController::class, 'reviews'])->name('sponsor.reviews');
-    Route::post('/reviews', [SponsorController::class, 'storeReview'])->name('sponsor.reviews.store');
-    Route::get('/payment', [SponsorController::class, 'payment'])->name('sponsor.payment');
-    Route::get('/setting', [SponsorController::class, 'setting'])->name('sponsor.setting');
-    Route::put('/settings', [SponsorController::class, 'updateSettings'])->name('sponsor.settings.update');
-    Route::put('/settings/password', [SponsorController::class, 'updatePassword'])->name('sponsor.settings.password');
-    Route::put('/settings/notifications', [SponsorController::class, 'updateNotifications'])->name('sponsor.settings.notifications');
-    Route::put('/settings/account', [SponsorController::class, 'updateAccount'])->name('sponsor.settings.account');
-    Route::put('/settings/social', [SponsorController::class, 'updateSocial'])->name('sponsor.settings.social');
+Route::prefix('finance')->middleware(['role.restrict'])->group(function () {
+    Route::get('/dashboard', [FinanceUserController::class, 'dashboard'])->name('finance.dashboard');
+    Route::get('/registrations', [FinanceUserController::class, 'registrations'])->name('finance.registrations');
+    Route::get('/registrations/{registration}', [FinanceUserController::class, 'showRegistration'])->name('finance.registrations.show');
+    Route::get('/registrations/{registration}/invoice/create', [FinanceUserController::class, 'createInvoice'])->name('finance.invoice.create');
+    Route::post('/registrations/{registration}/invoice', [FinanceUserController::class, 'storeInvoice'])->name('finance.invoice.store');
 });
-
 
 Route::prefix('case_manager')->middleware(['role.restrict'])->group(function () {
     // Case Manager Dashboard Routes
@@ -279,8 +297,8 @@ Route::prefix('patient')->middleware(['role.restrict'])->group(function () {
     Route::post('/program/register', [ProgramRegistrationController::class, 'store'])->name('program.register');
     Route::get('/program-registrations/{registration}', [ProgramRegistrationController::class, 'show'])->name('patient.programRegistrations.show');
 
-    // Webinars
-    Route::get('/webinars', [PatientController::class, 'webinars'])->name('patient.webinars');
-    Route::post('/webinars/{webinar}/register', [PatientController::class, 'joinWebinar'])->name('patient.webinars.register');
-    Route::delete('/webinars/{webinar}/cancel', [PatientController::class, 'cancelWebinar'])->name('patient.webinars.cancel');
+    // Webinars - commented: sponsor/webinars not important for now
+    // Route::get('/webinars', [PatientController::class, 'webinars'])->name('patient.webinars');
+    // Route::post('/webinars/{webinar}/register', [PatientController::class, 'joinWebinar'])->name('patient.webinars.register');
+    // Route::delete('/webinars/{webinar}/cancel', [PatientController::class, 'cancelWebinar'])->name('patient.webinars.cancel');
 });

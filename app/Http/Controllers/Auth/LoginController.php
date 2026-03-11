@@ -42,22 +42,17 @@ class LoginController extends Controller
                 Cookie::queue(Cookie::forget('remembered_password'));
             }
 
-            // Determine the redirect URL based on role
+            // Redirect to intended page (e.g. page user was trying to access before login), or role-based dashboard
             $roleName = Auth::user()->role->name;
+            $defaultUrl = match ($roleName) {
+                'admin' => route('admin.dashboard'),
+                'casemanager' => route('case_manager.dashboard'),
+                'patient' => route('patient.dashboard'),
+                'finance' => route('finance.dashboard'),
+                default => url('/'),
+            };
 
-            switch ($roleName) {
-                case 'admin':
-                    return redirect()->route('admin.dashboard');
-                case 'sponsor':
-                    return redirect()->route('sponsor.dashboard');
-                case 'casemanager':
-                    return redirect()->route('case_manager.dashboard');
-                case 'patient':
-                    return redirect()->route('patient.dashboard');
-                default:
-                    // fallback if role unknown
-                    return redirect('/');
-            }
+            return redirect()->intended($defaultUrl);
         }
 
         if (! $request->filled('remember')) {
@@ -66,9 +61,12 @@ class LoginController extends Controller
 
         Cookie::queue(Cookie::forget('remembered_password'));
 
-        return redirect()->route('register', ['tab' => 'login'])->withErrors([
-            'login' => 'These credentials do not match our records.',
-        ]);
+        $loginValue = $request->input('login', '');
+        return redirect()->route('register', ['tab' => 'login'])
+            ->withInput($request->only('login', 'remember'))
+            ->withErrors([
+                'login' => 'These credentials do not match our records for "' . e($loginValue) . '".',
+            ]);
     }
 
 

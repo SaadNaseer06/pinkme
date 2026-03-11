@@ -1,4 +1,4 @@
-@php
+﻿@php
     use Illuminate\Support\Facades\Auth;
     use Carbon\Carbon;
     use App\Models\Application;
@@ -87,7 +87,7 @@
                                 </div>
                             </div>
                             <button type="submit"
-                                class="px-4 py-2 bg-[#DB69A2] text-white rounded-md app-text hover:bg-pink-600">
+                                class="px-4 py-2 bg-[#9E2469] text-white rounded-md app-text hover:bg-pink-600">
                                 Apply
                             </button>
                             @if (request()->filled('range'))
@@ -203,7 +203,7 @@
 
                             @foreach ($pages as $page)
                                 @if ($page == $current)
-                                    <span class="px-4 py-1 rounded-md bg-[#DB69A2] text-white">{{ $page }}</span>
+                                    <span class="px-4 py-1 rounded-md bg-[#9E2469] text-white">{{ $page }}</span>
                                 @else
                                     <a href="{{ $apps->url($page) }}"
                                         class="px-3 py-1 rounded-md border border-[#B9B1B6] text-[#91848C]">{{ $page }}</a>
@@ -233,7 +233,7 @@
             </p>
             <div class="flex justify-center gap-3 pt-2">
                 <button id="deleteConfirmBtn"
-                    class="px-6 py-2 bg-[#DB69A2] hover:bg-[#FE6EB6] text-white rounded-md text-sm font-semibold transition">
+                    class="px-6 py-2 bg-[#9E2469] hover:bg-[#FE6EB6] text-white rounded-md text-sm font-semibold transition">
                     Yes
                 </button>
                 <button onclick="closeRejectModal()"
@@ -249,7 +249,7 @@
         <div class="bg-[#F9EEF6] rounded-xl shadow-lg w-full max-w-[20rem] md:max-w-md p-6">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Assign to:</h2>
             <input id="reviewerSearch" type="text" placeholder="Enter Name To Find The Reviewer"
-                class="w-full mb-4 px-4 py-2 rounded-md border border-[#E4D2DB] bg-transparent text-sm placeholder-[#B1A4AD] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]" />
+                class="w-full mb-4 px-4 py-2 rounded-md border border-[#E4D2DB] bg-transparent text-sm placeholder-[#B1A4AD] focus:outline-none focus:ring-2 focus:ring-[#9E2469]" />
             <div id="caseManagersList" class="space-y-3 max-h-60 overflow-y-auto pr-2">
                 @foreach ($caseManagers as $manager)
                     <div class="flex items-center justify-between manager-row" data-user-id="{{ $manager->id }}">
@@ -264,7 +264,7 @@
                             <span class="text-sm text-gray-800">{{ $manager->profile->full_name ?? 'Unknown' }}</span>
                         </div>
                         <button
-                            class="selectReviewer text-sm border border-[#DCCFD8] text-[#91848C] text-white px-4 py-1.5 rounded-md hover:bg-[#db69a2] hover:text-white"
+                            class="selectReviewer text-sm border border-[#DCCFD8] text-[#91848C] text-white px-4 py-1.5 rounded-md hover:bg-[#9E2469] hover:text-white"
                             data-user-id="{{ $manager->id }}">
                             Select
                         </button>
@@ -273,7 +273,7 @@
             </div>
             <div class="flex justify-between mt-6">
                 <button id="confirmAssignBtn"
-                    class="bg-[#DB69A2] hover:bg-[#FE6EB6] text-white font-semibold text-sm px-3 py-3 rounded-md transition"
+                    class="bg-[#9E2469] hover:bg-[#FE6EB6] text-white font-semibold text-sm px-3 py-3 rounded-md transition"
                     disabled>
                     CONFIRM & ASSIGN
                 </button>
@@ -412,10 +412,10 @@
             $('.selectReviewer').each(function() {
                 const userId = $(this).data('user-id');
                 if (userId == assignedReviewerId) {
-                    $(this).addClass('bg-[#db69a2] text-[#ffffff] font-bold cursor-not-allowed')
+                    $(this).addClass('bg-[#9E2469] text-[#ffffff] font-bold cursor-not-allowed')
                         .text('Assigned').prop('disabled', true);
                 } else {
-                    $(this).removeClass('bg-[#db69a2] font-bold cursor-not-allowed')
+                    $(this).removeClass('bg-[#9E2469] font-bold cursor-not-allowed')
                         .text('Select').prop('disabled', false);
                 }
             });
@@ -443,8 +443,8 @@
         $(document).on('click', '.selectReviewer', function() {
             if ($(this).prop('disabled')) return;
 
-            $('.selectReviewer').removeClass('bg-[#db69a2] text-white font-bold cursor-not-allowed').text('Select');
-            $(this).addClass('bg-[#db69a2] text-[#ffffff] font-bold cursor-not-allowed').text('Selected');
+            $('.selectReviewer').removeClass('bg-[#9E2469] text-white font-bold cursor-not-allowed').text('Select');
+            $(this).addClass('bg-[#9E2469] text-[#ffffff] font-bold cursor-not-allowed').text('Selected');
             selectedReviewerId = $(this).data('user-id');
             $('#confirmAssignBtn').prop('disabled', false);
         });

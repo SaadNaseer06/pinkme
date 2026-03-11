@@ -1,4 +1,4 @@
-@extends('sponsor.layouts.app')
+﻿@extends('sponsor.layouts.app')
 
 @section('title', 'Become A Sponsor')
 
@@ -47,8 +47,8 @@
                             <div>
                                 <h3 class="text-xl font-semibold text-[#213430] mb-1 program-h">{{ $event->title }}</h3>
                                 <p class="text-sm text-[#91848C] program-p">{{ $shortDesc ?: 'No description.' }}</p>
-                                <p class="text-xs text-[#DB69A2] font-medium uppercase tracking-wide">Full Funding Required</p>
-                                <span class="inline-flex items-center gap-2 px-3 py-1 mt-2 text-xs font-semibold text-white bg-[#DB69A2] rounded-full uppercase">Sponsor Covers 100%</span>
+                                <p class="text-xs text-[#9E2469] font-medium uppercase tracking-wide">Full Funding Required</p>
+                                <span class="inline-flex items-center gap-2 px-3 py-1 mt-2 text-xs font-semibold text-white bg-[#9E2469] rounded-full uppercase">Sponsor Covers 100%</span>
                             </div>
                         </div>
                         <div class="flex flex-col gap-4 text-sm items-end">
@@ -56,7 +56,7 @@
                                 <span class="text-[#91848C] app-text">Program Fund</span>
                                 <span class="text-[#213430] font-medium app-text">{{ $fundLabel }}</span>
                             </div>
-                            <a href="{{ route('sponsor.events.show', $event) }}" class="inline-flex items-center px-4 py-2 bg-[#DB69A2] text-white text-sm font-medium rounded-lg hover:bg-[#C63A85] transition">
+                            <a href="{{ route('sponsor.events.show', $event) }}" class="inline-flex items-center px-4 py-2 bg-[#9E2469] text-white text-sm font-medium rounded-lg hover:bg-[#B52D75] transition">
                                 Sponsor Entire Program
                             </a>
                         </div>
@@ -74,12 +74,12 @@
                         <h1 class="text-2xl font-medium text-[#213430] program-h">Ongoing Support Program</h1>
                         @if ($ongoingEvents->count() > 4)
                             <div class="flex space-x-2">
-                                <button type="button" id="fundPrevBtn" class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white p-2 rounded-lg" aria-label="Previous">
+                                <button type="button" id="fundPrevBtn" class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white p-2 rounded-lg" aria-label="Previous">
                                     <svg class="md:h-6 h-4 md:w-6 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M15 18l-6-6 6-6" />
                                     </svg>
                                 </button>
-                                <button type="button" id="fundNextBtn" class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white p-2 rounded-lg" aria-label="Next">
+                                <button type="button" id="fundNextBtn" class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white p-2 rounded-lg" aria-label="Next">
                                     <svg class="md:h-6 h-4 md:w-6 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M9 18l6-6-6-6" />
                                     </svg>
@@ -106,7 +106,7 @@
                                             : 'To be determined';
                                     @endphp
                                     <div class="carousel-item flex-shrink-0 w-[300px] md:w-[330px] lg:w-[350px]">
-                                        <div class="bg-[#F3E8EF] border border-[#DCCFD8] rounded-lg overflow-hidden hover:ring-2 ring-[#db69a2] h-full flex flex-col">
+                                        <div class="bg-[#F3E8EF] border border-[#DCCFD8] rounded-lg overflow-hidden hover:ring-2 ring-[#9E2469] h-full flex flex-col">
                                             <div class="p-2">
                                                 <img src="{{ $imgSrc }}" alt="{{ $event->title }}" class="w-full h-48 object-cover rounded" />
                                             </div>
@@ -121,7 +121,7 @@
                                                     <span class="text-[#91848C] app-text">Program Fund</span>
                                                     <span class="text-[#213430] font-medium app-text">{{ $fundLabel }}</span>
                                                 </div>
-                                                <a href="{{ route('sponsor.events.show', $event) }}" class="w-full py-3 text-center font-medium border border-[#DCCFD8] text-[#213430] rounded-lg hover:bg-[#db69a2] hover:text-white hover:border-[#db69a2] transition app-main">
+                                                <a href="{{ route('sponsor.events.show', $event) }}" class="w-full py-3 text-center font-medium border border-[#DCCFD8] text-[#213430] rounded-lg hover:bg-[#9E2469] hover:text-white hover:border-[#9E2469] transition app-main">
                                                     Sponsor Entire Program
                                                 </a>
                                             </div>

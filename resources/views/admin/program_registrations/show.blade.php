@@ -1,11 +1,11 @@
 @php
     use App\Models\ProgramRegistration;
-    $registration->loadMissing(['program', 'user', 'reviewer']);
+    $registration->loadMissing(['program', 'user', 'reviewer', 'financeUser.profile', 'registrationInvoices']);
     $status = strtolower($registration->status);
     $badgeClasses = match ($status) {
         ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
         ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
-        default => 'bg-[#FDE8F3] text-[#DB69A2] border border-[#F4BBD5]',
+        default => 'bg-[#FDE8F3] text-[#9E2469] border border-[#F4BBD5]',
     };
 
     $programLabels = [
@@ -80,7 +80,18 @@
 @section('content')
     <main class="flex-1 min-w-0">
         <div class="max-w-full mx-auto min-w-0">
-            <div class="mt-6 bg-[#F6EDF5] rounded-xl p-6 md:p-8 space-y-8 shadow-sm min-w-0">
+            <div class="mb-4">
+                <a href="{{ route('admin.registrations.index', ['status' => $status === 'pending' ? 'pending' : 'all']) }}"
+                    class="inline-flex items-center gap-2 text-base text-[#6C5F67] hover:text-[#213430] app-text">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to list
+                </a>
+            </div>
+            <div class="bg-[#F6EDF5] rounded-xl p-6 md:p-8 space-y-8 shadow-sm min-w-0">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[#DCCFD8] pb-5 min-w-0">
                     <div class="min-w-0 flex-1">
                         <h2 class="text-3xl font-semibold text-[#213430] app-main break-words">Registration Details</h2>
@@ -93,6 +104,7 @@
                     </span>
                 </div>
 
+                @if ($registration->registrationInvoices->isEmpty() && $status === 'pending')
                 <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1] min-w-0">
                     <h3 class="text-xl font-semibold text-[#213430] app-main">Assign Case Manager</h3>
                     <p class="text-sm text-[#6C5F67] app-text mt-1 break-words">
@@ -110,7 +122,7 @@
                             @endforeach
                         </select>
                         <button type="submit"
-                            class="px-4 py-2 bg-[#DB69A2] text-white rounded-md text-sm font-medium hover:bg-[#c95791] transition app-text">
+                            class="px-4 py-2 bg-[#9E2469] text-white rounded-md text-sm font-medium hover:bg-[#B52D75] transition app-text">
                             Save Assignment
                         </button>
                     </form>
@@ -118,6 +130,81 @@
                         Current: {{ $registration->assignedCaseManager?->profile?->full_name ?? $registration->assignedCaseManager?->email ?? 'Unassigned' }}
                         @if ($registration->assigned_at)
                             <span class="text-[#91848C]">• assigned {{ $registration->assigned_at->format('d M Y, h:i A') }}</span>
+                        @endif
+                    </div>
+                </div>
+                @elseif ($registration->registrationInvoices->isEmpty())
+                <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1] min-w-0">
+                    <h3 class="text-xl font-semibold text-[#213430] app-main">Assigned Case Manager</h3>
+                    <p class="mt-3 text-sm text-[#6C5F67] app-text">
+                        {{ $registration->assignedCaseManager?->profile?->full_name ?? $registration->assignedCaseManager?->email ?? 'Unassigned' }}
+                        @if ($registration->assigned_at)
+                            <span class="text-[#91848C]">• assigned {{ $registration->assigned_at->format('d M Y, h:i A') }}</span>
+                        @endif
+                    </p>
+                </div>
+                @else
+                <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1] min-w-0">
+                    <h3 class="text-xl font-semibold text-[#213430] app-main">Assigned Case Manager</h3>
+                    <p class="mt-3 text-sm text-[#6C5F67] app-text">
+                        {{ $registration->assignedCaseManager?->profile?->full_name ?? $registration->assignedCaseManager?->email ?? 'Unassigned' }}
+                        @if ($registration->assigned_at)
+                            <span class="text-[#91848C]">• assigned {{ $registration->assigned_at->format('d M Y, h:i A') }}</span>
+                        @endif
+                    </p>
+                </div>
+                @endif
+
+                {{-- Finance / Budget Allocation --}}
+                <div id="finance" class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1] min-w-0">
+                    <h3 class="text-xl font-semibold text-[#213430] app-main">Finance & Budget</h3>
+                    <p class="text-sm text-[#6C5F67] app-text mt-1">Finance status and allocated budget (invoices).</p>
+                    <div class="mt-4 space-y-3">
+                        @if ($registration->registrationInvoices->isNotEmpty())
+                            <div class="flex items-center gap-2 text-green-700">
+                                <i class="fas fa-check-circle"></i>
+                                <span class="font-medium">Budget Allocated</span>
+                            </div>
+                            <div class="border border-[#E6D8E1] rounded-lg overflow-hidden">
+                                <table class="min-w-full text-sm">
+                                    <thead class="bg-[#F7EEF3]">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left font-semibold text-[#7B5B6B]">Invoice #</th>
+                                            <th class="px-4 py-2 text-left font-semibold text-[#7B5B6B]">Purpose</th>
+                                            <th class="px-4 py-2 text-left font-semibold text-[#7B5B6B]">Amount</th>
+                                            <th class="px-4 py-2 text-left font-semibold text-[#7B5B6B]">Date</th>
+                                            <th class="px-4 py-2 text-left font-semibold text-[#7B5B6B]">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($registration->registrationInvoices as $inv)
+                                            <tr class="border-t border-[#E6D8E1]">
+                                                <td class="px-4 py-2">
+                                                    <a href="{{ route('admin.registration_invoices.show', [$registration, $inv]) }}" class="text-[#9E2469] hover:underline font-medium">
+                                                        {{ $inv->invoice_number }}
+                                                    </a>
+                                                </td>
+                                                <td class="px-4 py-2">{{ $inv->payment_purpose }}</td>
+                                                <td class="px-4 py-2">${{ number_format($inv->amount, 2) }}</td>
+                                                <td class="px-4 py-2">{{ $inv->issue_date?->format('M d, Y') ?? '—' }}</td>
+                                                <td class="px-4 py-2">{{ $inv->status }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-sm text-[#6C5F67]">Finance user: {{ $registration->financeUser?->profile?->full_name ?? $registration->financeUser?->email ?? '—' }}</p>
+                        @elseif ($registration->finance_user_id)
+                            <div class="flex items-center gap-2 text-amber-700">
+                                <i class="fas fa-clock"></i>
+                                <span class="font-medium">Sent to Finance</span> — awaiting budget allocation
+                            </div>
+                            <p class="text-sm text-[#6C5F67]">Assigned to: {{ $registration->financeUser?->profile?->full_name ?? $registration->financeUser?->email ?? '—' }}</p>
+                            @if ($registration->sent_to_finance_at)
+                                <p class="text-xs text-[#91848C]">Sent {{ $registration->sent_to_finance_at->format('d M Y, h:i A') }}</p>
+                            @endif
+                        @else
+                            <p class="text-[#91848C]">Not yet sent to finance.</p>
                         @endif
                     </div>
                 </div>
@@ -286,22 +373,10 @@
                             @csrf
                             <h4 class="font-semibold text-[#213430] app-main">Approve Registration</h4>
                             <p class="text-base text-[#6C5F67] app-text">Optional: add a short note for the applicant.</p>
-                            <textarea name="note" rows="3" class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#DB69A2]" placeholder="Optional note"></textarea>
+                            <textarea name="note" rows="3" class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]" placeholder="Optional note"></textarea>
                             <button type="submit"
                                 class="w-full inline-flex justify-center items-center px-4 py-3 bg-[#20B354] text-white rounded-md text-base font-semibold hover:bg-[#1A9444] transition">
                                 <span class="action-text">Approve Request</span>
-                                <span class="action-spinner" aria-hidden="true"></span>
-                            </button>
-                        </form>
-
-                        <form method="POST" action="{{ route('admin.program_registrations.reject', $registration) }}" data-action-loader class="bg-[#F8F2F6] rounded-lg p-4 space-y-3 border border-[#E6D8E1]">
-                            @csrf
-                            <h4 class="font-semibold text-[#213430] app-main">Reject Registration</h4>
-                            <p class="text-base text-[#6C5F67] app-text">Provide a short reason to keep for the record.</p>
-                            <textarea name="note" rows="3" required class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#DB69A2]" placeholder="Reason for rejection"></textarea>
-                            <button type="submit"
-                                class="w-full inline-flex justify-center items-center px-4 py-3 bg-[#B32020] text-white rounded-md text-base font-semibold hover:bg-[#8F1A1A] transition">
-                                <span class="action-text">Reject Request</span>
                                 <span class="action-spinner" aria-hidden="true"></span>
                             </button>
                         </form>

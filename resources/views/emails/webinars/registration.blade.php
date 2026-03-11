@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; color: #1f2933; line-height: 1.6; margin: 0; padding: 0;">
     <div style="max-width: 640px; margin: 0 auto; padding: 24px;">
-        <h2 style="margin: 0 0 16px; color: #d12978;">Your webinar spot is confirmed</h2>
+        <h2 style="margin: 0 0 16px; color: #9E2469;">Your webinar spot is confirmed</h2>
         <p style="margin: 0 0 12px;">Hi {{ $recipientName }},</p>
         <p style="margin: 0 0 12px;">Thanks for registering. Here are your webinar details:</p>
 
@@ -19,7 +19,7 @@
                 <p style="margin: 0 0 8px;"><strong>Presenter:</strong> {{ $webinar->presenter }}</p>
             @endif
             @if($joinUrl)
-                <p style="margin: 0 0 8px;"><strong>Join link:</strong> <a href="{{ $joinUrl }}" target="_blank" style="color: #d12978;">{{ $joinUrl }}</a></p>
+                <p style="margin: 0 0 8px;"><strong>Join link:</strong> <a href="{{ $joinUrl }}" target="_blank" style="color: #9E2469;">{{ $joinUrl }}</a></p>
             @endif
             @if($webinar->description)
                 <p style="margin: 0;">{{ $webinar->description }}</p>

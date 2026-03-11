@@ -1,6 +1,6 @@
 ﻿@extends('admin.layouts.admin')
 
-@section('title', 'Programs & Events')
+@section('title', 'Programs')
 
 @push('styles')
     <style>
@@ -17,15 +17,15 @@
 @section('content')
     <div class="max-w-8xl mx-auto space-y-8">
                 <div class="flex items-center justify-between">
-                    <h1 class="text-2xl font-semibold text-[#213430] app-main">Programs & Events</h1>
+                    <h1 class="text-2xl font-semibold text-[#213430] app-main">Programs</h1>
                 </div>
 
                 <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
-                    <!-- Navigation Tabs -->
+                    {{-- Fund Raising Events tab - commented for now
                     <div class="flex flex-wrap">
                         <div class="w-full md:w-1/2">
                             <button onclick="showTab('programs')" id="programs-tab"
-                                class="tab-btn w-full bg-[#DB69A2] text-white py-4 px-6 font-normal text-center border-b-4 border-[#DB69A2] transition-colors duration-200">
+                                class="tab-btn w-full bg-[#9E2469] text-white py-4 px-6 font-normal text-center border-b-4 border-[#9E2469] transition-colors duration-200">
                                 Programs
                             </button>
                         </div>
@@ -36,7 +36,7 @@
                             </button>
                         </div>
                     </div>
-
+                    --}}
 
                     <div id="tabContents" class="w-full space-y-8">
                     <!-- Programs Tab -->
@@ -50,7 +50,7 @@
                                         <form method="GET" class="flex items-center gap-2">
                                             <label for="programSort" class="text-sm text-[#6C5B68]">Sort by</label>
                                             <select id="programSort" name="program_sort" onchange="this.form.submit()"
-                                                class="rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                                                class="rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
                                                 <option value="latest" @selected(($programSort ?? 'latest') === 'latest')>Latest</option>
                                                 <option value="oldest" @selected(($programSort ?? 'latest') === 'oldest')>Oldest</option>
                                                 <option value="date_desc" @selected(($programSort ?? 'latest') === 'date_desc')>Date (newest first)</option>
@@ -58,7 +58,7 @@
                                             </select>
                                         </form>
                                         <a href="{{ route('programs.create') }}"
-                                            class="flex items-center bg-[#db69a2] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#c25891] transition-colors duration-200">
+                                            class="flex items-center bg-[#9E2469] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#B52D75] transition-colors duration-200">
                                             <span>Add New Program</span>
                                         </a>
                                     </div>
@@ -108,7 +108,7 @@
                                                     <h3 class="text-xl font-semibold text-[#213430] program-h">
                                                         {{ $program->title }}</h3>
                                                     <span
-                                                        class="inline-flex items-center rounded-full bg-white/60 px-3 py-1 text-xs font-medium text-[#DB69A2] capitalize">{{ $program->status }}</span>
+                                                        class="inline-flex items-center rounded-full bg-white/60 px-3 py-1 text-xs font-medium text-[#9E2469] capitalize">{{ $program->status }}</span>
                                                 </div>
                                                 <p class="text-sm text-[#91848C] program-p">
                                                     {{ Str::limit($program->description, 150) }}</p>
@@ -126,7 +126,7 @@
                                             <a href="{{ route('programs.edit', $program) }}"
                                                 class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-[#213430] shadow-sm hover:bg-[#F6EDF5] transition">Edit</a>
                                             <button onclick='openProgramDetailModal(@json($detail))'
-                                                class="bg-[#DB69A2] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#c25891] transition">View
+                                                class="bg-[#9E2469] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#B52D75] transition">View
                                                 Details</button>
                                         </div>
                                     </div>
@@ -143,7 +143,7 @@
                                                         {{ $program->title }}</h3>
                                                     <div class="flex flex-col items-end gap-1">
                                                         <span
-                                                            class="inline-flex items-center rounded-full bg-white/60 px-2 py-0.5 text-[10px] font-semibold text-[#DB69A2] capitalize">{{ $program->status }}</span>
+                                                            class="inline-flex items-center rounded-full bg-white/60 px-2 py-0.5 text-[10px] font-semibold text-[#9E2469] capitalize">{{ $program->status }}</span>
                                                     </div>
                                                 </div>
                                                 <p class="text-xs text-[#91848C] mt-1 program-p">
@@ -160,7 +160,7 @@
                                                     <a href="{{ route('programs.edit', $program) }}"
                                                         class="flex-1 text-center border border-[#213430] text-[#213430] text-xs py-2 rounded-md program-btn">Edit</a>
                                                     <button onclick='openProgramDetailModal(@json($detail))'
-                                                        class="flex-1 text-center bg-[#DB69A2] text-white text-xs py-2 rounded-md program-btn">View</button>
+                                                        class="flex-1 text-center bg-[#9E2469] text-white text-xs py-2 rounded-md program-btn">View</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -171,7 +171,7 @@
                                         <p class="text-[#91848C] text-lg font-medium mb-4">No support programs found.</p>
                                         <p class="text-[#6C5B68] text-sm mb-6">Create a new program to feature it here.</p>
                                     <a href="{{ route('programs.create') }}"
-                                        class="inline-flex items-center justify-center rounded-md bg-[#DB69A2] px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-[#c25891] transition-colors duration-200">
+                                        class="inline-flex items-center justify-center rounded-md bg-[#9E2469] px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-[#B52D75] transition-colors duration-200">
                                         Create New Program
                                     </a>
                                 </div>
@@ -179,7 +179,7 @@
                         </div>
                     </div>
 
-                    <!-- Fund Raising Events Tab -->
+                    {{-- Fund Raising Events Tab - commented for now
                     <div id="events" class="tab-content">
                         <!-- Fund Raising Events Section -->
                         <div class="mb-6 mt-6">
@@ -190,12 +190,12 @@
                                     <div class="flex items-center gap-2">
                                         @if (\App\Models\EventSponsorship::count() > 0)
                                             <a href="{{ route('events.registrations.index') }}"
-                                                class="bg-[#db69a2] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#c25891] transition-colors duration-200">
+                                                class="bg-[#9E2469] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#B52D75] transition-colors duration-200">
                                                 <span>View Sponsors</span>
                                             </a>
                                         @endif
                                         <a href="{{ route('events.create') }}"
-                                            class="flex items-center bg-[#db69a2] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#c25891] transition-colors duration-200">
+                                            class="flex items-center bg-[#9E2469] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#B52D75] transition-colors duration-200">
                                             <span>Add New Event</span>
                                         </a>
                                     </div>
@@ -270,7 +270,7 @@
                                                 class="h-full w-full object-cover">
                                             @if ($eventDate)
                                                 <div
-                                                    class="absolute top-4 left-4 flex flex-col items-center justify-center w-20 h-20 rounded-xl bg-white/90 text-[#DB69A2] shadow-md">
+                                                    class="absolute top-4 left-4 flex flex-col items-center justify-center w-20 h-20 rounded-xl bg-white/90 text-[#9E2469] shadow-md">
                                                     <span class="text-sm font-semibold tracking-wide">
                                                         {{ $eventDate->format('M') }}
                                                     </span>
@@ -316,8 +316,6 @@
                                                     </div>
                                                     <div
                                                         class="flex flex-wrap items-center justify-between gap-3 border border-[#E0D0DA] bg-white/60 px-3 py-2 rounded-lg text-xs text-[#6C5B68]">
-                                                        <span class="font-medium">Sponsors:
-                                                            {{ $event->sponsors_count ?? ($event->sponsors?->count() ?? 0) }}</span>
                                                         <span class="font-medium">Raised:
                                                             ${{ number_format($event->total_raised ?? 0, 2) }}</span>
                                                     </div>
@@ -334,7 +332,7 @@
                                                                 class="inline-flex items-center justify-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 transition">Delete</button>
                                                         </form>
                                                         <button onclick='openEventDetailModal(@json($detail))'
-                                                            class="inline-flex items-center justify-center rounded-md border border-transparent bg-[#DB69A2] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#c25891] transition">View</button>
+                                                            class="inline-flex items-center justify-center rounded-md border border-transparent bg-[#9E2469] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#B52D75] transition">View</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -344,9 +342,9 @@
                                     <div class="bg-white rounded-lg p-6 text-center shadow-sm">
                                         <p class="text-[#91848C] text-lg font-medium mb-4">No fund raising events found.</p>
                                         <p class="text-[#6C5B68] text-sm mb-6">Get started by creating a new event to
-                                            engage your community and sponsors.</p>
+                                            engage your community.</p>
                                         <a href="{{ route('events.create') }}"
-                                            class="inline-flex items-center justify-center rounded-md bg-[#DB69A2] px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-[#c25891] transition-colors duration-200">
+                                            class="inline-flex items-center justify-center rounded-md bg-[#9E2469] px-6 py-3 text-sm font-medium text-white shadow-sm hover:bg-[#B52D75] transition-colors duration-200">
                                             Create New Event
                                         </a>
                                     </div>
@@ -358,6 +356,7 @@
                     </div>
 
                     </div>
+                    --}}
                 </div>
             </div>
 
@@ -427,7 +426,7 @@
                                 <button onclick="closeProgramDetailModal()"
                                     class="px-5 py-3 bg-transparent border border-[#DCCFD8] text-[#91848C] rounded-md app-text">Cancel</button>
                                 <a id="programDetailModalPrimaryLink" href="#"
-                                    class="px-6 py-3 bg-[#DB69A2] text-white rounded-lg hover:bg-[#c25891] transition app-text hidden"
+                                    class="px-6 py-3 bg-[#9E2469] text-white rounded-lg hover:bg-[#B52D75] transition app-text hidden"
                                     target="_self">Open program</a>
                             </div>
                         </div>
@@ -525,7 +524,7 @@
                                 <button onclick="closeEventDetailModal()"
                                     class="px-5 py-3 bg-transparent border border-[#DCCFD8] text-[#91848C] rounded-md app-text">Cancel</button>
                                 <a id="eventDetailModalPrimaryLink" href="#"
-                                    class="px-6 py-3 bg-[#DB69A2] text-white rounded-lg hover:bg-[#c25891] transition app-text hidden"
+                                    class="px-6 py-3 bg-[#9E2469] text-white rounded-lg hover:bg-[#B52D75] transition app-text hidden"
                                     target="_self">Open event</a>
                             </div>
                         </div>
@@ -560,14 +559,14 @@
 
             // Update button states
             document.querySelectorAll(".tab-btn").forEach(btn => {
-                btn.classList.remove("bg-[#DB69A2]", "text-white", "border-[#DB69A2]");
+                btn.classList.remove("bg-[#9E2469]", "text-white", "border-[#9E2469]");
                 btn.classList.add("bg-[#F3E8EF]", "text-[#91848C]", "border-[#DCCFD8]");
             });
 
             const activeBtn = document.querySelector(`[onclick="showTab('${tabId}')"]`);
             if (activeBtn) {
                 activeBtn.classList.remove("bg-[#F3E8EF]", "text-[#91848C]", "border-[#DCCFD8]");
-                activeBtn.classList.add("bg-[#DB69A2]", "text-white", "border-[#DB69A2]");
+                activeBtn.classList.add("bg-[#9E2469]", "text-white", "border-[#9E2469]");
             }
 
             localStorage.setItem('programEventsActiveTab', tabId);

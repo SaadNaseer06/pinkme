@@ -14,6 +14,8 @@ use App\Models\Program;
 use App\Models\SiteSetting;
 use App\Models\UserProfile;
 use App\Models\ProgramRegistration;
+use App\Models\RegistrationInvoice;
+use App\Models\UserNotification;
 use App\Models\EventSponsorship;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
@@ -359,6 +361,206 @@ class AdminController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'An unexpected error occurred while assigning the reviewer.',
+            ], 500);
+        }
+    }
+
+    public function sendToFinance(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'finance_user_id' => ['required', 'integer', 'exists:users,id'],
+            ]);
+
+            return DB::transaction(function () use ($validated, $id) {
+                $application = Application::whereKey($id)->lockForUpdate()->first();
+
+                if (!$application) {
+                    return response()->json(['success' => false, 'message' => 'Application not found.'], 404);
+                }
+
+                if (strtolower($application->status) !== 'approved') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Only approved applications can be sent to finance.',
+                    ], 400);
+                }
+
+                $financeUser = User::with('profile')->find($validated['finance_user_id']);
+                if (!$financeUser) {
+                    return response()->json(['success' => false, 'message' => 'Finance user not found.'], 404);
+                }
+
+                $financeRoleId = Role::where('name', 'finance')->value('id');
+                if ($financeRoleId && (int) $financeUser->role_id !== (int) $financeRoleId) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected user is not a finance user.',
+                    ], 400);
+                }
+
+                if (optional($financeUser->profile)->status != 1) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected finance user is not active.',
+                    ], 400);
+                }
+
+                $application->update([
+                    'finance_user_id' => $financeUser->id,
+                    'sent_to_finance_at' => now(),
+                ]);
+
+                $financeName = $financeUser->profile->full_name ?? $financeUser->email ?? 'Unknown';
+
+                Log::info('Application sent to finance', [
+                    'application_id' => $application->id,
+                    'finance_user_id' => $financeUser->id,
+                    'sent_by' => Auth::id(),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Application sent to {$financeName} for budget allocation.",
+                    'data' => [
+                        'application_id' => $application->id,
+                        'finance_user_id' => $financeUser->id,
+                        'finance_user_name' => $financeName,
+                    ],
+                ], 200);
+            });
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid data provided.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error('Send to finance error', [
+                'application_id' => $id ?? 'unknown',
+                'error_message' => $e->getMessage(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred.',
+            ], 500);
+        }
+    }
+
+    public function showRegistrationInvoice(ProgramRegistration $registration, RegistrationInvoice $invoice)
+    {
+        if ($invoice->program_registration_id !== $registration->id) {
+            abort(404);
+        }
+        $invoice->load('programRegistration.program');
+        return view('admin.registration_invoices.show', compact('registration', 'invoice'));
+    }
+
+    public function downloadRegistrationInvoice(ProgramRegistration $registration, RegistrationInvoice $invoice)
+    {
+        if ($invoice->program_registration_id !== $registration->id) {
+            abort(404);
+        }
+        $storedPath = $invoice->file_path;
+        if (!$storedPath) {
+            abort(404, 'No file attached to this invoice.');
+        }
+        $downloadName = ($invoice->invoice_number ?: 'invoice') . '.pdf';
+        $publicPath = ltrim(str_replace('public/', '', $storedPath), '/');
+        if (Storage::disk('public')->exists($publicPath)) {
+            return Storage::disk('public')->download($publicPath, $downloadName);
+        }
+        if (Storage::exists($storedPath)) {
+            return Storage::download($storedPath, $downloadName);
+        }
+        abort(404, 'Invoice file not found.');
+    }
+
+    public function sendRegistrationToFinance(Request $request, ProgramRegistration $registration)
+    {
+        try {
+            $validated = $request->validate([
+                'finance_user_id' => ['required', 'integer', 'exists:users,id'],
+            ]);
+
+            return DB::transaction(function () use ($validated, $registration) {
+                $reg = ProgramRegistration::with('program')->whereKey($registration->id)->lockForUpdate()->first();
+                if (!$reg) {
+                    return response()->json(['success' => false, 'message' => 'Registration not found.'], 404);
+                }
+
+                if (strtolower($reg->status) !== ProgramRegistration::STATUS_APPROVED) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Only approved registrations can be sent to finance.',
+                    ], 400);
+                }
+
+                $financeUser = User::with('profile')->find($validated['finance_user_id']);
+                if (!$financeUser) {
+                    return response()->json(['success' => false, 'message' => 'Finance user not found.'], 404);
+                }
+
+                $financeRoleId = Role::where('name', 'finance')->value('id');
+                if ($financeRoleId && (int) $financeUser->role_id !== (int) $financeRoleId) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected user is not a finance user.',
+                    ], 400);
+                }
+
+                if (optional($financeUser->profile)->status != 1) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected finance user is not active.',
+                    ], 400);
+                }
+
+                $reg->update([
+                    'finance_user_id' => $financeUser->id,
+                    'sent_to_finance_at' => now(),
+                ]);
+
+                $financeName = $financeUser->profile->full_name ?? $financeUser->email ?? 'Unknown';
+
+                UserNotification::create([
+                    'user_id' => $financeUser->id,
+                    'title' => 'New Lead Assigned',
+                    'message' => 'A registration has been sent to you for budget allocation. Applicant: ' . ($reg->full_name ?? 'N/A') . ', Program: ' . ($reg->program->title ?? 'N/A'),
+                    'priority' => UserNotification::PRIORITY_IMPORTANT,
+                    'link_url' => route('finance.registrations.show', $reg),
+                ]);
+
+                Log::info('Registration sent to finance', [
+                    'registration_id' => $reg->id,
+                    'finance_user_id' => $financeUser->id,
+                    'sent_by' => Auth::id(),
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "Registration sent to {$financeName} for budget allocation.",
+                    'data' => [
+                        'registration_id' => $reg->id,
+                        'finance_user_id' => $financeUser->id,
+                        'finance_user_name' => $financeName,
+                    ],
+                ], 200);
+            });
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid data provided.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error('Send registration to finance error', [
+                'registration_id' => $registration->id ?? 'unknown',
+                'error_message' => $e->getMessage(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred.',
             ], 500);
         }
     }
@@ -748,15 +950,12 @@ class AdminController extends Controller
      */
     public function registrations(Request $request)
     {
-        $tab = $request->query('tab', 'programs'); // 'programs' or 'events'
-        if (!in_array($tab, ['programs', 'events'], true)) {
-            $tab = 'programs';
-        }
+        $tab = 'programs'; // Event tab commented: sponsor-related, sponsor not wanted for now
 
         $displayCol = $this->userDisplayColumn();
 
-        // Program Registrations Data
-        $programSelectedStatus = strtolower((string) $request->query('program_status', ProgramRegistration::STATUS_PENDING));
+        // Program Registrations Data (default: show all applications)
+        $programSelectedStatus = strtolower((string) $request->query('program_status', 'all'));
         $validProgramStatuses = [
             'all',
             ProgramRegistration::STATUS_PENDING,
@@ -765,11 +964,11 @@ class AdminController extends Controller
         ];
 
         if (!in_array($programSelectedStatus, $validProgramStatuses, true)) {
-            $programSelectedStatus = ProgramRegistration::STATUS_PENDING;
+            $programSelectedStatus = 'all';
         }
 
         $programQuery = ProgramRegistration::query()
-            ->with(['program:id,title', 'user:id,email', 'assignedCaseManager.profile'])
+            ->with(['program:id,title', 'user:id,email', 'assignedCaseManager.profile', 'financeUser.profile', 'registrationInvoices'])
             ->orderByDesc('created_at');
 
         if ($programSelectedStatus !== 'all') {
@@ -815,8 +1014,12 @@ class AdminController extends Controller
         ];
 
         $caseManagerRoleId = Role::where('name', 'casemanager')->value('id');
+        $financeRoleId = Role::where('name', 'finance')->value('id');
         $caseManagers = $caseManagerRoleId
             ? User::where('role_id', $caseManagerRoleId)->with('profile')->orderBy('email')->get()
+            : collect();
+        $financeUsers = $financeRoleId
+            ? User::where('role_id', $financeRoleId)->with('profile')->whereHas('profile', fn($q) => $q->where('status', 1))->orderBy('email')->get()
             : collect();
 
         return view('admin.registrations.index', [
@@ -831,6 +1034,46 @@ class AdminController extends Controller
             'eventCounts'                => $eventCounts,
             'displayCol'                 => $displayCol,
             'caseManagers'               => $caseManagers,
+            'financeUsers'                => $financeUsers,
+        ]);
+    }
+
+    /**
+     * AJAX endpoint: returns program registrations table partial (filter without page reload)
+     */
+    public function registrationsList(Request $request)
+    {
+        $programSelectedStatus = strtolower((string) $request->query('program_status', 'all'));
+        $validProgramStatuses = ['all', ProgramRegistration::STATUS_PENDING, ProgramRegistration::STATUS_APPROVED, ProgramRegistration::STATUS_REJECTED];
+        if (!in_array($programSelectedStatus, $validProgramStatuses, true)) {
+            $programSelectedStatus = 'all';
+        }
+
+        $programQuery = ProgramRegistration::query()
+            ->with(['program:id,title', 'user:id,email', 'assignedCaseManager.profile', 'financeUser.profile', 'registrationInvoices'])
+            ->orderByDesc('created_at');
+
+        if ($programSelectedStatus !== 'all') {
+            $programQuery->where('status', $programSelectedStatus);
+        }
+
+        $programRegistrations = $programQuery
+            ->paginate(15, ['*'], 'program_page')
+            ->appends($request->except('program_page'));
+
+        $caseManagerRoleId = Role::where('name', 'casemanager')->value('id');
+        $financeRoleId = Role::where('name', 'finance')->value('id');
+        $caseManagers = $caseManagerRoleId
+            ? User::where('role_id', $caseManagerRoleId)->with('profile')->orderBy('email')->get()
+            : collect();
+        $financeUsers = $financeRoleId
+            ? User::where('role_id', $financeRoleId)->with('profile')->whereHas('profile', fn($q) => $q->where('status', 1))->orderBy('email')->get()
+            : collect();
+
+        return view('admin.registrations._table', [
+            'programRegistrations'  => $programRegistrations,
+            'caseManagers'          => $caseManagers,
+            'financeUsers'          => $financeUsers,
         ]);
     }
 

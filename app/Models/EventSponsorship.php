@@ -105,8 +105,8 @@ class EventSponsorship extends Model
     public function getStatusTextAttribute(): string
     {
         return match($this->registration_status) {
-            'confirmed' => 'Confirmed',
-            'pending' => 'Pending',
+            'confirmed' => 'Approved',
+            'pending' => 'Pending Approval',
             'cancelled' => 'Cancelled',
             default => 'Unknown',
         };

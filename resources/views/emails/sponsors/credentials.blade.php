@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; color: #1f2933; line-height: 1.6; margin: 0; padding: 0;">
     <div style="max-width: 640px; margin: 0 auto; padding: 24px;">
-        <h2 style="margin: 0 0 16px; color: #d12978;">Welcome to PINK ME</h2>
+        <h2 style="margin: 0 0 16px; color: #9E2469;">Welcome to PINK ME</h2>
         <p style="margin: 0 0 12px;">Hi {{ $recipientName }},</p>
         <p style="margin: 0 0 16px;">An admin has created your sponsor account. Here are your login credentials:</p>
 
@@ -17,7 +17,7 @@
 
         <p style="margin: 0 0 12px;">Login here:</p>
         <p style="margin: 0 0 16px;">
-            <a href="{{ $loginUrl }}" target="_blank" style="color: #d12978;">{{ $loginUrl }}</a>
+            <a href="{{ $loginUrl }}" target="_blank" style="color: #9E2469;">{{ $loginUrl }}</a>
         </p>
 
         <p style="margin: 0;">Please change your password after signing in.</p>

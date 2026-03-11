@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @push('head')
     <style>
@@ -33,14 +33,14 @@
     <div class="container mx-auto py-6">
         <div class="flex justify-between flex-col gap-4 md:flex-row md:items-center mb-6">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-800">Event Registration Requests</h1>
-                <p class="text-gray-600">Review and manage sponsor registration requests for events</p>
+                <h1 class="text-2xl font-semibold text-gray-800">Event Application Requests</h1>
+                <p class="text-gray-600">Review and manage sponsor application requests for events</p>
             </div>
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:space-x-3">
                 <form method="GET" class="flex items-center gap-2">
                     <div class="relative">
                         <select name="event_id" onchange="this.form.submit()"
-                            class="appearance-none rounded-md border border-[#DCCFD8] bg-white px-4 py-2 pr-10 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                            class="appearance-none rounded-md border border-[#DCCFD8] bg-white px-4 py-2 pr-10 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
                             <option value="">All Events</option>
                             @foreach ($eventsForFilter as $eventOption)
                                 <option value="{{ $eventOption->id }}"
@@ -110,16 +110,6 @@
                                             <span class="action-spinner" aria-hidden="true"></span>
                                         </button>
                                     </form>
-                                    <form method="POST" action="{{ route('events.registrations.reject', $registration) }}" data-action-loader
-                                        class="inline">
-                                        @csrf
-                                        <button type="submit"
-                                            onclick="return confirm('Are you sure you want to reject this registration?')"
-                                            class="bg-red-600 text-white px-3 py-1 text-sm rounded hover:bg-red-700 transition">
-                                            <span class="action-text">Reject</span>
-                                            <span class="action-spinner" aria-hidden="true"></span>
-                                        </button>
-                                    </form>
                                 </div>
                             </div>
                             @if ($registration->message)
@@ -146,7 +136,7 @@
         <!-- All Registrations Table -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="px-6 py-4 bg-pink-50 border-b border-pink-200">
-                <h3 class="text-lg font-medium text-gray-900">All Event Registrations</h3>
+                <h3 class="text-lg font-medium text-gray-900">All Event Applications</h3>
             </div>
 
             <div class="overflow-x-auto">
@@ -207,7 +197,7 @@
                                 <td class="px-6 py-4 text-sm text-gray-600">
                                     <div>Registered: {{ $registration->formatted_registered_at }}</div>
                                     @if ($registration->confirmed_at)
-                                        <div>Confirmed: {{ $registration->formatted_confirmed_at }}</div>
+                                        <div>Approved: {{ $registration->formatted_confirmed_at }}</div>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm font-medium">
@@ -225,23 +215,6 @@
                                                             stroke-width="2" d="M5 13l4 4L19 7" />
                                                     </svg>
                                                     <span class="action-text">Approve</span>
-                                                    <span class="action-spinner" aria-hidden="true"></span>
-                                                </button>
-                                            </form>
-                                        @endif
-
-                                        @if ($registration->canBeRejected())
-                                            <form method="POST" data-action-loader
-                                                action="{{ route('events.registrations.reject', $registration) }}">
-                                                @csrf
-                                                <button type="submit" onclick="return confirm('Reject this registration?')"
-                                                    class="inline-flex items-center px-3 py-1.5 text-red-600 hover:text-red-800 font-semibold rounded-md hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                    <span class="action-text">{{ $registration->registration_status === 'confirmed' ? 'Cancel' : 'Reject' }}</span>
                                                     <span class="action-spinner" aria-hidden="true"></span>
                                                 </button>
                                             </form>
@@ -292,7 +265,7 @@
                         </div>
                     </div>
                     <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-500">Pending</div>
+                        <div class="text-sm font-medium text-gray-500">Pending Approval</div>
                         <div class="text-2xl font-semibold text-gray-900">
                             {{ $allRegistrations->where('registration_status', 'pending')->count() }}</div>
                     </div>
@@ -311,7 +284,7 @@
                         </div>
                     </div>
                     <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-500">Confirmed</div>
+                        <div class="text-sm font-medium text-gray-500">Approved</div>
                         <div class="text-2xl font-semibold text-gray-900">
                             {{ $allRegistrations->where('registration_status', 'confirmed')->count() }}</div>
                     </div>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; color: #1f2933; line-height: 1.6; margin: 0; padding: 0;">
     <div style="max-width: 640px; margin: 0 auto; padding: 24px;">
-        <h2 style="margin: 0 0 16px; color: #d12978;">Event registration {{ strtolower($statusLabel) }}</h2>
+        <h2 style="margin: 0 0 16px; color: #9E2469;">Event registration {{ strtolower($statusLabel) }}</h2>
         <p style="margin: 0 0 12px;">Hi {{ $recipientName }},</p>
         <p style="margin: 0 0 12px;">Your registration for <strong>{{ $eventTitle }}</strong> has been {{ strtolower($statusLabel) }}.</p>
 

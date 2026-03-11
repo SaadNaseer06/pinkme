@@ -1,4 +1,4 @@
-@php
+﻿@php
     $user = auth()->user();
     $profile = $user->profile;
     $fullName = $profile ? $profile->full_name : 'Unknown User';
@@ -29,17 +29,17 @@
 
                 <div class="grid grid-cols-3 gap-6 text-center">
                     <div>
-                        <p class="text-sm text-[#DB69A2] mb-1 app-text">Gender</p>
+                        <p class="text-sm text-[#9E2469] mb-1 app-text">Gender</p>
                         <p class="text-md font-medium app-text">{{ ucfirst($patient->user->profile->gender ?? 'N/A') }}</p>
                     </div>
                     <div>
-                        <p class="text-sm text-[#DB69A2] mb-1 app-text">Date of Birth</p>
+                        <p class="text-sm text-[#9E2469] mb-1 app-text">Date of Birth</p>
                         <p class="font-medium app-text">
                             {{ $patient->user->profile->date_of_birth ? \Carbon\Carbon::parse($patient->user->profile->date_of_birth)->format('d/m/Y') : 'N/A' }}
                         </p>
                     </div>
                     <div>
-                        <p class="text-sm text-[#DB69A2] mb-1 app-text">Condition</p>
+                        <p class="text-sm text-[#9E2469] mb-1 app-text">Condition</p>
                         <p class="font-medium app-text">{{ $patient->diagnosis ?? 'N/A' }}</p>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
                     @if ($hasLatest && !empty($latestStatus) && $latestStatus !== 'N/A')
                         Your most recent application
                         <span class="font-semibold text-[#213430]">{{ $latestCode }}</span>
-                        is currently <span class="text-[#DB69A2] font-medium">{{ $latestStatus }}</span>.
+                        is currently <span class="text-[#9E2469] font-medium">{{ $latestStatus }}</span>.
                     @else
                         You haven't submitted any applications yet. Start one to begin the review process.
                     @endif
@@ -101,7 +101,7 @@
                     <!--<div class="flex justify-between items-center gap-4">-->
                     <!--    <span class="text-md font-semibold text-[#213430] app-text">Your Application Details</span>-->
                     <!--    <a href="{{ $detailUrl }}"-->
-                    <!--        class="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-[#DB69A2] text-[#DB69A2] hover:bg-[#DB69A2] hover:text-white transition app-text">-->
+                    <!--        class="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-[#9E2469] text-[#9E2469] hover:bg-[#9E2469] hover:text-white transition app-text">-->
                     <!--        {{ $detailLabel }}-->
                     <!--        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"-->
                     <!--            stroke="currentColor">-->

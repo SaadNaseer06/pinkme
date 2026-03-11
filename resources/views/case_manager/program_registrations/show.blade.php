@@ -1,11 +1,11 @@
-@php
+﻿@php
     use App\Models\ProgramRegistration;
     $registration->loadMissing(['program', 'user', 'reviewer', 'assignedCaseManager']);
     $status = strtolower($registration->status);
     $badgeClasses = match ($status) {
         ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
         ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
-        default => 'bg-[#FDE8F3] text-[#DB69A2] border border-[#F4BBD5]',
+        default => 'bg-[#FDE8F3] text-[#9E2469] border border-[#F4BBD5]',
     };
 
     $programLabels = [
@@ -218,7 +218,7 @@
                                 @csrf
                                 <h4 class="font-semibold text-[#213430] app-main">Approve Registration</h4>
                                 <p class="text-base text-[#6C5F67] app-text">Optional: add a short note for the applicant.</p>
-                                <textarea name="note" rows="3" class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#DB69A2]" placeholder="Optional note"></textarea>
+                                <textarea name="note" rows="3" class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]" placeholder="Optional note"></textarea>
                                 <button type="submit"
                                     class="w-full inline-flex justify-center items-center px-4 py-3 bg-[#20B354] text-white rounded-md text-base font-semibold hover:bg-[#1A9444] transition">
                                     Approve Request
@@ -229,7 +229,7 @@
                                 @csrf
                                 <h4 class="font-semibold text-[#213430] app-main">Reject Registration</h4>
                                 <p class="text-base text-[#6C5F67] app-text">Provide a short reason to keep for the record.</p>
-                                <textarea name="note" rows="3" required class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#DB69A2]" placeholder="Reason for rejection"></textarea>
+                                <textarea name="note" rows="3" required class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]" placeholder="Reason for rejection"></textarea>
                                 <button type="submit"
                                     class="w-full inline-flex justify-center items-center px-4 py-3 bg-[#B32020] text-white rounded-md text-base font-semibold hover:bg-[#8F1A1A] transition">
                                     Reject Request

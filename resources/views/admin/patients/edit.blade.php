@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Edit Patient')
 
@@ -11,7 +11,7 @@
                         Edit Patient Details
                     </h1>
                     <a href="{{ route('admin.patients.show', $patient) }}"
-                        class="px-4 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-[#c25891] transition">
+                        class="px-4 py-2 bg-[#9E2469] text-white rounded-md hover:bg-[#B52D75] transition">
                         View Profile
                     </a>
                 </div>
@@ -42,13 +42,13 @@
                                 <label class="block text-sm font-medium text-[#213430] mb-1">Full Name</label>
                                 <input type="text" name="full_name"
                                     value="{{ old('full_name', $patient->user?->profile?->full_name) }}"
-                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]"
+                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]"
                                     required>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-[#213430] mb-1">Email</label>
                                 <input type="email" name="email" value="{{ old('email', $patient->user?->email) }}"
-                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]"
+                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]"
                                     required>
                             </div>
                         </div>
@@ -58,12 +58,12 @@
                                 <label class="block text-sm font-medium text-[#213430] mb-1">Phone</label>
                                 <input type="text" name="phone"
                                     value="{{ old('phone', $patient->user?->profile?->phone) }}"
-                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-[#213430] mb-1">Blood Group</label>
                                 <select name="blood_group"
-                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
                                     <option value="">Select</option>
                                     @foreach (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $group)
                                         <option value="{{ $group }}"
@@ -80,13 +80,13 @@
                                 <label class="block text-sm font-medium text-[#213430] mb-1">Disease Type</label>
                                 <input type="text" name="disease_type"
                                     value="{{ old('disease_type', $patient->disease_type) }}"
-                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-[#213430] mb-1">Disease Stage</label>
                                 <input type="text" name="disease_stage"
                                     value="{{ old('disease_stage', $patient->disease_stage) }}"
-                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
                             </div>
                         </div>
 
@@ -95,7 +95,7 @@
                                 <label class="block text-sm font-medium text-[#213430] mb-1">Diagnosis</label>
                                 <input type="text" name="diagnosis"
                                     value="{{ old('diagnosis', $patient->diagnosis) }}"
-                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-[#213430] mb-1">Diagnosis Date</label>
@@ -106,7 +106,7 @@
                                 @endphp
                                 <input type="date" name="diagnosis_date"
                                     value="{{ old('diagnosis_date', $diagnosisDate?->format('Y-m-d')) }}"
-                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
                             </div>
                         </div>
 
@@ -114,7 +114,7 @@
                             <label class="block text-sm font-medium text-[#213430] mb-1">Genetic Test</label>
                             <input type="text" name="genetic_test"
                                 value="{{ old('genetic_test', $patient->genetic_test) }}"
-                                class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]">
+                                class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
                         </div>
 
                         <div class="flex items-center justify-end gap-3 pt-4">
@@ -123,7 +123,7 @@
                                 Cancel
                             </a>
                             <button type="submit"
-                                class="px-4 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-[#c25891] transition">
+                                class="px-4 py-2 bg-[#9E2469] text-white rounded-md hover:bg-[#B52D75] transition">
                                 Save Changes
                             </button>
                         </div>

@@ -1,4 +1,4 @@
-@extends('patient.layouts.app')
+﻿@extends('patient.layouts.app')
 
 @section('title', 'Invoice Details')
 
@@ -44,7 +44,7 @@
                 @if ($invoice->file_path)
                     <div class="py-3">
                         <a href="{{ route('invoices.download', $invoice) }}"
-                            class="text-[#DB69A2] underline flex items-center gap-1">
+                            class="text-[#9E2469] underline flex items-center gap-1">
                             <img src="{{ asset('public/images/download.svg') }}" alt="" class="w-4 h-4" />
                             Download PDF
                         </a>
@@ -52,7 +52,7 @@
                 @endif
             </div>
             <div class="mt-4">
-                <a href="{{ route('patient.invoices') }}" class="text-[#DB69A2] underline flex items-center gap-1">
+                <a href="{{ route('patient.invoices') }}" class="text-[#9E2469] underline flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M15 18l-6-6 6-6" />

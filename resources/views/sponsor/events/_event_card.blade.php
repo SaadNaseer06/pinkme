@@ -1,4 +1,4 @@
-@php
+﻿@php
     use App\Support\EventHighlightFormatter;
     use Carbon\Carbon;
     use Illuminate\Support\Facades\Storage;
@@ -49,7 +49,7 @@
             <div>
                 <div class="flex items-center gap-2 mb-1">
                     <h3 class="text-xl font-semibold text-[#213430] program-h">{{ $event->title }}</h3>
-                    <span class="inline-flex items-center rounded-full bg-[#DB69A2] px-3 py-1 text-xs font-medium text-white">
+                    <span class="inline-flex items-center rounded-full bg-[#9E2469] px-3 py-1 text-xs font-medium text-white">
                         {{ $event->payment_type === 'full' ? 'Full Sponsorship' : 'Flexible Sponsorship' }}
                     </span>
                 </div>
@@ -58,7 +58,7 @@
         </div>
         <div class="flex gap-2">
             <button type="button"
-                class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white py-3 px-6 rounded-lg program-btn"
+                class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white py-3 px-6 rounded-lg program-btn"
                 onclick="openModal(this)" data-title="{{ e($event->title) }}"
                 data-description="{{ e($descriptionSummary) }}"
                 data-description-html="{{ e($descriptionHtml ?? '') }}"
@@ -74,9 +74,9 @@
             </button>
             @if ($event->isSponsorRegistered(auth()->id()))
                 <a href="{{ route('sponsor.events.show', $event) }}"
-                    style="background: #DB69A2; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; transition: background 0.3s ease;"
-                    onmouseover="this.style.background='linear-gradient(to right, #C63A85, #B02A72)'"
-                    onmouseout="this.style.background='linear-gradient(to right, #DB69A2, #C63A85)'">
+                    style="background: #9E2469; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; transition: background 0.3s ease;"
+                    onmouseover="this.style.background='linear-gradient(to right, #B52D75, #B02A72)'"
+                    onmouseout="this.style.background='linear-gradient(to right, #9E2469, #B52D75)'">
                     View Registration
                 </a>
             @elseif ($event->isRegistrationOpen())
@@ -87,9 +87,9 @@
                     data-register-payment-type="{{ $event->payment_type ?? 'flexible' }}"
                     data-register-remaining="{{ $event->remaining_funding ?? 0 }}"
                     data-register-funding-goal="{{ $event->funding_goal ?? 0 }}"
-                    style="background: #DB69A2; color: white; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; display: inline-block; transition: background 0.3s ease;"
-                    onmouseover="this.style.background='linear-gradient(to right, #C63A85, #B02A72)'"
-                    onmouseout="this.style.background='linear-gradient(to right, #DB69A2, #C63A85)'">
+                    style="background: #9E2469; color: white; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; display: inline-block; transition: background 0.3s ease;"
+                    onmouseover="this.style.background='linear-gradient(to right, #B52D75, #B02A72)'"
+                    onmouseout="this.style.background='linear-gradient(to right, #9E2469, #B52D75)'">
                     Register Now
                 </button>
             @else
@@ -115,14 +115,14 @@
         <div class="flex flex-col gap-1 text-left">
             <div class="flex items-center gap-2">
                 <h3 class="text-[15px] font-semibold text-[#213430]">{{ $event->title }}</h3>
-                <span class="inline-flex items-center rounded-full bg-[#DB69A2] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">
+                <span class="inline-flex items-center rounded-full bg-[#9E2469] px-2 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">
                     {{ $event->payment_type === 'full' ? 'Full' : 'Flexible' }}
                 </span>
             </div>
             <p class="text-[13px] font-light text-[#91848C]">{{ Str::limit($descriptionSummary, 110) }}</p>
             <div class="flex gap-2 flex-col">
                 <button type="button"
-                    class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#db69a2] hover:text-white hover:border-none py-2 px-4 rounded-lg text-sm"
+                    class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:text-white hover:border-none py-2 px-4 rounded-lg text-sm"
                     onclick="openModal(this)" data-title="{{ e($event->title) }}"
                     data-description="{{ e($descriptionSummary) }}"
                     data-description-html="{{ e($descriptionHtml ?? '') }}"
@@ -139,9 +139,9 @@
                 </button>
                 @if ($event->isSponsorRegistered(auth()->id()))
                     <a href="{{ route('sponsor.events.show', $event) }}"
-                        style="background: linear-gradient(to right, #DB69A2, #C63A85); color: white; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; text-align: center; text-decoration: none; display: inline-block; transition: background 0.3s ease;"
-                        onmouseover="this.style.background='linear-gradient(to right, #C63A85, #B02A72)'"
-                        onmouseout="this.style.background='linear-gradient(to right, #DB69A2, #C63A85)'">
+                        style="background: linear-gradient(to right, #9E2469, #B52D75); color: white; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; text-align: center; text-decoration: none; display: inline-block; transition: background 0.3s ease;"
+                        onmouseover="this.style.background='linear-gradient(to right, #B52D75, #B02A72)'"
+                        onmouseout="this.style.background='linear-gradient(to right, #9E2469, #B52D75)'">
                         View Registration
                     </a>
                 @elseif ($event->isRegistrationOpen())
@@ -152,9 +152,9 @@
                         data-register-payment-type="{{ $event->payment_type ?? 'flexible' }}"
                         data-register-remaining="{{ $event->remaining_funding ?? 0 }}"
                         data-register-funding-goal="{{ $event->funding_goal ?? 0 }}"
-                        style="background: linear-gradient(to right, #DB69A2, #C63A85); color: white; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; text-align: center; border: none; cursor: pointer; display: inline-block; width: 100%;"
-                        onmouseover="this.style.background='linear-gradient(to right, #C63A85, #B02A72)'"
-                        onmouseout="this.style.background='linear-gradient(to right, #DB69A2, #C63A85)'">
+                        style="background: linear-gradient(to right, #9E2469, #B52D75); color: white; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; text-align: center; border: none; cursor: pointer; display: inline-block; width: 100%;"
+                        onmouseover="this.style.background='linear-gradient(to right, #B52D75, #B02A72)'"
+                        onmouseout="this.style.background='linear-gradient(to right, #9E2469, #B52D75)'">
                         Register Now
                     </button>
                 @else

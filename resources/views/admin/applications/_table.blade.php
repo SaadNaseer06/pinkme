@@ -32,7 +32,7 @@
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h">Sub. Date</th>
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h">Email</th>
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h">Contact</th>
-                <th class="p-2 text-lg text-[#91848C] font-normal app-h">Assigned Reviewer</th>
+                <th class="p-2 text-lg text-[#91848C] font-normal app-h">Assigned Case Manager</th>
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h">Status</th>
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h">Action</th>
             </tr>
@@ -71,10 +71,18 @@
                             <a href="{{ route('admin.viewApplication', $app->id) }}" class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm">
                                 <i class="fas fa-eye mr-2"></i> View Details
                             </a>
-                            <a href="#" onclick="openAssignModal({{ $app->id }}, {{ $app->reviewer_id ?? 'null' }})" class="flex items-center px-4 py-2 text-[#91848C] text-sm">
-                                <i class="fas fa-check mr-2"></i>
-                                {{ $app->reviewer_id ? 'Change Reviewer' : 'Assign Reviewer' }}
-                            </a>
+                            @if ($app->reviewer_id)
+                                <div class="px-4 py-2 text-sm text-[#6C5F67] border-b border-[#E5D6E0]">
+                                    <span class="font-medium text-[#213430]">Case Manager:</span> {{ $reviewerName }}
+                                </div>
+                                <a href="#" onclick="openAssignModal({{ $app->id }}, {{ $app->reviewer_id }}, @json($reviewerName))" class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm">
+                                    <i class="fas fa-user-edit mr-2"></i> Change Case Manager
+                                </a>
+                            @else
+                                <a href="#" onclick="openAssignModal({{ $app->id }}, null, null)" class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm">
+                                    <i class="fas fa-user-plus mr-2"></i> Assign Case Manager
+                                </a>
+                            @endif
                             <a href="#" onclick="openRejectModal({{ $app->id }})" class="flex items-center px-4 py-2 gap-2 text-[#91848C] text-sm">
                                 <i class="fa-solid fa-trash"></i> Delete Application
                             </a>
@@ -111,7 +119,7 @@
 
         @foreach ($pages as $page)
             @if ($page == $current)
-                <span class="px-4 py-1 rounded-md bg-[#DB69A2] text-white">{{ $page }}</span>
+                <span class="px-4 py-1 rounded-md bg-[#9E2469] text-white">{{ $page }}</span>
             @else
                 <a href="{{ $apps->url($page) }}" class="px-3 py-1 rounded-md border border-[#B9B1B6] text-[#91848C]">{{ $page }}</a>
             @endif

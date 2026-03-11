@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Settings')
 
@@ -53,7 +53,7 @@ HTML;
             <div class="flex flex-wrap mb-10">
                 <div class="w-full md:w-1/3">
                     <button onclick="showTab('general')" id="general-tab"
-                        class="tab-btn w-full bg-[#DB69A2] text-white py-4 px-6 font-normal text-center rounded-t-lg md:rounded-tr-none md:rounded-l-lg app-text">
+                        class="tab-btn w-full bg-[#9E2469] text-white py-4 px-6 font-normal text-center rounded-t-lg md:rounded-tr-none md:rounded-l-lg app-text">
                         General Details
                     </button>
                 </div>
@@ -176,7 +176,7 @@ HTML;
 
                             <div class="mt-6">
                                 <button type="submit"
-                                    class="px-6 py-2 bg-[#DB69A2] text-white rounded-md shadow">Save</button>
+                                    class="px-6 py-2 bg-[#9E2469] text-white rounded-md shadow">Save</button>
                             </div>
                         </form>
                     </div>
@@ -209,7 +209,7 @@ HTML;
 
                             <div class="mt-6">
                                 <button type="submit"
-                                    class="px-6 py-2 bg-[#DB69A2] text-white rounded-md shadow">Save</button>
+                                    class="px-6 py-2 bg-[#9E2469] text-white rounded-md shadow">Save</button>
                             </div>
                         </form>
                     </div>
@@ -242,7 +242,7 @@ HTML;
 
                             <div class="mt-6">
                                 <button type="submit"
-                                    class="px-6 py-2 bg-[#DB69A2] text-white rounded-md shadow">Save</button>
+                                    class="px-6 py-2 bg-[#9E2469] text-white rounded-md shadow">Save</button>
                             </div>
                         </form>
                     </div>
@@ -325,13 +325,13 @@ HTML;
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('bg-[#DB69A2]', 'text-white');
+                el.classList.remove('bg-[#9E2469]', 'text-white');
                 el.classList.add('bg-[#F3E8EF]', 'text-[#91848C]');
             });
 
             document.getElementById(tabId).classList.remove('hidden');
             document.getElementById(tabId + '-tab').classList.remove('bg-[#F3E8EF]', 'text-[#91848C]');
-            document.getElementById(tabId + '-tab').classList.add('bg-[#DB69A2]', 'text-white');
+            document.getElementById(tabId + '-tab').classList.add('bg-[#9E2469]', 'text-white');
         }
 
         const defaultTab = @json($activeTab ?? 'general');

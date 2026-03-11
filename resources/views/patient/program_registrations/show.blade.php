@@ -1,4 +1,4 @@
-@php
+﻿@php
     use App\Models\ProgramRegistration;
     $registration->loadMissing([
         'program',
@@ -8,7 +8,7 @@
     $badgeClass = match ($status) {
         ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
         ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
-        default => 'bg-[#FDE8F3] text-[#DB69A2] border border-[#F4BBD5]',
+        default => 'bg-[#FDE8F3] text-[#9E2469] border border-[#F4BBD5]',
     };
 
     $program = $registration->program;

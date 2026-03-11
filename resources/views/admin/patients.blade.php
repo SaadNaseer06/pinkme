@@ -1,4 +1,4 @@
-@php
+﻿@php
     use Illuminate\Support\Facades\Auth;
     use Carbon\Carbon;
     use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -78,7 +78,7 @@
                             </div>
 
                             <button type="submit"
-                                class="px-4 py-2 bg-[#DB69A2] text-white rounded-md app-text hover:bg-pink-600">
+                                class="px-4 py-2 bg-[#9E2469] text-white rounded-md app-text hover:bg-pink-600">
                                 Apply
                             </button>
 
@@ -102,7 +102,7 @@
                                     <tr class="border-t border-[#e0cfd8]">
                                         {{-- <th class="p-2">
                                             <input id="patientsSelectAll" type="checkbox"
-                                                class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
+                                                class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
                                         </th> --}}
                                         <th class="p-2 text-lg font-medium text-[#91848C] font-normal app-h">Patient Name
                                         </th>
@@ -144,7 +144,7 @@
                                         <tr class="border-t border-[#e0cfd8] {{ $loop->last ? 'border-b' : '' }}">
                                             {{-- <td class="p-2">
                                                 <input type="checkbox" name="row_select[]" value="{{ $p->id }}"
-                                                    class="patientsRowCheck accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
+                                                    class="patientsRowCheck accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
                                             </td> --}}
 
                                             <td class="p-2">
@@ -242,7 +242,7 @@
                                     @foreach ($pages as $page)
                                         @if ($page == $current)
                                             <span
-                                                class="px-4 py-1 rounded-md bg-[#DB69A2] text-white">{{ $page }}</span>
+                                                class="px-4 py-1 rounded-md bg-[#9E2469] text-white">{{ $page }}</span>
                                         @else
                                             <a href="{{ $patients->url($page) }}"
                                                 class="px-3 py-1 rounded-md border border-[#B9B1B6] text-[#91848C] ajax-patients-page">{{ $page }}</a>

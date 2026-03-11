@@ -134,7 +134,7 @@ function showTab(tabId) {
     // Remove active styles from all tab buttons
     const buttons = document.querySelectorAll(".tab-btn");
     buttons.forEach((btn) => {
-        btn.classList.remove("bg-[#DB69A2]", "text-white");
+        btn.classList.remove("bg-[#9E2469]", "text-white");
         btn.classList.add("bg-[#F3E8EF]", "text-[#91848C]");
     });
 
@@ -143,6 +143,6 @@ function showTab(tabId) {
 
     // Add active styles to the clicked button
     const activeBtn = document.querySelector(`[onclick="showTab('${tabId}')"]`);
-    activeBtn.classList.add("bg-[#DB69A2]", "text-white");
+    activeBtn.classList.add("bg-[#9E2469]", "text-white");
     activeBtn.classList.remove("bg-[#F3E8EF]", "text-[#91848C]");
 }

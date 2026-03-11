@@ -17,8 +17,8 @@ class RedirectIfAuthenticatedByRole
             switch ($roleName) {
                 case 'admin':
                     return redirect()->route('admin.dashboard');
-                case 'sponsor':
-                    return redirect()->route('sponsor.dashboard');
+                // case 'sponsor': sponsor not important for now - falls through to default
+                //     return redirect()->route('sponsor.dashboard');
                 case 'casemanager':
                     return redirect()->route('case_manager.dashboard');
                 case 'patient':

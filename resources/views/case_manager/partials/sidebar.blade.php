@@ -16,9 +16,9 @@
                 href="{{ route('case_manager.dashboard') }}"><img
                     src="{{ request()->routeIs('case_manager.dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-dash.svg') }}"
                     alt="">Dashboard</a></li>
-        <li class="{{ request()->routeIs('case_manager.program_registrations.*') ? 'active' : '' }}">
+        <li class="{{ request()->routeIs('case_manager.program_registrations.*') || request()->is('case_manager/program-registrations*') ? 'active' : '' }}">
             <a href="{{ route('case_manager.program_registrations.index') }}">
-                <img src="{{ request()->routeIs('case_manager.program_registrations.*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
+                <img src="{{ request()->routeIs('case_manager.program_registrations.*') || request()->is('case_manager/program-registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}"
                     alt="">
                 Program Registrations
             </a>

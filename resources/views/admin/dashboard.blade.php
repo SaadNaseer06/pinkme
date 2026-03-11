@@ -1,4 +1,4 @@
-@php
+﻿@php
     use Illuminate\Support\Facades\Auth;
     use App\Models\Application;
     use Carbon\Carbon;
@@ -272,7 +272,7 @@
                                         <td class="p-3">
                                             <div class="action-menu-wrapper relative inline-block" data-action-wrapper>
                                                 <button type="button" data-action-toggle
-                                                    class="text-[#213430] p-2 rounded-md focus:outline-none hover:text-[#db69a2] transition-colors">
+                                                    class="text-[#213430] p-2 rounded-md focus:outline-none hover:text-[#9E2469] transition-colors">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                                         viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -342,7 +342,7 @@
                                     class="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-[#DCCFD8] hidden min-w-[140px] z-50">
                                     @foreach ($periodLabels as $key => $label)
                                         <a href="{{ request()->url() }}?period={{ $key }}"
-                                            class="block px-4 py-3 text-sm text-[#213430] hover:bg-[#F3E8EF] transition-colors first:rounded-t-lg last:rounded-b-lg {{ $timePeriod === $key ? 'bg-[#F3E8EF] font-medium text-[#db69a2]' : '' }}">
+                                            class="block px-4 py-3 text-sm text-[#213430] hover:bg-[#F3E8EF] transition-colors first:rounded-t-lg last:rounded-b-lg {{ $timePeriod === $key ? 'bg-[#F3E8EF] font-medium text-[#9E2469]' : '' }}">
                                             {{ $label }}
                                         </a>
                                     @endforeach
@@ -379,7 +379,7 @@
                                 <div class="flex flex-col items-center w-2 h-full mx-1">
                                     <div class="flex flex-col justify-end h-full w-full">
                                         <!-- Applications (pink, top) -->
-                                        <div class="segment segment-apps w-full bg-[#db69a2] rounded-t-full"
+                                        <div class="segment segment-apps w-full bg-[#9E2469] rounded-t-full"
                                             style="height: {{ $bar['apps'] }}%; transition: height .25s ease"
                                             data-height="{{ $bar['apps'] }}"></div>
 
@@ -403,8 +403,8 @@
                     <div
                         class="flex justify-around mt-6 gap-6 flex-wrap text-sm text-[#213430] laptop-slider z-20 relative">
                         <!-- Applications -->
-                        <div class="flex items-center gap-2 text-[14px] laptop-slider-gap" style="color: #db69a2">
-                            <label class="switch mini" style="color: #db69a2">
+                        <div class="flex items-center gap-2 text-[14px] laptop-slider-gap" style="color: #9E2469">
+                            <label class="switch mini" style="color: #9E2469">
                                 <input id="toggle-apps" type="checkbox" checked />
                                 <span class="slider">
                                     <span class="circle"></span>
@@ -444,7 +444,7 @@
                         Patients Lists
                     </h2>
                     {{-- <a href="{{ route('patients.all') }}" --}}
-                    {{-- <a href="#" class="text-lg font-medium text-decoration underline text-[#db69a2] app-main">
+                    {{-- <a href="#" class="text-lg font-medium text-decoration underline text-[#9E2469] app-main">
                         View All
                     </a> --}}
                 </div>
@@ -500,7 +500,7 @@
                                     <td class="p-2 align-middle">
                                         <div class="action-menu-wrapper relative inline-block" data-action-wrapper>
                                             <button type="button" data-action-toggle
-                                                class="text-[#213430] p-2 rounded-md focus:outline-none hover:text-[#db69a2] transition-colors">
+                                                class="text-[#213430] p-2 rounded-md focus:outline-none hover:text-[#9E2469] transition-colors">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                                     viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -715,7 +715,7 @@
         .patient-action-icon {
             width: 1.1rem;
             height: 1.1rem;
-            color: #DB69A2;
+            color: #9E2469;
             flex-shrink: 0;
             display: inline-flex;
             align-items: center;

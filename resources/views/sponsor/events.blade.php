@@ -1,4 +1,4 @@
-@php
+﻿@php
     use Carbon\Carbon;
     use Illuminate\Support\Facades\Storage;
     use Illuminate\Support\Str;
@@ -25,7 +25,7 @@
                         <h2 class="text-2xl font-semibold text-[#213430] mb-4 program-main">Ongoing Events</h2>
                         <div class="relative md:w-60 w-[160px]">
                             <select name="eventFilter" id="eventFilter"
-                                class="appearance-none w-full bg-[#F3E8EF] rounded-md pl-4 pr-10 py-2 text-sm text-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#db69a2] app-text">
+                                class="appearance-none w-full bg-[#F3E8EF] rounded-md pl-4 pr-10 py-2 text-sm text-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469] app-text">
                                 <option value="all" @selected(($selectedType ?? null) === null)>All Events</option>
                                 <option value="flexible" @selected(($selectedType ?? null) === 'flexible')>Flexible Sponsorship</option>
                                 <option value="full" @selected(($selectedType ?? null) === 'full')>Full Sponsorship</option>
@@ -186,9 +186,9 @@
                                     </button>
                                     <!-- Inside the modal -->
                                     <a href="#" id="modalViewEventButton"
-                                        style="padding: 14px 24px; background-color: #DB69A2; color: white; border-radius: 8px; text-decoration: none; display: inline-block; font-size: 14px; font-weight: 500; transition: background-color 0.3s ease;"
-                                        onmouseover="this.style.backgroundColor='#C63A85'"
-                                        onmouseout="this.style.backgroundColor='#DB69A2'">
+                                        style="padding: 14px 24px; background-color: #9E2469; color: white; border-radius: 8px; text-decoration: none; display: inline-block; font-size: 14px; font-weight: 500; transition: background-color 0.3s ease;"
+                                        onmouseover="this.style.backgroundColor='#B52D75'"
+                                        onmouseout="this.style.backgroundColor='#9E2469'">
                                         View Event Details
                                     </a>
                                 </div>
@@ -278,7 +278,7 @@
                         align-items: center;
                         margin-bottom: 1.25rem;
                         padding-bottom: 1rem;
-                        border-bottom: 2px solid #DB69A2;
+                        border-bottom: 2px solid #9E2469;
                     }
                     .register-event-modal__title {
                         font-size: 1.25rem;
@@ -314,7 +314,7 @@
                     .register-event-modal__amount {
                         font-size: 1.75rem;
                         font-weight: 700;
-                        color: #C63A85;
+                        color: #B52D75;
                     }
                     .register-event-modal__amount-label {
                         font-size: 0.875rem;
@@ -332,7 +332,7 @@
                         transition: opacity 0.2s, transform 0.1s;
                     }
                     .register-event-modal__btn--primary {
-                        background: linear-gradient(135deg, #DB69A2 0%, #C63A85 100%);
+                        background: linear-gradient(135deg, #9E2469 0%, #B52D75 100%);
                         color: #fff;
                         box-shadow: 0 4px 12px rgba(198, 58, 133, 0.35);
                     }
@@ -368,7 +368,7 @@
                         transition: border-color 0.2s, box-shadow 0.2s;
                     }
                     .register-event-modal__input:focus {
-                        border-color: #DB69A2;
+                        border-color: #9E2469;
                         box-shadow: 0 0 0 3px rgba(219, 105, 162, 0.2);
                     }
                     .register-event-modal__hint { font-size: 0.75rem; color: #6C5B68; }
@@ -389,7 +389,7 @@
                         transition: border-color 0.2s, box-shadow 0.2s;
                     }
                     .register-event-modal__textarea:focus {
-                        border-color: #DB69A2;
+                        border-color: #9E2469;
                         box-shadow: 0 0 0 3px rgba(219, 105, 162, 0.2);
                     }
                 </style>
@@ -563,7 +563,7 @@
                                 if (p <= maxAmount) {
                                     const btn = document.createElement('button');
                                     btn.type = 'button';
-                                    btn.className = 'register-amount-btn px-4 py-2 rounded-xl border-2 border-[#DCCFD8] text-[#213430] font-medium hover:border-[#DB69A2] hover:bg-[#FDF7FB] transition-colors';
+                                    btn.className = 'register-amount-btn px-4 py-2 rounded-xl border-2 border-[#DCCFD8] text-[#213430] font-medium hover:border-[#9E2469] hover:bg-[#FDF7FB] transition-colors';
                                     btn.setAttribute('data-amount', p);
                                     btn.textContent = '$' + p;
                                     registerPresetButtons.appendChild(btn);
@@ -571,7 +571,7 @@
                             });
                             const otherBtn = document.createElement('button');
                             otherBtn.type = 'button';
-                            otherBtn.className = 'register-amount-btn px-4 py-2 rounded-xl border-2 border-dashed border-[#DCCFD8] text-[#6C5B68] font-medium hover:border-[#DB69A2] transition-colors';
+                            otherBtn.className = 'register-amount-btn px-4 py-2 rounded-xl border-2 border-dashed border-[#DCCFD8] text-[#6C5B68] font-medium hover:border-[#9E2469] transition-colors';
                             otherBtn.setAttribute('data-amount', 'other');
                             otherBtn.textContent = 'Other';
                             registerPresetButtons.appendChild(otherBtn);
@@ -579,10 +579,10 @@
                             registerPresetButtons.querySelectorAll('.register-amount-btn').forEach(function(btn) {
                                 btn.addEventListener('click', function() {
                                     registerPresetButtons.querySelectorAll('.register-amount-btn').forEach(function(b) {
-                                        b.classList.remove('border-[#DB69A2]', 'bg-[#FDF7FB]');
+                                        b.classList.remove('border-[#9E2469]', 'bg-[#FDF7FB]');
                                         b.classList.add('border-[#DCCFD8]');
                                     });
-                                    btn.classList.add('border-[#DB69A2]', 'bg-[#FDF7FB]');
+                                    btn.classList.add('border-[#9E2469]', 'bg-[#FDF7FB]');
                                     btn.classList.remove('border-[#DCCFD8]');
                                     const amt = btn.getAttribute('data-amount');
                                     if (amt === 'other') {

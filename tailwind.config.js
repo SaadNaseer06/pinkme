@@ -9,8 +9,8 @@ export default {
             colors: {
                 pink: {
                     light: "#F9F4F8",
-                    DEFAULT: "#E35A9B",
-                    dark: "#D1478A",
+                    DEFAULT: "#9E2469",
+                    dark: "#7D1D54",
                 },
             },
             fontFamily: {

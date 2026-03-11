@@ -1,4 +1,4 @@
-@php
+﻿@php
     use Carbon\Carbon;
     use Illuminate\Support\Facades\Storage;
 @endphp
@@ -21,7 +21,7 @@
                     <div class="flex flex-wrap mb-2 mobile-btn">
                         <div class="w-full md:w-1/2">
                             <button onclick="showTab('individual')"
-                                class="tab-btn w-full bg-[#DB69A2] text-white py-2 px-6 font-normal text-center rounded-t-lg md:rounded-tr-none md:rounded-l-lg app-text">
+                                class="tab-btn w-full bg-[#9E2469] text-white py-2 px-6 font-normal text-center rounded-t-lg md:rounded-tr-none md:rounded-l-lg app-text">
                                 Individual
                             </button>
                         </div>

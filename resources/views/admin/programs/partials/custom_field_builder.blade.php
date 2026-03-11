@@ -1,4 +1,4 @@
-@php
+﻿@php
     $builderId = $builderId ?? 'program-field-builder';
     $initialFields = $initialFields ?? [];
     $defaultFields = $defaultFields ?? [];
@@ -24,7 +24,7 @@
                         <div class="flex items-center justify-between gap-2">
                             <p class="text-xs font-semibold text-[#213430]">Default form</p>
                             <button type="button" data-load-default
-                                class="text-xs font-semibold text-[#DB69A2] hover:underline">Use it</button>
+                                class="text-xs font-semibold text-[#9E2469] hover:underline">Use it</button>
                         </div>
                         <p class="mt-1 text-[11px] text-[#6C5B68]">Load the previous program fields{{ $defaultProgramTitle ? ' from "' . $defaultProgramTitle . '"' : '' }}.</p>
                         <p class="mt-2 hidden text-[11px] rounded-lg border border-[#D1E7DD] bg-[#F0FFF4] px-3 py-2 text-[#0F5132]"
@@ -33,20 +33,20 @@
                 @endif
                 <p class="text-xs text-[#6C5B68]">Add common fields from the chips below, then fine-tune on the right.</p>
                 <button type="button" id="{{ $builderId }}-add"
-                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#DB69A2] bg-white px-4 py-2 text-sm font-semibold text-[#DB69A2] transition hover:bg-[#FDF0F7]">
+                    class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#9E2469] bg-white px-4 py-2 text-sm font-semibold text-[#9E2469] transition hover:bg-[#FDF0F7]">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" />
                     </svg>
                     Add a blank field
                 </button>
                 <div class="flex flex-wrap gap-2">
-                    <button type="button" data-quick-field="title" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Title</button>
-                    <button type="button" data-quick-field="description" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Description</button>
-                    <button type="button" data-quick-field="application_start_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Application Start</button>
-                    <button type="button" data-quick-field="application_end_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Application End</button>
-                    <button type="button" data-quick-field="event_time" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Time</button>
-                    <button type="button" data-quick-field="status" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Status</button>
-                    <button type="button" data-quick-field="max_applications" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#DB69A2] hover:text-[#DB69A2]">+ Max Applications</button>
+                    <button type="button" data-quick-field="title" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Title</button>
+                    <button type="button" data-quick-field="description" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Description</button>
+                    <button type="button" data-quick-field="application_start_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Application Start</button>
+                    <button type="button" data-quick-field="application_end_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Application End</button>
+                    <button type="button" data-quick-field="event_time" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Time</button>
+                    <button type="button" data-quick-field="status" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Status</button>
+                    <button type="button" data-quick-field="max_applications" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Max Applications</button>
                 </div>
                 <p class="text-xs text-[#91848C]">Quick-add drops in the right label and type. Edit values on the right.</p>
             </div>
@@ -80,7 +80,7 @@
             <div>
                 <label class="mb-1 block text-sm font-medium text-[#213430]">Field name</label>
                 <select data-role="name" data-name="name"
-                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                     <option value="title">Title</option>
                     <option value="description">Description</option>
                     <option value="event_time">Time</option>
@@ -105,13 +105,13 @@
                 <div>
                     <label class="mb-1 block text-sm font-medium text-[#213430]">Display label</label>
                     <input type="text" data-role="label" data-name="label" placeholder="e.g. Program Title"
-                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                 </div>
 
                 <div>
                     <label class="mb-1 block text-sm font-medium text-[#213430]">Field type</label>
                     <select data-role="type" data-name="type"
-                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
+                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                         <option value="short_text">Short text</option>
                         <option value="long_text">Long text</option>
                         <option value="number">Number</option>
@@ -142,7 +142,7 @@
             const defaultFields = @json($defaultFields);
             const defaultButton = document.querySelector('[data-load-default]');
             const defaultHint = document.querySelector('[data-default-hint]');
-            const HIGHLIGHT_CLASS = 'outline outline-2 outline-[#DB69A2]';
+            const HIGHLIGHT_CLASS = 'outline outline-2 outline-[#9E2469]';
 
             if (!listEl || !addBtn || !template) {
                 return;
@@ -213,7 +213,7 @@
             };
 
             const buildValueControl = (type, value, name) => {
-                const baseClass = 'w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#DB69A2] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70';
+                const baseClass = 'w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70';
 
                 if (name === 'status') {
                     const select = document.createElement('select');

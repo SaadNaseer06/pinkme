@@ -6,7 +6,7 @@
 }
 
 :root {
-    --pink: #db69a2;
+    --pink: #9E2469;
     --black1: #222;
     --black2: #999;
     --white: #fff;
@@ -399,6 +399,10 @@ body {
 .box {
     position: relative;
     width: 300px;
+    min-width: 300px;
+    flex-shrink: 0;
+    min-height: 100vh;
+    background: var(--pink);
 }
 
 .navigation {
@@ -406,7 +410,6 @@ body {
     width: 300px;
     height: 100%;
     background: var(--pink);
-    border-left: 10px solid var(--pink);
     transition: 0.5s;
     overflow: hidden;
     display: flex;

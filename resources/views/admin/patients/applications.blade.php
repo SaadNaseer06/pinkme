@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Patient Applications')
 
@@ -16,7 +16,7 @@
                         </p>
                     </div>
                     <a href="{{ route('admin.patients') }}"
-                        class="px-4 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-[#c25891] transition">
+                        class="px-4 py-2 bg-[#9E2469] text-white rounded-md hover:bg-[#B52D75] transition">
                         Back to Patients
                     </a>
                 </div>
@@ -66,7 +66,7 @@
                                             </td>
                                             <td class="p-3">
                                                 <a href="{{ route('admin.viewApplication', $application->id) }}"
-                                                    class="inline-flex items-center justify-center rounded-md border border-[#DB69A2] px-3 py-1.5 text-xs font-medium text-[#DB69A2] hover:bg-[#F6EDF5] transition">
+                                                    class="inline-flex items-center justify-center rounded-md border border-[#9E2469] px-3 py-1.5 text-xs font-medium text-[#9E2469] hover:bg-[#F6EDF5] transition">
                                                     View Application
                                                 </a>
                                             </td>

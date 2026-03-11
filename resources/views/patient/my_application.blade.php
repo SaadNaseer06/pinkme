@@ -1,4 +1,4 @@
-@extends('patient.layouts.app')
+﻿@extends('patient.layouts.app')
 
 @section('title', 'My Application')
 
@@ -138,7 +138,7 @@
                         <tr class="border-t border-[#e0cfd8]">
                             <!--<th class="p-2">-->
                             <!--    <input type="checkbox"-->
-                            <!--        class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
+                            <!--        class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
                             <!--</th>-->
 
                             <th class="p-2 text-lg text-[#91848C] font-normal app-h">
@@ -159,7 +159,7 @@
                             <tr class="border-t border-[#e0cfd8]">
                                 <!--<td class="p-2">-->
                                 <!--    <input type="checkbox"-->
-                                <!--        class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
+                                <!--        class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />-->
                                 <!--</td>-->
                                 <td class="p-2">
                                     <div class="flex items-center gap-3">

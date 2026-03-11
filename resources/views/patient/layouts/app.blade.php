@@ -15,8 +15,8 @@
                     colors: {
                         pink: {
                             light: "#F9F4F8",
-                            DEFAULT: "#E35A9B",
-                            dark: "#D1478A",
+                            DEFAULT: "#9E2469",
+                            dark: "#7B1D52",
                         },
                     },
                     fontFamily: {
@@ -32,12 +32,13 @@
     {{-- Favicon --}}
     <link rel="icon" href="{{ asset('public/images/favicon.png') }}" type="image/x-icon">
     @vite(['resources/css/patient.css', 'resources/js/app.js'])
+    @include('partials.theme-variables')
     @stack('head')
 </head>
 
-<body class="bg-[#FFF8FC] font-sans flex min-h-screen">
+<body class="bg-[#FFF8FC] font-sans flex min-h-screen gap-0">
     @include('patient.partials.sidebar')
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col min-w-0">
         @include('patient.partials.topbar')
         <main class="flex-1 p-6">
             @include('partials.flash')

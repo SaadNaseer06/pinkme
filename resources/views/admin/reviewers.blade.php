@@ -85,7 +85,7 @@
                 <div class="grid gap-4 md:grid-cols-3 mt-6 mb-6">
                     <div
                         class="md:col-span-2 bg-gradient-to-r from-[#FCE8F3] via-[#F7F0F7] to-white rounded-2xl p-6 shadow-sm">
-                        <span class="text-xs font-semibold uppercase tracking-[0.2em] text-[#DB69A2]">Reviewer & Case
+                        <span class="text-xs font-semibold uppercase tracking-[0.2em] text-[#9E2469]">Reviewer & Case
                             Manager workspace</span>
                         <h2 class="mt-2 text-2xl font-semibold text-[#213430]">Manage reviewers and case managers in one
                             view</h2>
@@ -99,7 +99,7 @@
                                 assignments.</p>
                         </div>
                         <a href="{{ route('admin.assigned') }}"
-                            class="inline-flex items-center justify-center px-4 py-2 mt-4 rounded-md bg-[#DB69A2] text-white text-sm font-semibold hover:bg-[#C4568C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#DB69A2]">
+                            class="inline-flex items-center justify-center px-4 py-2 mt-4 rounded-md bg-[#9E2469] text-white text-sm font-semibold hover:bg-[#B52D75] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9E2469]">
                             View Assigned Applications
                             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" stroke-width="1.5"
                                 viewBox="0 0 24 24">
@@ -120,7 +120,7 @@
                                 assigned applications.</p>
                         </div>
                         <a href="{{ route('admin.case-managers.create') }}"
-                            class="inline-flex items-center bg-[#db69a2] text-white text-sm px-4 py-2 rounded-md app-h hover:bg-[#c95791]">
+                            class="inline-flex items-center bg-[#9E2469] text-white text-sm px-4 py-2 rounded-md app-h hover:bg-[#B52D75]">
                             Add Case Manager
                         </a>
                     </div>

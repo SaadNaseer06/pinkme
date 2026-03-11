@@ -1,4 +1,4 @@
-@php
+﻿@php
     $inputId = $inputId ?? 'program-banner';
     $bannerUrl = $bannerUrl ?? null;
 @endphp
@@ -14,10 +14,10 @@
 
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
             <label for="{{ $inputId }}"
-                class="flex-1 cursor-pointer rounded-2xl border border-dashed border-[#DB69A2] bg-[#FDF7FB] px-4 py-6 text-center transition hover:border-[#C63A85] hover:bg-[#FBEAF3]">
+                class="flex-1 cursor-pointer rounded-2xl border border-dashed border-[#9E2469] bg-[#FDF7FB] px-4 py-6 text-center transition hover:border-[#B52D75] hover:bg-[#FBEAF3]">
                 <input id="{{ $inputId }}" type="file" name="banner" accept="image/*" class="sr-only">
                 <div class="flex flex-col items-center justify-center gap-2 text-[#213430]">
-                    <svg class="h-8 w-8 text-[#DB69A2]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <svg class="h-8 w-8 text-[#9E2469]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="M4 17.5V6.5C4 5.67157 4.67157 5 5.5 5H18.5C19.3284 5 20 5.67157 20 6.5V17.5C20 18.3284 19.3284 19 18.5 19H5.5C4.67157 19 4 18.3284 4 17.5Z" stroke="currentColor" stroke-width="1.5" />
                         <path d="M9 11.5C9 12.8807 7.88071 14 6.5 14C5.11929 14 4 12.8807 4 11.5C4 10.1193 5.11929 9 6.5 9C7.88071 9 9 10.1193 9 11.5Z" stroke="currentColor" stroke-width="1.5" />
                         <path d="M9.5 18L13.5 12L17.5 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -37,7 +37,7 @@
         </div>
 
         @error('banner')
-            <p class="text-xs text-[#DB69A2]">{{ $message }}</p>
+            <p class="text-xs text-[#9E2469]">{{ $message }}</p>
         @enderror
     </div>
 </section>

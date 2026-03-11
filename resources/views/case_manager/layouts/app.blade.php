@@ -16,8 +16,8 @@
                     colors: {
                         pink: {
                             light: "#F9F4F8",
-                            DEFAULT: "#E35A9B",
-                            dark: "#D1478A",
+                            DEFAULT: "#9E2469",
+                            dark: "#7B1D52",
                         },
                     },
                     fontFamily: {
@@ -31,12 +31,13 @@
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     @vite(['resources/css/custom.css', 'resources/js/app.js'])
+    @include('partials.theme-variables')
     @stack('head')
 </head>
 
-<body class="bg-[#FFF8FC] font-sans flex min-h-screen">
+<body class="bg-[#FFF8FC] font-sans flex min-h-screen gap-0">
     @include('case_manager.partials.sidebar')
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col min-w-0">
         @include('case_manager.partials.topbar')
         <main class="flex-1 p-6">
         @include('partials.flash')

@@ -1,4 +1,4 @@
-@extends('patient.layouts.app')
+﻿@extends('patient.layouts.app')
 
 @section('title', 'Settings')
 
@@ -30,7 +30,7 @@
             <div class="flex flex-wrap mb-10">
                 <div class="w-full md:w-1/4">
                     <button type="button" id="tab-personal" onclick="showTab('personal')"
-                        class="tab-btn w-full bg-[#DB69A2] text-white py-4 px-6 font-normal text-center rounded-t-lg md:rounded-tr-none md:rounded-l-lg app-text">
+                        class="tab-btn w-full bg-[#9E2469] text-white py-4 px-6 font-normal text-center rounded-t-lg md:rounded-tr-none md:rounded-l-lg app-text">
                         Personal Information
                     </button>
                 </div>
@@ -75,7 +75,7 @@
                                         </div>
                                     </div>
                                     <label for="avatar"
-                                        class="absolute bottom-[10px] right-[7px] bg-[#DB69A2] text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer">
+                                        class="absolute bottom-[10px] right-[7px] bg-[#9E2469] text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -188,7 +188,7 @@
                                 <button type="button"
                                     class="px-6 py-2 bg-[#FFF7FC] text-[#91848C] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Cancel</button>
                                 <button type="submit"
-                                    class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Save</button>
+                                    class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Save</button>
                             </div>
                         </form>
                     </div>
@@ -226,7 +226,7 @@
                                 <button type="button"
                                     class="px-6 py-2 bg-[#FFF7FC] text-[#91848C] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Cancel</button>
                                 <button type="submit"
-                                    class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Save</button>
+                                    class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Save</button>
                             </div>
                         </form>
                     </div>
@@ -263,13 +263,13 @@
                                         <label class="flex items-center gap-2">
                                             <input type="checkbox" name="notify_on_new_notifications"
                                                 {{ old('notify_on_new_notifications', $profile->notify_on_new_notifications) ? 'checked' : '' }}
-                                                class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
+                                                class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
                                             <span class="text-sm text-[#213430] app-text">You have new notifications</span>
                                         </label>
                                         <label class="flex items-center gap-2">
                                             <input type="checkbox" name="notify_on_direct_message"
                                                 {{ old('notify_on_direct_message', $profile->notify_on_direct_message) ? 'checked' : '' }}
-                                                class="accent-[#DB69A2] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
+                                                class="accent-[#9E2469] w-4 h-4 border border-[#91848C] rounded appearance-none checked:appearance-auto focus:ring-0" />
                                             <span class="text-sm text-[#213430] app-text">You're sent a direct
                                                 message</span>
                                         </label>
@@ -280,7 +280,7 @@
                                 <button type="button"
                                     class="px-6 py-2 bg-[#FFF7FC] text-[#91848C] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Cancel</button>
                                 <button type="submit"
-                                    class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Save</button>
+                                    class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Save</button>
                             </div>
                         </form>
                     </div>
@@ -323,7 +323,7 @@
                                     <button type="button"
                                         class="px-6 py-2 bg-[#FFF7FC] text-[#91848C] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Cancel</button>
                                     <button type="submit"
-                                        class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Save</button>
+                                        class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Save</button>
                                 </div>
                             </form>
                         </div>
@@ -359,7 +359,7 @@
                                     <button type="button"
                                         class="px-6 py-2 bg-[#FFF7FC] text-[#91848C] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Cancel</button>
                                     <button type="submit"
-                                        class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Save</button>
+                                        class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">Save</button>
                                 </div>
                             </form>
                         </div>
@@ -390,7 +390,7 @@
             tabs.forEach((tab) => tab.classList.add('hidden'));
             // Remove active styles from all buttons
             Object.values(buttons).forEach((btn) => {
-                btn.classList.remove('bg-[#DB69A2]', 'text-white');
+                btn.classList.remove('bg-[#9E2469]', 'text-white');
                 btn.classList.add('bg-[#F3E8EF]', 'text-[#91848C]');
             });
 
@@ -404,7 +404,7 @@
             const activeButton = buttons[id];
             if (activeButton) {
                 activeButton.classList.remove('bg-[#F3E8EF]', 'text-[#91848C]');
-                activeButton.classList.add('bg-[#DB69A2]', 'text-white');
+                activeButton.classList.add('bg-[#9E2469]', 'text-white');
             }
         }
 

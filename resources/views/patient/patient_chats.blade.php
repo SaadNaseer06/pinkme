@@ -1,4 +1,4 @@
-@extends('patient.layouts.app')
+﻿@extends('patient.layouts.app')
 
 @section('title', 'Patient Chats')
 
@@ -7,7 +7,7 @@
         @if ($contacts->isEmpty())
             <div class="max-w-4xl mx-auto bg-[#F3E8EF] rounded-xl shadow-sm p-12 text-center space-y-4">
                 <div class="flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-[#DB69A2]" viewBox="0 0 24 24" fill="none"
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-[#9E2469]" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="1.5">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M7.5 8.25h9m-9 3.75h6m-8.25 6h12a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-12A2.25 2.25 0 0 0 3.75 6.75v9A2.25 2.25 0 0 0 6 18.75Z" />
@@ -28,9 +28,9 @@
                     <div class="px-5 py-4 border-b border-[#E4D6DF]">
                         <div class="relative">
                             <input type="text" placeholder="Search..."
-                                class="w-full text-sm text-[#91848C] bg-transparent rounded-lg py-2.5 pl-4 pr-10 border border-[#D1C2CC] focus:outline-none focus:border-[#DB69A2]"
+                                class="w-full text-sm text-[#91848C] bg-transparent rounded-lg py-2.5 pl-4 pr-10 border border-[#D1C2CC] focus:outline-none focus:border-[#9E2469]"
                                 disabled>
-                            <span class="absolute right-3 top-2.5 text-[#DB69A2]">
+                            <span class="absolute right-3 top-2.5 text-[#9E2469]">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                     stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -41,7 +41,7 @@
                     </div>
                     <div class="flex border-b border-[#E4D6DF] text-sm text-[#91848C]">
                         <span
-                            class="flex-1 text-center py-3 font-medium text-[#DB69A2] border-b-2 border-[#DB69A2]">All</span>
+                            class="flex-1 text-center py-3 font-medium text-[#9E2469] border-b-2 border-[#9E2469]">All</span>
                         <span class="flex-1 text-center py-3">Unread</span>
                         <span class="flex-1 text-center py-3">Archived</span>
                     </div>
@@ -55,7 +55,7 @@
                                         alt="{{ $contact['name'] }}"
                                         class="w-11 h-11 rounded-full object-cover border border-white shadow-sm">
                                     <span
-                                        class="absolute -top-1 -right-1 bg-[#DB69A2] text-white text-[10px] font-semibold rounded-full px-1.5 @if (($contact['unread_count'] ?? 0) === 0) hidden @endif"
+                                        class="absolute -top-1 -right-1 bg-[#9E2469] text-white text-[10px] font-semibold rounded-full px-1.5 @if (($contact['unread_count'] ?? 0) === 0) hidden @endif"
                                         data-contact-unread>{{ $contact['unread_count'] ?? 0 }}</span>
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -91,7 +91,7 @@
                                 <p class="text-xs text-[#91848C]">Typically replies within a few hours</p>
                             </div>
                         </div>
-                        <div class="flex gap-3 text-[#DB69A2]">
+                        <div class="flex gap-3 text-[#9E2469]">
                             <button type="button" class="p-2 rounded-full hover:bg-[#F4D9E6] transition">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none"
                                     stroke="currentColor" stroke-width="1.5">
@@ -138,7 +138,7 @@
                                                         </a>
                                                     @else
                                                         <a href="{{ $attachment['url'] }}" target="_blank"
-                                                            class="inline-flex items-center gap-2 text-sm text-[#DB69A2] hover:underline">
+                                                            class="inline-flex items-center gap-2 text-sm text-[#9E2469] hover:underline">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
                                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                                                 stroke-width="1.5">
@@ -157,7 +157,7 @@
                                         </div>
                                     @else
                                         <div
-                                            class="bg-[#DB69A2] text-white text-sm leading-relaxed px-4 py-3 rounded-2xl rounded-br-sm shadow-sm text-left">
+                                            class="bg-[#9E2469] text-white text-sm leading-relaxed px-4 py-3 rounded-2xl rounded-br-sm shadow-sm text-left">
                                             @if (filled($message['content']))
                                                 <div>{!! nl2br(e($message['content'])) !!}</div>
                                             @endif
@@ -204,7 +204,7 @@
                     <footer class="border-t border-[#E4D6DF] bg-[#F3E8EF]">
                         <form class="flex items-center gap-3 px-5 py-4" data-chat-form>
                             <label
-                                class="p-2.5 rounded-full bg-white border border-[#E0D0D9] text-[#70626A] hover:text-[#DB69A2] cursor-pointer">
+                                class="p-2.5 rounded-full bg-white border border-[#E0D0D9] text-[#70626A] hover:text-[#9E2469] cursor-pointer">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -214,10 +214,10 @@
                                     data-chat-upload>
                             </label>
                             <input type="text" name="content" placeholder="Type your message"
-                                class="flex-1 bg-white border border-[#DACFD6] rounded-xl px-4 py-2.5 text-sm text-[#4C4047] focus:outline-none focus:border-[#DB69A2]"
+                                class="flex-1 bg-white border border-[#DACFD6] rounded-xl px-4 py-2.5 text-sm text-[#4C4047] focus:outline-none focus:border-[#9E2469]"
                                 autocomplete="off">
                             <button type="submit"
-                                class="inline-flex items-center gap-2 bg-[#DB69A2] text-white rounded-xl px-5 py-2 text-sm font-medium hover:bg-[#C35A91] transition">
+                                class="inline-flex items-center gap-2 bg-[#9E2469] text-white rounded-xl px-5 py-2 text-sm font-medium hover:bg-[#B52D75] transition">
                                 Send
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">

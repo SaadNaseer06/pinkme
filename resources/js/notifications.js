@@ -285,7 +285,7 @@ class NotificationManager {
 
         const accent = document.createElement('div');
         accent.className = 'mt-1';
-        accent.innerHTML = `<span class="inline-block h-2.5 w-2.5 rounded-full ${isUnread ? 'bg-[#DB69A2]' : 'bg-gray-300'}"></span>`;
+        accent.innerHTML = `<span class="inline-block h-2.5 w-2.5 rounded-full ${isUnread ? 'bg-[#9E2469]' : 'bg-gray-300'}"></span>`;
 
         const body = document.createElement('div');
         body.className = 'flex-1 space-y-1';
@@ -308,7 +308,7 @@ class NotificationManager {
 
         if (notification.priority === 'important') {
             const badge = document.createElement('span');
-            badge.className = 'inline-flex items-center rounded-full bg-[#DB69A2] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white';
+            badge.className = 'inline-flex items-center rounded-full bg-[#9E2469] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white';
             badge.textContent = 'Important';
             body.insertBefore(badge, message);
         }

@@ -1,4 +1,4 @@
-@php
+﻿@php
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Str;
     use Carbon\Carbon;
@@ -116,7 +116,7 @@
                         </div>
                     </div>
                     <button type="submit"
-                        class="px-4 py-2 bg-[#DB69A2] text-white rounded-md app-text hover:bg-pink-600">Apply</button>
+                        class="px-4 py-2 bg-[#9E2469] text-white rounded-md app-text hover:bg-pink-600">Apply</button>
                     @if (request()->filled('range'))
                         <a href="{{ route('case_manager.myApplication') }}"
                             class="px-3 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md app-text">Reset</a>
@@ -221,7 +221,7 @@
                                             found{{ $range ? ' in the selected range' : '' }}.</p>
                                         @if (request()->filled('range'))
                                             <a href="{{ route('case_manager.myApplication') }}"
-                                                class="mt-2 inline-block text-[#DB69A2] underline hover:text-[#FE6EB6]">
+                                                class="mt-2 inline-block text-[#9E2469] underline hover:text-[#FE6EB6]">
                                                 Reset filter and show all
                                             </a>
                                         @endif
@@ -260,7 +260,7 @@
                     {{-- Page window --}}
                     @foreach ($pages as $page)
                         @if ($page == $current)
-                            <span class="px-4 py-1 rounded-md bg-[#DB69A2] text-white app-btn-1">{{ $page }}</span>
+                            <span class="px-4 py-1 rounded-md bg-[#9E2469] text-white app-btn-1">{{ $page }}</span>
                         @else
                             <a href="{{ $p->url($page) }}"
                                 class="px-3 py-1 rounded-md bg-transparent text-[#91848C] border border-[#B9B1B6] app-btn">{{ $page }}</a>
@@ -292,7 +292,7 @@
                     <h1 class="text-2xl md:text-3xl font-normal text-gray-800">Reject Application</h1>
                     <p class="text-black text-md md:text-lg leading-relaxed">
                         Are you sure you want to reject this application? Please provide a <span
-                            class="text-[#DB69A2]">reason</span>.
+                            class="text-[#9E2469]">reason</span>.
                     </p>
 
                     <form id="rejectForm" method="POST"
@@ -303,12 +303,12 @@
                                 Enter Reason For Rejection <span class="text-red-500">*</span>
                             </label>
                             <textarea name="reason" placeholder="Message" rows="4" required
-                                class="w-full px-4 py-3 rounded-md bg-transparent text-[#B1A4AD] border border-[#DCCFD8] placeholder:text-[#C4B8C0] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]"></textarea>
+                                class="w-full px-4 py-3 rounded-md bg-transparent text-[#B1A4AD] border border-[#DCCFD8] placeholder:text-[#C4B8C0] focus:outline-none focus:ring-2 focus:ring-[#9E2469]"></textarea>
                         </div>
 
                         <div class="flex justify-center gap-3 pt-4">
                             <button type="submit"
-                                class="bg-[#DB69A2] text-white px-3 py-3 rounded-md text-sm font-semibold hover:bg-[#FE6EB6] transition app-text">
+                                class="bg-[#9E2469] text-white px-3 py-3 rounded-md text-sm font-semibold hover:bg-[#FE6EB6] transition app-text">
                                 CONFIRM & REJECT
                             </button>
                             <button type="button" onclick="cmCloseRejectModal()"
@@ -341,12 +341,12 @@
                             Enter Details For Missing Document <span class="text-red-500">*</span>
                         </label>
                         <textarea name="message" placeholder="Message" rows="4" required
-                            class="w-full px-4 py-3 rounded-md bg-transparent text-[#B1A4AD] border border-[#DCCFD8] placeholder:text-[#C4B8C0] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]"></textarea>
+                            class="w-full px-4 py-3 rounded-md bg-transparent text-[#B1A4AD] border border-[#DCCFD8] placeholder:text-[#C4B8C0] focus:outline-none focus:ring-2 focus:ring-[#9E2469]"></textarea>
                     </div>
 
                     <div class="flex justify-center gap-4 pt-4">
                         <button type="submit"
-                            class="bg-[#DB69A2] text-white px-6 py-3 rounded-md text-sm font-semibold hover:bg-[#FE6EB6] transition">
+                            class="bg-[#9E2469] text-white px-6 py-3 rounded-md text-sm font-semibold hover:bg-[#FE6EB6] transition">
                             SEND
                         </button>
                         <button type="button" onclick="cmCloseMissingDocument()"

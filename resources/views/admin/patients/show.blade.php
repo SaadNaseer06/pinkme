@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Patient Profile')
 
@@ -11,7 +11,7 @@
                         Patient Profile
                     </h1>
                     <a href="{{ route('admin.patients') }}"
-                        class="px-4 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-[#c25891] transition">
+                        class="px-4 py-2 bg-[#9E2469] text-white rounded-md hover:bg-[#B52D75] transition">
                         Back to Patients
                     </a>
                 </div>
@@ -71,7 +71,7 @@
                                 <p>Total Applications: {{ $applicationsCount }}</p>
                                 @if ($applicationsCount)
                                     <a href="{{ route('admin.patients.applications', $patient) }}"
-                                        class="inline-flex items-center text-[#DB69A2] hover:underline">
+                                        class="inline-flex items-center text-[#9E2469] hover:underline">
                                         View all applications
                                     </a>
                                 @endif
@@ -81,11 +81,11 @@
 
                     <div class="flex gap-3">
                         <a href="{{ route('admin.patients.edit', $patient) }}"
-                            class="px-4 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-[#c25891] transition">
+                            class="px-4 py-2 bg-[#9E2469] text-white rounded-md hover:bg-[#B52D75] transition">
                             Edit Patient Details
                         </a>
                         <a href="{{ route('admin.patients.applications', $patient) }}"
-                            class="px-4 py-2 border border-[#DB69A2] text-[#DB69A2] rounded-md hover:bg-[#F6EDF5] transition">
+                            class="px-4 py-2 border border-[#9E2469] text-[#9E2469] rounded-md hover:bg-[#F6EDF5] transition">
                             View Applications
                         </a>
                     </div>

@@ -84,7 +84,7 @@
     $caseManagers = App\Models\User::with('profile')
         ->where('role_id', $caseManagerRoleId)
         ->whereHas('profile', function ($query) {
-            $query->where('status', 1); // Ensure that the profile's status is 1
+            $query->where('status', 1);
         })
         ->get();
 @endphp
@@ -94,8 +94,8 @@
 @section('title', 'Applications')
 
 <style>
-    /* Escaped version of .bg-[#db69a2] */
-    button.bg-\[\#db69a2\] {
+    /* Escaped version of .bg-[#9E2469] */
+    button.bg-\[\#9E2469\] {
         color: #fff !important;
     }
 </style>
@@ -116,7 +116,7 @@
                                 </h2>
                                 <div class="relative">
                                     <select name="view" id="viewFilter"
-                                        class="appearance-none rounded-md px-4 py-2 pr-12 text-sm text-[#213430] bg-white border border-[#DCCFD8] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#DB69A2] transition">
+                                        class="appearance-none rounded-md px-4 py-2 pr-12 text-sm text-[#213430] bg-white border border-[#DCCFD8] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#9E2469] transition">
                                         <option value="all" {{ $viewMode === 'all' ? 'selected' : '' }}>All Applications</option>
                                         <option value="assigned" {{ $viewMode === 'assigned' ? 'selected' : '' }}>Assigned Applications</option>
                                     </select>
@@ -138,7 +138,7 @@
                             <div class="flex flex-col sm:flex-row gap-3 lg:gap-2 lg:items-center">
                                 <div class="relative w-full sm:w-[160px] lg:w-[180px]">
                                     <select name="range" id="rangeFilter"
-                                        class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#DCCFD8] focus:outline-none focus:ring-1 focus:ring-[#DB69A2]">
+                                        class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#DCCFD8] focus:outline-none focus:ring-1 focus:ring-[#9E2469]">
                                         <option value="">All Time</option>
                                         <option value="week" {{ $range === 'week' ? 'selected' : '' }}>Last Week</option>
                                         <option value="month" {{ $range === 'month' ? 'selected' : '' }}>Last Month</option>
@@ -151,7 +151,7 @@
                                 </div>
                                 <div class="relative w-full sm:w-[180px] lg:w-[200px]">
                                     <select name="status" id="statusFilter"
-                                        class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#DCCFD8] focus:outline-none focus:ring-1 focus:ring-[#DB69A2]">
+                                        class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#DCCFD8] focus:outline-none focus:ring-1 focus:ring-[#9E2469]">
                                         <option value="">All Statuses</option>
                                         @foreach ($statusOptions as $value => $label)
                                             <option value="{{ $value }}" {{ $selectedStatus === $value ? 'selected' : '' }}>
@@ -168,7 +168,7 @@
                                 <div class="relative w-full sm:w-[240px] lg:w-[260px]">
                                     <input type="text" name="q" id="searchInput" value="{{ request('q') }}"
                                         placeholder="Search by name, email, code, ID"
-                                        class="w-full rounded-md px-3 py-2 text-sm text-[#213430] bg-[#F8F4F7] border border-[#DCCFD8] focus:outline-none focus:ring-1 focus:ring-[#DB69A2]"
+                                        class="w-full rounded-md px-3 py-2 text-sm text-[#213430] bg-[#F8F4F7] border border-[#DCCFD8] focus:outline-none focus:ring-1 focus:ring-[#9E2469]"
                                         autocomplete="off" />
                                     <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -179,12 +179,12 @@
                             </div>
                             <div class="flex flex-wrap items-center gap-3 lg:gap-2">
                                 <button type="button" id="exportApplicationsBtn"
-                                    class="px-4 py-2 bg-[#DB69A2] text-white rounded-md app-text shadow-sm hover:bg-[#c95791] focus:ring-2 focus:ring-offset-1 focus:ring-[#DB69A2] transition">
+                                    class="px-4 py-2 bg-[#9E2469] text-white rounded-md app-text shadow-sm hover:bg-[#B52D75] focus:ring-2 focus:ring-offset-1 focus:ring-[#9E2469] transition">
                                     Export Excel
                                 </button>
                                 @if (request()->filled('range') || request()->filled('q') || request()->filled('status') || $viewMode === 'assigned')
                                     <a href="{{ route('admin.applications') }}"
-                                        class="px-3 py-2 border border-[#DCCFD8] text-[#213430] rounded-md app-text hover:border-[#DB69A2] hover:text-[#DB69A2] transition">
+                                        class="px-3 py-2 border border-[#DCCFD8] text-[#213430] rounded-md app-text hover:border-[#9E2469] hover:text-[#9E2469] transition">
                                         Reset
                                     </a>
                                 @endif
@@ -210,7 +210,7 @@
             </p>
             <div class="flex justify-center gap-3 pt-2">
                 <button id="deleteConfirmBtn"
-                    class="px-6 py-2 bg-[#DB69A2] hover:bg-[#FE6EB6] text-white rounded-md text-sm font-semibold transition">
+                    class="px-6 py-2 bg-[#9E2469] hover:bg-[#FE6EB6] text-white rounded-md text-sm font-semibold transition">
                     Yes
                 </button>
                 <button onclick="closeRejectModal()"
@@ -221,12 +221,13 @@
         </div>
     </div>
 
-    {{-- Assign Reviewer Modal --}}
+    {{-- Assign Case Manager Modal --}}
     <div id="assignModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-[#F9EEF6] rounded-xl shadow-lg w-full max-w-[20rem] md:max-w-md p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Assign to:</h2>
-            <input id="reviewerSearch" type="text" placeholder="Enter Name To Find The Reviewer"
-                class="w-full mb-4 px-4 py-2 rounded-md border border-[#E4D2DB] bg-transparent text-sm placeholder-[#B1A4AD] focus:outline-none focus:ring-2 focus:ring-[#DB69A2]" />
+            <h2 id="assignModalTitle" class="text-xl font-semibold text-gray-800 mb-2">Assign Case Manager</h2>
+            <p id="assignModalSubtitle" class="text-sm text-[#6C5F67] mb-4 hidden"></p>
+            <input id="reviewerSearch" type="text" placeholder="Enter name to find the case manager"
+                class="w-full mb-4 px-4 py-2 rounded-md border border-[#E4D2DB] bg-transparent text-sm placeholder-[#B1A4AD] focus:outline-none focus:ring-2 focus:ring-[#9E2469]" />
             <div id="caseManagersList" class="space-y-3 max-h-60 overflow-y-auto pr-2">
                 @foreach ($caseManagers as $manager)
                     <div class="flex items-center justify-between manager-row" data-user-id="{{ $manager->id }}">
@@ -241,7 +242,7 @@
                             <span class="text-sm text-gray-800">{{ $manager->profile->full_name ?? 'Unknown' }}</span>
                         </div>
                         <button
-                            class="selectReviewer text-sm border border-[#DCCFD8] text-[#91848C] text-white px-4 py-1.5 rounded-md hover:bg-[#db69a2] hover:text-white"
+                            class="selectReviewer text-sm border border-[#DCCFD8] text-[#91848C] text-white px-4 py-1.5 rounded-md hover:bg-[#9E2469] hover:text-white"
                             data-user-id="{{ $manager->id }}">
                             Select
                         </button>
@@ -250,7 +251,7 @@
             </div>
             <div class="flex justify-between mt-6">
                 <button id="confirmAssignBtn"
-                    class="bg-[#DB69A2] hover:bg-[#FE6EB6] text-white font-semibold text-sm px-3 py-3 rounded-md transition"
+                    class="bg-[#9E2469] hover:bg-[#FE6EB6] text-white font-semibold text-sm px-3 py-3 rounded-md transition"
                     disabled>
                     CONFIRM & ASSIGN
                 </button>
@@ -369,10 +370,21 @@
         let assignedReviewerId = null;
         let selectedReviewerId = null;
 
-        function openAssignModal(applicationId, reviewerId) {
+        function openAssignModal(applicationId, reviewerId, reviewerName) {
             currentApplicationId = applicationId;
             assignedReviewerId = reviewerId ?? null;
             selectedReviewerId = null;
+
+            // Update modal title based on assignment state
+            const $title = $('#assignModalTitle');
+            const $subtitle = $('#assignModalSubtitle');
+            if (assignedReviewerId && reviewerName) {
+                $title.text('Change Case Manager');
+                $subtitle.text('Currently assigned to: ' + reviewerName).removeClass('hidden');
+            } else {
+                $title.text('Assign Case Manager');
+                $subtitle.addClass('hidden');
+            }
 
             // Reset search and show all rows
             $('#reviewerSearch').val('');
@@ -383,12 +395,12 @@
                 const userId = $(this).data('user-id');
                 if (userId == assignedReviewerId) {
                     $(this)
-                        .addClass('bg-[#db69a2] text-white font-bold cursor-not-allowed')
+                        .addClass('bg-[#9E2469] text-white font-bold cursor-not-allowed')
                         .text('Assigned')
                         .prop('disabled', true);
                 } else {
                     $(this)
-                        .removeClass('bg-[#db69a2] text-white font-bold cursor-not-allowed')
+                        .removeClass('bg-[#9E2469] text-white font-bold cursor-not-allowed')
                         .text('Select')
                         .prop('disabled', false);
                 }
@@ -420,11 +432,11 @@
             if ($(this).prop('disabled')) return;
 
             $('.selectReviewer')
-                .removeClass('bg-[#db69a2] text-white font-bold cursor-not-allowed')
+                .removeClass('bg-[#9E2469] text-white font-bold cursor-not-allowed')
                 .text('Select');
 
             $(this)
-                .addClass('bg-[#db69a2] text-white font-bold cursor-not-allowed')
+                .addClass('bg-[#9E2469] text-white font-bold cursor-not-allowed')
                 .text('Selected');
 
             selectedReviewerId = $(this).data('user-id');
@@ -445,11 +457,11 @@
                 },
                 success: (resp) => {
                     closeAssignModal();
-                    showToast(resp?.message || 'Reviewer assigned successfully!', 'success');
+                    showToast(resp?.message || 'Case manager assigned successfully!', 'success');
                     setTimeout(() => location.reload(), 800);
                 },
                 error: (xhr) => {
-                    const msg = xhr?.responseJSON?.message || 'Failed to assign reviewer.';
+                    const msg = xhr?.responseJSON?.message || 'Failed to assign case manager.';
                     showToast(msg, 'error');
                     $btn.prop('disabled', false).text('CONFIRM & ASSIGN');
                 },

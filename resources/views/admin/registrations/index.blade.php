@@ -5,57 +5,40 @@
         <!-- Header -->
         <div class="flex justify-between flex-col gap-4 md:flex-row md:items-center mb-6">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-800">Registrations Management</h1>
-                <p class="text-gray-600">Review and manage all program and event registration requests</p>
+                <h1 class="text-2xl font-semibold text-gray-800">Applications Management</h1>
+                <p class="text-gray-600">Review and manage all program application requests</p>
             </div>
         </div>
 
-        <!-- Tab Navigation -->
+        <!-- Tab Navigation - Event tab commented: sponsor-related -->
         <div class="bg-white rounded-lg shadow-md mb-6">
             <div class="border-b border-gray-200">
                 <nav class="flex -mb-px" aria-label="Tabs">
-                    <button type="button" 
-                            data-tab="programs"
-                            class="tab-button flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors {{ $tab === 'programs' ? 'border-pink-600 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                    <div class="flex-1 py-4 px-6 text-center border-b-2 border-pink-600">
                         <div class="flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            Program Registrations
+                            Program Applications
                             @if($programCounts['pending'] > 0)
-                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800 program-pending-badge">
+                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
                                     {{ $programCounts['pending'] }}
                                 </span>
                             @endif
                         </div>
-                    </button>
-                    <button type="button"
-                            data-tab="events"
-                            class="tab-button flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors {{ $tab === 'events' ? 'border-pink-600 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                        <div class="flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            Event Registrations
-                            @if($eventCounts['pending'] > 0)
-                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800 event-pending-badge">
-                                    {{ $eventCounts['pending'] }}
-                                </span>
-                            @endif
-                        </div>
-                    </button>
+                    </div>
                 </nav>
             </div>
         </div>
-
+  
         <!-- Dynamic Stats Dashboard -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6" id="statsCards">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6" id="statsCards">
             <!-- Program Stats (shown when programs tab is active) -->
             <div class="stat-card program-stats" data-tab="programs" style="display: {{ $tab === 'programs' ? 'block' : 'none' }}; transition: opacity 0.3s ease;">
                 <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-pink-500">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Pending</p>
+                            <p class="text-sm font-medium text-gray-600">Pending Approval</p>
                             <p class="text-2xl font-semibold text-gray-900 mt-1" id="program-pending-count">
                                 {{ $programCounts['pending'] }}
                             </p>
@@ -85,23 +68,7 @@
                     </div>
                 </div>
             </div>
-            <div class="stat-card program-stats" data-tab="programs" style="display: {{ $tab === 'programs' ? 'block' : 'none' }};">
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Rejected</p>
-                            <p class="text-2xl font-semibold text-gray-900 mt-1" id="program-rejected-count">
-                                {{ $programCounts['rejected'] }}
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {{-- Rejected stat removed per client request --}}
             <div class="stat-card program-stats" data-tab="programs" style="display: {{ $tab === 'programs' ? 'block' : 'none' }};">
                 <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
                     <div class="flex items-center justify-between">
@@ -120,12 +87,12 @@
                 </div>
             </div>
 
-            <!-- Event Stats (shown when events tab is active) -->
+            {{-- Event Stats - commented: sponsor-related, sponsor not wanted for now
             <div class="stat-card event-stats" data-tab="events" style="display: {{ $tab === 'events' ? 'block' : 'none' }}; transition: opacity 0.3s ease;">
                 <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-pink-500">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Pending</p>
+                            <p class="text-sm font-medium text-gray-600">Pending Approval</p>
                             <p class="text-2xl font-semibold text-gray-900 mt-1" id="event-pending-count">
                                 {{ $eventCounts['pending'] }}
                             </p>
@@ -138,86 +105,33 @@
                     </div>
                 </div>
             </div>
-            <div class="stat-card event-stats" data-tab="events" style="display: {{ $tab === 'events' ? 'block' : 'none' }};">
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Confirmed</p>
-                            <p class="text-2xl font-semibold text-gray-900 mt-1" id="event-confirmed-count">
-                                {{ $eventCounts['confirmed'] }}
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="stat-card event-stats" data-tab="events" style="display: {{ $tab === 'events' ? 'block' : 'none' }};">
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Cancelled</p>
-                            <p class="text-2xl font-semibold text-gray-900 mt-1" id="event-cancelled-count">
-                                {{ $eventCounts['cancelled'] }}
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="stat-card event-stats" data-tab="events" style="display: {{ $tab === 'events' ? 'block' : 'none' }};">
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Total</p>
-                            <p class="text-2xl font-semibold text-gray-900 mt-1" id="event-total-count">
-                                {{ $eventCounts['all'] }}
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            --}}
         </div>
 
         <!-- Program Registrations Tab Content -->
-        <div id="programs-content" class="tab-content" style="display: {{ $tab === 'programs' ? 'block' : 'none' }}; transition: opacity 0.3s ease;">
+        <div id="programs-content" class="tab-content" style="display: block;">
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="px-6 py-4 bg-pink-50 border-b border-pink-200">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900">Program Registrations</h3>
-                            <p class="text-sm text-gray-600 mt-1">Manage patient program registration requests</p>
+                    <h3 class="text-lg font-medium text-gray-900">Program Applications</h3>
+                    <p class="text-sm text-gray-600 mt-1">Manage patient program application requests</p>
                         </div>
                         <div class="flex flex-wrap gap-2 text-sm text-gray-600">
                             <span>Pending: <strong class="text-pink-600">{{ $programCounts['pending'] }}</strong></span>
                             <span>Approved: <strong class="text-green-600">{{ $programCounts['approved'] }}</strong></span>
-                            <span>Rejected: <strong class="text-red-600">{{ $programCounts['rejected'] }}</strong></span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Filters -->
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <form method="GET" class="flex flex-col md:flex-row md:items-center gap-3">
-                        <input type="hidden" name="tab" value="programs">
+                    <div class="flex flex-col md:flex-row md:items-center gap-3">
                         <div class="relative w-full md:w-48">
-                            <select name="program_status" onchange="this.form.submit()"
+                            <select name="program_status" id="programStatusFilter"
                                 class="w-full appearance-none rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
-                                <option value="pending" {{ $programSelectedStatus === 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="pending" {{ $programSelectedStatus === 'pending' ? 'selected' : '' }}>Pending Approval</option>
                                 <option value="approved" {{ $programSelectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
-                                <option value="rejected" {{ $programSelectedStatus === 'rejected' ? 'selected' : '' }}>Rejected</option>
                                 <option value="all" {{ $programSelectedStatus === 'all' ? 'selected' : '' }}>All</option>
                             </select>
                             <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
@@ -226,105 +140,23 @@
                                 </svg>
                             </span>
                         </div>
-                        @if ($programSelectedStatus !== 'pending')
-                            <a href="{{ route('admin.registrations.index', ['tab' => 'programs']) }}"
+                        @if ($programSelectedStatus !== 'all')
+                            <a href="{{ route('admin.registrations.index', ['tab' => 'programs', 'program_status' => 'all']) }}"
                                 class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 transition">
                                 Reset
                             </a>
                         @endif
-                    </form>
-                </div>
-
-                <!-- Table -->
-                <div class="overflow-x-auto overflow-y-visible border border-gray-200 rounded-xl bg-white shadow-sm">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-[#F7EEF3] border-b border-pink-200">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em]">Applicant</th>
-                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em]">Program</th>
-                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em]">Submitted</th>
-                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em]">Status</th>
-                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em]">Assigned</th>
-                                <th class="px-6 py-3 text-left text-[11px] font-semibold text-[#7B5B6B] uppercase tracking-[0.14em] w-24">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @forelse($programRegistrations as $registration)
-                                <tr class="hover:bg-[#FBF5F8] transition">
-                                    <td class="px-6 py-4 align-top">
-                                        <div class="flex flex-col">
-                                            <span class="font-semibold text-gray-900">{{ $registration->full_name }}</span>
-                                            <span class="text-xs text-gray-500">{{ $registration->email }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 align-top">
-                                        {{ $registration->program->title ?? 'N/A' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600 align-top">
-                                        {{ $registration->created_at?->format('M d, Y h:i A') ?? 'N/A' }}
-                                    </td>
-                                    <td class="px-6 py-4 align-top">
-                                        @php
-                                            $status = strtolower($registration->status);
-                                            $badgeClasses = match ($status) {
-                                                'approved' => 'bg-green-100 text-green-800',
-                                                'rejected' => 'bg-red-100 text-red-800',
-                                                default => 'bg-pink-100 text-pink-800',
-                                            };
-                                        @endphp
-                                        <span class="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold rounded-full {{ $badgeClasses }}">
-                                            {{ ucfirst($status) }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-700 align-top">
-                                        {{ $registration->assignedCaseManager?->profile?->full_name ?? $registration->assignedCaseManager?->email ?? 'Unassigned' }}
-                                    </td>
-                                    <td class="px-6 py-4 text-sm font-medium align-top w-24">
-                                        <div class="inline-flex">
-                                            <button type="button" data-actions-toggle
-                                                class="inline-flex items-center justify-center h-8 w-8 rounded-full border border-gray-400 text-gray-600 hover:bg-gray-100 transition"
-                                                aria-haspopup="true" aria-expanded="false" title="Actions">
-                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6h.01M12 12h.01M12 18h.01" />
-                                                </svg>
-                                            </button>
-                                            <div data-actions-menu
-                                                class="hidden absolute right-0 mt-2 w-48 rounded-xl border border-gray-200 bg-white shadow-xl z-30 max-h-56 overflow-y-auto">
-                                                <div class="p-2">
-                                                    <a href="{{ route('admin.program_registrations.show', $registration) }}"
-                                                        class="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
-                                                        {{-- <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-pink-100 text-pink-600 text-xs">V</span> --}}
-                                                        View Details
-                                                    </a>
-                                                    <button type="button"
-                                                        data-assign-trigger
-                                                        data-assign-url="{{ route('admin.program_registrations.assign', $registration) }}"
-                                                        data-assign-current="{{ $registration->assigned_case_manager_id ?? '' }}"
-                                                        class="w-full flex items-center gap-2 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
-                                                        {{-- <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-pink-100 text-pink-600 text-xs">A</span> --}}
-                                                        Assign Case Manager
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                                        No program registrations found for the selected filter.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                @if ($programRegistrations->hasPages())
-                    <div class="px-6 py-4 border-t border-gray-200">
-                        {{ $programRegistrations->links() }}
                     </div>
-                @endif
+                </div>
+
+                <!-- Table (AJAX-loaded) -->
+                <div id="programRegistrationsTableWrapper">
+                    @include('admin.registrations._table', [
+                        'programRegistrations' => $programRegistrations,
+                        'caseManagers' => $caseManagers,
+                        'financeUsers' => $financeUsers,
+                    ])
+                </div>
             </div>
         </div>
 
@@ -332,8 +164,8 @@
             <div class="bg-white rounded-2xl w-full max-w-md shadow-xl p-6">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Assign Case Manager</h3>
-                        <p class="text-sm text-gray-500 mt-1">Select a case manager to handle this registration.</p>
+                        <h3 id="assignModalTitle" class="text-lg font-semibold text-gray-900">Assign Case Manager</h3>
+                        <p id="assignModalSubtitle" class="text-sm text-gray-500 mt-1">Select a case manager to handle this registration.</p>
                     </div>
                     <button type="button" id="assignModalClose"
                         class="h-8 w-8 inline-flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50">
@@ -372,7 +204,54 @@
             </div>
         </div>
 
-        <!-- Event Registrations Tab Content -->
+        <!-- Toast Container -->
+        <div id="toastContainer" class="fixed top-8 right-8 z-[99999] flex flex-col gap-3" style="min-width: 250px; max-width: 400px;"></div>
+
+        {{-- Send to Finance Modal --}}
+        <div id="sendToFinanceModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-2xl w-full max-w-md shadow-xl p-6">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Send to Finance User</h3>
+                        <p class="text-sm text-gray-500 mt-1">Select a finance user to allocate budget for this registration.</p>
+                    </div>
+                    <button type="button" id="sendToFinanceModalClose"
+                        class="h-8 w-8 inline-flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="sendToFinanceModalForm" class="mt-5 space-y-4">
+                    @csrf
+                    <input type="hidden" id="sendToFinanceRegistrationId" name="registration_id" value="">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-[0.12em]">Assign To Finance User</label>
+                        <select id="sendToFinanceUserId" name="finance_user_id"
+                            class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
+                            <option value="">Select finance user</option>
+                            @foreach ($financeUsers ?? [] as $fu)
+                                <option value="{{ $fu->id }}">{{ $fu->profile->full_name ?? $fu->email }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-2">
+                        <button type="button" id="sendToFinanceModalCancel"
+                            class="px-4 py-2 rounded-md border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit" id="sendToFinanceSubmit"
+                            class="px-4 py-2 rounded-md bg-pink-600 text-white text-sm font-semibold hover:bg-pink-700">
+                            Send to Finance
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- Event Registrations Tab Content - commented: sponsor-related, sponsor not wanted for now
         <div id="events-content" class="tab-content" style="display: {{ $tab === 'events' ? 'block' : 'none' }}; transition: opacity 0.3s ease;">
             <!-- Pending Registrations Section -->
             @if ($pendingEventRegistrations->count() > 0)
@@ -411,14 +290,6 @@
                                                 Approve
                                             </button>
                                         </form>
-                                        <form method="POST" action="{{ route('events.registrations.reject', $registration) }}" class="inline">
-                                            @csrf
-                                            <button type="submit"
-                                                onclick="return confirm('Are you sure you want to reject this registration?')"
-                                                class="bg-red-600 text-white px-3 py-1 text-sm rounded hover:bg-red-700 transition">
-                                                Reject
-                                            </button>
-                                        </form>
                                     </div>
                                 </div>
                                 @if ($registration->message)
@@ -447,12 +318,12 @@
                 <div class="px-6 py-4 bg-pink-50 border-b border-pink-200">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900">All Event Registrations</h3>
-                            <p class="text-sm text-gray-600 mt-1">Manage sponsor registration requests for events</p>
+                            <h3 class="text-lg font-medium text-gray-900">All Event Applications</h3>
+                            <p class="text-sm text-gray-600 mt-1">Manage sponsor application requests for events</p>
                         </div>
                         <div class="flex flex-wrap gap-2 text-sm text-gray-600">
-                            <span>Pending: <strong class="text-pink-600">{{ $eventCounts['pending'] }}</strong></span>
-                            <span>Confirmed: <strong class="text-green-600">{{ $eventCounts['confirmed'] }}</strong></span>
+                            <span>Pending Approval: <strong class="text-pink-600">{{ $eventCounts['pending'] }}</strong></span>
+                            <span>Approved: <strong class="text-green-600">{{ $eventCounts['confirmed'] }}</strong></span>
                             <span>Cancelled: <strong class="text-red-600">{{ $eventCounts['cancelled'] }}</strong></span>
                         </div>
                     </div>
@@ -556,19 +427,6 @@
                                                 </form>
                                             @endif
 
-                                            @if ($registration->canBeRejected())
-                                                <form method="POST" action="{{ route('events.registrations.reject', $registration) }}">
-                                                    @csrf
-                                                    <button type="submit" onclick="return confirm('Reject this registration?')"
-                                                        class="inline-flex items-center px-3 py-1.5 text-red-700 hover:text-red-900 font-semibold rounded-md hover:bg-red-50 transition-colors">
-                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                        {{ $registration->registration_status === 'confirmed' ? 'Cancel' : 'Reject' }}
-                                                    </button>
-                                                </form>
-                                            @endif
-
                                             <a href="{{ route('events.show', $registration->event) }}"
                                                 class="inline-flex items-center px-3 py-1.5 text-pink-700 hover:text-pink-900 font-semibold rounded-md hover:bg-pink-50 transition-colors">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -600,6 +458,7 @@
                 @endif
             </div>
         </div>
+        --}}
     </div>
 
     <style>
@@ -623,8 +482,63 @@
         }
     </style>
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
+        const REGISTRATIONS_LIST_URL = "{{ route('admin.registrations.list') }}";
+
+        function showToast(message, type) {
+            type = type || 'success';
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg toast-' + type;
+            toast.innerHTML = '<span>' + (type === 'success' ? '✓' : '!') + '</span><div style="flex:1">' + (message || '') + '</div><button class="toast-close" aria-label="Close">&times;</button>';
+            container.appendChild(toast);
+            toast.querySelector('.toast-close').addEventListener('click', function() {
+                toast.style.opacity = '0';
+                setTimeout(function() { toast.remove(); }, 300);
+            });
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                setTimeout(function() { toast.remove(); }, 400);
+            }, 3500);
+        }
+
+        function loadProgramRegistrations(params) {
+            const query = $.param(params || {});
+            $('#programRegistrationsTableWrapper').addClass('opacity-60');
+            $.get(REGISTRATIONS_LIST_URL + (query ? ('?' + query) : ''))
+                .done(function(html) {
+                    $('#programRegistrationsTableWrapper').html(html).removeClass('opacity-60');
+                })
+                .fail(function() {
+                    $('#programRegistrationsTableWrapper').removeClass('opacity-60');
+                    alert('Failed to load applications.');
+                });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Filter: load without page reload
+            $('#programStatusFilter').on('change', function() {
+                const status = $(this).val();
+                loadProgramRegistrations({ program_status: status, program_page: 1 });
+            });
+
+            // Pagination: load via AJAX without reload
+            $(document).on('click', '#programRegistrationsTableWrapper a', function(e) {
+                const href = this.getAttribute('href') || '';
+                const isPagination = href.indexOf('program_page') !== -1 || href.indexOf('registrations/list') !== -1;
+                if (isPagination) {
+                    e.preventDefault();
+                    const query = href.indexOf('?') !== -1 ? href.substring(href.indexOf('?')) : '';
+                    const url = href.indexOf('http') === 0 ? href : REGISTRATIONS_LIST_URL + (href.indexOf('?') !== -1 ? href.substring(href.indexOf('?')) : '');
+                    $('#programRegistrationsTableWrapper').addClass('opacity-60');
+                    $.get(url)
+                        .done(function(html) { $('#programRegistrationsTableWrapper').html(html).removeClass('opacity-60'); })
+                        .fail(function() { $('#programRegistrationsTableWrapper').removeClass('opacity-60'); alert('Failed to load applications.'); });
+                }
+            });
+
             const tabButtons = document.querySelectorAll('.tab-button');
             const tabContents = document.querySelectorAll('.tab-content');
             const statCards = document.querySelectorAll('.stat-card');
@@ -676,74 +590,92 @@
                 });
             });
 
-            const actionToggles = document.querySelectorAll('[data-actions-toggle]');
-            const assignTriggers = document.querySelectorAll('[data-assign-trigger]');
             const assignModal = document.getElementById('assignModal');
             const assignModalForm = document.getElementById('assignModalForm');
             const assignModalClose = document.getElementById('assignModalClose');
             const assignModalCancel = document.getElementById('assignModalCancel');
+            const sendToFinanceModal = document.getElementById('sendToFinanceModal');
+            const sendToFinanceRegistrationId = document.getElementById('sendToFinanceRegistrationId');
 
             function closeActionMenus() {
-                document.querySelectorAll('[data-actions-menu]').forEach(menu => {
-                    menu.classList.add('hidden');
-                });
-                document.querySelectorAll('[data-actions-toggle]').forEach(toggle => {
-                    toggle.setAttribute('aria-expanded', 'false');
-                });
+                document.querySelectorAll('[data-actions-menu]').forEach(menu => menu.classList.add('hidden'));
+                document.querySelectorAll('[data-actions-toggle]').forEach(toggle => toggle.setAttribute('aria-expanded', 'false'));
             }
 
-            actionToggles.forEach(toggle => {
-                toggle.addEventListener('click', function(e) {
+            // Event delegation for dynamically loaded table rows
+            document.addEventListener('click', function(e) {
+                const actionsToggle = e.target.closest('[data-actions-toggle]');
+                if (actionsToggle) {
                     e.stopPropagation();
-                    const menu = this.parentElement.querySelector('[data-actions-menu]');
-                    if (!menu) {
-                        return;
+                    const menu = actionsToggle.parentElement.querySelector('[data-actions-menu]');
+                    if (menu) {
+                        const isOpen = !menu.classList.contains('hidden');
+                        closeActionMenus();
+                        if (!isOpen) {
+                            menu.classList.remove('hidden');
+                            actionsToggle.setAttribute('aria-expanded', 'true');
+                        }
                     }
-                    const isOpen = !menu.classList.contains('hidden');
+                    return;
+                }
+                const assignTrigger = e.target.closest('[data-assign-trigger]');
+                if (assignTrigger) {
+                    e.preventDefault();
+                    const url = assignTrigger.getAttribute('data-assign-url');
+                    const currentId = assignTrigger.getAttribute('data-assign-current');
+                    const assignName = assignTrigger.getAttribute('data-assign-name') || '';
                     closeActionMenus();
-                    if (!isOpen) {
-                        menu.classList.remove('hidden');
-                        this.setAttribute('aria-expanded', 'true');
+                    if (url && assignModal && assignModalForm) {
+                        assignModalForm.action = url;
+                        const select = assignModalForm.querySelector('select[name="case_manager_id"]');
+                        if (select) select.value = currentId || '';
+                        const titleEl = document.getElementById('assignModalTitle');
+                        const subtitleEl = document.getElementById('assignModalSubtitle');
+                        if (assignName) {
+                            if (titleEl) titleEl.textContent = 'Change Case Manager';
+                            if (subtitleEl) subtitleEl.textContent = 'Currently assigned to: ' + assignName;
+                        } else {
+                            if (titleEl) titleEl.textContent = 'Assign Case Manager';
+                            if (subtitleEl) subtitleEl.textContent = 'Select a case manager to handle this registration.';
+                        }
+                        assignModal.classList.remove('hidden');
+                        assignModal.classList.add('flex');
                     }
-                });
-            });
-
-            document.addEventListener('click', function() {
-                closeActionMenus();
+                    return;
+                }
+                const sendFinanceTrigger = e.target.closest('[data-send-finance-trigger]');
+                if (sendFinanceTrigger) {
+                    e.preventDefault();
+                    const regId = sendFinanceTrigger.getAttribute('data-registration-id');
+                    closeActionMenus();
+                    if (regId && sendToFinanceRegistrationId) {
+                        sendToFinanceRegistrationId.value = regId;
+                        if (sendToFinanceModal) {
+                            sendToFinanceModal.classList.remove('hidden');
+                            sendToFinanceModal.classList.add('flex');
+                        }
+                    }
+                    return;
+                }
+                if (!e.target.closest('[data-actions-menu]') && !e.target.closest('[data-actions-toggle]')) {
+                    closeActionMenus();
+                }
             });
 
             function openAssignModal(url, currentId) {
-                if (!assignModal || !assignModalForm) {
-                    return;
-                }
+                if (!assignModal || !assignModalForm) return;
                 assignModalForm.action = url;
                 const select = assignModalForm.querySelector('select[name="case_manager_id"]');
-                if (select) {
-                    select.value = currentId || '';
-                }
+                if (select) select.value = currentId || '';
                 assignModal.classList.remove('hidden');
                 assignModal.classList.add('flex');
             }
 
             function closeAssignModal() {
-                if (!assignModal) {
-                    return;
-                }
+                if (!assignModal) return;
                 assignModal.classList.add('hidden');
                 assignModal.classList.remove('flex');
             }
-
-            assignTriggers.forEach(trigger => {
-                trigger.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const url = this.getAttribute('data-assign-url');
-                    const currentId = this.getAttribute('data-assign-current');
-                    closeActionMenus();
-                    if (url) {
-                        openAssignModal(url, currentId);
-                    }
-                });
-            });
 
             if (assignModal) {
                 assignModal.addEventListener('click', function(e) {
@@ -759,6 +691,60 @@
 
             if (assignModalCancel) {
                 assignModalCancel.addEventListener('click', closeAssignModal);
+            }
+
+            // Send to Finance Modal
+            const sendToFinanceForm = document.getElementById('sendToFinanceModalForm');
+            const sendToFinanceModalClose = document.getElementById('sendToFinanceModalClose');
+            const sendToFinanceModalCancel = document.getElementById('sendToFinanceModalCancel');
+
+            function closeSendToFinanceModal() {
+                if (sendToFinanceModal) {
+                    sendToFinanceModal.classList.add('hidden');
+                    sendToFinanceModal.classList.remove('flex');
+                }
+            }
+
+            if (sendToFinanceModal) {
+                sendToFinanceModal.addEventListener('click', function(e) {
+                    if (e.target === sendToFinanceModal) closeSendToFinanceModal();
+                });
+            }
+            if (sendToFinanceModalClose) sendToFinanceModalClose.addEventListener('click', closeSendToFinanceModal);
+            if (sendToFinanceModalCancel) sendToFinanceModalCancel.addEventListener('click', closeSendToFinanceModal);
+
+            if (sendToFinanceForm) {
+                sendToFinanceForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const regId = sendToFinanceRegistrationId?.value;
+                    const financeUserId = document.getElementById('sendToFinanceUserId')?.value;
+                    if (!regId || !financeUserId) return;
+                    const submitBtn = document.getElementById('sendToFinanceSubmit');
+                    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
+                    const formData = new FormData();
+                    formData.append('finance_user_id', financeUserId);
+                    formData.append('_token', document.querySelector('input[name="_token"]')?.value || document.querySelector('meta[name="csrf-token"]')?.content);
+                    fetch(`/admin/program-registration-requests/${regId}/send-to-finance`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('input[name="_token"]')?.value,
+                            'Accept': 'application/json',
+                        },
+                        body: formData
+                    }).then(r => r.json()).then(data => {
+                        closeSendToFinanceModal();
+                        if (data.success) {
+                            showToast(data.message || 'Sent to finance successfully!', 'success');
+                            setTimeout(function() { window.location.reload(); }, 800);
+                        } else {
+                            showToast(data.message || 'Failed to send.', 'error');
+                        }
+                    }).catch(() => {
+                        showToast('An error occurred.', 'error');
+                    }).finally(() => {
+                        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send to Finance'; }
+                    });
+                });
             }
 
             // Handle browser back/forward buttons

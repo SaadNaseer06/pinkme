@@ -1,4 +1,4 @@
- <!-- Mobile Sidebar -->
+﻿ <!-- Mobile Sidebar -->
  <div class="mobile-sidebar" id="mobileSidebar">
      <!-- Close Button -->
      <button class="close-btn" id="closeBtn">

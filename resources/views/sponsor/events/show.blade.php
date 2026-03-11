@@ -1,4 +1,4 @@
-@extends('sponsor.layouts.app')
+﻿@extends('sponsor.layouts.app')
 
 @section('title', $event->title)
 
@@ -22,7 +22,7 @@
 
             <!-- Back to Events -->
             <a href="{{ route('sponsor.events') }}"
-                class="inline-flex items-center gap-2 text-[#6C5B68] hover:text-[#C63A85] font-medium mb-6 transition-colors">
+                class="inline-flex items-center gap-2 text-[#6C5B68] hover:text-[#B52D75] font-medium mb-6 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
@@ -35,7 +35,7 @@
             @endphp
             <div
                 class="rounded-2xl p-8 shadow-lg mb-8 overflow-hidden"
-                style="background: linear-gradient(135deg, #9B2768 0%, #B82E75 25%, #C63A85 50%, #D04A8E 75%, #DB69A2 100%);">
+                style="background: linear-gradient(135deg, #9B2768 0%, #B82E75 25%, #B52D75 50%, #D04A8E 75%, #9E2469 100%);">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between relative z-10">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-2">
@@ -115,7 +115,7 @@
                             <div class="grid gap-4">
                                 @foreach ($event->confirmedSponsors as $sponsor)
                                     <div class="flex items-center gap-4 p-4 bg-[#FDF7FB] rounded-xl">
-                                        <div class="w-12 h-12 bg-[#DB69A2] rounded-full flex items-center justify-center">
+                                        <div class="w-12 h-12 bg-[#9E2469] rounded-full flex items-center justify-center">
                                             <span class="text-white font-semibold">
                                                 {{ strtoupper(substr($sponsor->profile->first_name ?? $sponsor->email, 0, 1)) }}
                                             </span>
@@ -151,7 +151,7 @@
                                     <span class="font-medium text-[#213430]">{{ $progressPct }}%</span>
                                 </div>
                                 <div class="w-full bg-[#F1E5EF] rounded-full h-3 overflow-hidden block" role="progressbar" aria-valuenow="{{ $progressPct }}" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="bg-gradient-to-r from-[#DB69A2] to-[#C63A85] rounded-full transition-all duration-300 block"
+                                    <div class="bg-gradient-to-r from-[#9E2469] to-[#B52D75] rounded-full transition-all duration-300 block"
                                         style="height: 12px; width: {{ $progressPct }}%; min-width: {{ $progressPct > 0 ? '4px' : '0' }};"></div>
                                 </div>
                             </div>
@@ -229,11 +229,11 @@
                                     <div class="mb-4">
                                         <details class="text-sm text-[#6C5B68]">
                                             <summary class="cursor-pointer hover:text-[#213430]">Add a message (optional)</summary>
-                                            <textarea name="message" rows="2" class="mt-2 w-full px-4 py-2 border border-[#DCCFD8] rounded-xl focus:ring-2 focus:ring-[#DB69A2] focus:border-transparent" placeholder="Why you're supporting this event..." maxlength="500"></textarea>
+                                            <textarea name="message" rows="2" class="mt-2 w-full px-4 py-2 border border-[#DCCFD8] rounded-xl focus:ring-2 focus:ring-[#9E2469] focus:border-transparent" placeholder="Why you're supporting this event..." maxlength="500"></textarea>
                                         </details>
                                         @error('message')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                                     </div>
-                                    <button type="submit" class="w-full py-3 px-4 bg-gradient-to-r from-[#DB69A2] to-[#C63A85] text-white font-semibold rounded-xl hover:opacity-95 transition-opacity">
+                                    <button type="submit" class="w-full py-3 px-4 bg-gradient-to-r from-[#9E2469] to-[#B52D75] text-white font-semibold rounded-xl hover:opacity-95 transition-opacity">
                                         Pay ${{ $formatAmount($remainingFunding) }} &amp; Register
                                     </button>
                                 </form>
@@ -256,15 +256,15 @@
                                             @endphp
                                             @foreach ($presets as $p)
                                                 @if ($p <= $maxAmount)
-                                                    <button type="button" class="amount-btn px-4 py-2 rounded-xl border-2 border-[#DCCFD8] text-[#213430] font-medium hover:border-[#DB69A2] hover:bg-[#FDF7FB] transition-colors" data-amount="{{ $p }}">${{ number_format($p) }}</button>
+                                                    <button type="button" class="amount-btn px-4 py-2 rounded-xl border-2 border-[#DCCFD8] text-[#213430] font-medium hover:border-[#9E2469] hover:bg-[#FDF7FB] transition-colors" data-amount="{{ $p }}">${{ number_format($p) }}</button>
                                                 @endif
                                             @endforeach
-                                            <button type="button" class="amount-btn px-4 py-2 rounded-xl border-2 border-dashed border-[#DCCFD8] text-[#6C5B68] font-medium hover:border-[#DB69A2] transition-colors" data-amount="other">Other</button>
+                                            <button type="button" class="amount-btn px-4 py-2 rounded-xl border-2 border-dashed border-[#DCCFD8] text-[#6C5B68] font-medium hover:border-[#9E2469] transition-colors" data-amount="other">Other</button>
                                         </div>
                                         <div id="other-amount-wrap" class="hidden mt-2">
                                             <div class="relative">
                                                 <span class="absolute inset-y-0 left-3 flex items-center text-[#6C5B68]">$</span>
-                                                <input type="number" id="other-amount-input" min="0.50" step="0.01" placeholder="Enter amount" class="w-full pl-8 pr-4 py-2 border border-[#DCCFD8] rounded-xl focus:ring-2 focus:ring-[#DB69A2] focus:border-transparent" @if ($event->funding_goal) max="{{ $remainingFunding }}" @endif>
+                                                <input type="number" id="other-amount-input" min="0.50" step="0.01" placeholder="Enter amount" class="w-full pl-8 pr-4 py-2 border border-[#DCCFD8] rounded-xl focus:ring-2 focus:ring-[#9E2469] focus:border-transparent" @if ($event->funding_goal) max="{{ $remainingFunding }}" @endif>
                                             </div>
                                             @if ($event->funding_goal)
                                                 <p class="text-xs text-[#6C5B68] mt-1">Max: ${{ $formatAmount($remainingFunding) }}</p>
@@ -275,7 +275,7 @@
                                     <div class="mb-4">
                                         <details class="text-sm text-[#6C5B68]">
                                             <summary class="cursor-pointer hover:text-[#213430]">Add a message (optional)</summary>
-                                            <textarea name="message" rows="2" class="mt-2 w-full px-4 py-2 border border-[#DCCFD8] rounded-xl focus:ring-2 focus:ring-[#DB69A2] focus:border-transparent" placeholder="Why you're supporting this event..." maxlength="500"></textarea>
+                                            <textarea name="message" rows="2" class="mt-2 w-full px-4 py-2 border border-[#DCCFD8] rounded-xl focus:ring-2 focus:ring-[#9E2469] focus:border-transparent" placeholder="Why you're supporting this event..." maxlength="500"></textarea>
                                         </details>
                                         @error('message')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                                     </div>
@@ -301,14 +301,14 @@
                                             if (maxAmount != null && num > maxAmount) return;
                                             amountInput.value = num; selectedPreset = value; otherInput.value = value === 'other' ? '' : value;
                                             submitBtn.disabled = false;
-                                            submitBtn.className = 'w-full py-3 px-4 bg-gradient-to-r from-[#DB69A2] to-[#C63A85] text-white font-semibold rounded-xl hover:opacity-95 transition-opacity';
+                                            submitBtn.className = 'w-full py-3 px-4 bg-gradient-to-r from-[#9E2469] to-[#B52D75] text-white font-semibold rounded-xl hover:opacity-95 transition-opacity';
                                             submitBtn.textContent = 'Pay $' + (value === 'other' ? (otherInput.value || '0') : formatAmountDisplay(num)) + ' & Register';
                                         }
                                         form.querySelectorAll('.amount-btn').forEach(function(btn) {
                                             btn.addEventListener('click', function() {
                                                 var amt = btn.getAttribute('data-amount');
-                                                form.querySelectorAll('.amount-btn').forEach(function(b) { b.classList.remove('border-[#DB69A2]', 'bg-[#FDF7FB]'); b.classList.add('border-[#DCCFD8]'); });
-                                                btn.classList.add('border-[#DB69A2]', 'bg-[#FDF7FB]'); btn.classList.remove('border-[#DCCFD8]');
+                                                form.querySelectorAll('.amount-btn').forEach(function(b) { b.classList.remove('border-[#9E2469]', 'bg-[#FDF7FB]'); b.classList.add('border-[#DCCFD8]'); });
+                                                btn.classList.add('border-[#9E2469]', 'bg-[#FDF7FB]'); btn.classList.remove('border-[#DCCFD8]');
                                                 if (amt === 'other') { otherWrap.classList.remove('hidden'); setAmount('other'); otherInput.focus(); return; }
                                                 otherWrap.classList.add('hidden'); otherInput.value = ''; setAmount(amt);
                                             });
@@ -323,7 +323,7 @@
                                                 num = maxAmount;
                                                 this.value = formatAmountDisplay(num);
                                             }
-                                            amountInput.value = num; submitBtn.disabled = false; submitBtn.className = 'w-full py-3 px-4 bg-gradient-to-r from-[#DB69A2] to-[#C63A85] text-white font-semibold rounded-xl hover:opacity-95 transition-opacity'; submitBtn.textContent = 'Pay $' + formatAmountDisplay(num) + ' & Register';
+                                            amountInput.value = num; submitBtn.disabled = false; submitBtn.className = 'w-full py-3 px-4 bg-gradient-to-r from-[#9E2469] to-[#B52D75] text-white font-semibold rounded-xl hover:opacity-95 transition-opacity'; submitBtn.textContent = 'Pay $' + formatAmountDisplay(num) + ' & Register';
                                         });
                                         form.addEventListener('submit', function(e) {
                                             if (!otherWrap.classList.contains('hidden') && otherInput.value) amountInput.value = parseFloat(otherInput.value) || '';

@@ -1,4 +1,4 @@
-@extends('patient.layouts.app')
+﻿@extends('patient.layouts.app')
 
 
 @section('title', 'View Application')
@@ -142,7 +142,7 @@
                                 <img src="{{ asset('public/images/document.svg') }}" alt="" class="w-6 h-6 block group-hover:hidden" />
                                 <img src="{{ asset('public/images/document-pink.svg') }}" alt=""
                                     class="w-6 h-6 hidden group-hover:block" />
-                                <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#DB69A2]">
+                                <span class="text-[#91848C] text-md font-light app-text group-hover:text-[#9E2469]">
                                     {{ $doc->filename }}
                                 </span>
                             </div>

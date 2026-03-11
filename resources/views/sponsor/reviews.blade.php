@@ -1,4 +1,4 @@
-@extends('sponsor.layouts.app')
+﻿@extends('sponsor.layouts.app')
 
 @section('title', 'Reviews')
 
@@ -16,9 +16,9 @@
                     @foreach ($summary['distribution'] as $dist)
                         <div class="flex items-center" title="{{ $dist['rating'] }} Stars">
                             <span class="w-16 text-lg font-medium text-[#213430] program-main">{{ $dist['label'] }}</span>
-                            <span class="text-[#db69a2] text-2xl mr-2 app-main">★</span>
+                            <span class="text-[#9E2469] text-2xl mr-2 app-main">★</span>
                             <div class="flex-1 h-3 bg-[#FDD7EC] rounded-full overflow-hidden bar-h">
-                                <div class="h-full rounded-full bg-[#db69a2] transition-all duration-300"
+                                <div class="h-full rounded-full bg-[#9E2469] transition-all duration-300"
                                     style="width: {{ $dist['percentage'] }}%"></div>
                             </div>
                             <span class="ml-3 text-lg text-[#213430] font-medium app-main">
@@ -36,8 +36,8 @@
             <!-- Right: Average Rating -->
             <div
                 class="flex-1 bg-[#F3E8EF] p-10 flex flex-col items-center justify-center text-center space-y-2 rounded-lg">
-                <div class="text-4xl md:text-6xl font-bold text-[#db69a2]">{{ $summary['average'] ?? 'N/A' }}</div>
-                <div class="text-2xl md:text-4xl text-[#db69a2] font-semibold flex space-x-2">
+                <div class="text-4xl md:text-6xl font-bold text-[#9E2469]">{{ $summary['average'] ?? 'N/A' }}</div>
+                <div class="text-2xl md:text-4xl text-[#9E2469] font-semibold flex space-x-2">
                     @for ($i = 1; $i <= 5; $i++)
                         <span>{{ $i <= floor($summary['average'] ?? 0) ? '★' : '☆' }}</span>
                     @endfor
@@ -62,7 +62,7 @@
                                             {{ $review->sponsor->profile->full_name ?? 'Anonymous' }}
                                         </h3>
                                     </div>
-                                    <div class="flex space-x-1 text-[#db69a2] text-xl app-text">
+                                    <div class="flex space-x-1 text-[#9E2469] text-xl app-text">
                                         @for ($i = 1; $i <= 5; $i++)
                                             <span>{{ $i <= $review->rating ? '★' : '☆' }}</span>
                                         @endfor
@@ -89,14 +89,14 @@
                         @csrf
                         <div class="mb-4">
                             <label class="block text-[#213430] mb-2 app-main">Add Your Rating<span
-                                    class="text-[#db69a2]">*</span></label>
+                                    class="text-[#9E2469]">*</span></label>
                             <div class="flex" id="starRating">
                                 @for ($i = 1; $i <= 5; $i++)
                                     <input type="radio" name="rating" value="{{ $i }}" class="hidden"
                                         id="rating-{{ $i }}" {{ old('rating') == $i ? 'checked' : '' }}
                                         required>
                                     <label for="rating-{{ $i }}"
-                                        class="text-2xl app-main text-[#db69a2] cursor-pointer transition-all duration-200 ease-in-out hover:text-[#ff85b9] star-label"
+                                        class="text-2xl app-main text-[#9E2469] cursor-pointer transition-all duration-200 ease-in-out hover:text-[#ff85b9] star-label"
                                         data-value="{{ $i }}"></label>
                                 @endfor
                                 @error('rating')
@@ -106,7 +106,7 @@
                         </div>
                         <div class="mb-6">
                             <label class="block text-[#213430] mb-2 app-text">Write Your Review<span
-                                    class="text-[#db69a2]">*</span></label>
+                                    class="text-[#9E2469]">*</span></label>
                             <textarea rows="3" name="comment" placeholder="Write here..."
                                 class="w-full px-4 py-2 border border-[#DCCFD8] text-[#B1A4AD] rounded-md focus:outline-none focus:ring-2 focus:ring-pink-300 bg-transparent">{{ old('comment') }}</textarea>
                             @error('comment')
@@ -114,7 +114,7 @@
                             @enderror
                         </div>
                         <button type="submit"
-                            class="w-full bg-[#db69a2] text-white py-3 rounded-md app-text">Submit</button>
+                            class="w-full bg-[#9E2469] text-white py-3 rounded-md app-text">Submit</button>
                     </form>
                     @if (session('success'))
                         <div class="mb-4 text-green-600">{{ session('success') }}</div>
@@ -196,17 +196,17 @@
 
             .star-label:before {
                 content: '☆';
-                color: #db69a2;
+                color: #9E2469;
             }
 
             .star-label.selected:before {
                 content: '★';
-                color: #db69a2;
+                color: #9E2469;
             }
 
             .star-label.hover:before {
                 content: '★';
-                color: #db69a2;
+                color: #9E2469;
             }
         </style>
     @endpush

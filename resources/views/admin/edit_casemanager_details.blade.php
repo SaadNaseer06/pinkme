@@ -1,4 +1,4 @@
-@extends('admin.layouts.admin')
+﻿@extends('admin.layouts.admin')
 
 @section('title', 'Edit Reviewer')
 
@@ -43,7 +43,7 @@
                                 alt="Profile" class="object-cover w-full h-full" />
                         </div>
                         <label for="avatar"
-                            class="absolute bottom-[10px] right-[7px] bg-[#DB69A2] text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer">
+                            class="absolute bottom-[10px] right-[7px] bg-[#9E2469] text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -123,7 +123,7 @@
 
                 <!-- Save and Cancel Buttons -->
                 <div class="flex mt-8 space-x-4">
-                    <button type="submit" class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600">Save
+                    <button type="submit" class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600">Save
                         Changes</button>
                     <a href="{{ route('admin.reviewers') }}"
                         class="px-6 py-2 bg-[#FFF7FC] text-[#91848C] border border-[#DCCFD8] rounded-md hover:bg-[#F1E3EC]">Cancel</a>

@@ -1,4 +1,4 @@
-@extends('patient.layouts.app')
+﻿@extends('patient.layouts.app')
 
 @section('title', 'Programs & Aids')
 
@@ -61,7 +61,7 @@
                         </div>
                     </div>
                     <button onclick="openModal({{ $program->id }})"
-                        class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white py-4 px-8 rounded-lg program-btn">
+                        class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white py-4 px-8 rounded-lg program-btn">
                         View Details
                     </button>
                 </div>
@@ -97,7 +97,7 @@
                         </div>
                     </div>
                     <button onclick="openModal({{ $program->id }})"
-                        class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#DB69A2] hover:border-none hover:text-white py-4 px-8 rounded-lg program-btn">
+                        class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white py-4 px-8 rounded-lg program-btn">
                         View Details
                     </button>
                 </div>
@@ -246,11 +246,11 @@
                             <p class="text-xs text-[#91848C] app-text">Option 1: May through June · Option 2: November through December</p>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="quarter" value="option1" class="text-[#DB69A2]" required>
+                                    <input type="radio" name="quarter" value="option1" class="text-[#9E2469]" required>
                                     <span>Option 1: May through June</span>
                                 </label>
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="quarter" value="option2" class="text-[#DB69A2]">
+                                    <input type="radio" name="quarter" value="option2" class="text-[#9E2469]">
                                     <span>Option 2: November through December</span>
                                 </label>
                             </div>
@@ -262,11 +262,11 @@
                             </p>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="programs_applied[]" value="Breast Cancer Treatment Assistance Program (up to $500)" class="text-[#DB69A2]">
+                                    <input type="checkbox" name="programs_applied[]" value="Breast Cancer Treatment Assistance Program (up to $500)" class="text-[#9E2469]">
                                     <span>Breast Cancer Treatment Assistance Program (up to $500)</span>
                                 </label>
                                 <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="programs_applied[]" value="Survivor Health and Wellness Assistance Program (up to $250)" class="text-[#DB69A2]">
+                                    <input type="checkbox" name="programs_applied[]" value="Survivor Health and Wellness Assistance Program (up to $250)" class="text-[#9E2469]">
                                     <span>Survivor Health and Wellness Assistance Program (up to $250)</span>
                                 </label>
                             </div>
@@ -281,11 +281,11 @@
                             <p class="font-medium">Are you in active treatment?</p>
                             <div class="flex items-center gap-4">
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="active_treatment" value="1" class="text-[#DB69A2]" required>
+                                    <input type="radio" name="active_treatment" value="1" class="text-[#9E2469]" required>
                                     <span>Yes</span>
                                 </label>
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="active_treatment" value="0" class="text-[#DB69A2]">
+                                    <input type="radio" name="active_treatment" value="0" class="text-[#9E2469]">
                                     <span>No</span>
                                 </label>
                             </div>
@@ -315,11 +315,11 @@
                             <p class="font-medium">Select one</p>
                             <div class="flex items-center gap-4">
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="referral_type" value="self" class="text-[#DB69A2]" required>
+                                    <input type="radio" name="referral_type" value="self" class="text-[#9E2469]" required>
                                     <span>Self referral</span>
                                 </label>
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="referral_type" value="facility" class="text-[#DB69A2]">
+                                    <input type="radio" name="referral_type" value="facility" class="text-[#9E2469]">
                                     <span>Healthcare facility referral</span>
                                 </label>
                             </div>
@@ -387,23 +387,23 @@
                     <h3 class="text-md font-semibold text-[#213430] app-main">Proof of income / employment status *</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-[#213430] app-text">
                         <label class="flex items-center gap-2">
-                            <input type="checkbox" name="proof_of_income_status[]" value="employed" class="text-[#DB69A2]">
+                            <input type="checkbox" name="proof_of_income_status[]" value="employed" class="text-[#9E2469]">
                             <span>Employed</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="checkbox" name="proof_of_income_status[]" value="self_employed" class="text-[#DB69A2]">
+                            <input type="checkbox" name="proof_of_income_status[]" value="self_employed" class="text-[#9E2469]">
                             <span>Self Employed</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="checkbox" name="proof_of_income_status[]" value="disabled" class="text-[#DB69A2]">
+                            <input type="checkbox" name="proof_of_income_status[]" value="disabled" class="text-[#9E2469]">
                             <span>Disabled</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="checkbox" name="proof_of_income_status[]" value="retired" class="text-[#DB69A2]">
+                            <input type="checkbox" name="proof_of_income_status[]" value="retired" class="text-[#9E2469]">
                             <span>Retired</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="checkbox" name="proof_of_income_status[]" value="student" class="text-[#DB69A2]">
+                            <input type="checkbox" name="proof_of_income_status[]" value="student" class="text-[#9E2469]">
                             <span>Student</span>
                         </label>
                     </div>
@@ -428,33 +428,33 @@
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 text-sm text-[#213430] app-text">
                         <label class="inline-flex items-center gap-2">
-                            <input type="radio" name="authorization_choice" value="allow" class="text-[#DB69A2]" checked>
+                            <input type="radio" name="authorization_choice" value="allow" class="text-[#9E2469]" checked>
                             <span>Yes, you may share the items I select below.</span>
                         </label>
                         <label class="inline-flex items-center gap-2">
-                            <input type="radio" name="authorization_choice" value="decline" class="text-[#DB69A2]">
+                            <input type="radio" name="authorization_choice" value="decline" class="text-[#9E2469]">
                             <span>No, do not use my information or images.</span>
                         </label>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-[#213430] app-text" data-auth-permissions>
                         <label class="flex items-start gap-2">
-                            <input type="checkbox" name="authorization_permissions[]" value="full_name" class="mt-1 text-[#DB69A2]">
+                            <input type="checkbox" name="authorization_permissions[]" value="full_name" class="mt-1 text-[#9E2469]">
                             <span>Use my full name</span>
                         </label>
                         <label class="flex items-start gap-2">
-                            <input type="checkbox" name="authorization_permissions[]" value="story_anonymous" class="mt-1 text-[#DB69A2]">
+                            <input type="checkbox" name="authorization_permissions[]" value="story_anonymous" class="mt-1 text-[#9E2469]">
                             <span>Share part of my story anonymously</span>
                         </label>
                         <label class="flex items-start gap-2">
-                            <input type="checkbox" name="authorization_permissions[]" value="story_full" class="mt-1 text-[#DB69A2]">
+                            <input type="checkbox" name="authorization_permissions[]" value="story_full" class="mt-1 text-[#9E2469]">
                             <span>Share my story with my name</span>
                         </label>
                         <label class="flex items-start gap-2">
-                            <input type="checkbox" name="authorization_permissions[]" value="photos" class="mt-1 text-[#DB69A2]">
+                            <input type="checkbox" name="authorization_permissions[]" value="photos" class="mt-1 text-[#9E2469]">
                             <span>Use photos / media of me or my journey</span>
                         </label>
                         <label class="flex items-start gap-2">
-                            <input type="checkbox" name="authorization_permissions[]" value="contact_details" class="mt-1 text-[#DB69A2]">
+                            <input type="checkbox" name="authorization_permissions[]" value="contact_details" class="mt-1 text-[#9E2469]">
                             <span>Contact me for follow-ups related to my story</span>
                         </label>
                     </div>
@@ -476,7 +476,7 @@
                             </div>
                             <div class="flex items-center justify-between text-xs text-[#91848C] app-text">
                                 <span>Sign inside the box above.</span>
-                                <button type="button" id="signature-clear" class="px-3 py-1 rounded-md border border-[#DB69A2] text-[#DB69A2] hover:bg-[#FDE8F3]">Clear</button>
+                                <button type="button" id="signature-clear" class="px-3 py-1 rounded-md border border-[#9E2469] text-[#9E2469] hover:bg-[#FDE8F3]">Clear</button>
                             </div>
                             <input type="hidden" name="signature_data" id="signature_data" required>
                         </div>
@@ -522,7 +522,7 @@
                         Cancel
                     </button>
                     <button type="submit"
-                        class="px-6 py-2 bg-[#DB69A2] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
+                        class="px-6 py-2 bg-[#9E2469] text-white rounded-md hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-300 app-text">
                         Submit
                     </button>
                 </div>
@@ -582,7 +582,7 @@
                 case 'link':
                     valueNode.href = rawValue || '#';
                     valueNode.textContent = rawValue || 'Open link';
-                    valueNode.className = 'text-sm text-[#DB69A2] underline break-all';
+                    valueNode.className = 'text-sm text-[#9E2469] underline break-all';
                     valueNode.target = '_blank';
                     valueNode.rel = 'noopener noreferrer';
                     break;
@@ -639,7 +639,7 @@
 
                 if (field?.required) {
                     const badge = document.createElement('span');
-                    badge.className = 'inline-flex items-center rounded-full bg-[#DB69A2]/10 px-2 py-0.5 text-[10px] font-semibold text-[#DB69A2]';
+                    badge.className = 'inline-flex items-center rounded-full bg-[#9E2469]/10 px-2 py-0.5 text-[10px] font-semibold text-[#9E2469]';
                     badge.textContent = 'Important';
                     labelRow.appendChild(badge);
                 }
@@ -899,7 +899,7 @@
                 resizeSignatureCanvas();
                 signaturePad = new SignaturePad(signatureCanvas, {
                     backgroundColor: '#ffffff',
-                    penColor: '#DB69A2'
+                    penColor: '#9E2469'
                 });
                 signaturePad.onEnd = syncSignature;
             }

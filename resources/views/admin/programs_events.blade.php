@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.admin')
+@extends('admin.layouts.admin')
 
 @section('title', 'Programs')
 
@@ -81,7 +81,7 @@
                                                     ? \Carbon\Carbon::parse($program->event_time)
                                                     : null);
                                         $image = $program->banner
-                                            ? asset('storage/app/public/' . $program->banner)
+                                            ? asset('storage/' . ltrim($program->banner, '/'))
                                             : $program->image_url ?? asset('public/images/program-3.png');
                                         $detail = [
                                             'type' => 'program',
@@ -241,7 +241,7 @@
                                             ),
                                         );
                                         $eventImage = $event->image
-                                            ? asset('storage/app/public/' . ltrim($event->image, '/'))
+                                            ? asset('storage/' . ltrim($event->image, '/'))
                                             : asset('public/images/program-details.png');
                                         $detail = [
                                             'type' => 'event',

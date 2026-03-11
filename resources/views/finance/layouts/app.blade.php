@@ -34,6 +34,7 @@
         @include('finance.partials.footer')
     </div>
     @include('partials.notification-modal')
+    @include('partials.image-fallback')
     @stack('scripts')
 </body>
 </html>

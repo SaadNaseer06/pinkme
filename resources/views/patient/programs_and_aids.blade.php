@@ -1,4 +1,4 @@
-﻿@extends('patient.layouts.app')
+@extends('patient.layouts.app')
 
 @section('title', 'Programs & Aids')
 
@@ -50,10 +50,11 @@
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
                             @php
-                                $bannerUrl = $program->banner ? url('storage/app/public/' . ltrim($program->banner, '/')) : asset('public/images/program-details.png');
+                                $bannerUrl = $program->banner ? asset('storage/' . ltrim($program->banner, '/')) : asset('public/images/program-3.png');
+                                $fallbackImg = asset('public/images/program-3.png');
                             @endphp
                             <img src="{{ $bannerUrl }}" alt="{{ $program->title }}"
-                                class="w-full h-full object-cover" />
+                                class="w-full h-full object-cover" onerror="this.src='{{ $fallbackImg }}'" />
                         </div>
                         <div>
                             <h3 class="text-xl font-semibold text-[#213430] mb-1 program-h">{{ $program->title }}</h3>
@@ -86,10 +87,11 @@
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
                             @php
-                                $bannerUrl = $program->banner ? url('storage/app/public/' . ltrim($program->banner, '/')) : asset('public/images/program-details.png');
+                                $bannerUrl = $program->banner ? asset('storage/' . ltrim($program->banner, '/')) : asset('public/images/program-3.png');
+                                $fallbackImg = asset('public/images/program-3.png');
                             @endphp
                             <img src="{{ $bannerUrl }}" alt="{{ $program->title }}"
-                                class="w-full h-full object-cover" />
+                                class="w-full h-full object-cover" onerror="this.src='{{ $fallbackImg }}'" />
                         </div>
                         <div>
                             <h3 class="text-xl font-semibold text-[#213430] mb-1 program-h">{{ $program->title }}</h3>
@@ -118,7 +120,7 @@
 
                 <!-- Image -->
                 <div class="w-full h-64 overflow-hidden rounded-md mb-2">
-                    <img src="{{ asset('public/images/program-details.png') }}" alt="Program Banner" class="modal-banner w-full h-full object-cover">
+                    <img src="{{ asset('public/images/program-3.png') }}" alt="Program Banner" class="modal-banner w-full h-full object-cover" onerror="this.src='{{ asset('public/images/program-3.png') }}'">
                 </div>
 
                 <!-- Modal Body -->
@@ -722,7 +724,7 @@
                         }
                     }
 
-                    const fallbackBanner = "{{ asset('public/images/program-details.png') }}";
+                    const fallbackBanner = "{{ asset('public/images/program-3.png') }}";
                     const bannerEl = document.querySelector('#registerModal .modal-banner');
                     const bannerSrc = data.banner ? data.banner : fallbackBanner;
                     if (bannerEl) {

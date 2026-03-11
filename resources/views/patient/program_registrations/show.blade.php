@@ -1,4 +1,4 @@
-﻿@php
+@php
     use App\Models\ProgramRegistration;
     $registration->loadMissing([
         'program',
@@ -145,7 +145,7 @@
                         <span class="font-medium">Signature:</span>
                         @if ($registration->signature)
                             <div class="mt-2">
-                                <img src="{{ asset('storage/app/public/' . ltrim($registration->signature, '/')) }}" alt="Signature" class="h-24 object-contain">
+                                <img src="{{ asset('storage/' . ltrim($registration->signature, '/')) }}" alt="Signature" class="h-24 object-contain">
                             </div>
                         @else
                             <p class="text-[#6C5F67]">N/A</p>

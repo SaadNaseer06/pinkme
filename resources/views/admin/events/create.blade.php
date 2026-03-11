@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.admin')
+@extends('admin.layouts.admin')
 
 @php
     $isEdit = isset($event);
@@ -89,7 +89,7 @@
                                     <div class="space-y-1 text-center">
                                         @if ($isEdit && $event->image)
                                             <div class="mb-4" id="current-image">
-                                                <img src="{{ asset('storage/app/public/' . ltrim($event->image, '/')) }}" alt="Current event image"
+                                                <img src="{{ asset('storage/' . ltrim($event->image, '/')) }}" alt="Current event image"
                                                     class="mx-auto h-32 w-auto rounded-lg shadow-sm">
                                                 <p class="mt-2 text-xs text-[#6C5B68]">Current image</p>
                                             </div>

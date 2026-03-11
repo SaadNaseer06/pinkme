@@ -1,4 +1,4 @@
-﻿@php
+@php
     $inputId = $inputId ?? 'program-banner';
     $bannerUrl = $bannerUrl ?? null;
 @endphp

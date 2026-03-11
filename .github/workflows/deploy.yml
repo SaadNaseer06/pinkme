@@ -62,6 +62,7 @@ jobs:
             (command -v composer >/dev/null 2>&1 && composer install --no-dev --optimize-autoloader --no-interaction || \
             (curl -sS https://getcomposer.org/installer | php -d allow_url_fopen=On -- --install-dir=. --filename=composer.phar && php -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader --no-interaction)) && \
             echo '=== Setting permissions ===' && chmod -R 775 storage bootstrap/cache && \
+            php artisan storage:link && \
             echo '=== Running migrations ===' && php artisan migrate --force && \
             echo '=== Rebuilding caches ===' && php artisan config:clear && php artisan cache:clear && \
             php artisan config:cache && php artisan route:cache && php artisan view:cache && \

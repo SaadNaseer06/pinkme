@@ -1188,6 +1188,7 @@
             });
         }
     </script>
+    @include('partials.image-fallback')
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-﻿@extends('case_manager.layouts.app')
+@extends('case_manager.layouts.app')
 
 @section('title', 'Patient Chats')
 
@@ -201,9 +201,9 @@
                     </div>
 
                     <footer class="border-t border-[#E4D6DF] bg-[#F3E8EF]">
-                        <form class="flex items-center gap-3 px-5 py-4" data-chat-form>
+                        <form class="flex flex-wrap items-center gap-3 px-5 py-4" data-chat-form>
                             <label
-                                class="p-2.5 rounded-full bg-white border border-[#E0D0D9] text-[#70626A] hover:text-[#9E2469] cursor-pointer">
+                                class="p-2.5 rounded-full bg-white border border-[#E0D0D9] text-[#70626A] hover:text-[#9E2469] cursor-pointer shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -212,6 +212,15 @@
                                 <input type="file" name="attachment" accept="image/*,application/pdf" class="hidden"
                                     data-chat-upload>
                             </label>
+                            <div class="hidden flex items-center gap-2 px-3 py-1.5 bg-white border border-[#E0D0D9] rounded-lg text-sm text-[#4C4047]"
+                                data-chat-file-preview>
+                                <span data-chat-file-name class="truncate max-w-[140px]"></span>
+                                <button type="button" data-chat-file-clear class="p-0.5 rounded text-[#91848C] hover:text-[#9E2469] hover:bg-[#F4D9E6] transition" title="Remove file">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
                             <input type="text" name="content" placeholder="Type your message"
                                 class="flex-1 bg-white border border-[#DACFD6] rounded-xl px-4 py-2.5 text-sm text-[#4C4047] focus:outline-none focus:border-[#9E2469]"
                                 autocomplete="off">

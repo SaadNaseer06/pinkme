@@ -9,6 +9,9 @@ class ChatConversation {
         this.form = root.querySelector('[data-chat-form]');
         this.input = this.form ? this.form.querySelector('input[name="content"]') : null;
         this.fileInput = this.form ? this.form.querySelector('[data-chat-upload]') : null;
+        this.filePreview = this.form ? this.form.querySelector('[data-chat-file-preview]') : null;
+        this.fileNameSpan = this.form ? this.form.querySelector('[data-chat-file-name]') : null;
+        this.fileClearBtn = this.form ? this.form.querySelector('[data-chat-file-clear]') : null;
         this.submitButton = this.form ? this.form.querySelector('button[type="submit"]') : null;
         this.currentUserId = Number(root.dataset.currentUserId);
         this.activeContactId = Number(root.dataset.activeContactId);
@@ -29,6 +32,8 @@ class ChatConversation {
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleIncoming = this.handleIncoming.bind(this);
+        this.handleFileChange = this.handleFileChange.bind(this);
+        this.handleFileClear = this.handleFileClear.bind(this);
 
         this.initialize();
     }
@@ -38,9 +43,40 @@ class ChatConversation {
             this.form.addEventListener('submit', this.handleSubmit);
         }
 
+        if (this.fileInput) {
+            this.fileInput.addEventListener('change', this.handleFileChange);
+        }
+        if (this.fileClearBtn) {
+            this.fileClearBtn.addEventListener('click', this.handleFileClear);
+        }
+
         this.scrollToBottom();
         this.subscribeToUpdates();
         this.startActivityPing();
+    }
+
+    handleFileChange() {
+        const file = this.fileInput?.files?.[0];
+        if (this.filePreview && this.fileNameSpan) {
+            if (file) {
+                this.fileNameSpan.textContent = file.name;
+                this.filePreview.classList.remove('hidden');
+            } else {
+                this.filePreview.classList.add('hidden');
+                this.fileNameSpan.textContent = '';
+            }
+        }
+    }
+
+    handleFileClear(event) {
+        event.preventDefault();
+        if (this.fileInput) {
+            this.fileInput.value = '';
+        }
+        if (this.filePreview && this.fileNameSpan) {
+            this.filePreview.classList.add('hidden');
+            this.fileNameSpan.textContent = '';
+        }
     }
 
     /** Ping so we're marked "in chat" and don't get new-message emails while viewing chat. */
@@ -91,6 +127,7 @@ class ChatConversation {
             if (this.fileInput) {
                 this.fileInput.value = '';
             }
+            this.handleFileChange();
         } catch (error) {
             console.error('[chat] unable to send message', error);
             window.alert('Unable to send message. Please try again.');

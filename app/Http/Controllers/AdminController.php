@@ -50,17 +50,12 @@ class AdminController extends Controller
             ->limit(5)
             ->get();
 
-        // Get monthly application data for charts
-        $monthlyApplications = Application::selectRaw('MONTH(submission_date) as month, COUNT(*) as count')
-            ->whereYear('submission_date', Carbon::now()->year)
-            ->groupBy('month')
-            ->pluck('count', 'month')
-            ->toArray();
-
-        // Fill missing months with 0
+        // Get monthly application data for charts (database-agnostic)
         $chartData = [];
         for ($i = 1; $i <= 12; $i++) {
-            $chartData[] = $monthlyApplications[$i] ?? 0;
+            $chartData[] = Application::whereYear('submission_date', Carbon::now()->year)
+                ->whereMonth('submission_date', $i)
+                ->count();
         }
 
         return view('admin.dashboard', compact(

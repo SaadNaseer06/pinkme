@@ -1,5 +1,6 @@
-﻿@php
+@php
     use Illuminate\Support\Facades\Auth;
+    use Illuminate\Support\Facades\DB;
     use App\Models\Application;
     use Carbon\Carbon;
 

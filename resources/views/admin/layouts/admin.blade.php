@@ -13,6 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
     @include('partials.theme-variables')
+    @include('partials.broadcasting-config')
     @vite('resources/js/app.js')
     @stack('head')
     <!-- Font Awesome CDN -->

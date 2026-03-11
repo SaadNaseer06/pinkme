@@ -19,8 +19,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="icon" href="{{ asset('public/images/favicon.png') }}" type="image/x-icon">
-    @vite(['resources/css/custom.css', 'resources/js/app.js'])
     @include('partials.theme-variables')
+    @include('partials.broadcasting-config')
+    @vite(['resources/css/custom.css', 'resources/js/app.js'])
     @stack('head')
 </head>
 <body class="bg-[#FFF8FC] font-sans flex min-h-screen gap-0">

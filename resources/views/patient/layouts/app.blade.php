@@ -31,8 +31,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     {{-- Favicon --}}
     <link rel="icon" href="{{ asset('public/images/favicon.png') }}" type="image/x-icon">
-    @vite(['resources/css/patient.css', 'resources/js/app.js'])
     @include('partials.theme-variables')
+    @include('partials.broadcasting-config')
+    @vite(['resources/css/patient.css', 'resources/js/app.js'])
     @stack('head')
 </head>
 

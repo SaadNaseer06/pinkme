@@ -518,13 +518,17 @@ class AdminController extends Controller
 
                 $financeName = $financeUser->profile->full_name ?? $financeUser->email ?? 'Unknown';
 
-                UserNotification::create([
-                    'user_id' => $financeUser->id,
-                    'title' => 'New Lead Assigned',
-                    'message' => 'A registration has been sent to you for budget allocation. Applicant: ' . ($reg->full_name ?? 'N/A') . ', Program: ' . ($reg->program->title ?? 'N/A'),
-                    'priority' => UserNotification::PRIORITY_IMPORTANT,
-                    'link_url' => route('finance.registrations.show', $reg),
-                ]);
+                try {
+                    UserNotification::create([
+                        'user_id' => $financeUser->id,
+                        'title' => 'New Lead Assigned',
+                        'message' => 'A registration has been sent to you for budget allocation. Applicant: ' . ($reg->full_name ?? 'N/A') . ', Program: ' . ($reg->program?->title ?? 'N/A'),
+                        'priority' => UserNotification::PRIORITY_IMPORTANT,
+                        'link_url' => route('finance.registrations.show', $reg),
+                    ]);
+                } catch (\Throwable $e) {
+                    report($e);
+                }
 
                 Log::info('Registration sent to finance', [
                     'registration_id' => $reg->id,

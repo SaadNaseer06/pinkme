@@ -111,13 +111,17 @@ class FinanceUserController extends Controller
         $invoice->update(['file_path' => $pdfPath]);
 
         if ($registration->user) {
-            UserNotification::create([
-                'user_id' => $registration->user_id,
-                'title' => 'Budget Allocated',
-                'message' => 'Budget has been allocated for your registration for "' . ($registration->program->title ?? '') . '". Invoice #' . $invoice->invoice_number . ' has been generated.',
-                'priority' => UserNotification::PRIORITY_IMPORTANT,
-                'link_url' => null,
-            ]);
+            try {
+                UserNotification::create([
+                    'user_id' => $registration->user_id,
+                    'title' => 'Budget Allocated',
+                    'message' => 'Budget has been allocated for your registration for "' . ($registration->program?->title ?? '') . '". Invoice #' . $invoice->invoice_number . ' has been generated.',
+                    'priority' => UserNotification::PRIORITY_IMPORTANT,
+                    'link_url' => null,
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         $adminUsers = User::query()
@@ -125,22 +129,30 @@ class FinanceUserController extends Controller
             ->get();
 
         foreach ($adminUsers as $admin) {
-            UserNotification::create([
-                'user_id' => $admin->id,
-                'title' => 'Budget Allocated by Finance',
-                'message' => 'Finance has allocated budget for ' . ($registration->full_name ?? 'N/A') . ' - ' . ($registration->program->title ?? 'Program') . '. Invoice #' . $invoice->invoice_number . ' ($' . number_format($invoice->amount, 2) . ').',
-                'priority' => UserNotification::PRIORITY_IMPORTANT,
-                'link_url' => route('admin.program_registrations.show', $registration),
-            ]);
-            if ($admin->email) {
-                Mail::to($admin->email)->send(new BudgetAllocatedToAdmin($registration, $invoice, $pdfContent));
+            try {
+                UserNotification::create([
+                    'user_id' => $admin->id,
+                    'title' => 'Budget Allocated by Finance',
+                    'message' => 'Finance has allocated budget for ' . ($registration->full_name ?? 'N/A') . ' - ' . ($registration->program?->title ?? 'Program') . '. Invoice #' . $invoice->invoice_number . ' ($' . number_format($invoice->amount, 2) . ').',
+                    'priority' => UserNotification::PRIORITY_IMPORTANT,
+                    'link_url' => route('admin.program_registrations.show', $registration),
+                ]);
+                if ($admin->email) {
+                    Mail::to($admin->email)->send(new BudgetAllocatedToAdmin($registration, $invoice, $pdfContent));
+                }
+            } catch (\Throwable $e) {
+                report($e);
             }
         }
 
         // Send email to patient (applicant)
         $patientEmail = $registration->user?->email ?? $registration->email;
         if ($patientEmail) {
-            Mail::to($patientEmail)->send(new BudgetAllocatedToPatient($registration, $invoice, $pdfContent));
+            try {
+                Mail::to($patientEmail)->send(new BudgetAllocatedToPatient($registration, $invoice, $pdfContent));
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         return redirect()

@@ -207,18 +207,26 @@ class CaseManagerController extends Controller
         ]);
 
         if ($registration->user) {
-            UserNotification::create([
-                'user_id' => $registration->user_id,
-                'title' => 'Program Registration Approved',
-                'message' => 'Your registration for "' . ($registration->program->title ?? 'a program') . '" has been approved.',
-                'priority' => UserNotification::PRIORITY_IMPORTANT,
-                'link_url' => route('patient.programRegistrations.show', $registration),
-            ]);
+            try {
+                UserNotification::create([
+                    'user_id' => $registration->user_id,
+                    'title' => 'Program Registration Approved',
+                    'message' => 'Your registration for "' . ($registration->program?->title ?? 'a program') . '" has been approved.',
+                    'priority' => UserNotification::PRIORITY_IMPORTANT,
+                    'link_url' => route('patient.programRegistrations.show', $registration),
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {
-            Mail::to($recipientEmail)->send(new ProgramRegistrationStatus($registration, 'Approved', $data['note'] ?? null));
+            try {
+                Mail::to($recipientEmail)->send(new ProgramRegistrationStatus($registration, 'Approved', $data['note'] ?? null));
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         return redirect()
@@ -252,18 +260,26 @@ class CaseManagerController extends Controller
         ]);
 
         if ($registration->user) {
-            UserNotification::create([
-                'user_id' => $registration->user_id,
-                'title' => 'Program Registration Rejected',
-                'message' => 'Your registration for "' . ($registration->program->title ?? 'a program') . '" has been rejected. Reason: ' . $data['note'],
-                'priority' => UserNotification::PRIORITY_IMPORTANT,
-                'link_url' => route('patient.programRegistrations.show', $registration),
-            ]);
+            try {
+                UserNotification::create([
+                    'user_id' => $registration->user_id,
+                    'title' => 'Program Registration Rejected',
+                    'message' => 'Your registration for "' . ($registration->program?->title ?? 'a program') . '" has been rejected. Reason: ' . $data['note'],
+                    'priority' => UserNotification::PRIORITY_IMPORTANT,
+                    'link_url' => route('patient.programRegistrations.show', $registration),
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {
-            Mail::to($recipientEmail)->send(new ProgramRegistrationStatus($registration, 'Rejected', $data['note']));
+            try {
+                Mail::to($recipientEmail)->send(new ProgramRegistrationStatus($registration, 'Rejected', $data['note']));
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         return redirect()
@@ -363,14 +379,18 @@ class CaseManagerController extends Controller
         ApplicationMissingRequest::where('application_id', $application->id)->delete();
 
         if ($patientUser = optional($application->patient)->user) {
-            $code = $application->code ?: ('APP-' . str_pad((string) $application->id, 6, '0', STR_PAD_LEFT));
-            UserNotification::create([
-                'user_id' => $patientUser->id,
-                'title' => 'Application Approved',
-                'message' => "Your application {$code} has been approved.",
-                'priority' => UserNotification::PRIORITY_IMPORTANT,
-                'link_url' => route('patient.viewApplication', $application->id),
-            ]);
+            try {
+                $code = $application->code ?: ('APP-' . str_pad((string) $application->id, 6, '0', STR_PAD_LEFT));
+                UserNotification::create([
+                    'user_id' => $patientUser->id,
+                    'title' => 'Application Approved',
+                    'message' => "Your application {$code} has been approved.",
+                    'priority' => UserNotification::PRIORITY_IMPORTANT,
+                    'link_url' => route('patient.viewApplication', $application->id),
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         return back()->with('success', 'The application has been approved successfully.');
@@ -400,14 +420,18 @@ class CaseManagerController extends Controller
         ApplicationMissingRequest::where('application_id', $application->id)->delete();
 
         if ($patientUser = optional($application->patient)->user) {
-            $code = $application->code ?: ('APP-' . str_pad((string) $application->id, 6, '0', STR_PAD_LEFT));
-            UserNotification::create([
-                'user_id' => $patientUser->id,
-                'title' => 'Application Rejected',
-                'message' => "Your application {$code} has been rejected. Reason: {$data['reason']}.",
-                'priority' => UserNotification::PRIORITY_IMPORTANT,
-                'link_url' => route('patient.viewApplication', $application->id),
-            ]);
+            try {
+                $code = $application->code ?: ('APP-' . str_pad((string) $application->id, 6, '0', STR_PAD_LEFT));
+                UserNotification::create([
+                    'user_id' => $patientUser->id,
+                    'title' => 'Application Rejected',
+                    'message' => "Your application {$code} has been rejected. Reason: {$data['reason']}.",
+                    'priority' => UserNotification::PRIORITY_IMPORTANT,
+                    'link_url' => route('patient.viewApplication', $application->id),
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         return back()->with('success', 'The application has been rejected and the applicant has been notified.');

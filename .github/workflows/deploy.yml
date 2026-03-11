@@ -13,6 +13,7 @@ jobs:
       - name: Deploy via SSH
         env:
           SSH_KEY: ${{ secrets.CPANEL_SSH_KEY }}
+          APP_URL: ${{ secrets.DEPLOY_APP_URL }}
         run: |
           set -e
           mkdir -p ~/.ssh
@@ -42,6 +43,7 @@ jobs:
             echo '=== Pulling latest code ===' && git fetch origin main && git reset --hard origin/main && \
             ([ -f .env ] || (cp .env.example .env && php artisan key:generate --force)) && \
             (grep -q 'APP_KEY=base64:' .env || php artisan key:generate --force) && \
+            ([ -z \"${{ secrets.DEPLOY_APP_URL }}\" ] || (sed -i 's|APP_URL=.*|APP_URL=${{ secrets.DEPLOY_APP_URL }}|' .env || true)) && \
             echo '=== Installing dependencies ===' && \
             (command -v composer >/dev/null 2>&1 && composer install --no-dev --optimize-autoloader --no-interaction || \
             (curl -sS https://getcomposer.org/installer | php -d allow_url_fopen=On -- --install-dir=. --filename=composer.phar && php -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader --no-interaction)) && \

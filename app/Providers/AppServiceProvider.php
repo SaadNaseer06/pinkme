@@ -9,6 +9,7 @@ use App\Mail\NewChatMessageEmail;
 use App\Mail\UserNotificationEmail;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -26,6 +27,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force correct base URL when app is in subdirectory (e.g. /pinkme)
+        $appUrl = config('app.url');
+        if ($appUrl && parse_url($appUrl, PHP_URL_PATH) && parse_url($appUrl, PHP_URL_PATH) !== '/') {
+            URL::forceRootUrl($appUrl);
+        }
+
         // Send email when a user receives a notification
         Event::listen(UserNotificationCreated::class, function (UserNotificationCreated $event): void {
             $notification = $event->notification;

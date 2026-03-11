@@ -16,6 +16,7 @@ use App\Models\UserProfile;
 use App\Models\ProgramRegistration;
 use App\Models\RegistrationInvoice;
 use App\Models\UserNotification;
+use App\Services\FinanceNotificationService;
 use App\Models\EventSponsorship;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
@@ -408,6 +409,8 @@ class AdminController extends Controller
 
                 $financeName = $financeUser->profile->full_name ?? $financeUser->email ?? 'Unknown';
 
+                FinanceNotificationService::notifyApplicationAssigned($financeUser, $application);
+
                 Log::info('Application sent to finance', [
                     'application_id' => $application->id,
                     'finance_user_id' => $financeUser->id,
@@ -518,17 +521,7 @@ class AdminController extends Controller
 
                 $financeName = $financeUser->profile->full_name ?? $financeUser->email ?? 'Unknown';
 
-                try {
-                    UserNotification::create([
-                        'user_id' => $financeUser->id,
-                        'title' => 'New Lead Assigned',
-                        'message' => 'A registration has been sent to you for budget allocation. Applicant: ' . ($reg->full_name ?? 'N/A') . ', Program: ' . ($reg->program?->title ?? 'N/A'),
-                        'priority' => UserNotification::PRIORITY_IMPORTANT,
-                        'link_url' => route('finance.registrations.show', $reg),
-                    ]);
-                } catch (\Throwable $e) {
-                    report($e);
-                }
+                FinanceNotificationService::notifyRegistrationAssigned($financeUser, $reg);
 
                 Log::info('Registration sent to finance', [
                     'registration_id' => $reg->id,

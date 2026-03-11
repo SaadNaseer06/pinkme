@@ -39,7 +39,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key \
             -p ${{ secrets.CPANEL_SSH_PORT }} \
             ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_HOST }} "set -e && cd ${{ secrets.DEPLOY_PATH }} && \
-            echo '=== Pulling latest code ===' && git pull origin main && \
+            echo '=== Pulling latest code ===' && git fetch origin main && git reset --hard origin/main && \
             ([ -f .env ] || (cp .env.example .env && php artisan key:generate --force)) && \
             (grep -q 'APP_KEY=base64:' .env || php artisan key:generate --force) && \
             echo '=== Installing dependencies ===' && \

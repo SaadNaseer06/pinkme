@@ -10,12 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Setup SSH key
+        run: |
+          # CPANEL_SSH_KEY must be base64-encoded (avoids GitHub multiline secret issues)
+          # Generate with: cat ~/.ssh/id_rsa | base64 -w 0
+          echo "${{ secrets.CPANEL_SSH_KEY }}" | base64 -d > deploy_key
+          chmod 600 deploy_key
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.CPANEL_HOST }}
           username: ${{ secrets.CPANEL_USERNAME }}
-          key: ${{ secrets.CPANEL_SSH_KEY }}
+          key_path: deploy_key
           port: ${{ secrets.CPANEL_SSH_PORT }}
           script: |
             set -e

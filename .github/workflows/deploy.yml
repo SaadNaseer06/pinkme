@@ -15,14 +15,23 @@ jobs:
           SSH_KEY: ${{ secrets.CPANEL_SSH_KEY }}
         run: |
           set -e
-          # CPANEL_SSH_KEY must be base64-encoded. Generate with: cat ~/.ssh/id_rsa | base64 -w 0
           mkdir -p ~/.ssh
-          echo "$SSH_KEY" | base64 -d > ~/.ssh/deploy_key
+          # Support both raw PEM and base64-encoded key
+          if echo "$SSH_KEY" | grep -q '^-----BEGIN'; then
+            echo "$SSH_KEY" > ~/.ssh/deploy_key
+          else
+            echo "$SSH_KEY" | tr -d '\n\r' | base64 -d > ~/.ssh/deploy_key 2>/dev/null || {
+              echo "ERROR: Invalid key. Use either:"
+              echo "  1) Raw PEM: paste full key (-----BEGIN ... -----END-----)"
+              echo "  2) Base64:  cat ~/.ssh/id_rsa | base64 -w 0  (Linux, no line breaks)"
+              exit 1
+            }
+          fi
           chmod 600 ~/.ssh/deploy_key
 
-          # Verify key
-          if [ ! -s ~/.ssh/deploy_key ]; then
-            echo "ERROR: Key file is empty. Ensure CPANEL_SSH_KEY is base64-encoded."
+          # Validate key format
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>&1; then
+            echo "ERROR: Key file invalid or passphrase-protected. Use an unencrypted key."
             exit 1
           fi
 

@@ -88,9 +88,9 @@ HTML;
                         </h2>
                         <p class="text-sm text-[#91848C] mb-6 app-text">Update your admin account details.</p>
 
-                        @if (session('success'))
+                        {{-- @if (session('success'))
                             <div class="mb-6 rounded-lg border-2 border-green-300 bg-green-50 px-4 py-3 text-green-800">{{ session('success') }}</div>
-                        @endif
+                        @endif --}}
 
                         <form action="{{ route('admin.settings.profile') }}" method="POST">
                             @csrf

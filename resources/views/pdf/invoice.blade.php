@@ -1,27 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Invoice {{ $invoice->invoice_number ?? '' }}</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; color: #213430; font-size: 11px; line-height: 1.5; margin: 0; padding: 30px; }
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            color: #213430;
+            font-size: 11px;
+            line-height: 1.5;
+            margin: 0;
+            padding: 30px;
+        }
+
         .header {
             background: #9E2469;
             color: #fff;
             padding: 24px 28px;
             margin: -30px -30px 28px -30px;
         }
-        .brand { font-size: 24px; font-weight: bold; letter-spacing: 0.5px; }
-        .tagline { font-size: 9px; opacity: 0.9; margin-top: 4px; }
-        .invoice-badge { text-align: right; }
-        .invoice-badge .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
-        .invoice-badge .number { font-size: 20px; font-weight: bold; margin-top: 2px; }
 
-        .info-grid { margin-bottom: 24px; }
-        .info-grid table { width: 100%; }
-        .info-grid td { padding: 4px 0; vertical-align: top; }
-        .info-grid td:first-child { width: 140px; color: #91848C; font-size: 10px; }
-        .applicant-name { font-size: 14px; font-weight: bold; color: #213430; }
+        .brand {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .tagline {
+            font-size: 9px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        .invoice-badge {
+            text-align: right;
+        }
+
+        .invoice-badge .label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .invoice-badge .number {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        .info-grid {
+            margin-bottom: 24px;
+        }
+
+        .info-grid table {
+            width: 100%;
+        }
+
+        .info-grid td {
+            padding: 4px 0;
+            vertical-align: top;
+        }
+
+        .info-grid td:first-child {
+            width: 140px;
+            color: #91848C;
+            font-size: 10px;
+        }
+
+        .applicant-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #213430;
+        }
 
         .details-table {
             width: 100%;
@@ -29,6 +81,7 @@
             margin: 24px 0;
             border: 1px solid #E5D2DE;
         }
+
         .details-table th {
             background: #F3E8EF;
             color: #213430;
@@ -40,14 +93,30 @@
             letter-spacing: 0.5px;
             border-bottom: 1px solid #E5D2DE;
         }
+
         .details-table td {
             padding: 12px 16px;
             border-bottom: 1px solid #F0E5EB;
         }
-        .details-table tr:last-child td { border-bottom: none; }
-        .amount-row { background: #FDF8FB; }
-        .amount-value { font-size: 20px; font-weight: bold; color: #9E2469; }
-        .status-paid { color: #20B354; font-weight: 600; }
+
+        .details-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .amount-row {
+            background: #FDF8FB;
+        }
+
+        .amount-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #9E2469;
+        }
+
+        .status-paid {
+            color: #20B354;
+            font-weight: 600;
+        }
 
         .total-box {
             margin-top: 24px;
@@ -55,9 +124,26 @@
             background: #F3E8EF;
             border: 1px solid #E5D2DE;
         }
-        .total-box .label { font-size: 10px; color: #91848C; margin-bottom: 4px; }
-        .total-box .value { font-size: 24px; font-weight: bold; color: #9E2469; }
-        .total-box .status { background: #20B354; color: #fff; padding: 8px 16px; font-size: 11px; font-weight: bold; }
+
+        .total-box .label {
+            font-size: 10px;
+            color: #91848C;
+            margin-bottom: 4px;
+        }
+
+        .total-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #9E2469;
+        }
+
+        .total-box .status {
+            background: #20B354;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: bold;
+        }
 
         .footer {
             margin-top: 32px;
@@ -69,6 +155,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <table style="width: 100%;">
@@ -122,10 +209,10 @@
             <td><span class="status-paid">{{ $invoice->status }}</span></td>
         </tr>
         @if (!empty($invoice->notes))
-        <tr>
-            <th>Notes</th>
-            <td>{{ $invoice->notes }}</td>
-        </tr>
+            <tr>
+                <th>Notes</th>
+                <td>{{ $invoice->notes }}</td>
+            </tr>
         @endif
     </table>
 
@@ -148,4 +235,5 @@
         <p style="margin-top: 6px;">Thank you for your support.</p>
     </div>
 </body>
+
 </html>

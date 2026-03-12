@@ -616,3 +616,24 @@ body {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     margin-right: 20px; /* Add some right margin */
 }
+
+/* Form submit loading state - prevents double-clicks */
+button.is-submit-loading,
+input[type="submit"].is-submit-loading {
+    cursor: not-allowed !important;
+    opacity: 0.8;
+}
+.form-loader-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: form-loader-spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+@keyframes form-loader-spin {
+    to { transform: rotate(360deg); }
+}

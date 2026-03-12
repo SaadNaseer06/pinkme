@@ -855,7 +855,7 @@ class AdminController extends Controller
             default => null,
         };
 
-        $apps = Application::query()
+        $exportQuery = Application::query()
             ->with([
                 'program:id,title',
                 'patient:id,user_id',
@@ -879,8 +879,7 @@ class AdminController extends Controller
                 });
             })
             ->orderByRaw('CASE WHEN reviewer_id IS NULL THEN 0 ELSE 1 END')
-            ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('created_at');
 
         $filename = 'applications_' . now()->format('Ymd_His') . '.csv';
         $headers  = [
@@ -898,7 +897,7 @@ class AdminController extends Controller
 
         $timezone = config('app.timezone');
 
-        return response()->stream(function () use ($apps, $statusLabel, $timezone) {
+        return response()->stream(function () use ($exportQuery, $statusLabel, $timezone) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, [
                 'Application ID',
@@ -912,7 +911,8 @@ class AdminController extends Controller
                 'Submitted At',
             ]);
 
-            foreach ($apps as $app) {
+            $exportQuery->chunk(100, function ($apps) use ($handle, $statusLabel, $timezone) {
+                foreach ($apps as $app) {
                 $patientProfile  = $app->patient?->user?->profile;
                 $reviewerProfile = $app->reviewer?->profile;
                 $missingDocs     = $app->missingRequests->isNotEmpty() ? 'Yes' : 'No';
@@ -931,7 +931,8 @@ class AdminController extends Controller
                     $missingDocs,
                     $submittedAt,
                 ]);
-            }
+                }
+            });
 
             fclose($handle);
         }, 200, $headers);

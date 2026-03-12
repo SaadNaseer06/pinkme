@@ -278,7 +278,7 @@ class EventController extends Controller
 
         $registration->loadMissing(['event', 'sponsor.profile']);
         if ($registration->sponsor?->email) {
-            Mail::to($registration->sponsor->email)->send(new EventRegistrationStatus($registration, 'Approved'));
+            Mail::to($registration->sponsor->email)->queue(new EventRegistrationStatus($registration, 'Approved'));
         }
         
         return back()->with('success', 'Event registration approved successfully!');
@@ -297,7 +297,7 @@ class EventController extends Controller
 
         $registration->loadMissing(['event', 'sponsor.profile']);
         if ($registration->sponsor?->email) {
-            Mail::to($registration->sponsor->email)->send(new EventRegistrationStatus($registration, 'Rejected'));
+            Mail::to($registration->sponsor->email)->queue(new EventRegistrationStatus($registration, 'Rejected'));
         }
         
         return back()->with('success', 'Event registration rejected.');

@@ -7,6 +7,7 @@ use App\Models\RegistrationInvoice;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Storage;
 
 class BudgetAllocatedToAdmin extends Mailable
 {
@@ -15,14 +16,14 @@ class BudgetAllocatedToAdmin extends Mailable
     public ProgramRegistration $registration;
     public RegistrationInvoice $invoice;
 
-    /** @var string|null Raw PDF content for attachment */
-    public ?string $pdfContent;
+    /** @var string|null Storage path to PDF for attachment (used when queued) */
+    public ?string $pdfPath;
 
-    public function __construct(ProgramRegistration $registration, RegistrationInvoice $invoice, ?string $pdfContent = null)
+    public function __construct(ProgramRegistration $registration, RegistrationInvoice $invoice, ?string $pdfPath = null)
     {
         $this->registration = $registration;
         $this->invoice = $invoice;
-        $this->pdfContent = $pdfContent;
+        $this->pdfPath = $pdfPath;
     }
 
     public function build()
@@ -41,8 +42,8 @@ class BudgetAllocatedToAdmin extends Mailable
                 'detailUrl' => route('admin.program_registrations.show', $this->registration),
             ]);
 
-        if ($this->pdfContent) {
-            $mailable->attachData($this->pdfContent, 'Invoice-' . $this->invoice->invoice_number . '.pdf', [
+        if ($this->pdfPath && Storage::exists($this->pdfPath)) {
+            $mailable->attachData(Storage::get($this->pdfPath), 'Invoice-' . $this->invoice->invoice_number . '.pdf', [
                 'mime' => 'application/pdf',
             ]);
         }

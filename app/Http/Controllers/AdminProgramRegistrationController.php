@@ -115,7 +115,7 @@ class AdminProgramRegistrationController extends Controller
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {
             try {
-                Mail::to($recipientEmail)->send(new ProgramRegistrationStatus($registration, 'Approved', $data['note'] ?? null));
+                Mail::to($recipientEmail)->queue(new ProgramRegistrationStatus($registration, 'Approved', $data['note'] ?? null));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -167,7 +167,7 @@ class AdminProgramRegistrationController extends Controller
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {
             try {
-                Mail::to($recipientEmail)->send(new ProgramRegistrationStatus($registration, 'Rejected', $data['note']));
+                Mail::to($recipientEmail)->queue(new ProgramRegistrationStatus($registration, 'Rejected', $data['note']));
             } catch (\Throwable $e) {
                 report($e);
             }

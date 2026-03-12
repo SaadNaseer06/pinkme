@@ -80,7 +80,7 @@ class AdminSponsorController extends Controller
 
         try {
             $loginUrl = route('login');
-            Mail::to($sponsor->email)->send(new SponsorCredentials($sponsor, $data['password'], $loginUrl));
+            Mail::to($sponsor->email)->queue(new SponsorCredentials($sponsor, $data['password'], $loginUrl));
         } catch (\Throwable $e) {
             Log::warning('Failed to send sponsor credentials email', [
                 'sponsor_id' => $sponsor->id ?? null,

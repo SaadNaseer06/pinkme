@@ -105,9 +105,8 @@ class FinanceUserController extends Controller
         // Generate and store invoice PDF
         $registration->load('program');
         $pdf = Pdf::loadView('pdf.invoice', compact('invoice', 'registration'));
-        $pdfContent = $pdf->output();
         $pdfPath = 'invoices/registration/' . $invoice->id . '_' . preg_replace('/[^a-zA-Z0-9\-]/', '', $invoice->invoice_number) . '.pdf';
-        Storage::put($pdfPath, $pdfContent);
+        Storage::put($pdfPath, $pdf->output());
         $invoice->update(['file_path' => $pdfPath]);
 
         if ($registration->user) {
@@ -138,18 +137,18 @@ class FinanceUserController extends Controller
                     'link_url' => route('admin.program_registrations.show', $registration),
                 ]);
                 if ($admin->email) {
-                    Mail::to($admin->email)->send(new BudgetAllocatedToAdmin($registration, $invoice, $pdfContent));
+                    Mail::to($admin->email)->queue(new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath));
                 }
             } catch (\Throwable $e) {
                 report($e);
             }
         }
 
-        // Send email to patient (applicant)
+        // Queue email to patient (applicant)
         $patientEmail = $registration->user?->email ?? $registration->email;
         if ($patientEmail) {
             try {
-                Mail::to($patientEmail)->send(new BudgetAllocatedToPatient($registration, $invoice, $pdfContent));
+                Mail::to($patientEmail)->queue(new BudgetAllocatedToPatient($registration, $invoice, $pdfPath));
             } catch (\Throwable $e) {
                 report($e);
             }

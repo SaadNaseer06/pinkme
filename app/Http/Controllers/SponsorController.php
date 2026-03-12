@@ -931,7 +931,7 @@ class SponsorController extends Controller
     private function sendWebinarRegistrationEmail(Webinar $webinar, $user): void
     {
         try {
-            Mail::to($user->email)->send(new WebinarRegistrationConfirmation($webinar, $user));
+            Mail::to($user->email)->queue(new WebinarRegistrationConfirmation($webinar, $user));
         } catch (\Throwable $e) {
             Log::warning('Failed to send webinar registration email', [
                 'user_id' => $user->id ?? null,

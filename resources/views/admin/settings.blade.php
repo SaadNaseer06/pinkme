@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.admin')
+@extends('admin.layouts.admin')
 
 @section('title', 'Settings')
 
@@ -51,19 +51,25 @@ HTML;
 
             <!-- Navigation Tabs -->
             <div class="flex flex-wrap mb-10">
-                <div class="w-full md:w-1/3">
+                <div class="w-full md:w-1/4">
                     <button onclick="showTab('general')" id="general-tab"
                         class="tab-btn w-full bg-[#9E2469] text-white py-4 px-6 font-normal text-center rounded-t-lg md:rounded-tr-none md:rounded-l-lg app-text">
                         General Details
                     </button>
                 </div>
-                <div class="w-full md:w-1/3">
+                <div class="w-full md:w-1/4">
+                    <button onclick="showTab('site')" id="site-tab"
+                        class="tab-btn w-full bg-[#F3E8EF] text-[#91848C] py-4 px-6 font-normal text-center app-text">
+                        Site Settings
+                    </button>
+                </div>
+                <div class="w-full md:w-1/4">
                     <button onclick="showTab('privacy')" id="privacy-tab"
                         class="tab-btn w-full bg-[#F3E8EF] text-[#91848C] py-4 px-6 font-normal text-center app-text">
                         Privacy Policy
                     </button>
                 </div>
-                <div class="w-full md:w-1/3">
+                <div class="w-full md:w-1/4">
                     <button onclick="showTab('terms')" id="terms-tab"
                         class="tab-btn w-full bg-[#F3E8EF] text-[#91848C] py-4 px-6 font-normal text-center rounded-b-lg md:rounded-b-none md:rounded-r-lg app-text">
                         Terms & Conditions
@@ -74,14 +80,72 @@ HTML;
             <!-- Tab Contents -->
             <div id="tabContents">
 
-                <!-- General Details -->
+                <!-- General Details (Admin Profile) -->
                 <div id="general" class="tab-content">
+                    <div class="bg-[#F3E8EF] rounded-lg p-8">
+                        <h2 class="text-xl text-gray-700 font-medium pb-4 border-b border-[#DCCFD8] mb-6 app-main">
+                            Admin Profile
+                        </h2>
+                        <p class="text-sm text-[#91848C] mb-6 app-text">Update your admin account details.</p>
+
+                        @if (session('success'))
+                            <div class="mb-6 rounded-lg border-2 border-green-300 bg-green-50 px-4 py-3 text-green-800">{{ session('success') }}</div>
+                        @endif
+
+                        <form action="{{ route('admin.settings.profile') }}" method="POST">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block font-light text-md text-[#213430] mb-1 app-text">Full Name</label>
+                                    <input type="text" name="full_name"
+                                        value="{{ old('full_name', optional($admin->profile)->full_name ?? $admin->email ?? '') }}"
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
+                                        placeholder="Your full name" />
+                                    @error('full_name')<p class="text-xs text-[#9E2469] mt-1">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label class="block font-light text-md text-[#213430] mb-1 app-text">Username</label>
+                                    <input type="text" name="username"
+                                        value="{{ old('username', optional($admin->profile)->username ?? '') }}"
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
+                                        placeholder="Username (optional)" />
+                                    @error('username')<p class="text-xs text-[#9E2469] mt-1">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label class="block font-light text-md text-[#213430] mb-1 app-text">Email <span class="text-[#9E2469]">*</span></label>
+                                    <input type="email" name="email"
+                                        value="{{ old('email', $admin->email ?? '') }}"
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
+                                        required />
+                                    @error('email')<p class="text-xs text-[#9E2469] mt-1">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label class="block font-light text-md text-[#213430] mb-1 app-text">Phone</label>
+                                    <input type="text" name="phone"
+                                        value="{{ old('phone', optional($admin->profile)->phone ?? '') }}"
+                                        class="w-full px-4 py-2 font-light rounded-md border border-[#DCCFD8] text-[#213430] bg-transparent focus:outline-none focus:ring-2 focus:ring-pink-300 app-text"
+                                        placeholder="Contact number" />
+                                    @error('phone')<p class="text-xs text-[#9E2469] mt-1">{{ $message }}</p>@enderror
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <button type="submit" class="px-6 py-2 bg-[#9E2469] text-white rounded-md shadow">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Site Settings -->
+                <div id="site" class="tab-content hidden">
                     <div class="bg-[#F3E8EF] rounded-lg p-8">
                         <h2 class="text-xl text-gray-700 font-medium pb-4 border-b border-[#DCCFD8] mb-6 app-main">
                             General Site Settings
                         </h2>
 
-                        <form action="{{ route('admin.settings.update', ['tab' => 'general']) }}" method="POST">
+                        <form action="{{ route('admin.settings.update', ['tab' => 'site']) }}" method="POST">
                             @csrf
                             @method('PUT')
 

@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -707,7 +708,38 @@ class AdminController extends Controller
     public function settings()
     {
         $settings = SiteSetting::first();
-        return view('admin.settings', compact('settings'));
+        $admin = Auth::user()->load('profile');
+        return view('admin.settings', compact('settings', 'admin'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $admin = Auth::user();
+
+        $rules = [
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($admin->id)],
+            'username' => ['nullable', 'string', 'max:255', Rule::unique('user_profiles', 'username')->ignore($admin->profile?->id)],
+            'full_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+        ];
+
+        $validated = $request->validate($rules);
+
+        $admin->email = $validated['email'];
+        $admin->save();
+
+        $profile = $admin->profile ?? UserProfile::firstOrCreate(
+            ['user_id' => $admin->id],
+            ['full_name' => $admin->email, 'phone' => '']
+        );
+        $profile->full_name = $validated['full_name'] ?? $profile->full_name ?? $admin->email;
+        $profile->phone = $validated['phone'] ?? $profile->phone ?? '';
+        $profile->username = $validated['username'] ?? $profile->username;
+        $profile->save();
+
+        return redirect()
+            ->route('admin.settings', ['tab' => 'general'])
+            ->with(['success' => 'Profile updated successfully.', 'active_tab' => 'general']);
     }
 
 

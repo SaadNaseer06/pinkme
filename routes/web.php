@@ -189,8 +189,9 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     // Route::put('/sponsors/{sponsor}', [AdminSponsorController::class, 'update'])->name('admin.sponsors.update');
     // Route::delete('/sponsors/{sponsor}', [AdminSponsorController::class, 'destroy'])->name('admin.sponsors.destroy');
     Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
+    Route::put('/settings/profile', [AdminController::class, 'updateProfile'])->name('admin.settings.profile');
     Route::put('/settings/{tab}', [SiteSettingController::class, 'update'])
-        ->whereIn('tab', ['general', 'privacy', 'terms'])
+        ->whereIn('tab', ['site', 'privacy', 'terms'])
         ->name('admin.settings.update');
     Route::post('/settings/upload', [SiteSettingController::class, 'upload'])->name('admin.settings.upload');
     Route::get('/admin/applications', [AdminController::class, 'applicationsIndex'])

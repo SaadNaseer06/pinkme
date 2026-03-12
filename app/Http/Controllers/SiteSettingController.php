@@ -24,7 +24,7 @@ class SiteSettingController extends Controller
         $rules = [];
 
         switch ($tab) {
-            case 'general':
+            case 'site':
                 $rules = [
                     'site_name'        => 'nullable|string|max:255',
                     'site_description' => 'nullable|string',

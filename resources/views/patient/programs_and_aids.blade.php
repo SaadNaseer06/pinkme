@@ -252,7 +252,7 @@
                                     <span>Option 1: May through June</span>
                                 </label>
                                 <label class="flex items-center gap-2">
-                                    <input type="radio" name="quarter" value="option2" class="text-[#9E2469]">
+                                    <input type="radio" name="quarter" value="option2" class="text-[#9E2469]" required>
                                     <span>Option 2: November through December</span>
                                 </label>
                             </div>
@@ -918,6 +918,13 @@
         const form = document.querySelector('#popupModal form');
         form?.addEventListener('submit', (e) => {
             syncSignature();
+            const quarterRadios = document.querySelectorAll('input[name="quarter"]');
+            const hasQuarterSelected = Array.from(quarterRadios).some((r) => r.checked);
+            if (!hasQuarterSelected) {
+                e.preventDefault();
+                alert('Please select an application period before submitting.');
+                return;
+            }
             const programCheckboxes = Array.from(document.querySelectorAll('input[name="programs_applied[]"]'));
             const hasProgramSelected = programCheckboxes.some((checkbox) => checkbox.checked);
             if (!hasProgramSelected) {

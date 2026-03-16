@@ -29,7 +29,7 @@ class ProgramRegistrationController extends Controller
             'medical_condition' => 'nullable|string|max:1000',
             'assistance_type' => 'nullable|string|max:255',
             'justification' => 'nullable|string|max:1000',
-            'quarter' => 'nullable|string|in:' . implode(',', $quarterOptions),
+            'quarter' => 'required|string|in:' . implode(',', $quarterOptions),
             'programs_applied' => 'required|array|min:1',
             'programs_applied.*' => 'string|max:255',
             'active_treatment' => 'required|boolean',

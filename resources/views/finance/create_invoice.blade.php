@@ -29,9 +29,16 @@
 
             <div>
                 <label class="block text-sm font-medium text-[#213430] mb-2">Amount ($) <span class="text-red-500">*</span></label>
-                <input type="number" name="amount" value="{{ old('amount') }}" step="0.01" min="0.01" required
-                    class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-[#4C4047] placeholder:text-[#B1A4AD] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-transparent transition"
-                    placeholder="0.00">
+                <p class="text-xs text-[#6C5F67] mb-2">Based on patient's selected program(s): {{ collect($registration->programs_applied ?? [])->implode(', ') ?: 'N/A' }}</p>
+                @if ($calculatedAmount !== null)
+                    <input type="number" name="amount" value="{{ old('amount', $calculatedAmount) }}" step="0.01" min="0.01" required readonly
+                        class="w-full rounded-xl border border-[#DCCFD8] bg-[#F7EBF3] px-4 py-3 text-[#4C4047] cursor-not-allowed">
+                    <p class="text-xs text-[#6C5F67] mt-1">This amount is set by the patient's program selection and cannot be edited.</p>
+                @else
+                    <input type="number" name="amount" value="{{ old('amount') }}" step="0.01" min="0.01" required
+                        class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-[#4C4047] placeholder:text-[#B1A4AD] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-transparent transition"
+                        placeholder="0.00">
+                @endif
                 @error('amount')
                     <p class="text-xs text-[#9E2469] mt-1">{{ $message }}</p>
                 @enderror

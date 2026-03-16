@@ -56,6 +56,34 @@ class FinanceUserController extends Controller
         return view('finance.show_registration', compact('registration'));
     }
 
+    /**
+     * Download or preview a bill statement attachment. Ensures finance user has access.
+     */
+    public function downloadBillStatement(Request $request, ProgramRegistration $registration, int $index)
+    {
+        if ($registration->finance_user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $paths = $registration->bill_statement_paths ?? [];
+        if (!is_array($paths) || !isset($paths[$index])) {
+            abort(404, 'Attachment not found.');
+        }
+
+        $path = $paths[$index];
+        $publicPath = ltrim(str_replace('public/', '', $path), '/');
+
+        if (!Storage::disk('public')->exists($publicPath)) {
+            abort(404, 'File not found.');
+        }
+
+        $filename = basename($path);
+        $fullPath = Storage::disk('public')->path($publicPath);
+        $disposition = $request->boolean('preview') ? 'inline' : 'attachment';
+
+        return response()->download($fullPath, $filename, [], $disposition);
+    }
+
     public function createInvoice(ProgramRegistration $registration)
     {
         if ($registration->finance_user_id !== Auth::id()) {
@@ -70,7 +98,9 @@ class FinanceUserController extends Controller
 
         $registration->load(['program', 'user.profile']);
 
-        return view('finance.create_invoice', compact('registration'));
+        $calculatedAmount = $registration->calculated_grant_amount;
+
+        return view('finance.create_invoice', compact('registration', 'calculatedAmount'));
     }
 
     public function storeInvoice(Request $request, ProgramRegistration $registration)
@@ -85,6 +115,8 @@ class FinanceUserController extends Controller
                 ->with('error', 'An invoice has already been generated for this registration.');
         }
 
+        $calculatedAmount = $registration->calculated_grant_amount;
+
         $data = $request->validate([
             'payment_purpose' => ['required', 'string', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0.01'],
@@ -92,11 +124,14 @@ class FinanceUserController extends Controller
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        // Use patient's calculated amount when available (non-editable by finance)
+        $amount = $calculatedAmount ?? $data['amount'];
+
         $invoice = RegistrationInvoice::create([
             'program_registration_id' => $registration->id,
             'issue_date' => now(),
             'payment_purpose' => $data['payment_purpose'],
-            'amount' => $data['amount'],
+            'amount' => $amount,
             'payment_method' => $data['payment_method'],
             'status' => 'Paid',
             'notes' => $data['notes'] ?? null,

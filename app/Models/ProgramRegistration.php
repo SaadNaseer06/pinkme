@@ -151,6 +151,27 @@ class ProgramRegistration extends Model
         };
     }
 
+    /**
+     * Calculate total grant amount from patient's selected programs (programs_applied).
+     * Parses "(up to $XXX)" from each program name and sums the amounts.
+     */
+    public function getCalculatedGrantAmountAttribute(): ?float
+    {
+        $programs = $this->programs_applied;
+        if (empty($programs) || !is_array($programs)) {
+            return null;
+        }
+
+        $total = 0;
+        foreach ($programs as $programName) {
+            if (preg_match('/\(up to \$(\d+)\)/i', (string) $programName, $m)) {
+                $total += (float) $m[1];
+            }
+        }
+
+        return $total > 0 ? round($total, 2) : null;
+    }
+
     public function getTreatmentLetterAttribute(): ?array
     {
         return $this->mapFile($this->treatment_letter_path);

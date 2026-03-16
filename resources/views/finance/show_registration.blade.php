@@ -1,4 +1,4 @@
-﻿@extends('finance.layouts.app')
+@extends('finance.layouts.app')
 
 @section('title', 'View Registration')
 
@@ -48,10 +48,29 @@
                 <h3 class="text-lg font-semibold text-[#213430] mb-3">Details</h3>
                 <hr class="border-[#DCCFD8] mb-4" />
                 <div class="space-y-5">
-                    <div><span class="font-medium">Medical Condition</span><p class="text-[#91848C] mt-1">{{ $registration->medical_condition ?? 'N/A' }}</p></div>
                     <div><span class="font-medium">Story</span><p class="text-[#91848C] mt-1">{{ Str::limit($registration->story ?? 'N/A', 200) }}</p></div>
                 </div>
             </div>
+        </div>
+
+        <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-[#213430] mb-3">Bill Statement Attachments</h3>
+            <hr class="border-[#DCCFD8] mb-4" />
+            @if (!empty($registration->bill_statements))
+                <ul class="space-y-2">
+                    @foreach ($registration->bill_statements as $index => $bill)
+                        <li class="flex items-center justify-between gap-2 bg-white rounded-md px-4 py-3 border border-[#E5D2DE]">
+                            <span class="text-[#213430] truncate">{{ $bill['filename'] }}</span>
+                            <div class="flex items-center gap-3 shrink-0">
+                                <a href="{{ route('finance.registrations.bill_statement.download', [$registration, $index]) }}?preview=1" target="_blank" class="text-[#9E2469] font-medium hover:underline">Preview</a>
+                                <a href="{{ route('finance.registrations.bill_statement.download', [$registration, $index]) }}" class="text-[#213430] font-medium hover:underline">Download</a>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <p class="text-[#6C5F67]">No bill statements uploaded.</p>
+            @endif
         </div>
 
         @if ($registration->registrationInvoices->isNotEmpty())

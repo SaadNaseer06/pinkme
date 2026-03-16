@@ -245,6 +245,7 @@ Route::prefix('finance')->middleware(['role.restrict'])->group(function () {
     Route::get('/dashboard', [FinanceUserController::class, 'dashboard'])->name('finance.dashboard');
     Route::get('/registrations', [FinanceUserController::class, 'registrations'])->name('finance.registrations');
     Route::get('/registrations/{registration}', [FinanceUserController::class, 'showRegistration'])->name('finance.registrations.show');
+    Route::get('/registrations/{registration}/bill-statement/{index}', [FinanceUserController::class, 'downloadBillStatement'])->name('finance.registrations.bill_statement.download')->where('index', '[0-9]+');
     Route::get('/registrations/{registration}/invoice/create', [FinanceUserController::class, 'createInvoice'])->name('finance.invoice.create');
     Route::post('/registrations/{registration}/invoice', [FinanceUserController::class, 'storeInvoice'])->name('finance.invoice.store');
 });

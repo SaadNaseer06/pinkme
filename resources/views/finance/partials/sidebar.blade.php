@@ -17,6 +17,11 @@
                 <img src="{{ request()->routeIs('finance.registrations*') || request()->routeIs('finance.invoice*') || request()->is('finance/registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}" alt="" />Patient Requests
             </a>
         </li>
+        <li class="{{ request()->routeIs('finance.guide') ? 'active' : '' }}">
+            <a href="{{ route('finance.guide') }}">
+                <img src="{{ request()->routeIs('finance.guide') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}" alt="" />Tutorial
+            </a>
+        </li>
     </ul>
 </div>
 
@@ -35,6 +40,12 @@
                 <a href="{{ route('finance.registrations') }}">
                     <span class="icon"><img src="{{ request()->routeIs('finance.registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}" alt="" /></span>
                     <span class="title">Patient Requests</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('finance.guide') ? 'hovered' : '' }}">
+                <a href="{{ route('finance.guide') }}">
+                    <span class="icon"><img src="{{ request()->routeIs('finance.guide') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}" alt="" /></span>
+                    <span class="title">Tutorial</span>
                 </a>
             </li>
         </ul>

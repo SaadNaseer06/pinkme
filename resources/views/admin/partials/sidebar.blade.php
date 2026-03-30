@@ -75,6 +75,11 @@
                     src="{{ request()->is('admin/settings') ? asset('public/images/setting-pink.svg') : asset('public/images/setting.svg') }}"
                     alt="" />Setting</a>
         </li>
+        <li class="{{ request()->routeIs('admin.guide') ? 'active' : '' }}">
+            <a href="{{ route('admin.guide') }}">
+                <img src="{{ request()->routeIs('admin.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
+                     alt="Tutorial" />Tutorial</a>
+        </li>
     </ul>
 </div>
 
@@ -180,6 +185,13 @@
                     <span class="icon"><img
                             src="{{ request()->is('admin/settings') ? asset('public/images/setting-pink.svg') : asset('public/images/setting.svg') }}" /></span>
                     <span class="title">Settings</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('admin.guide') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.guide') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('admin.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}" /></span>
+                    <span class="title">Tutorial</span>
                 </a>
             </li>
         </ul>

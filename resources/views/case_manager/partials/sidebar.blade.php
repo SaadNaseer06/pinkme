@@ -31,6 +31,10 @@
                 href="{{ route('case_manager.patientChats') }}"><img
                     src="{{ request()->routeIs('case_manager.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"
                     alt="">Patient Chats</a></li>
+        <li class="{{ request()->routeIs('case_manager.guide') ? 'active' : '' }}"><a
+                href="{{ route('case_manager.guide') }}"><img
+                    src="{{ request()->routeIs('case_manager.guide') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}"
+                    alt="">Tutorial</a></li>
         <li class="{{ request()->routeIs('case_manager.setting') ? 'active' : '' }}"><a
                 href="{{ route('case_manager.setting') }}"><img
                     src="{{ request()->routeIs('case_manager.setting') ? asset('public/images/setting-pink.svg') : asset('public/images/setting.svg') }}"
@@ -78,6 +82,14 @@
                             src="{{ request()->routeIs('case_manager.patientChats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"
                             alt="" /></span>
                     <span class="title">Patient Chats</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('case_manager.guide') ? 'hovered' : '' }}">
+                <a href="{{ route('case_manager.guide') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('case_manager.guide') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}"
+                            alt="" /></span>
+                    <span class="title">Tutorial</span>
                 </a>
             </li>
             <li class="{{ request()->routeIs('case_manager.setting') ? 'hovered' : '' }}">

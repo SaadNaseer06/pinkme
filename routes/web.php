@@ -109,6 +109,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     // Admin Routes
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/tutorial', [PageController::class, 'adminGuide'])->name('admin.guide');
     Route::get('/applications', [AdminController::class, 'applications'])->name('admin.applications');
     Route::get('/application/{id}', [AdminController::class, 'viewApplication'])->name('admin.viewApplication');
     Route::post('/applications/{id}/assign-reviewer', [AdminController::class, 'assignReviewer'])->name('admin.assignReviewer');
@@ -243,6 +244,7 @@ Route::prefix('api')->name('api.')->group(function () {
 
 Route::prefix('finance')->middleware(['role.restrict'])->group(function () {
     Route::get('/dashboard', [FinanceUserController::class, 'dashboard'])->name('finance.dashboard');
+    Route::get('/tutorial', [PageController::class, 'financeGuide'])->name('finance.guide');
     Route::get('/registrations', [FinanceUserController::class, 'registrations'])->name('finance.registrations');
     Route::get('/registrations/{registration}', [FinanceUserController::class, 'showRegistration'])->name('finance.registrations.show');
     Route::get('/registrations/{registration}/bill-statement/{index}', [FinanceUserController::class, 'downloadBillStatement'])->name('finance.registrations.bill_statement.download')->where('index', '[0-9]+');
@@ -253,6 +255,7 @@ Route::prefix('finance')->middleware(['role.restrict'])->group(function () {
 Route::prefix('case_manager')->middleware(['role.restrict'])->group(function () {
     // Case Manager Dashboard Routes
     Route::get('/dashboard', [CaseManagerController::class, 'dashboard'])->name('case_manager.dashboard');
+    Route::get('/tutorial', [PageController::class, 'caseManagerGuide'])->name('case_manager.guide');
     Route::get('/my-application', [CaseManagerController::class, 'myApplication'])->name('case_manager.myApplication');
     Route::get('/program-registrations', [CaseManagerController::class, 'programRegistrations'])->name('case_manager.program_registrations.index');
     Route::get('/program-registrations/{registration}', [CaseManagerController::class, 'showProgramRegistration'])->name('case_manager.program_registrations.show');
@@ -277,6 +280,7 @@ Route::prefix('patient')->middleware(['role.restrict'])->group(function () {
     Route::get('/programs/{id}', [ProgramController::class, 'show'])->name('patient.programs.show');
     Route::get('/my-applications', [PatientController::class, 'myApplications'])->name('patient.applications');
     Route::get('/dashboard', [PatientController::class, 'dashboard'])->name('patient.dashboard');
+    Route::get('/tutorial', [PageController::class, 'patientGuide'])->name('patient.guide');
     Route::get('/my-application', [PatientController::class, 'myApplications'])->name('patient.myApplication');
     Route::get('/programs-and-aids', [PatientController::class, 'programsAndAids'])->name('patient.programsAndAids');
     Route::get('/patient-chats', [PatientController::class, 'patientChats'])->name('patient.patientChats');

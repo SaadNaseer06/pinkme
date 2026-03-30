@@ -42,7 +42,7 @@ class LoginController extends Controller
                 Cookie::queue(Cookie::forget('remembered_password'));
             }
 
-            // Redirect to intended page (e.g. page user was trying to access before login), or role-based dashboard
+            // Always send users to their role dashboard after login.
             $roleName = Auth::user()->role->name;
             $defaultUrl = match ($roleName) {
                 'admin' => route('admin.dashboard'),
@@ -52,7 +52,9 @@ class LoginController extends Controller
                 default => url('/'),
             };
 
-            return redirect()->intended($defaultUrl);
+            $request->session()->forget('url.intended');
+
+            return redirect()->to($defaultUrl);
         }
 
         if (! $request->filled('remember')) {

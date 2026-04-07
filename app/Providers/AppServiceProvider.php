@@ -7,9 +7,11 @@ use App\Events\UserNotificationCreated;
 use App\Http\Controllers\ChatMessageController;
 use App\Mail\NewChatMessageEmail;
 use App\Mail\UserNotificationEmail;
+use App\Models\Patient;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -32,6 +34,14 @@ class AppServiceProvider extends ServiceProvider
         if ($appUrl && parse_url($appUrl, PHP_URL_PATH) && parse_url($appUrl, PHP_URL_PATH) !== '/') {
             URL::forceRootUrl($appUrl);
         }
+
+        View::composer('patient.partials.sidebar', function ($view): void {
+            $user = auth()->user();
+            $view->with(
+                'patientCanUseChat',
+                $user ? Patient::userHasAssignedCaseManager($user) : false
+            );
+        });
 
         // Send email when a user receives a notification
         Event::listen(UserNotificationCreated::class, function (UserNotificationCreated $event): void {

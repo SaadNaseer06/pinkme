@@ -6,6 +6,7 @@ use App\Events\MessageSent;
 use App\Models\Application;
 use App\Models\Message;
 use App\Mail\ChatMessageReceived;
+use App\Models\Patient;
 use App\Models\ProgramRegistration;
 use App\Models\User;
 use App\Models\UserNotification;
@@ -133,6 +134,9 @@ class ChatMessageController extends Controller
     public function activity(Request $request): JsonResponse
     {
         $user = $request->user();
+        if (optional($user->role)->name === 'patient' && ! Patient::userHasAssignedCaseManager($user)) {
+            return response()->json(['ok' => false], 403);
+        }
         $this->markUserActiveInChat($user->id);
         return response()->json(['ok' => true]);
     }
@@ -153,6 +157,10 @@ class ChatMessageController extends Controller
         $contactRole = optional($contact->role)->name;
 
         if ($authRole === 'patient') {
+            if (! Patient::userHasAssignedCaseManager($authUser)) {
+                abort(403);
+            }
+
             if (!in_array($contactRole, ['admin', 'casemanager'], true)) {
                 abort(403);
             }

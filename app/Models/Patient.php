@@ -31,4 +31,29 @@ class Patient extends Model
     {
         return $this->hasMany(Application::class);
     }
+
+    /**
+     * Patient may use portal chat only after a case manager is assigned (program registration
+     * assignment or legacy application reviewer).
+     */
+    public static function userHasAssignedCaseManager(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        $hasRegistration = ProgramRegistration::query()
+            ->where('user_id', $user->id)
+            ->whereNotNull('assigned_case_manager_id')
+            ->exists();
+
+        $patientId = static::query()->where('user_id', $user->id)->value('id');
+        $hasApplicationReviewer = $patientId
+            && Application::query()
+                ->where('patient_id', $patientId)
+                ->whereNotNull('reviewer_id')
+                ->exists();
+
+        return $hasRegistration || $hasApplicationReviewer;
+    }
 }

@@ -146,6 +146,13 @@ class PatientController extends Controller
     public function patientChats(Request $request)
     {
         $user = Auth::user();
+
+        if (! Patient::userHasAssignedCaseManager($user)) {
+            return redirect()
+                ->route('patient.myApplication')
+                ->with('warning', __('Chat is available after a case manager is assigned to your application.'));
+        }
+
         $patient = Patient::firstOrCreate(['user_id' => $user->id]);
 
         $applicationCaseManagers = Application::where('patient_id', $patient->id)

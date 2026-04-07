@@ -78,14 +78,23 @@
     /*
      * Sidebar SVGs were authored for the old dark bar; on light sidebar inactive icons read as white/washed out.
      * Tint inactive icons to body text #213430; remove filter on active row (pink icon assets).
+     * Brand PNG is always a direct child of the link (a > img), never inside .icon — never tint those.
      */
-    .navigation ul li:not(:nth-child(1)):not(.hovered) a .icon img {
+    .navigation ul li a > img {
+        filter: none !important;
+        opacity: 1 !important;
+    }
+    .navigation ul li:not(.hovered) a .icon img {
         filter: brightness(0) saturate(100%) invert(13%) sepia(10%) saturate(618%) hue-rotate(131deg) brightness(95%) contrast(92%);
         opacity: 1;
     }
     .navigation ul li.hovered a .icon img {
         filter: none !important;
         opacity: 1;
+    }
+    .mobile-sidebar .mobile-logo img {
+        filter: none !important;
+        opacity: 1 !important;
     }
     .mobile-sidebar .mobile-menu li:not(.active) a img {
         filter: brightness(0) saturate(100%) invert(13%) sepia(10%) saturate(618%) hue-rotate(131deg) brightness(95%) contrast(92%);

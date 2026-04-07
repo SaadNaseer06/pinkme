@@ -25,13 +25,21 @@
         </div>
 
         <div class="rounded-2xl border border-[#E9DCE7] bg-white shadow-lg shadow-[#9E2469]/10 p-8">
+            @php
+                $rememberedEmailValue = old('email', $rememberedStaffEmail ?? '');
+                $hasOldInput = session()->has('_old_input');
+                $rememberedPasswordValue = $hasOldInput ? '' : ($rememberedStaffPassword ?? '');
+                $rememberCheckboxChecked = $hasOldInput
+                    ? old('remember') !== null
+                    : (!empty($rememberedEmailValue) || !empty($rememberedPasswordValue));
+            @endphp
             <form method="POST" action="{{ route('login.staff.submit') }}" class="space-y-5">
                 @csrf
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-[#213430] mb-1.5">Email</label>
-                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email"
-                        autofocus
+                    <input id="email" type="email" name="email" value="{{ $rememberedEmailValue }}" required
+                        autocomplete="email" autofocus
                         class="w-full rounded-xl border border-[#DCCFD8] px-4 py-3 text-sm text-[#213430] placeholder:text-[#91848C] outline-none transition focus:border-[#9E2469] focus:ring-2 focus:ring-[#9E2469]/20 @error('email') border-red-400 @enderror">
                     @error('email')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -40,7 +48,8 @@
 
                 <div>
                     <label for="password" class="block text-sm font-medium text-[#213430] mb-1.5">Password</label>
-                    <input id="password" type="password" name="password" required autocomplete="current-password"
+                    <input id="password" type="password" name="password" value="{{ $rememberedPasswordValue }}" required
+                        autocomplete="current-password"
                         class="w-full rounded-xl border border-[#DCCFD8] px-4 py-3 text-sm text-[#213430] outline-none transition focus:border-[#9E2469] focus:ring-2 focus:ring-[#9E2469]/20 @error('password') border-red-400 @enderror">
                     @error('password')
                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -48,10 +57,10 @@
                 </div>
 
                 <div class="flex items-center justify-between gap-3">
-                    <label class="inline-flex items-center gap-2 text-sm text-[#6C5B68] cursor-pointer">
-                        <input type="checkbox" name="remember" value="1"
+                    <label for="staff-remember" class="inline-flex items-center gap-2 text-sm text-[#6C5B68] cursor-pointer">
+                        <input id="staff-remember" type="checkbox" name="remember" value="1"
                             class="rounded border-[#DCCFD8] text-[#9E2469] focus:ring-[#9E2469]"
-                            {{ old('remember') ? 'checked' : '' }}>
+                            {{ $rememberCheckboxChecked ? 'checked' : '' }}>
                         Remember me
                     </label>
                     <a href="{{ route('password.request') }}"
@@ -66,7 +75,7 @@
         </div>
 
         <p class="mt-6 text-center text-sm text-[#6C5B68]">
-            Patients and sponsors:
+            Patients:
             <a href="{{ route('register', ['tab' => 'login']) }}" class="font-medium text-[#9E2469] hover:underline">Main
                 login &amp; registration</a>
         </p>

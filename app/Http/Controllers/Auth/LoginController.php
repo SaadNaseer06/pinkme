@@ -12,9 +12,16 @@ class LoginController extends Controller
     /** Roles allowed to use the dedicated staff login page (email + password). */
     private const STAFF_ROLES = ['admin', 'casemanager', 'finance'];
 
+    private const COOKIE_STAFF_EMAIL = 'staff_remembered_email';
+
+    private const COOKIE_STAFF_PASSWORD = 'staff_remembered_password';
+
     public function showStaffLoginForm()
     {
-        return view('auth.staff_login');
+        return view('auth.staff_login', [
+            'rememberedStaffEmail' => Cookie::get(self::COOKIE_STAFF_EMAIL),
+            'rememberedStaffPassword' => Cookie::get(self::COOKIE_STAFF_PASSWORD),
+        ]);
     }
 
     /**
@@ -27,12 +34,19 @@ class LoginController extends Controller
             'password' => ['required'],
         ]);
 
+        $remember = $request->boolean('remember');
+
         if (! Auth::attempt(
             ['email' => $request->email, 'password' => $request->password],
-            $request->boolean('remember')
+            $remember
         )) {
+            if (! $remember) {
+                Cookie::queue(Cookie::forget(self::COOKIE_STAFF_EMAIL));
+            }
+            Cookie::queue(Cookie::forget(self::COOKIE_STAFF_PASSWORD));
+
             return redirect()->route('login.staff')
-                ->withInput($request->only('email'))
+                ->withInput($request->only('email', 'remember'))
                 ->withErrors([
                     'email' => __('These credentials do not match our records.'),
                 ]);
@@ -46,11 +60,24 @@ class LoginController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
+            if (! $remember) {
+                Cookie::queue(Cookie::forget(self::COOKIE_STAFF_EMAIL));
+            }
+            Cookie::queue(Cookie::forget(self::COOKIE_STAFF_PASSWORD));
+
             return redirect()->route('login.staff')
-                ->withInput($request->only('email'))
+                ->withInput($request->only('email', 'remember'))
                 ->withErrors([
                     'email' => __('This sign-in page is for staff only. Patients should use the main login.'),
                 ]);
+        }
+
+        if ($remember) {
+            Cookie::queue(self::COOKIE_STAFF_EMAIL, $request->email, 60 * 24 * 30);
+            Cookie::queue(self::COOKIE_STAFF_PASSWORD, $request->password, 60 * 24 * 30);
+        } else {
+            Cookie::queue(Cookie::forget(self::COOKIE_STAFF_EMAIL));
+            Cookie::queue(Cookie::forget(self::COOKIE_STAFF_PASSWORD));
         }
 
         $request->session()->regenerate();
@@ -85,13 +112,15 @@ class LoginController extends Controller
         // Allow login by email or phone
         $fieldType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
 
+        $remember = $request->boolean('remember');
+
         if (Auth::attempt(
             [$fieldType => $request->login, 'password' => $request->password],
-            $request->filled('remember')
+            $remember
         )) {
             $request->session()->regenerate();
 
-            if ($request->filled('remember')) {
+            if ($remember) {
                 Cookie::queue('remembered_login', $request->login, 60 * 24 * 30);
                 Cookie::queue('remembered_password', $request->password, 60 * 24 * 30);
             } else {
@@ -114,7 +143,7 @@ class LoginController extends Controller
             return redirect()->to($defaultUrl);
         }
 
-        if (! $request->filled('remember')) {
+        if (! $remember) {
             Cookie::queue(Cookie::forget('remembered_login'));
         }
 

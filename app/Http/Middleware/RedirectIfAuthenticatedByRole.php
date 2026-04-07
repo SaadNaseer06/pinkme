@@ -23,6 +23,8 @@ class RedirectIfAuthenticatedByRole
                     return redirect()->route('case_manager.dashboard');
                 case 'patient':
                     return redirect()->route('patient.dashboard');
+                case 'finance':
+                    return redirect()->route('finance.dashboard');
                 default:
                     // fallback if role not recognized
                     return redirect()->route('register', ['tab' => 'login']);

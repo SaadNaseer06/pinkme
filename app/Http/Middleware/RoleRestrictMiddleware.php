@@ -8,11 +8,19 @@ use Illuminate\Support\Facades\Auth;
 
 class RoleRestrictMiddleware
 {
+    /** @var list<string> */
+    private const STAFF_PORTAL_PREFIXES = ['admin', 'case_manager', 'finance'];
+
     public function handle(Request $request, Closure $next)
     {
         $user = Auth::user();
         if (!$user) {
-            return redirect()->guest(route('register', ['tab' => 'login']));
+            $prefix = ltrim((string) $request->route()?->getPrefix(), '/');
+            $guestLogin = in_array($prefix, self::STAFF_PORTAL_PREFIXES, true)
+                ? route('login.staff')
+                : route('register', ['tab' => 'login']);
+
+            return redirect()->guest($guestLogin);
         }
         $role = $user->role->name;
         $routePrefix = ltrim($request->route()->getPrefix(), '/');

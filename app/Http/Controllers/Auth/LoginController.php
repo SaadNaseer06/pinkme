@@ -9,6 +9,63 @@ use Illuminate\Support\Facades\Cookie;
 
 class LoginController extends Controller
 {
+    /** Roles allowed to use the dedicated staff login page (email + password). */
+    private const STAFF_ROLES = ['admin', 'casemanager', 'finance'];
+
+    public function showStaffLoginForm()
+    {
+        return view('auth.staff_login');
+    }
+
+    /**
+     * Sign-in for admin, case managers, and finance users only.
+     */
+    public function staffLogin(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (! Auth::attempt(
+            ['email' => $request->email, 'password' => $request->password],
+            $request->boolean('remember')
+        )) {
+            return redirect()->route('login.staff')
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'email' => __('These credentials do not match our records.'),
+                ]);
+        }
+
+        $user = Auth::user();
+        $roleName = $user->role?->name;
+
+        if (! in_array($roleName, self::STAFF_ROLES, true)) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login.staff')
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'email' => __('This sign-in page is for staff only. Patients should use the main login.'),
+                ]);
+        }
+
+        $request->session()->regenerate();
+        $request->session()->forget('url.intended');
+
+        $defaultUrl = match ($roleName) {
+            'admin' => route('admin.dashboard'),
+            'casemanager' => route('case_manager.dashboard'),
+            'finance' => route('finance.dashboard'),
+            default => route('login.staff'),
+        };
+
+        return redirect()->to($defaultUrl);
+    }
+
     public function showLoginForm()
     {
         return view('auth.signup_login', [
@@ -74,9 +131,15 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        $roleName = Auth::user()?->role?->name;
+        $wasStaff = in_array($roleName, self::STAFF_ROLES, true);
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('register', ['tab' => 'login']);
+
+        return $wasStaff
+            ? redirect()->route('login.staff')
+            : redirect()->route('register', ['tab' => 'login']);
     }
 }

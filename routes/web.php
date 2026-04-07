@@ -67,6 +67,10 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])
     ->middleware('redirect.by.role')
     ->name('login');
 
+Route::get('/staff/login', [LoginController::class, 'showStaffLoginForm'])
+    ->middleware('redirect.by.role')
+    ->name('login.staff');
+
 Route::middleware('guest')->group(function () {
     Route::get('/password/forgot', [ForgotPasswordController::class, 'showLinkRequestForm'])
         ->name('password.request');
@@ -94,6 +98,7 @@ Route::post('/register', [RegisterController::class, 'register']);
 
 
 Route::post('/login', [LoginController::class, 'login']);
+Route::post('/staff/login', [LoginController::class, 'staffLogin'])->name('login.staff.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {

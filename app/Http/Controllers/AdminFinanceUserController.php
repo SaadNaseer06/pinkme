@@ -70,7 +70,6 @@ class AdminFinanceUserController extends Controller
                     $user,
                     $plainPassword,
                     'Finance',
-                    route('register', ['tab' => 'login']),
                 ),
             );
         } catch (\Throwable $e) {

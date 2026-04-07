@@ -21,7 +21,6 @@ class StaffAccountCredentialsEmail extends Mailable
         public string $plainPassword,
         /** e.g. "Case Manager" or "Finance" */
         public string $roleLabel,
-        public string $loginUrl,
     ) {
         $this->user = $user->loadMissing('profile');
     }
@@ -33,6 +32,8 @@ class StaffAccountCredentialsEmail extends Mailable
             ?? 'there';
 
         $appName = config('app.name', 'Pink Me');
+        // Always staff portal — do not use register/patient login here.
+        $staffLoginUrl = route('login.staff');
 
         return $this
             ->subject('Your ' . $appName . ' ' . $this->roleLabel . ' account')
@@ -42,7 +43,7 @@ class StaffAccountCredentialsEmail extends Mailable
                 'email' => $this->user->email,
                 'password' => $this->plainPassword,
                 'roleLabel' => $this->roleLabel,
-                'loginUrl' => $this->loginUrl,
+                'loginUrl' => $staffLoginUrl,
                 'appName' => $appName,
             ]);
     }

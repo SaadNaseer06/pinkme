@@ -65,7 +65,6 @@ class AdminCaseManagerController extends Controller
                     $user,
                     $plainPassword,
                     'Case Manager',
-                    route('register', ['tab' => 'login']),
                 ),
             );
         } catch (\Throwable $e) {

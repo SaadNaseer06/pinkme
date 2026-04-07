@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ProgramRegistration;
 use App\Models\SponsorshipProgram;
+use App\Support\ProgramDefaultTemplate;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Program;
 use Illuminate\Http\Request;
@@ -117,10 +118,26 @@ class ProgramController extends Controller
 
     public function create()
     {
-        $defaultProgram = Program::orderByDesc('id')->first();
-        $defaultFields = $defaultProgram?->custom_fields ?? [];
+        $defaultProgram = Program::query()->orderByDesc('id')->first();
 
-        return view('admin.programs.create', compact('defaultProgram', 'defaultFields'));
+        if ($defaultProgram) {
+            $defaultFields = $defaultProgram->custom_fields ?? [];
+            $defaultProgramTitle = $defaultProgram->title;
+        } else {
+            $defaultFields = ProgramDefaultTemplate::customFields();
+            $defaultProgramTitle = 'Recommended starter';
+        }
+
+        $usesStarterTemplate = $defaultProgram === null;
+        $applyDefaultOnLoad = $usesStarterTemplate && empty(old('custom_fields'));
+
+        return view('admin.programs.create', compact(
+            'defaultProgram',
+            'defaultFields',
+            'defaultProgramTitle',
+            'usesStarterTemplate',
+            'applyDefaultOnLoad',
+        ));
     }
 
     public function store(Request $r)
@@ -495,7 +512,7 @@ class ProgramController extends Controller
         return match ($name) {
             'title' => 'Title',
             'description' => 'Description',
-            'event_date' => 'Date',
+            'event_date' => 'Program date',
             'event_time' => 'Time',
             'application_start_date' => 'Application Start Date',
             'application_end_date' => 'Application End Date',

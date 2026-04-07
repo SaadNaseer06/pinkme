@@ -3,6 +3,8 @@
     $initialFields = $initialFields ?? [];
     $defaultFields = $defaultFields ?? [];
     $defaultProgramTitle = $defaultProgramTitle ?? null;
+    $applyDefaultOnLoad = $applyDefaultOnLoad ?? false;
+    $usesStarterTemplate = $usesStarterTemplate ?? false;
 @endphp
 
 <section class="rounded-2xl border border-[#E9DCE7] bg-white shadow-sm">
@@ -22,13 +24,19 @@
                 @if (!empty($defaultFields))
                     <div class="rounded-lg border border-[#DCCFD8] bg-white px-3 py-3">
                         <div class="flex items-center justify-between gap-2">
-                            <p class="text-xs font-semibold text-[#213430]">Default form</p>
+                            <p class="text-xs font-semibold text-[#213430]">{{ $usesStarterTemplate ? 'Starter template' : 'Copy fields' }}</p>
                             <button type="button" data-load-default
                                 class="text-xs font-semibold text-[#9E2469] hover:underline">Use it</button>
                         </div>
-                        <p class="mt-1 text-[11px] text-[#6C5B68]">Load the previous program fields{{ $defaultProgramTitle ? ' from "' . $defaultProgramTitle . '"' : '' }}.</p>
+                        <p class="mt-1 text-[11px] text-[#6C5B68]">
+                            @if ($usesStarterTemplate)
+                                Suggested fields (title, dates, window, time, status, capacity) — same shape as your live programs. Loads below{{ $applyDefaultOnLoad ? ' automatically' : '; click Use it to apply' }}.
+                            @else
+                                Load fields from @if ($defaultProgramTitle)“{{ $defaultProgramTitle }}”.@endif
+                            @endif
+                        </p>
                         <p class="mt-2 hidden text-[11px] rounded-lg border border-[#D1E7DD] bg-[#F0FFF4] px-3 py-2 text-[#0F5132]"
-                            data-default-hint>Default form applied. You can still edit or remove fields.</p>
+                            data-default-hint>Template applied. Edit any value, then save.</p>
                     </div>
                 @endif
                 <p class="text-xs text-[#6C5B68]">Add common fields from the chips below, then fine-tune on the right.</p>
@@ -42,6 +50,7 @@
                 <div class="flex flex-wrap gap-2">
                     <button type="button" data-quick-field="title" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Title</button>
                     <button type="button" data-quick-field="description" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Description</button>
+                    <button type="button" data-quick-field="event_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Program date</button>
                     <button type="button" data-quick-field="application_start_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Application Start</button>
                     <button type="button" data-quick-field="application_end_date" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Application End</button>
                     <button type="button" data-quick-field="event_time" class="rounded-full border border-[#DCCFD8] bg-white px-3 py-1 text-xs font-semibold text-[#213430] transition hover:border-[#9E2469] hover:text-[#9E2469]">+ Time</button>
@@ -83,6 +92,7 @@
                     class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#9E2469] focus:ring focus:ring-[#F8D4E6] focus:ring-opacity-70">
                     <option value="title">Title</option>
                     <option value="description">Description</option>
+                    <option value="event_date">Program date</option>
                     <option value="event_time">Time</option>
                     <option value="application_start_date">Application Start Date</option>
                     <option value="application_end_date">Application End Date</option>
@@ -136,6 +146,7 @@
             const addBtn = document.getElementById('{{ $builderId }}-add');
             const template = document.getElementById('{{ $builderId }}-template');
             const initialFields = @json($initialFields);
+            const applyDefaultOnLoad = @json($applyDefaultOnLoad);
             const fieldCountEl = document.querySelector('[data-field-count]');
             const quickButtons = document.querySelectorAll('[data-quick-field]');
             const duplicateWarning = document.querySelector('[data-duplicate-warning]');
@@ -151,6 +162,7 @@
             const fieldPresets = {
                 title: { label: 'Title', type: 'short_text' },
                 description: { label: 'Description', type: 'long_text' },
+                event_date: { label: 'Program date', type: 'date' },
                 event_time: { label: 'Time', type: 'time' },
                 application_start_date: { label: 'Application Start Date', type: 'date' },
                 application_end_date: { label: 'Application End Date', type: 'date' },
@@ -223,8 +235,9 @@
                     select.innerHTML = `
                         <option value="upcoming">Upcoming</option>
                         <option value="ongoing">Ongoing</option>
+                        <option value="completed">Completed</option>
                     `;
-                    select.value = (value && ['upcoming', 'ongoing'].includes(String(value).toLowerCase()))
+                    select.value = (value && ['upcoming', 'ongoing', 'completed'].includes(String(value).toLowerCase()))
                         ? String(value).toLowerCase()
                         : 'upcoming';
                     return select;
@@ -323,7 +336,7 @@
 
                 const pickDefaultName = () => {
                     const used = new Set(selectedNames());
-                    const order = ['title', 'description', 'application_start_date', 'application_end_date', 'event_time', 'max_applications', 'status', 'link', 'custom_note'];
+                    const order = ['title', 'description', 'event_date', 'application_start_date', 'application_end_date', 'event_time', 'max_applications', 'status', 'link', 'custom_note'];
                     const next = order.find((n) => !used.has(n));
                     return next || null;
                 };
@@ -401,7 +414,7 @@
                 setDuplicateWarning('');
                 if (defaultHint) {
                     defaultHint.classList.remove('hidden');
-                    defaultHint.textContent = 'Default form applied. You can still edit or remove fields.';
+                    defaultHint.textContent = 'Template applied. Edit any value, then save.';
                 }
                 listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
             };
@@ -430,6 +443,8 @@
             // Seed builder
             if (Array.isArray(initialFields) && initialFields.length > 0) {
                 initialFields.forEach((field) => addField(field));
+            } else if (applyDefaultOnLoad && Array.isArray(defaultFields) && defaultFields.length > 0) {
+                applyDefaultFields();
             } else {
                 addField({ name: 'title', label: '', type: 'short_text' });
             }

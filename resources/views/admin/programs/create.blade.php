@@ -13,6 +13,9 @@
                         <p class="uppercase tracking-widest text-xs font-semibold opacity-90">Support Programs</p>
                         <h1 class="mt-2 text-3xl font-semibold">Create New Program</h1>
                         <p class="mt-3 text-sm lg:text-base max-w-xl opacity-95">Build every field you need - titles, descriptions, dates, payments, and more - using the flexible field builder below, then add an optional banner image.</p>
+                        @if(!empty($usesStarterTemplate) && $usesStarterTemplate)
+                            <p class="mt-3 text-sm lg:text-base max-w-xl opacity-95 border-t border-white/30 pt-3">There are no programs in the database yet. A <strong>recommended starter</strong> set of fields is loaded below (you can also click <strong>Use it</strong> in the sidebar to reset the list). Adjust dates and text, then save.</p>
+                        @endif
                     </div>
                     <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                         <a href="{{ route('admin.programs-events') }}"
@@ -53,7 +56,9 @@
                         'builderId' => 'program-field-builder',
                         'initialFields' => old('custom_fields', []),
                         'defaultFields' => $defaultFields ?? [],
-                        'defaultProgramTitle' => optional($defaultProgram)->title,
+                        'defaultProgramTitle' => $defaultProgramTitle ?? null,
+                        'usesStarterTemplate' => $usesStarterTemplate ?? false,
+                        'applyDefaultOnLoad' => $applyDefaultOnLoad ?? false,
                     ])
 
                     @include('admin.programs.partials.banner_upload', [

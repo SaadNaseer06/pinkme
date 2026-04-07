@@ -42,6 +42,7 @@ class ProgramRegistration extends Model
         'authorization_allow',
         'authorization_permissions',
         'billing_details',
+        'payment_links',
         'signature',
         'justification',
         'document_paths',

@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\Events\MessageSent;
 use App\Models\Application;
 use App\Models\Message;
+use App\Mail\ChatMessageReceived;
 use App\Models\ProgramRegistration;
 use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class ChatMessageController extends Controller
 {
@@ -89,6 +93,34 @@ class ChatMessageController extends Controller
         ])->load(['sender.profile', 'receiver.profile']);
 
         broadcast(new MessageSent($message))->toOthers();
+
+        $contact->loadMissing('role');
+        if (!self::isUserActiveInChat($contact->id) && $contact->email) {
+            $snippet = $message->content !== ''
+                ? Str::limit($message->content, 240)
+                : ('Attachment: ' . ($message->attachment_name ?? 'file'));
+            $chatUrl = match ($contact->role?->name) {
+                'patient' => url('/patient/patient-chats'),
+                'casemanager' => url('/case_manager/patient-chats'),
+                default => url('/'),
+            };
+            try {
+                UserNotification::create([
+                    'user_id' => $contact->id,
+                    'title' => 'New chat message',
+                    'message' => 'You have a new message from ' . (optional($user->profile)->full_name ?? $user->email ?? 'a contact') . '.',
+                    'priority' => \App\Models\UserNotification::PRIORITY_IMPORTANT,
+                    'link_url' => $chatUrl,
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+            try {
+                Mail::to($contact->email)->send(new ChatMessageReceived($user, $contact, $snippet, $chatUrl));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
 
         return response()->json([
             'message' => $message->toFrontendPayload(),

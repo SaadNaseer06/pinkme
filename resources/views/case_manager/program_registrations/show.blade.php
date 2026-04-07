@@ -126,6 +126,12 @@
                             </ul>
                         @endif
                         <p class="text-base text-[#213430] app-text mt-2"><span class="font-medium">Billing Details:</span> {{ $registration->billing_details ?? 'N/A' }}</p>
+                        @if (!empty($registration->payment_links))
+                            <p class="text-base text-[#213430] app-text mt-2"><span class="font-medium">Billing payment links (from finance):</span></p>
+                            <div class="text-base text-[#213430] app-text mt-1">
+                                {!! \App\Support\BillingPaymentLinks::toHtml($registration->payment_links) !!}
+                            </div>
+                        @endif
                         <div class="text-base text-[#213430] app-text">
                             <span class="font-medium">Signature:</span>
                             @if ($registration->signature)
@@ -216,7 +222,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <form method="POST" action="{{ route('case_manager.program_registrations.approve', $registration) }}" class="bg-[#F8F2F6] rounded-lg p-4 space-y-3 border border-[#E6D8E1]">
                                 @csrf
-                                <h4 class="font-semibold text-[#213430] app-main">Approve Registration</h4>
+                                <h4 class="font-semibold text-[#213430] app-main">Approve Application</h4>
                                 <p class="text-base text-[#6C5F67] app-text">Optional: add a short note for the applicant.</p>
                                 <textarea name="note" rows="3" class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]" placeholder="Optional note"></textarea>
                                 <button type="submit"
@@ -227,7 +233,7 @@
 
                             <form method="POST" action="{{ route('case_manager.program_registrations.reject', $registration) }}" class="bg-[#F8F2F6] rounded-lg p-4 space-y-3 border border-[#E6D8E1]">
                                 @csrf
-                                <h4 class="font-semibold text-[#213430] app-main">Reject Registration</h4>
+                                <h4 class="font-semibold text-[#213430] app-main">Reject Application</h4>
                                 <p class="text-base text-[#6C5F67] app-text">Provide a short reason to keep for the record.</p>
                                 <textarea name="note" rows="3" required class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]" placeholder="Reason for rejection"></textarea>
                                 <button type="submit"

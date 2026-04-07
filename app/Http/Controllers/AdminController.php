@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminController extends Controller
 {
@@ -558,12 +559,112 @@ class AdminController extends Controller
         }
     }
 
-    public function patients()
+    /**
+     * Admin patients list query (filters match admin/patients.blade.php).
+     */
+    protected function patientsIndexQuery(Request $request)
     {
-        $patients = Patient::with(['user.profile', 'applications'])
-            ->paginate(20);
+        $range = $request->query('range');
+        $q = trim((string) $request->query('q', ''));
+
+        $startDate = match ($range) {
+            'week' => Carbon::now()->subWeek(),
+            'month' => Carbon::now()->subMonth(),
+            default => null,
+        };
+
+        return Patient::query()
+            ->with(['user:id,email', 'user.profile:id,user_id,full_name,phone,avatar,status'])
+            ->withCount('applications')
+            ->when($startDate, fn ($qb) => $qb->where('created_at', '>=', $startDate))
+            ->when($q !== '', function ($qb) use ($q) {
+                $qb->where(function ($w) use ($q) {
+                    $w->whereHas('user.profile', fn ($qq) => $qq->where('full_name', 'like', "%{$q}%"))
+                        ->orWhereHas('user', fn ($qq) => $qq->where('email', 'like', "%{$q}%"))
+                        ->orWhere('disease_type', 'like', "%{$q}%")
+                        ->orWhere('genetic_test', 'like', "%{$q}%");
+                    if (ctype_digit($q)) {
+                        $w->orWhere('id', (int) $q);
+                    }
+                });
+            })
+            ->latest('created_at');
+    }
+
+    public function patients(Request $request)
+    {
+        $patients = $this->patientsIndexQuery($request)
+            ->paginate(10)
+            ->appends($request->query());
 
         return view('admin.patients', compact('patients'));
+    }
+
+    public function exportPatientsCsv(Request $request): StreamedResponse
+    {
+        $filename = 'patients_' . date('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($request) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, [
+                'ID',
+                'Patient ref',
+                'Full name',
+                'Email',
+                'Phone',
+                'Age',
+                'Disease type',
+                'Genetic test',
+                'Diagnosis',
+                'Blood group',
+                'Disease stage',
+                'Diagnosis date',
+                'Applications',
+                'Status',
+                'Created at',
+            ]);
+
+            $this->patientsIndexQuery($request)->chunk(200, function ($chunk) use ($out) {
+                foreach ($chunk as $p) {
+                    $profile = $p->user?->profile;
+                    $name = $profile->full_name ?? '';
+                    $email = $p->user?->email ?? '';
+                    $phone = $profile->phone ?? '';
+                    $age = $p->age ?? ($profile->age ?? '');
+                    $rawStatus = $p->status ?? ($profile->status ?? null);
+                    $isActive = is_null($rawStatus)
+                        ? true
+                        : (string) $rawStatus === '1'
+                            || strtolower((string) $rawStatus) === 'active';
+                    $statusLbl = $isActive ? 'Active' : 'Inactive';
+                    $pid = 'P-' . str_pad((string) $p->id, 4, '0', STR_PAD_LEFT);
+
+                    fputcsv($out, [
+                        $p->id,
+                        $pid,
+                        $name,
+                        $email,
+                        $phone,
+                        $age,
+                        $p->disease_type ?? '',
+                        $p->genetic_test ?? '',
+                        $p->diagnosis ?? '',
+                        $p->blood_group ?? '',
+                        $p->disease_stage ?? '',
+                        $p->diagnosis_date
+                            ? Carbon::parse($p->diagnosis_date)->format('Y-m-d')
+                            : '',
+                        $p->applications_count,
+                        $statusLbl,
+                        $p->created_at?->toIso8601String(),
+                    ]);
+                }
+            });
+
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     public function showPatient(Patient $patient)

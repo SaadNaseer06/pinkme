@@ -1,0 +1,16 @@
+﻿
+Fatal error: Uncaught Error: Class "Smalot\PdfParser\Parser" not found in C:\EDataBackup\pinkme\pinkme\tmp_extract_pdf.php:11
+Stack trace:
+#0 {main}
+  thrown in C:\EDataBackup\pinkme\pinkme\tmp_extract_pdf.php on line 11
+php : PHP Fatal error:  Uncaught Error: Class "Smalot\PdfParser\Parser" not found in 
+C:\EDataBackup\pinkme\pinkme\tmp_extract_pdf.php:11
+At C:\Users\Saad Naseer\AppData\Local\Temp\ps-script-e92af15b-de62-4fc8-9e04-c1fe3e23a46e.ps1:76 char:36
++ ...  "C:\EDataBackup\pinkme\pinkme"; php tmp_extract_pdf.php 2>&1 | Out-F ...
++                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PHP Fatal error...ract_pdf.php:11:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Stack trace:
+#0 {main}
+  thrown in C:\EDataBackup\pinkme\pinkme\tmp_extract_pdf.php on line 11

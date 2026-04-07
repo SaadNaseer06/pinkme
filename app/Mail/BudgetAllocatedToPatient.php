@@ -7,6 +7,7 @@ use App\Models\RegistrationInvoice;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class BudgetAllocatedToPatient extends Mailable
@@ -16,14 +17,22 @@ class BudgetAllocatedToPatient extends Mailable
     public ProgramRegistration $registration;
     public RegistrationInvoice $invoice;
 
-    /** @var string|null Storage path to PDF for attachment (used when queued) */
+    /** @var string|null Path relative to storage disk */
     public ?string $pdfPath;
 
-    public function __construct(ProgramRegistration $registration, RegistrationInvoice $invoice, ?string $pdfPath = null)
-    {
+    /** @var string Disk name used when the PDF was stored */
+    public string $pdfDisk;
+
+    public function __construct(
+        ProgramRegistration $registration,
+        RegistrationInvoice $invoice,
+        ?string $pdfPath = null,
+        ?string $pdfDisk = null,
+    ) {
         $this->registration = $registration;
         $this->invoice = $invoice;
         $this->pdfPath = $pdfPath;
+        $this->pdfDisk = $pdfDisk ?? (string) config('filesystems.default', 'local');
     }
 
     public function build()
@@ -46,9 +55,18 @@ class BudgetAllocatedToPatient extends Mailable
                 'registration' => $this->registration,
             ]);
 
-        if ($this->pdfPath && Storage::exists($this->pdfPath)) {
-            $mailable->attachData(Storage::get($this->pdfPath), 'Invoice-' . $this->invoice->invoice_number . '.pdf', [
-                'mime' => 'application/pdf',
+        if ($this->pdfPath && Storage::disk($this->pdfDisk)->exists($this->pdfPath)) {
+            $mailable->attachFromStorageDisk(
+                $this->pdfDisk,
+                $this->pdfPath,
+                'Invoice-' . $this->invoice->invoice_number . '.pdf',
+                ['mime' => 'application/pdf'],
+            );
+        } elseif ($this->pdfPath) {
+            Log::warning('Budget invoice PDF missing for patient email attachment', [
+                'path' => $this->pdfPath,
+                'disk' => $this->pdfDisk,
+                'invoice_id' => $this->invoice->id ?? null,
             ]);
         }
 

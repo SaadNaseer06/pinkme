@@ -1,38 +1,8 @@
-﻿@php
-    use Illuminate\Support\Facades\Auth;
-    use Carbon\Carbon;
+@php
     use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-    use App\Models\Patient; // ensure model exists
-    // expects relations: Patient->user() and User->profile()
 
-    $user = Auth::user();
     $range = request('range');
     $q = trim((string) request('q', ''));
-
-    $startDate = match ($range) {
-        'week' => Carbon::now()->subWeek(),
-        'month' => Carbon::now()->subMonth(),
-        default => null,
-    };
-
-    // Base query with eager loads for performance
-    $patients = Patient::query()
-        ->with(['user:id,email', 'user.profile:id,user_id,full_name,phone,avatar,status'])
-        ->when($startDate, fn($qb) => $qb->where('created_at', '>=', $startDate))
-        ->when($q !== '', function ($qb) use ($q) {
-            $qb->where(function ($w) use ($q) {
-                $w->whereHas('user.profile', fn($qq) => $qq->where('full_name', 'like', "%{$q}%"))
-                    ->orWhereHas('user', fn($qq) => $qq->where('email', 'like', "%{$q}%"))
-                    ->orWhere('disease_type', 'like', "%{$q}%")
-                    ->orWhere('genetic_test', 'like', "%{$q}%");
-                if (ctype_digit($q)) {
-                    $w->orWhere('id', (int) $q);
-                }
-            });
-        })
-        ->latest('created_at')
-        ->paginate(10)
-        ->appends(request()->query());
 @endphp
 
 @extends('admin.layouts.admin')
@@ -81,6 +51,12 @@
                                 class="px-4 py-2 bg-[#9E2469] text-white rounded-md app-text hover:bg-pink-600">
                                 Apply
                             </button>
+
+                            <a id="patientsExportCsv"
+                                href="{{ route('admin.patients.export', array_filter(['range' => $range ?: null, 'q' => $q !== '' ? $q : null], fn ($v) => $v !== null && $v !== '')) }}"
+                                class="px-4 py-2 border border-[#9E2469] text-[#9E2469] rounded-md app-text hover:bg-[#F9EFF5] whitespace-nowrap">
+                                Export CSV
+                            </a>
 
                             @if (request()->filled('range') || request()->filled('q'))
                                 {{-- ROUTE: adjust if your route name differs --}}
@@ -331,6 +307,16 @@
             $('#patientsLoading').toggleClass('hidden', !isLoading);
         }
 
+        function patientsUpdateExportHref() {
+            const $a = $('#patientsExportCsv');
+            if (!$a.length) return;
+            const exportBase = @json(route('admin.patients.export'));
+            const params = new URLSearchParams($('#patientsFiltersForm').serialize());
+            params.delete('page');
+            const qs = params.toString();
+            $a.attr('href', qs ? `${exportBase}?${qs}` : exportBase);
+        }
+
         /* =========================
                 Core Loader
            ========================= */
@@ -363,6 +349,7 @@
                     patientsExtractAndSwap(html);
                     const query = (new URL(finalUrl, window.location.href)).searchParams.toString();
                     patientsUpdateUrl(query);
+                    patientsUpdateExportHref();
                 })
                 .fail((xhr, status) => {
                     if (status === 'abort') return;
@@ -376,6 +363,7 @@
              Initialize + Events
            ========================= */
         $(function() {
+            patientsUpdateExportHref();
             // Intercept form submit
             $('#patientsFiltersForm').on('submit', function(e) {
                 e.preventDefault();

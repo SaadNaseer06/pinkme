@@ -41,7 +41,8 @@ body {
     left: 0;
     width: 300px;
     height: 100%;
-    background-color: var(--pink);
+    background-color: #FAFAFA;
+    border-right: 1px solid #E5D6E0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -95,13 +96,13 @@ body {
     padding: 12px 20px;
     border-radius: 30px;
     text-decoration: none;
-    color: var(--white);
+    color: #213430;
     transition: background 0.3s, color 0.3s;
 }
 
 .mobile-menu li.active a,
 .mobile-menu li a:hover {
-    background-color: var(--white);
+    background-color: #F3E8EF;
     color: var(--pink);
 }
 
@@ -452,14 +453,15 @@ grid-template-columns: 1fr !important;
     min-width: 300px;
     flex-shrink: 0;
     min-height: 100vh;
-    background: var(--pink);
+    background: #FAFAFA;
+    border-right: 1px solid #E5D6E0;
 }
 
 .navigation {
     position: fixed;
     width: 300px;
     height: 100%;
-    background: var(--pink);
+    background: #FAFAFA;
     transition: 0.5s;
     overflow: hidden;
     display: flex;
@@ -483,7 +485,7 @@ grid-template-columns: 1fr !important;
 }
 
 .navigation ul li.hovered {
-    background: #fff8fc;
+    background: #F3E8EF;
 }
 
 .navigation ul li:nth-child(1) {
@@ -506,7 +508,7 @@ grid-template-columns: 1fr !important;
     width: 100%;
     display: flex;
     text-decoration: none;
-    color: var(--white);
+    color: #213430;
     padding-left: 20px;
 }
 
@@ -549,7 +551,7 @@ grid-template-columns: 1fr !important;
     height: 50px;
     background: transparent;
     border-radius: 50%;
-    box-shadow: 35px 35px 0 10px #fff8fc;
+    box-shadow: 35px 35px 0 10px #F3E8EF;
     pointer-events: none;
 }
 
@@ -562,7 +564,7 @@ grid-template-columns: 1fr !important;
     height: 50px;
     background: transparent;
     border-radius: 50%;
-    box-shadow: 35px -35px 0 10px #fff8fc;
+    box-shadow: 35px -35px 0 10px #F3E8EF;
     pointer-events: none;
 }
 
@@ -571,11 +573,12 @@ grid-template-columns: 1fr !important;
     bottom: 20px;
     left: 0;
     width: 300px;
-    background: var(--pink);
+    background: #FAFAFA;
     padding: 10px 20px;
     text-align: center;
     box-sizing: border-box;
     border-top-left-radius: 30px;
+    border-top: 1px solid #E5D6E0;
 }
 
 .sign-out a {
@@ -584,7 +587,7 @@ grid-template-columns: 1fr !important;
     align-items: center;
     margin-left: 42px;
     text-decoration: none;
-    color: var(--white);
+    color: var(--pink);
 }
 
 .sign-out a .icon {

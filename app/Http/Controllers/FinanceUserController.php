@@ -11,11 +11,31 @@ use App\Models\UserNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class FinanceUserController extends Controller
 {
+    /**
+     * Email to use for applicant-facing mail: form email first, then account email.
+     * Ignores empty strings (PHP ?? alone does not fall back when user->email is '').
+     */
+    private function resolveApplicantEmail(ProgramRegistration $registration): ?string
+    {
+        $registration->loadMissing('user');
+
+        foreach ([$registration->email, $registration->user?->email] as $candidate) {
+            $e = strtolower(trim((string) $candidate));
+            if ($e !== '' && filter_var($e, FILTER_VALIDATE_EMAIL)) {
+                return $e;
+            }
+        }
+
+        return null;
+    }
+
     public function dashboard()
     {
         $financeUserId = Auth::id();
@@ -117,15 +137,20 @@ class FinanceUserController extends Controller
 
         $calculatedAmount = $registration->calculated_grant_amount;
 
+        $amountRules = ['required', 'numeric', 'min:0.01'];
+        if ($calculatedAmount !== null) {
+            $amountRules[] = 'max:' . $calculatedAmount;
+        }
+
         $data = $request->validate([
             'payment_purpose' => ['required', 'string', 'max:255'],
-            'amount' => ['required', 'numeric', 'min:0.01'],
+            'amount' => $amountRules,
             'payment_method' => ['required', 'string', 'in:Bank Transfer,Credit Card,Cheque,Check,Cash,Other'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        // Use patient's calculated amount when available (non-editable by finance)
-        $amount = $calculatedAmount ?? $data['amount'];
+        // Patient selection sets the maximum; finance may allocate a lower amount (not higher)
+        $amount = $data['amount'];
 
         $invoice = RegistrationInvoice::create([
             'program_registration_id' => $registration->id,
@@ -137,11 +162,12 @@ class FinanceUserController extends Controller
             'notes' => $data['notes'] ?? null,
         ]);
 
-        // Generate and store invoice PDF
+        // Generate and store invoice PDF (same disk used for mail attachments)
         $registration->load('program');
         $pdf = Pdf::loadView('pdf.invoice', compact('invoice', 'registration'));
         $pdfPath = 'invoices/registration/' . $invoice->id . '_' . preg_replace('/[^a-zA-Z0-9\-]/', '', $invoice->invoice_number) . '.pdf';
-        Storage::put($pdfPath, $pdf->output());
+        $pdfDisk = (string) config('filesystems.default', 'local');
+        Storage::disk($pdfDisk)->put($pdfPath, $pdf->output());
         $invoice->update(['file_path' => $pdfPath]);
 
         if ($registration->user) {
@@ -172,25 +198,148 @@ class FinanceUserController extends Controller
                     'link_url' => route('admin.program_registrations.show', $registration),
                 ]);
                 if ($admin->email) {
-                    Mail::to($admin->email)->queue(new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath));
+                    Mail::to($admin->email)->send(new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
                 }
             } catch (\Throwable $e) {
                 report($e);
             }
         }
 
-        // Queue email to patient (applicant)
-        $patientEmail = $registration->user?->email ?? $registration->email;
+        $patientEmail = $this->resolveApplicantEmail($registration);
+        $applicantMailWarning = null;
         if ($patientEmail) {
             try {
-                Mail::to($patientEmail)->queue(new BudgetAllocatedToPatient($registration, $invoice, $pdfPath));
+                Mail::to($patientEmail)->send(new BudgetAllocatedToPatient($registration, $invoice, $pdfPath, $pdfDisk));
+                Log::info('Budget allocation email sent to applicant', [
+                    'registration_id' => $registration->id,
+                    'email' => $patientEmail,
+                ]);
             } catch (\Throwable $e) {
                 report($e);
+                Log::error('Budget allocation applicant email failed', [
+                    'registration_id' => $registration->id,
+                    'email' => $patientEmail,
+                    'error' => $e->getMessage(),
+                ]);
+                $applicantMailWarning = 'The invoice was saved, but the email to the applicant could not be sent. Check mail configuration (MAIL_* in .env) or use “Resend invoice email” on this page.';
             }
+        } else {
+            Log::warning('Budget allocation skipped applicant email — no valid address', [
+                'registration_id' => $registration->id,
+                'registration_email_raw' => $registration->email,
+                'user_id' => $registration->user_id,
+            ]);
+            $applicantMailWarning = 'The invoice was saved, but no valid applicant email was found (application form email and account email were missing or invalid), so the patient was not emailed.';
+        }
+
+        $redirect = redirect()
+            ->route('finance.registrations.show', $registration)
+            ->with('success', 'Invoice generated successfully. Budget has been allocated to the patient request.');
+        if ($applicantMailWarning) {
+            $redirect->with('warning', $applicantMailWarning);
+        }
+
+        return $redirect;
+    }
+
+    public function resendInvoiceEmails(Request $request, ProgramRegistration $registration, RegistrationInvoice $invoice)
+    {
+        if ($registration->finance_user_id !== Auth::id()) {
+            abort(403);
+        }
+        if ($invoice->program_registration_id !== $registration->id) {
+            abort(404);
+        }
+
+        $registration->load(['program', 'user.profile']);
+        $pdfPath = $invoice->file_path;
+        $pdfDisk = (string) config('filesystems.default', 'local');
+
+        $adminUsers = User::query()
+            ->whereHas('role', fn ($q) => $q->where('name', 'admin'))
+            ->get();
+
+        foreach ($adminUsers as $admin) {
+            if ($admin->email) {
+                try {
+                    Mail::to($admin->email)->send(new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+        }
+
+        $patientEmail = $this->resolveApplicantEmail($registration);
+        if ($patientEmail) {
+            try {
+                Mail::to($patientEmail)->send(new BudgetAllocatedToPatient($registration, $invoice, $pdfPath, $pdfDisk));
+                Log::info('Budget allocation resend: email sent to applicant', [
+                    'registration_id' => $registration->id,
+                    'email' => $patientEmail,
+                ]);
+            } catch (\Throwable $e) {
+                report($e);
+                Log::error('Budget allocation resend: applicant email failed', [
+                    'registration_id' => $registration->id,
+                    'email' => $patientEmail,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        } else {
+            Log::warning('Budget allocation resend skipped applicant — no valid address', [
+                'registration_id' => $registration->id,
+            ]);
         }
 
         return redirect()
             ->route('finance.registrations.show', $registration)
-            ->with('success', 'Invoice generated successfully. Budget has been allocated to the patient request.');
+            ->with('success', 'Invoice PDF emails were sent again to the patient and administrators.');
+    }
+
+    /**
+     * Finance-only: save online billing / payment portal links for this registration.
+     */
+    public function updateBillingPaymentLinks(Request $request, ProgramRegistration $registration)
+    {
+        if ($registration->finance_user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'billing_urls' => ['nullable', 'array'],
+            'billing_urls.*' => ['nullable', 'string', 'max:2048'],
+        ]);
+
+        $normalized = [];
+        foreach ($data['billing_urls'] ?? [] as $raw) {
+            $u = trim((string) $raw);
+            if ($u === '') {
+                continue;
+            }
+            $href = preg_match('#^https?://#i', $u) ? $u : 'https://' . $u;
+            if (! filter_var($href, FILTER_VALIDATE_URL)) {
+                throw ValidationException::withMessages([
+                    'billing_urls' => 'Invalid URL: ' . $u,
+                ]);
+            }
+            $scheme = strtolower((string) parse_url($href, PHP_URL_SCHEME));
+            if (! in_array($scheme, ['http', 'https'], true)) {
+                throw ValidationException::withMessages([
+                    'billing_urls' => 'Only http and https links are allowed: ' . $u,
+                ]);
+            }
+            $normalized[] = $href;
+        }
+
+        $normalized = array_values(array_unique($normalized));
+        $joined = implode("\n", $normalized);
+
+        $registration->update([
+            'payment_links' => $joined !== '' ? $joined : null,
+        ]);
+
+        return redirect()
+            ->route('finance.registrations.show', $registration)
+            ->with('success', 'Billing payment links saved.');
     }
 }

@@ -10,7 +10,7 @@
     </div>
 
     <div class="px-6 py-6 space-y-4">
-        <p class="text-sm text-[#6C5B68]">Use a horizontal image for best results. Max size 2MB.</p>
+        <p class="text-sm text-[#6C5B68]">Use a horizontal image for best results. Max size 25MB.</p>
 
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
             <label for="{{ $inputId }}"
@@ -23,7 +23,7 @@
                         <path d="M9.5 18L13.5 12L17.5 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     <span class="text-sm font-semibold text-[#213430]">Drop image or click to browse</span>
-                    <span class="text-xs text-[#91848C]">Accepted formats: JPG, PNG. Up to 2MB.</span>
+                    <span class="text-xs text-[#91848C]">Accepted formats: JPG, PNG, GIF, WebP, and other image types. Up to 25MB.</span>
                 </div>
             </label>
 

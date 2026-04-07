@@ -1,7 +1,3 @@
-﻿@php
-    use App\Models\ProgramRegistration;
-@endphp
-
 @extends('case_manager.layouts.app')
 
 @section('title', 'Program Registration Requests')
@@ -33,7 +29,8 @@
                     </div>
                 </div>
 
-                <form method="GET" class="flex flex-col md:flex-row md:items-center gap-3 mb-6">
+                <form id="cmProgramRegFiltersForm" method="GET" action="{{ route('case_manager.program_registrations.index') }}"
+                    class="flex flex-col md:flex-row md:items-center gap-3 mb-6">
                     <div class="relative w-full md:w-48">
                         <select name="status" id="programRegStatus"
                             class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#91848C] focus:outline-none">
@@ -52,82 +49,32 @@
                         class="px-4 py-2 bg-[#9E2469] text-white rounded-md text-sm font-medium hover:bg-[#B52D75] transition app-text">
                         Apply Filter
                     </button>
-                    @if ($selectedStatus !== 'pending')
-                        <a href="{{ route('case_manager.program_registrations.index') }}"
-                            class="px-4 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md text-sm app-text hover:bg-[#F9EFF5] transition">
-                            Reset
-                        </a>
-                    @endif
+                    <a id="cmProgramRegReset" href="{{ route('case_manager.program_registrations.index') }}"
+                        class="px-4 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md text-sm app-text hover:bg-[#F9EFF5] transition {{ $selectedStatus === 'pending' ? 'hidden' : '' }}">
+                        Reset
+                    </a>
                 </form>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm text-left">
-                        <thead>
-                            <tr class="border-t border-[#e0cfd8] bg-white/40">
-                                <th class="p-3 text-[#91848C] font-medium app-h">Applicant</th>
-                                <th class="p-3 text-[#91848C] font-medium app-h">Program</th>
-                                <th class="p-3 text-[#91848C] font-medium app-h">Submitted</th>
-                                <th class="p-3 text-[#91848C] font-medium app-h">Status</th>
-                                <th class="p-3 text-[#91848C] font-medium app-h text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-[#213430]">
-                            @forelse ($registrations as $registration)
-                                <tr class="border-t border-[#e0cfd8] hover:bg-white/60">
-                                    <td class="p-3">
-                                        <div class="flex flex-col">
-                                            <span class="font-medium app-text">{{ $registration->full_name }}</span>
-                                            <span class="text-xs text-[#91848C] app-text">{{ $registration->email }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="p-3 app-text">
-                                        {{ $registration->program->title ?? 'N/A' }}
-                                    </td>
-                                    <td class="p-3 app-text">
-                                        {{ $registration->created_at?->format('d M Y, h:i A') ?? 'N/A' }}
-                                    </td>
-                                    <td class="p-3">
-                                        @php
-                                            $status = strtolower($registration->status);
-                                            $badgeClasses = match ($status) {
-                                                ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354]',
-                                                ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020]',
-                                                default => 'bg-[#FDE8F3] text-[#9E2469]',
-                                            };
-                                        @endphp
-                                        <span class="rounded-full text-xs font-semibold app-text {{ $badgeClasses }}">
-                                            {{ ucfirst($status) }}
-                                        </span>
-                                    </td>
-                                    <td class="p-3 text-center">
-                                        <a href="{{ route('case_manager.program_registrations.show', $registration) }}"
-                                            class="inline-flex items-center px-3 py-2 text-sm text-[#9E2469] border border-[#9E2469] rounded-md hover:bg-[#9E2469] hover:text-white transition app-text">
-                                            View Details
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="p-6 text-center text-[#91848C] app-text">
-                                        No registration requests found for the selected filter.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-6">
-                    {{ $registrations->links() }}
+                <div id="cmProgramRegTableWrap" class="transition-opacity min-h-[120px]">
+                    @include('case_manager.program_registrations._list_fragment', ['registrations' => $registrations])
                 </div>
             </div>
         </div>
     </main>
 
+@endsection
+
+@push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        (function () {
+            const baseUrl = @json(route('case_manager.program_registrations.index'));
+            const wrap = document.getElementById('cmProgramRegTableWrap');
+            const form = document.getElementById('cmProgramRegFiltersForm');
             const statusSelect = document.getElementById('programRegStatus');
             const heading = document.getElementById('programRegHeading');
+            const resetLink = document.getElementById('cmProgramRegReset');
+            if (!wrap || !form || !statusSelect) return;
+
             const labels = {
                 pending: 'Pending Program Registrations',
                 approved: 'Approved Program Registrations',
@@ -135,12 +82,67 @@
                 all: 'All Program Registrations'
             };
 
-            if (statusSelect && heading) {
-                statusSelect.addEventListener('change', () => {
-                    const next = labels[statusSelect.value] || 'Program Registration Requests';
-                    heading.textContent = next;
+            function updateChrome() {
+                if (heading) {
+                    heading.textContent = labels[statusSelect.value] || 'Program Registration Requests';
+                }
+                if (resetLink) {
+                    resetLink.classList.toggle('hidden', statusSelect.value === 'pending');
+                }
+            }
+
+            async function loadProgramRegistrations(url) {
+                let targetUrl = url;
+                if (!targetUrl) {
+                    const params = new URLSearchParams(new FormData(form));
+                    const qs = params.toString();
+                    targetUrl = qs ? `${baseUrl}?${qs}` : baseUrl;
+                }
+
+                wrap.classList.add('opacity-50', 'pointer-events-none');
+                try {
+                    const res = await fetch(targetUrl, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'text/html',
+                        },
+                        credentials: 'same-origin',
+                    });
+                    if (!res.ok) throw new Error('Request failed');
+                    wrap.innerHTML = await res.text();
+                    const u = new URL(targetUrl, window.location.origin);
+                    window.history.replaceState({}, '', u.pathname + u.search);
+                    updateChrome();
+                } catch (e) {
+                    alert('Could not load registrations. Please try again.');
+                } finally {
+                    wrap.classList.remove('opacity-50', 'pointer-events-none');
+                }
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                loadProgramRegistrations();
+            });
+
+            statusSelect.addEventListener('change', function () {
+                loadProgramRegistrations();
+            });
+
+            if (resetLink) {
+                resetLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    statusSelect.value = 'pending';
+                    loadProgramRegistrations(baseUrl);
                 });
             }
-        });
+
+            document.addEventListener('click', function (e) {
+                const pagLink = e.target.closest('.cm-prog-reg-pagination a[href]');
+                if (!pagLink || !wrap.contains(pagLink)) return;
+                e.preventDefault();
+                loadProgramRegistrations(pagLink.href);
+            });
+        })();
     </script>
-@endsection
+@endpush

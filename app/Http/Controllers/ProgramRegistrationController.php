@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ProgramRegistration;
 use App\Models\Program;
+use App\Support\ProgramRegistrationNotifiers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -11,6 +12,9 @@ use Illuminate\Support\Str;
 
 class ProgramRegistrationController extends Controller
 {
+    /** Laravel file size rules use kilobytes; 25MB per upload. */
+    private const APPLICATION_FILE_MAX_KB = 25 * 1024;
+
     public function store(Request $request)
     {
         $quarterOptions = ['option1', 'option2'];
@@ -59,13 +63,13 @@ class ProgramRegistrationController extends Controller
             'authorization_permissions.*' => 'in:' . implode(',', $authorizationOptions),
             'billing_details' => 'nullable|string|max:2000',
             'signature_data' => 'required|string',
-            'treatment_verification_letter' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'treatment_verification_letter' => 'required|file|mimes:pdf,jpg,jpeg,png|max:' . self::APPLICATION_FILE_MAX_KB,
             'bill_statements' => 'required|array|min:1|max:3',
-            'bill_statements.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'bill_statements.*' => 'file|mimes:pdf,jpg,jpeg,png|max:' . self::APPLICATION_FILE_MAX_KB,
             'income_documents' => 'nullable|array|max:3',
-            'income_documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'income_documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:' . self::APPLICATION_FILE_MAX_KB,
             'documents' => 'nullable|array',
-            'documents.*' => 'nullable|file|max:5120',
+            'documents.*' => 'nullable|file|max:' . self::APPLICATION_FILE_MAX_KB,
         ]);
 
         $program = Program::findOrFail($request->program_id);
@@ -167,7 +171,7 @@ class ProgramRegistrationController extends Controller
             }
         }
 
-        ProgramRegistration::create([
+        $registration = ProgramRegistration::create([
             'program_id' => $request->program_id,
             'user_id' => Auth::id(),
             'first_name' => $request->first_name,
@@ -206,6 +210,12 @@ class ProgramRegistrationController extends Controller
             'income_document_paths' => $incomeDocuments,
             'status' => ProgramRegistration::STATUS_PENDING,
         ]);
+
+        ProgramRegistrationNotifiers::notifyAdmins(
+            'New program application received',
+            'A new financial assistance application has been submitted and is awaiting review.',
+            $registration
+        );
 
         if ($program->max_applications) {
             $currentCount = ProgramRegistration::where('program_id', $program->id)->count();

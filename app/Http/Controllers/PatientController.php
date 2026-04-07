@@ -130,10 +130,12 @@ class PatientController extends Controller
 
         // Programs & Aids: use effective status (date-based) so applications go live on opening date
         $upcomingPrograms = Program::effectiveUpcoming()
+            ->orderByDesc('created_at')
             ->orderBy('application_start_date')
             ->orderBy('event_date')
             ->get();
         $ongoingPrograms = Program::effectiveOngoing()
+            ->orderByDesc('created_at')
             ->orderBy('application_end_date')
             ->orderBy('event_date')
             ->get();

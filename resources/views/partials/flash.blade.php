@@ -1,10 +1,11 @@
 ﻿@php
     $successMessage = session('success');
     $errorMessage = session('error');
+    $warningMessage = session('warning');
     $formErrors = ($errors ?? null) instanceof \Illuminate\Support\ViewErrorBag ? $errors->all() : [];
 @endphp
 
-@if ($successMessage || $errorMessage || !empty($formErrors))
+@if ($successMessage || $errorMessage || $warningMessage || !empty($formErrors))
     <div class="mb-6 space-y-3">
         @if ($successMessage)
             <div class="rounded-xl border border-[#F4C9DD] bg-[#FEF6FB] px-5 py-4 shadow-sm">
@@ -33,6 +34,22 @@
                     <div class="space-y-1">
                         <p class="text-sm font-semibold text-[#B52D75]">Something needs attention</p>
                         <p class="text-sm leading-relaxed">{{ $errorMessage }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if ($warningMessage)
+            <div class="rounded-xl border border-[#E5D6B8] bg-[#FFFDF6] px-5 py-4 shadow-sm">
+                <div class="flex items-start gap-3 text-[#6B5F4C]">
+                    <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#F3E8C8] text-[#8A6D3B]">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </span>
+                    <div class="space-y-1">
+                        <p class="text-sm font-semibold text-[#7A6228]">Notice</p>
+                        <p class="text-sm leading-relaxed">{{ $warningMessage }}</p>
                     </div>
                 </div>
             </div>

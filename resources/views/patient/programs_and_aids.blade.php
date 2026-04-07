@@ -149,6 +149,7 @@
                                 <p class="text-[#91848C] modal-time">-</p>
                             </div>
                         </div>
+                        <div id="modal-application-range" class="mt-3 pt-3 border-t border-[#DCCFD8] text-sm text-[#91848C] hidden app-text"></div>
                     </div>
 
                     <!-- About Program -->
@@ -159,24 +160,14 @@
                                 <span class="text-sm font-semibold text-[#213430]">Status</span>
                                 <span class="modal-effective-status text-sm font-medium text-[#213430]">-</span>
                             </div>
-                            <div id="program-application-window-row" class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-3 py-3 hidden">
-                                <div class="flex justify-between gap-3">
-                                    <span class="text-sm font-semibold text-[#213430]">Application opening</span>
-                                    <span class="modal-application-start text-sm text-[#213430]">-</span>
-                                </div>
-                                <div class="flex justify-between gap-3">
-                                    <span class="text-sm font-semibold text-[#213430]">Application closing</span>
-                                    <span class="modal-application-end text-sm text-[#213430]">-</span>
-                                </div>
-                            </div>
                             <div data-custom-fields class="space-y-3"></div>
                             <p data-custom-fields-empty class="text-sm text-[#91848C] app-text">No additional details have been added yet.</p>
                         </div>
                     </div>
 
-                    <!-- Registration Summary -->
+                    <!-- Application summary -->
                     <div id="registration-info" class="hidden border border-[#DCCFD8] p-4 rounded-lg space-y-2">
-                        <h3 class="text-lg font-medium text-[#213430] app-main">Your Registration</h3>
+                        <h3 class="text-lg font-medium text-[#213430] app-main">Your application</h3>
                         <p class="text-sm text-[#213430] app-text">Status: <span class="font-semibold registration-status">-</span></p>
                         <p class="text-sm text-[#213430] app-text">Submitted: <span class="registration-submitted">-</span></p>
                         <div class="registration-note hidden">
@@ -198,7 +189,7 @@
                             </a>
                             <button type="button" id="register-btn" onclick="openRegistrationForm()"
                                 class="px-6 py-2 bg-pink text-white rounded-lg hover:bg-pink-dark transition app-text">
-                                Register Yourself
+                                Apply now
                             </button>
                         </div>
                     </div>
@@ -207,7 +198,7 @@
         </div>
     </div>
 
-    <!-- Registration Popup Modal -->
+    <!-- Application form modal -->
     <div id="popupModal" class="fixed inset-0 z-50 hidden flex items-start sm:items-center justify-center bg-black/60 px-4 py-6 overflow-y-auto">
         <!-- Modal Box -->
         <div class="bg-[#F3E8EF] p-6 rounded-lg w-full max-w-4xl relative overflow-y-auto max-h-[90vh] shadow-xl border border-[#DCCFD8]">
@@ -424,20 +415,22 @@
                 </div>
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
-                    <h3 class="text-md font-semibold text-[#213430] app-main">Authorization</h3>
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Sharing your story (optional)</h3>
                     <p class="text-sm text-[#91848C] app-text">
-                        If approved, may we use parts of your story to help others? This does not affect your eligibility.
+                        If your application is approved, would you like us to be able to share parts of your story to inspire others?
+                        Your answer does not affect eligibility—we simply want to respect your wishes.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 text-sm text-[#213430] app-text">
                         <label class="inline-flex items-center gap-2">
-                            <input type="radio" name="authorization_choice" value="allow" class="text-[#9E2469]" checked>
-                            <span>Yes, you may share the items I select below.</span>
+                            <input type="radio" name="authorization_choice" value="allow" class="text-[#9E2469]">
+                            <span>Yes—show me the sharing options below.</span>
                         </label>
                         <label class="inline-flex items-center gap-2">
-                            <input type="radio" name="authorization_choice" value="decline" class="text-[#9E2469]">
-                            <span>No, do not use my information or images.</span>
+                            <input type="radio" name="authorization_choice" value="decline" class="text-[#9E2469]" checked>
+                            <span>No thanks—please do not use my information or images.</span>
                         </label>
                     </div>
+                    <p class="text-xs text-[#91848C] app-text hidden" data-auth-hint>Select <strong>Yes</strong> to choose what we may share; if you select <strong>No</strong>, those options stay hidden.</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-[#213430] app-text" data-auth-permissions>
                         <label class="flex items-start gap-2">
                             <input type="checkbox" name="authorization_permissions[]" value="full_name" class="mt-1 text-[#9E2469]">
@@ -487,31 +480,38 @@
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
                     <h3 class="text-md font-semibold text-[#213430] app-main">Upload documentation</h3>
+                    <p class="text-xs text-[#91848C] app-text">Each file can be up to 25MB (PDF, JPG, or PNG).</p>
                     <div class="space-y-3 text-sm text-[#213430] app-text">
                         <div>
-                            <label class="block font-medium mb-1">Upload Treatment Verification Letter *</label>
+                            <label class="block font-medium mb-1" title="Letter from your doctor or hospital confirming diagnosis/treatment, on official letterhead">Upload Treatment Verification Letter *</label>
                             <input type="file" name="treatment_verification_letter" accept=".pdf,.jpg,.jpeg,.png" required
+                                title="Official letter from your treatment facility confirming you are under care (letterhead required)."
                                 class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
-                            <p class="text-xs text-[#91848C]">Must be on facility letterhead.</p>
+                            <p class="text-xs text-[#91848C]">Must be on facility letterhead—confirms you are receiving care for your condition.</p>
                         </div>
                         <div class="space-y-2">
-                            <label class="block font-medium">Upload Bill Statements *</label>
+                            <label class="block font-medium" title="Recent medical bills or statements of charges you need help with">Upload Bill Statements *</label>
                             <input type="file" name="bill_statements[]" accept=".pdf,.jpg,.jpeg,.png" required
+                                title="Upload itemized bills or statements from your provider (PDF or image)."
                                 class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
                             <input type="file" name="bill_statements[]" accept=".pdf,.jpg,.jpeg,.png"
+                                title="Optional second bill document."
                                 class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
                             <input type="file" name="bill_statements[]" accept=".pdf,.jpg,.jpeg,.png"
+                                title="Optional third bill document."
                                 class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
-                            <p class="text-xs text-[#91848C]">All bills must be submitted at one time; partial submissions will not be accepted.</p>
+                            <p class="text-xs text-[#91848C]">Up to 3 files—upload all related bills together; partial submissions are not accepted.</p>
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Proof of income documents (optional)</label>
+                            <label class="block font-medium mb-1" title="W-2, pay stubs, bank statements, or signed income statement for eligibility review">Proof of income documents (optional)</label>
                             <input type="file" name="income_documents[]" accept=".pdf,.jpg,.jpeg,.png" multiple
+                                title="W-2, pay stubs, or bank records that show household income (optional)."
                                 class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">Additional supporting documents (optional)</label>
+                            <label class="block font-medium mb-1" title="Any extra paperwork that supports your application">Additional supporting documents (optional)</label>
                             <input type="file" name="documents[]" accept=".pdf,.jpg,.jpeg,.png" multiple
+                                title="Other documents you want the review team to see (optional)."
                                 class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
                         </div>
                     </div>
@@ -711,16 +711,16 @@
                     if (effectiveStatusEl) {
                         effectiveStatusEl.textContent = data.effective_status_label || 'Upcoming';
                     }
-                    const appWindowRow = document.getElementById('program-application-window-row');
-                    const appStartEl = document.querySelector('#registerModal .modal-application-start');
-                    const appEndEl = document.querySelector('#registerModal .modal-application-end');
-                    if (appWindowRow && appStartEl && appEndEl) {
+                    const rangeEl = document.getElementById('modal-application-range');
+                    if (rangeEl) {
                         if (data.application_start_date || data.application_end_date) {
-                            appStartEl.textContent = data.application_start_date || '-';
-                            appEndEl.textContent = data.application_end_date || '-';
-                            appWindowRow.classList.remove('hidden');
+                            const start = data.application_start_date || '—';
+                            const end = data.application_end_date || '—';
+                            rangeEl.textContent = 'Application window: ' + start + ' – ' + end;
+                            rangeEl.classList.remove('hidden');
                         } else {
-                            appWindowRow.classList.add('hidden');
+                            rangeEl.textContent = '';
+                            rangeEl.classList.add('hidden');
                         }
                     }
 
@@ -753,7 +753,7 @@
 
                     if (alreadyRegistered) {
                         // Already registered: disable the button and update text/style
-                        registerButton.textContent = 'Registered';
+                        registerButton.textContent = 'Application submitted';
                         registerButton.disabled = true;
                         registerButton.classList.remove('bg-pink', 'hover:bg-pink-dark');
                         registerButton.classList.add('bg-gray-400', 'opacity-50', 'cursor-not-allowed');
@@ -780,7 +780,7 @@
                         // Not registered: enable Register only when applications are open
                         const applicationOpen = data.is_application_open !== false;
                         if (applicationOpen) {
-                            registerButton.textContent = 'Register Yourself';
+                            registerButton.textContent = 'Apply now';
                             registerButton.disabled = false;
                             registerButton.classList.remove('bg-gray-400', 'opacity-50', 'cursor-not-allowed');
                             registerButton.classList.add('bg-pink', 'hover:bg-pink-dark');
@@ -834,13 +834,19 @@
         const authRadios = document.querySelectorAll('input[name="authorization_choice"]');
         const permissionSection = document.querySelector('[data-auth-permissions]');
         const permissionCheckboxes = permissionSection ? permissionSection.querySelectorAll('input[type="checkbox"]') : [];
+        const authHint = document.querySelector('[data-auth-hint]');
         const syncPermissions = () => {
             if (!permissionSection) return;
             const allowSelected = Array.from(authRadios).some((r) => r.checked && r.value === 'allow');
-            permissionSection.classList.toggle('opacity-60', !allowSelected);
-            permissionSection.classList.toggle('pointer-events-none', !allowSelected);
+            permissionSection.classList.toggle('hidden', !allowSelected);
+            if (authHint) {
+                authHint.classList.toggle('hidden', allowSelected);
+            }
             permissionCheckboxes.forEach((cb) => {
                 cb.disabled = !allowSelected;
+                if (!allowSelected) {
+                    cb.checked = false;
+                }
             });
         };
 

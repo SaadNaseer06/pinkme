@@ -127,6 +127,7 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
 
     // Legacy routes (kept for backward compatibility)
     Route::get('/program-registration-requests', [AdminProgramRegistrationController::class, 'index'])->name('admin.program_registrations.index');
+    Route::get('/program-registration-requests/export', [AdminProgramRegistrationController::class, 'exportCsv'])->name('admin.program_registrations.export');
     Route::get('/program-registration-requests/{registration}', [AdminProgramRegistrationController::class, 'show'])->name('admin.program_registrations.show');
     Route::post('/program-registration-requests/{registration}/approve', [AdminProgramRegistrationController::class, 'approve'])->name('admin.program_registrations.approve');
     Route::post('/program-registration-requests/{registration}/reject', [AdminProgramRegistrationController::class, 'reject'])->name('admin.program_registrations.reject');
@@ -176,6 +177,7 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::get('/assigned', [AdminController::class, 'assigned'])->name('admin.assigned');
     Route::get('/reviewers', [AdminController::class, 'reviewers'])->name('admin.reviewers');
     Route::get('/patients', [AdminController::class, 'patients'])->name('admin.patients');
+    Route::get('/patients/export', [AdminController::class, 'exportPatientsCsv'])->name('admin.patients.export');
     Route::get('/patients/{patient}', [AdminController::class, 'showPatient'])->name('admin.patients.show');
     Route::get('/patients/{patient}/edit', [AdminController::class, 'editPatient'])->name('admin.patients.edit');
     Route::put('/patients/{patient}', [AdminController::class, 'updatePatient'])->name('admin.patients.update');
@@ -247,9 +249,11 @@ Route::prefix('finance')->middleware(['role.restrict'])->group(function () {
     Route::get('/tutorial', [PageController::class, 'financeGuide'])->name('finance.guide');
     Route::get('/registrations', [FinanceUserController::class, 'registrations'])->name('finance.registrations');
     Route::get('/registrations/{registration}', [FinanceUserController::class, 'showRegistration'])->name('finance.registrations.show');
+    Route::post('/registrations/{registration}/billing-payment-links', [FinanceUserController::class, 'updateBillingPaymentLinks'])->name('finance.registrations.billing_payment_links');
     Route::get('/registrations/{registration}/bill-statement/{index}', [FinanceUserController::class, 'downloadBillStatement'])->name('finance.registrations.bill_statement.download')->where('index', '[0-9]+');
     Route::get('/registrations/{registration}/invoice/create', [FinanceUserController::class, 'createInvoice'])->name('finance.invoice.create');
     Route::post('/registrations/{registration}/invoice', [FinanceUserController::class, 'storeInvoice'])->name('finance.invoice.store');
+    Route::post('/registrations/{registration}/invoices/{invoice}/resend-emails', [FinanceUserController::class, 'resendInvoiceEmails'])->name('finance.invoice.resend_emails');
 });
 
 Route::prefix('case_manager')->middleware(['role.restrict'])->group(function () {

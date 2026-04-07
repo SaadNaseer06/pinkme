@@ -6,10 +6,13 @@ use App\Models\ProgramRegistration;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Mail\ProgramRegistrationAdminNotice;
 use App\Mail\ProgramRegistrationStatus;
+use App\Support\ProgramRegistrationNotifiers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminProgramRegistrationController extends Controller
 {
@@ -205,8 +208,105 @@ class AdminProgramRegistrationController extends Controller
             'assigned_at' => !empty($data['case_manager_id']) ? now() : null,
         ]);
 
+        if (!empty($data['case_manager_id'])) {
+            $registration->loadMissing(['program']);
+            $caseManager = User::with('profile')->find($data['case_manager_id']);
+            ProgramRegistrationNotifiers::notifyAdmins(
+                'Application assigned to case manager',
+                'An application has been assigned to a case manager for review.',
+                $registration
+            );
+            if ($caseManager?->email) {
+                try {
+                    Mail::to($caseManager->email)->send(new ProgramRegistrationAdminNotice(
+                        'You were assigned a new application',
+                        $registration,
+                        'You have been assigned to review a financial assistance application.',
+                        route('case_manager.program_registrations.show', $registration)
+                    ));
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+            $patientEmail = $registration->user?->email ?? $registration->email;
+            if ($patientEmail) {
+                try {
+                    Mail::to($patientEmail)->send(new ProgramRegistrationAdminNotice(
+                        'Your application is under review',
+                        $registration,
+                        'Your application has been assigned to a case manager. You will be notified when there is an update.',
+                        route('patient.programRegistrations.show', $registration)
+                    ));
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+        }
+
         return redirect()
             ->route('admin.program_registrations.show', $registration)
             ->with('success', 'Case manager assignment updated.');
+    }
+
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $selectedStatus = strtolower((string) $request->query('status', 'all'));
+        $validStatuses = [
+            'all',
+            ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_APPROVED,
+            ProgramRegistration::STATUS_REJECTED,
+        ];
+        if (!in_array($selectedStatus, $validStatuses, true)) {
+            $selectedStatus = 'all';
+        }
+
+        $query = ProgramRegistration::query()
+            ->with(['program:id,title'])
+            ->orderByDesc('created_at');
+        if ($selectedStatus !== 'all') {
+            $query->where('status', $selectedStatus);
+        }
+
+        $filename = 'program_applications_' . date('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, [
+                'ID',
+                'First name',
+                'Last name',
+                'Email',
+                'Phone',
+                'Program',
+                'Status',
+                'Submitted at',
+                'Quarter',
+                'Programs applied',
+                'Billing payment links (finance)',
+                'Billing details',
+            ]);
+            $query->chunk(500, function ($chunk) use ($out) {
+                foreach ($chunk as $r) {
+                    fputcsv($out, [
+                        $r->id,
+                        $r->first_name,
+                        $r->last_name,
+                        $r->email,
+                        $r->phone,
+                        $r->program?->title,
+                        $r->status,
+                        $r->created_at?->toIso8601String(),
+                        $r->quarter_applied,
+                        is_array($r->programs_applied) ? implode('; ', $r->programs_applied) : '',
+                        $r->payment_links,
+                        $r->billing_details,
+                    ]);
+                }
+            });
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 }

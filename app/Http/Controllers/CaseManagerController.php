@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\UserNotification;
 use App\Mail\ProgramRegistrationStatus;
+use App\Support\ProgramRegistrationNotifiers;
 use Illuminate\Support\Facades\Mail;
 
 class CaseManagerController extends Controller
@@ -161,11 +162,19 @@ class CaseManagerController extends Controller
             'all' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())->count(),
         ];
 
-        return view('case_manager.program_registrations.index', [
+        $payload = [
             'registrations' => $registrations,
             'selectedStatus' => $selectedStatus,
             'counts' => $counts,
-        ]);
+        ];
+
+        if ($request->ajax()) {
+            return view('case_manager.program_registrations._list_fragment', [
+                'registrations' => $registrations,
+            ]);
+        }
+
+        return view('case_manager.program_registrations.index', $payload);
     }
 
     public function showProgramRegistration(ProgramRegistration $registration)
@@ -229,6 +238,12 @@ class CaseManagerController extends Controller
             }
         }
 
+        ProgramRegistrationNotifiers::notifyAdmins(
+            'Application approved by case manager',
+            'A case manager approved an application. It can now be sent to finance for budget allocation when ready.',
+            $registration
+        );
+
         return redirect()
             ->route('case_manager.program_registrations.show', $registration)
             ->with('success', 'The registration has been approved.');
@@ -281,6 +296,12 @@ class CaseManagerController extends Controller
                 report($e);
             }
         }
+
+        ProgramRegistrationNotifiers::notifyAdmins(
+            'Application rejected by case manager',
+            'A case manager rejected an application. Review details in the admin portal if needed.',
+            $registration
+        );
 
         return redirect()
             ->route('case_manager.program_registrations.show', $registration)

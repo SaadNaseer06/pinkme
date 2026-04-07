@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.admin')
+@extends('admin.layouts.admin')
 
 @section('title', 'Program Registration Requests')
 
@@ -51,6 +51,10 @@
                         class="px-4 py-2 bg-[#9E2469] text-white rounded-md text-sm font-medium hover:bg-[#B52D75] transition app-text">
                         Apply Filter
                     </button>
+                    <a href="{{ route('admin.program_registrations.export', ['status' => $selectedStatus]) }}"
+                        class="px-4 py-2 border border-[#9E2469] text-[#9E2469] rounded-md text-sm font-medium hover:bg-[#F9EFF5] transition app-text inline-flex items-center justify-center">
+                        Export to CSV (Excel)
+                    </a>
                     @if ($selectedStatus !== 'pending')
                         <a href="{{ route('admin.program_registrations.index') }}"
                             class="px-4 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md text-sm app-text hover:bg-[#F9EFF5] transition">
@@ -60,7 +64,7 @@
                 </form>
 
                 <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm text-left">
+                    <table class="min-w-full text-base text-left">
                         <thead>
                             <tr class="border-t border-[#e0cfd8] bg-white/40">
                                 <th class="p-3 text-[#91848C] font-medium app-h">Applicant</th>

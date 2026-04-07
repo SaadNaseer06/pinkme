@@ -129,14 +129,12 @@ class ProgramController extends Controller
         }
 
         $usesStarterTemplate = $defaultProgram === null;
-        $applyDefaultOnLoad = $usesStarterTemplate && empty(old('custom_fields'));
 
         return view('admin.programs.create', compact(
             'defaultProgram',
             'defaultFields',
             'defaultProgramTitle',
             'usesStarterTemplate',
-            'applyDefaultOnLoad',
         ));
     }
 

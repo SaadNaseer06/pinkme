@@ -3,7 +3,6 @@
     $initialFields = $initialFields ?? [];
     $defaultFields = $defaultFields ?? [];
     $defaultProgramTitle = $defaultProgramTitle ?? null;
-    $applyDefaultOnLoad = $applyDefaultOnLoad ?? false;
     $usesStarterTemplate = $usesStarterTemplate ?? false;
 @endphp
 
@@ -30,7 +29,7 @@
                         </div>
                         <p class="mt-1 text-[11px] text-[#6C5B68]">
                             @if ($usesStarterTemplate)
-                                Suggested fields (title, dates, window, time, status, capacity) — same shape as your live programs. Loads below{{ $applyDefaultOnLoad ? ' automatically' : '; click Use it to apply' }}.
+                                Suggested fields (title, dates, window, time, status, capacity). Click <strong>Use it</strong> to show them in the list.
                             @else
                                 Load fields from @if ($defaultProgramTitle)“{{ $defaultProgramTitle }}”.@endif
                             @endif
@@ -146,7 +145,7 @@
             const addBtn = document.getElementById('{{ $builderId }}-add');
             const template = document.getElementById('{{ $builderId }}-template');
             const initialFields = @json($initialFields);
-            const applyDefaultOnLoad = @json($applyDefaultOnLoad);
+            const usesStarterTemplate = @json($usesStarterTemplate ?? false);
             const fieldCountEl = document.querySelector('[data-field-count]');
             const quickButtons = document.querySelectorAll('[data-quick-field]');
             const duplicateWarning = document.querySelector('[data-duplicate-warning]');
@@ -440,14 +439,13 @@
                 defaultButton.addEventListener('click', applyDefaultFields);
             }
 
-            // Seed builder
+            // Seed builder — starter template stays empty until admin clicks "Use it"
             if (Array.isArray(initialFields) && initialFields.length > 0) {
                 initialFields.forEach((field) => addField(field));
-            } else if (applyDefaultOnLoad && Array.isArray(defaultFields) && defaultFields.length > 0) {
-                applyDefaultFields();
-            } else {
+            } else if (!usesStarterTemplate) {
                 addField({ name: 'title', label: '', type: 'short_text' });
             }
+            updateCount();
 
             addBtn.addEventListener('click', function() {
                 addField({ name: 'title', label: '', type: 'short_text' });

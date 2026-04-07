@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\StaffAccountCredentialsEmail;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class AdminCaseManagerController extends Controller
@@ -40,9 +42,10 @@ class AdminCaseManagerController extends Controller
 
         $roleId = Role::where('name', 'casemanager')->value('id');
 
+        $plainPassword = $request->password;
         $user = User::create([
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($plainPassword),
             'role_id' => $roleId,
         ]);
 
@@ -55,6 +58,19 @@ class AdminCaseManagerController extends Controller
             'username' => $request->username,
             'status' => (int)$request->status,
         ]);
+
+        try {
+            Mail::to($user->email)->send(
+                new StaffAccountCredentialsEmail(
+                    $user,
+                    $plainPassword,
+                    'Case Manager',
+                    route('register', ['tab' => 'login']),
+                ),
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return redirect()->route('admin.case-managers.index')
             ->with('success', 'Case manager created successfully.');

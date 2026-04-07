@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PatientWelcomeEmail;
+use App\Models\Role;
 use App\Models\SponsorDetail;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
@@ -57,6 +60,15 @@ class RegisterController extends Controller
                 'company_type' => $validated['company_type'],
                 'logo' => $logoPath,
             ]);
+        }
+
+        $role = Role::query()->find($validated['role_id']);
+        if ($role && $role->name === 'patient' && filled($email)) {
+            try {
+                Mail::to($email)->send(new PatientWelcomeEmail($user));
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         return redirect()->route('register', ['tab' => 'login'])

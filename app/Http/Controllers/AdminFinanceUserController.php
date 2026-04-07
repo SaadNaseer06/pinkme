@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\StaffAccountCredentialsEmail;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class AdminFinanceUserController extends Controller
@@ -45,9 +47,10 @@ class AdminFinanceUserController extends Controller
             return redirect()->back()->withInput()->withErrors(['email' => 'Finance role not found. Please run: php artisan db:seed --class=RoleSeeder']);
         }
 
+        $plainPassword = $request->password;
         $user = User::create([
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($plainPassword),
             'role_id' => $roleId,
         ]);
 
@@ -60,6 +63,19 @@ class AdminFinanceUserController extends Controller
             'username' => $request->username,
             'status' => (int) $request->status,
         ]);
+
+        try {
+            Mail::to($user->email)->send(
+                new StaffAccountCredentialsEmail(
+                    $user,
+                    $plainPassword,
+                    'Finance',
+                    route('register', ['tab' => 'login']),
+                ),
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         return redirect()->route('admin.finance-users.index')
             ->with('success', 'Finance user created successfully.');

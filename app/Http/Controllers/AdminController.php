@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\Builder;
 use Throwable;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -75,13 +76,9 @@ class AdminController extends Controller
         ));
     }
 
-    public function applications()
+    public function applications(Request $request)
     {
-        $applications = Application::with(['patient.user.profile', 'reviewer.profile', 'program'])
-            ->orderBy('submission_date', 'desc')
-            ->paginate(20);
-
-        return view('admin.applications', compact('applications'));
+        return $this->renderAdminApplicationsPage($request);
     }
 
     public function viewApplication($id)
@@ -911,21 +908,25 @@ class AdminController extends Controller
 
     public function applicationsIndex(Request $request)
     {
-        // initial render (non-AJAX) just returns the page; data is loaded via AJAX too
-        return view('admin.applications');
+        return $this->renderAdminApplicationsPage($request);
     }
 
-
-    public function applicationsList(Request $request)
+    /**
+     * Shared filters for admin assistance applications list + CSV export.
+     * Status "paid" = application has a paid assistance invoice and/or the patient user has a program
+     * registration with a paid registration invoice (finance budget allocation).
+     */
+    protected function applicationsFilteredQuery(Request $request): Builder
     {
         $range  = $request->string('range')->toString();
         $view   = $request->string('view')->toString();
         $q      = trim($request->string('q')->toString());
         $status = strtolower($request->string('status')->toString());
 
-        $viewMode        = $view === 'assigned' ? 'assigned' : 'all';
-        $allowedStatuses = ['pending', 'under_review', 'approved', 'rejected'];
-        $statusFilter    = in_array($status, $allowedStatuses, true) ? $status : null;
+        $viewMode = $view === 'assigned' ? 'assigned' : 'all';
+        $allowedAppStatuses = ['pending', 'under_review', 'approved', 'rejected'];
+        $statusFilter = in_array($status, $allowedAppStatuses, true) ? $status : null;
+        $paidFinanceFilter = ($status === 'paid');
 
         $startDate = match ($range) {
             'week'  => Carbon::now()->subWeek(),
@@ -933,77 +934,25 @@ class AdminController extends Controller
             default => null,
         };
 
-        $apps = Application::query()
-            ->with([
-                'program:id,title',
-                'patient:id,user_id',
-                'patient.user:id,email',
-                'patient.user.profile:id,user_id,full_name,phone,avatar',
-                'reviewer.profile:id,user_id,full_name,avatar,status',
-                'missingRequests',
-            ])
-            ->when($viewMode === 'assigned', fn($q2) => $q2->whereNotNull('reviewer_id'))
-            ->when($startDate, fn($q2) => $q2->where('created_at', '>=', $startDate))
-            ->when($statusFilter, fn($q2) => $q2->where('status', $statusFilter))
-            // search: name, email, code, id
-            ->when($q !== '', function ($qb) use ($q) {
-                $qb->where(function ($w) use ($q) {
-                    $w->whereHas('patient.user.profile', fn($qq) => $qq->where('full_name', 'like', "%{$q}%"))
-                        ->orWhereHas('patient.user', fn($qq) => $qq->where('email', 'like', "%{$q}%"))
-                        ->orWhere('title', 'like', "%{$q}%");
-
-                    // also allow typing numeric id like "123"
-                    if (ctype_digit($q)) {
-                        $w->orWhere('id', (int)$q);
-                    }
+        return Application::query()
+            ->when($viewMode === 'assigned', fn ($q2) => $q2->whereNotNull('reviewer_id'))
+            ->when($startDate, fn ($q2) => $q2->where('created_at', '>=', $startDate))
+            ->when($statusFilter, fn ($q2) => $q2->where('status', $statusFilter))
+            ->when($paidFinanceFilter, function ($q2) {
+                $q2->where(function ($outer) {
+                    $outer->whereHas(
+                        'invoices',
+                        fn ($iq) => $iq->where('status', 'Paid')
+                    )->orWhereHas(
+                        'patient.user.programRegistrations.registrationInvoices',
+                        fn ($rq) => $rq->where('status', 'Paid')
+                    );
                 });
             })
-            // unassigned first, then newest
-            ->orderByRaw('CASE WHEN reviewer_id IS NULL THEN 0 ELSE 1 END')
-            ->orderByDesc('created_at')
-            ->paginate(10)
-            ->appends($request->query());
-
-        // Return the partial HTML for the table + pagination
-        return view('admin.applications._table', [
-            'apps'  => $apps,
-            'range' => $range,
-        ]);
-    }
-
-    public function applicationsExport(Request $request)
-    {
-        $range  = $request->string('range')->toString();
-        $view   = $request->string('view')->toString();
-        $q      = trim($request->string('q')->toString());
-        $status = strtolower($request->string('status')->toString());
-
-        $viewMode        = $view === 'assigned' ? 'assigned' : 'all';
-        $allowedStatuses = ['pending', 'under_review', 'approved', 'rejected'];
-        $statusFilter    = in_array($status, $allowedStatuses, true) ? $status : null;
-
-        $startDate = match ($range) {
-            'week'  => Carbon::now()->subWeek(),
-            'month' => Carbon::now()->subMonth(),
-            default => null,
-        };
-
-        $exportQuery = Application::query()
-            ->with([
-                'program:id,title',
-                'patient:id,user_id',
-                'patient.user:id,email',
-                'patient.user.profile:id,user_id,full_name,phone',
-                'reviewer.profile:id,user_id,full_name',
-                'missingRequests',
-            ])
-            ->when($viewMode === 'assigned', fn($q2) => $q2->whereNotNull('reviewer_id'))
-            ->when($startDate, fn($q2) => $q2->where('created_at', '>=', $startDate))
-            ->when($statusFilter, fn($q2) => $q2->where('status', $statusFilter))
             ->when($q !== '', function ($qb) use ($q) {
                 $qb->where(function ($w) use ($q) {
-                    $w->whereHas('patient.user.profile', fn($qq) => $qq->where('full_name', 'like', "%{$q}%"))
-                        ->orWhereHas('patient.user', fn($qq) => $qq->where('email', 'like', "%{$q}%"))
+                    $w->whereHas('patient.user.profile', fn ($qq) => $qq->where('full_name', 'like', "%{$q}%"))
+                        ->orWhereHas('patient.user', fn ($qq) => $qq->where('email', 'like', "%{$q}%"))
                         ->orWhere('title', 'like', "%{$q}%");
 
                     if (ctype_digit($q)) {
@@ -1013,6 +962,59 @@ class AdminController extends Controller
             })
             ->orderByRaw('CASE WHEN reviewer_id IS NULL THEN 0 ELSE 1 END')
             ->orderByDesc('created_at');
+    }
+
+    protected function renderAdminApplicationsPage(Request $request)
+    {
+        $apps = $this->applicationsFilteredQuery($request)
+            ->with([
+                'program:id,title',
+                'patient:id,user_id',
+                'patient.user:id,email',
+                'reviewer.profile',
+                'missingRequests',
+            ])
+            ->paginate(10)
+            ->appends($request->query());
+
+        return view('admin.applications', compact('apps'));
+    }
+
+    public function applicationsList(Request $request)
+    {
+        $range = $request->string('range')->toString();
+
+        $apps = $this->applicationsFilteredQuery($request)
+            ->with([
+                'program:id,title',
+                'patient:id,user_id',
+                'patient.user:id,email',
+                'patient.user.profile:id,user_id,full_name,phone,avatar',
+                'reviewer.profile:id,user_id,full_name,avatar,status',
+                'missingRequests',
+            ])
+            ->paginate(10)
+            ->appends($request->query());
+
+        return view('admin.applications._table', [
+            'apps'  => $apps,
+            'range' => $range,
+        ]);
+    }
+
+    public function applicationsExport(Request $request)
+    {
+        $exportQuery = $this->applicationsFilteredQuery($request)
+            ->with([
+                'program:id,title',
+                'patient:id,user_id',
+                'patient.user:id,email',
+                'patient.user.profile:id,user_id,full_name,phone',
+                'reviewer.profile:id,user_id,full_name',
+                'missingRequests',
+                'invoices:id,application_id,status',
+                'patient.user.programRegistrations.registrationInvoices:id,program_registration_id,status',
+            ]);
 
         $filename = 'applications_' . now()->format('Ymd_His') . '.csv';
         $headers  = [
@@ -1040,6 +1042,7 @@ class AdminController extends Controller
                 'Program',
                 'Assigned Reviewer',
                 'Status',
+                'Paid invoice (finance)',
                 'Missing Docs Requested',
                 'Submitted At',
             ]);
@@ -1052,6 +1055,13 @@ class AdminController extends Controller
                 $submittedAt     = $app->created_at
                     ? $app->created_at->timezone($timezone)->format('Y-m-d H:i:s')
                     : '';
+                $hasPaidInvoice = $app->invoices->contains(fn ($inv) => $inv->status === 'Paid')
+                    || collect($app->patient?->user?->programRegistrations ?? [])
+                        ->contains(
+                            fn ($reg) => $reg->registrationInvoices->contains(
+                                fn ($inv) => $inv->status === 'Paid'
+                            )
+                        );
 
                 fputcsv($handle, [
                     $app->code ?: ('APP-' . str_pad((string) $app->id, 6, '0', STR_PAD_LEFT)),
@@ -1061,6 +1071,7 @@ class AdminController extends Controller
                     $app->program?->title ?? 'N/A',
                     $reviewerProfile->full_name ?? 'Unassigned',
                     $missingDocs === 'Yes' ? 'Missing Docs Requested' : $statusLabel($app->status),
+                    $hasPaidInvoice ? 'Yes' : 'No',
                     $missingDocs,
                     $submittedAt,
                 ]);
@@ -1072,6 +1083,38 @@ class AdminController extends Controller
     }
 
     /**
+     * Program applications query for /admin/registrations (status includes virtual "paid" = finance paid invoice).
+     */
+    protected function programRegistrationsFilteredQuery(Request $request): Builder
+    {
+        $programSelectedStatus = strtolower((string) $request->query('program_status', 'all'));
+        $validProgramStatuses = [
+            'all',
+            'paid',
+            ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_APPROVED,
+            ProgramRegistration::STATUS_REJECTED,
+        ];
+
+        if (! in_array($programSelectedStatus, $validProgramStatuses, true)) {
+            $programSelectedStatus = 'all';
+        }
+
+        $query = ProgramRegistration::query();
+
+        if ($programSelectedStatus === 'paid') {
+            $query->whereHas(
+                'registrationInvoices',
+                fn ($iq) => $iq->where('status', 'Paid')
+            );
+        } elseif ($programSelectedStatus !== 'all') {
+            $query->where('status', $programSelectedStatus);
+        }
+
+        return $query->orderByDesc('created_at');
+    }
+
+    /**
      * Unified registrations page for both Program and Event registrations
      */
     public function registrations(Request $request)
@@ -1080,28 +1123,20 @@ class AdminController extends Controller
 
         $displayCol = $this->userDisplayColumn();
 
-        // Program Registrations Data (default: show all applications)
         $programSelectedStatus = strtolower((string) $request->query('program_status', 'all'));
         $validProgramStatuses = [
             'all',
+            'paid',
             ProgramRegistration::STATUS_PENDING,
             ProgramRegistration::STATUS_APPROVED,
             ProgramRegistration::STATUS_REJECTED,
         ];
-
-        if (!in_array($programSelectedStatus, $validProgramStatuses, true)) {
+        if (! in_array($programSelectedStatus, $validProgramStatuses, true)) {
             $programSelectedStatus = 'all';
         }
 
-        $programQuery = ProgramRegistration::query()
+        $programRegistrations = $this->programRegistrationsFilteredQuery($request)
             ->with(['program:id,title', 'user:id,email', 'assignedCaseManager.profile', 'financeUser.profile', 'registrationInvoices'])
-            ->orderByDesc('created_at');
-
-        if ($programSelectedStatus !== 'all') {
-            $programQuery->where('status', $programSelectedStatus);
-        }
-
-        $programRegistrations = $programQuery
             ->paginate(15, ['*'], 'program_page')
             ->appends($request->except('program_page'));
 
@@ -1109,6 +1144,10 @@ class AdminController extends Controller
             'pending'  => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING)->count(),
             'approved' => ProgramRegistration::where('status', ProgramRegistration::STATUS_APPROVED)->count(),
             'rejected' => ProgramRegistration::where('status', ProgramRegistration::STATUS_REJECTED)->count(),
+            'paid'     => ProgramRegistration::whereHas(
+                'registrationInvoices',
+                fn ($iq) => $iq->where('status', 'Paid')
+            )->count(),
             'all'      => ProgramRegistration::count(),
         ];
 
@@ -1169,21 +1208,8 @@ class AdminController extends Controller
      */
     public function registrationsList(Request $request)
     {
-        $programSelectedStatus = strtolower((string) $request->query('program_status', 'all'));
-        $validProgramStatuses = ['all', ProgramRegistration::STATUS_PENDING, ProgramRegistration::STATUS_APPROVED, ProgramRegistration::STATUS_REJECTED];
-        if (!in_array($programSelectedStatus, $validProgramStatuses, true)) {
-            $programSelectedStatus = 'all';
-        }
-
-        $programQuery = ProgramRegistration::query()
+        $programRegistrations = $this->programRegistrationsFilteredQuery($request)
             ->with(['program:id,title', 'user:id,email', 'assignedCaseManager.profile', 'financeUser.profile', 'registrationInvoices'])
-            ->orderByDesc('created_at');
-
-        if ($programSelectedStatus !== 'all') {
-            $programQuery->where('status', $programSelectedStatus);
-        }
-
-        $programRegistrations = $programQuery
             ->paginate(15, ['*'], 'program_page')
             ->appends($request->except('program_page'));
 
@@ -1201,6 +1227,65 @@ class AdminController extends Controller
             'caseManagers'          => $caseManagers,
             'financeUsers'          => $financeUsers,
         ]);
+    }
+
+    public function registrationsExport(Request $request): StreamedResponse
+    {
+        $exportQuery = $this->programRegistrationsFilteredQuery($request)
+            ->with([
+                'program:id,title',
+                'user:id,email',
+                'assignedCaseManager.profile:id,user_id,full_name',
+                'financeUser.profile:id,user_id,full_name',
+                'registrationInvoices:id,program_registration_id,invoice_number,status,amount,issue_date',
+            ]);
+
+        $filename = 'program_applications_' . now()->format('Ymd_His') . '.csv';
+        $headers  = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $tz = config('app.timezone');
+
+        return response()->stream(function () use ($exportQuery, $tz) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                'ID',
+                'Applicant name',
+                'Email',
+                'Program',
+                'Application status',
+                'Case manager',
+                'Finance user',
+                'Paid by finance',
+                'Invoice #',
+                'Invoice amount',
+                'Submitted at',
+            ]);
+
+            $exportQuery->chunk(100, function ($rows) use ($handle, $tz) {
+                foreach ($rows as $reg) {
+                    $paid = $reg->registrationInvoices->contains(fn ($inv) => $inv->status === 'Paid');
+                    $inv  = $reg->registrationInvoices->first();
+                    fputcsv($handle, [
+                        $reg->id,
+                        $reg->full_name,
+                        $reg->email,
+                        $reg->program?->title ?? '',
+                        $reg->status,
+                        $reg->assignedCaseManager?->profile?->full_name ?? $reg->assignedCaseManager?->email ?? '',
+                        $reg->financeUser?->profile?->full_name ?? $reg->financeUser?->email ?? '',
+                        $paid ? 'Yes' : 'No',
+                        $inv?->invoice_number ?? '',
+                        $inv !== null ? number_format((float) $inv->amount, 2, '.', '') : '',
+                        $reg->created_at?->timezone($tz)->format('Y-m-d H:i:s') ?? '',
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        }, 200, $headers);
     }
 
     private function userDisplayColumn(): string

@@ -44,9 +44,12 @@
                     </td>
                     <td class="px-6 py-4 align-top">
                         @if ($registration->registrationInvoices->isNotEmpty())
+                            @php
+                                $financePaid = $registration->registrationInvoices->contains(fn ($inv) => strtolower((string) $inv->status) === 'paid');
+                            @endphp
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-full bg-green-100 text-green-800">
                                 <i class="fas fa-check-circle"></i>
-                                <a href="{{ route('admin.program_registrations.show', $registration) }}#finance" class="hover:underline">Budget Allocated</a>
+                                <a href="{{ route('admin.program_registrations.show', $registration) }}#finance" class="hover:underline">{{ $financePaid ? 'Paid (finance)' : 'Budget Allocated' }}</a>
                             </span>
                         @elseif ($registration->finance_user_id)
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-full bg-amber-100 text-amber-800">

@@ -129,6 +129,7 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     // Unified Registrations (combines Program and Event registrations)
     Route::get('/registrations', [AdminController::class, 'registrations'])->name('admin.registrations.index');
     Route::get('/registrations/list', [AdminController::class, 'registrationsList'])->name('admin.registrations.list');
+    Route::get('/registrations/export', [AdminController::class, 'registrationsExport'])->name('admin.registrations.export');
 
     // Legacy routes (kept for backward compatibility)
     Route::get('/program-registration-requests', [AdminProgramRegistrationController::class, 'index'])->name('admin.program_registrations.index');

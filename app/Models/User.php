@@ -80,6 +80,11 @@ class User extends Authenticatable
         return $this->hasOne(Patient::class);
     }
 
+    public function programRegistrations()
+    {
+        return $this->hasMany(ProgramRegistration::class);
+    }
+
     public function reviewerApplications()
     {
         return $this->hasMany(Application::class, 'reviewer_id');

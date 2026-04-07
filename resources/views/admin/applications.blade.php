@@ -1,13 +1,11 @@
 @php
     use Illuminate\Support\Facades\Auth;
     use Carbon\Carbon;
-    use App\Models\Application;
-    use Illuminate\Contracts\Pagination\LengthAwarePaginator;
     use App\Models\UserProfile;
 
     $user = Auth::user();
 
-    // --- Filters ---
+    // --- Filters (list query: AdminController::applications / renderAdminApplicationsPage) ---
     $viewMode = request('view') === 'assigned' ? 'assigned' : 'all';
     $range = request('range');
     $statusOptions = [
@@ -15,46 +13,9 @@
         'under_review' => 'Under Review',
         'approved' => 'Approved',
         'rejected' => 'Rejected',
+        'paid' => 'Paid (finance)',
     ];
     $selectedStatus = strtolower((string) request('status'));
-    $statusFilter = array_key_exists($selectedStatus, $statusOptions) ? $selectedStatus : null;
-
-    $startDate = match ($range) {
-        'week' => Carbon::now()->subWeek(),
-        'month' => Carbon::now()->subMonth(),
-        default => null,
-    };
-
-    // --- Base query ---
-    $apps = Application::query()
-        ->with([
-            'program:id,title',
-            'patient:id,user_id',
-            'patient.user:id,email',
-            'reviewer.profile',
-            'missingRequests',
-        ])
-        ->when($viewMode === 'assigned', fn($q) => $q->whereNotNull('reviewer_id'))
-        ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-        ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
-        ->latest('created_at')
-        ->paginate(10)
-        ->appends(request()->query());
-
-    // $apps = Application::query()
-    //     ->with([
-    //         'program:id,title',
-    //         'patient:id,user_id',
-    //         'patient.user:id,email',
-    //         'reviewer.profile', // add this to prevent N+1 in Blade
-    //         'missingRequests',
-    //     ])
-    //     ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-    //     // portable: NULLs first, then by newest
-    //     ->orderByRaw('CASE WHEN reviewer_id IS NULL THEN 0 ELSE 1 END')
-    //     ->orderByDesc('created_at')
-    //     ->paginate(10)
-    //     ->appends(request()->query());
 
     // --- Helpers ---
     $fmtDate = fn($dt) => $dt ? Carbon::parse($dt)->format('Y-m-d') : '—';

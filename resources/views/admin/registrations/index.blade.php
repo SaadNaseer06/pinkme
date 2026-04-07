@@ -120,32 +120,40 @@
                         <div class="flex flex-wrap gap-2 text-sm text-gray-600">
                             <span>Pending: <strong class="text-pink-600">{{ $programCounts['pending'] }}</strong></span>
                             <span>Approved: <strong class="text-green-600">{{ $programCounts['approved'] }}</strong></span>
+                            <span>Paid (finance): <strong class="text-emerald-700">{{ $programCounts['paid'] ?? 0 }}</strong></span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Filters -->
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <div class="flex flex-col md:flex-row md:items-center gap-3">
-                        <div class="relative w-full md:w-48">
-                            <select name="program_status" id="programStatusFilter"
-                                class="w-full appearance-none rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
-                                <option value="pending" {{ $programSelectedStatus === 'pending' ? 'selected' : '' }}>Pending Approval</option>
-                                <option value="approved" {{ $programSelectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
-                                <option value="all" {{ $programSelectedStatus === 'all' ? 'selected' : '' }}>All</option>
-                            </select>
-                            <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </span>
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <div class="relative w-full sm:w-56">
+                                <select name="program_status" id="programStatusFilter"
+                                    class="w-full appearance-none rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
+                                    <option value="pending" {{ $programSelectedStatus === 'pending' ? 'selected' : '' }}>Pending Approval</option>
+                                    <option value="approved" {{ $programSelectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
+                                    <option value="paid" {{ $programSelectedStatus === 'paid' ? 'selected' : '' }}>Paid (finance)</option>
+                                    <option value="all" {{ $programSelectedStatus === 'all' ? 'selected' : '' }}>All</option>
+                                </select>
+                                <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </span>
+                            </div>
+                            @if ($programSelectedStatus !== 'all')
+                                <a href="{{ route('admin.registrations.index', ['tab' => 'programs', 'program_status' => 'all']) }}"
+                                    class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 transition">
+                                    Reset
+                                </a>
+                            @endif
                         </div>
-                        @if ($programSelectedStatus !== 'all')
-                            <a href="{{ route('admin.registrations.index', ['tab' => 'programs', 'program_status' => 'all']) }}"
-                                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 transition">
-                                Reset
-                            </a>
-                        @endif
+                        <button type="button" id="exportProgramRegistrationsBtn"
+                            class="inline-flex items-center justify-center px-4 py-2 bg-pink-600 text-white rounded-md text-sm font-medium shadow-sm hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-1 transition">
+                            Export CSV
+                        </button>
                     </div>
                 </div>
 
@@ -485,6 +493,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         const REGISTRATIONS_LIST_URL = "{{ route('admin.registrations.list') }}";
+        const REGISTRATIONS_EXPORT_URL = "{{ route('admin.registrations.export') }}";
 
         function showToast(message, type) {
             type = type || 'success';
@@ -522,6 +531,12 @@
             $('#programStatusFilter').on('change', function() {
                 const status = $(this).val();
                 loadProgramRegistrations({ program_status: status, program_page: 1 });
+            });
+
+            $('#exportProgramRegistrationsBtn').on('click', function() {
+                const status = $('#programStatusFilter').val() || 'all';
+                const q = $.param({ program_status: status });
+                window.location.href = REGISTRATIONS_EXPORT_URL + (q ? ('?' + q) : '');
             });
 
             // Pagination: load via AJAX without reload

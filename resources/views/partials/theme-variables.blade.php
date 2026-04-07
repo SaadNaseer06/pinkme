@@ -75,6 +75,35 @@
         filter: brightness(0);
         opacity: 0.75;
     }
+    /*
+     * Sidebar SVGs were authored for the old dark bar; on light sidebar inactive icons read as white/washed out.
+     * Tint inactive icons to body text #213430; remove filter on active row (pink icon assets).
+     */
+    .navigation ul li:not(:nth-child(1)):not(.hovered) a .icon img {
+        filter: brightness(0) saturate(100%) invert(13%) sepia(10%) saturate(618%) hue-rotate(131deg) brightness(95%) contrast(92%);
+        opacity: 1;
+    }
+    .navigation ul li.hovered a .icon img {
+        filter: none !important;
+        opacity: 1;
+    }
+    .mobile-sidebar .mobile-menu li:not(.active) a img {
+        filter: brightness(0) saturate(100%) invert(13%) sepia(10%) saturate(618%) hue-rotate(131deg) brightness(95%) contrast(92%);
+        opacity: 1;
+    }
+    .mobile-sidebar .mobile-menu li.active a img {
+        filter: none !important;
+        opacity: 1;
+    }
+    .mobile-sidebar .mobile-menu li:not(.active) a:hover img {
+        filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(314deg) brightness(87%) contrast(97%);
+        opacity: 1;
+    }
+    /* Sign out: icon matches pink link */
+    .sign-out a .icon img {
+        filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(314deg) brightness(87%) contrast(97%);
+        opacity: 1;
+    }
     /* Active / hover row: light rose tab */
     .navigation ul li.hovered {
         background: #F3E8EF !important;

@@ -14,7 +14,7 @@
     <ul class="mobile-menu">
         <li class="{{ request()->routeIs('case_manager.dashboard') ? 'active' : '' }}"><a
                 href="{{ route('case_manager.dashboard') }}"><img
-                    src="{{ request()->routeIs('case_manager.dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-dash.svg') }}"
+                    src="{{ request()->routeIs('case_manager.dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-Dash.svg') }}"
                     alt="">Dashboard</a></li>
         <li class="{{ request()->routeIs('case_manager.program_registrations.*') || request()->is('case_manager/program-registrations*') ? 'active' : '' }}">
             <a href="{{ route('case_manager.program_registrations.index') }}">
@@ -33,7 +33,7 @@
                     alt="">Patient Chats</a></li>
         <li class="{{ request()->routeIs('case_manager.guide') ? 'active' : '' }}"><a
                 href="{{ route('case_manager.guide') }}"><img
-                    src="{{ request()->routeIs('case_manager.guide') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}"
+                    src="{{ request()->routeIs('case_manager.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
                     alt="">Tutorial</a></li>
         <li class="{{ request()->routeIs('case_manager.setting') ? 'active' : '' }}"><a
                 href="{{ route('case_manager.setting') }}"><img
@@ -55,7 +55,7 @@
             <li class="{{ request()->routeIs('case_manager.dashboard') ? 'hovered' : '' }}">
                 <a href="{{ route('case_manager.dashboard') }}">
                     <span class="icon"><img
-                            src="{{ request()->routeIs('case_manager.dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-dash.svg') }}"
+                            src="{{ request()->routeIs('case_manager.dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-Dash.svg') }}"
                             alt="" class="width: 20px; height: 20px;" /></span>
                     <span class="title">Dashboard</span>
                 </a>
@@ -87,7 +87,7 @@
             <li class="{{ request()->routeIs('case_manager.guide') ? 'hovered' : '' }}">
                 <a href="{{ route('case_manager.guide') }}">
                     <span class="icon"><img
-                            src="{{ request()->routeIs('case_manager.guide') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}"
+                            src="{{ request()->routeIs('case_manager.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
                             alt="" /></span>
                     <span class="title">Tutorial</span>
                 </a>

@@ -57,14 +57,14 @@
 
         <li class="{{ request()->routeIs('patient.faq') ? 'active' : '' }}">
             <a href="{{ route('patient.faq') }}">
-                <img src="{{ request()->routeIs('patient.faq') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}"
+                <img src="{{ request()->routeIs('patient.faq') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
                     alt="">
                 FAQ
             </a>
         </li>
         <li class="{{ request()->routeIs('patient.guide') ? 'active' : '' }}">
             <a href="{{ route('patient.guide') }}">
-                <img src="{{ request()->routeIs('patient.guide') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}"
+                <img src="{{ request()->routeIs('patient.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
                     alt="">
                 Tutorial
             </a>
@@ -146,7 +146,7 @@
             <li class="{{ request()->routeIs('patient.faq') ? 'hovered' : '' }}">
                 <a href="{{ route('patient.faq') }}">
                     <span class="icon"><img
-                            src="{{ request()->routeIs('patient.faq') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}"
+                            src="{{ request()->routeIs('patient.faq') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
                             alt="" /></span>
                     <span class="title">FAQ</span>
                 </a>
@@ -154,7 +154,7 @@
             <li class="{{ request()->routeIs('patient.guide') ? 'hovered' : '' }}">
                 <a href="{{ route('patient.guide') }}">
                     <span class="icon"><img
-                            src="{{ request()->routeIs('patient.guide') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}"
+                            src="{{ request()->routeIs('patient.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}"
                             alt="" /></span>
                     <span class="title">Tutorial</span>
                 </a>

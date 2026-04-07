@@ -9,7 +9,7 @@
     <ul class="mobile-menu">
         <li class="{{ request()->routeIs('finance.dashboard') || request()->is('finance/dashboard') ? 'active' : '' }}">
             <a href="{{ route('finance.dashboard') }}">
-                <img src="{{ request()->routeIs('finance.dashboard') || request()->is('finance/dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-dash.svg') }}" alt="" class="w-5 h-5" />Dashboard
+                <img src="{{ request()->routeIs('finance.dashboard') || request()->is('finance/dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-Dash.svg') }}" alt="" class="w-5 h-5" />Dashboard
             </a>
         </li>
         <li class="{{ request()->routeIs('finance.registrations*') || request()->routeIs('finance.invoice*') || request()->is('finance/registrations*') ? 'active' : '' }}">
@@ -19,7 +19,7 @@
         </li>
         <li class="{{ request()->routeIs('finance.guide') ? 'active' : '' }}">
             <a href="{{ route('finance.guide') }}">
-                <img src="{{ request()->routeIs('finance.guide') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}" alt="" />Tutorial
+                <img src="{{ request()->routeIs('finance.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}" alt="" />Tutorial
             </a>
         </li>
     </ul>
@@ -32,7 +32,7 @@
             <li><a href="#"><img src="{{ asset('public/images/pink_me_logo.png') }}" alt="" /></a></li>
             <li class="{{ request()->routeIs('finance.dashboard') ? 'hovered' : '' }}">
                 <a href="{{ route('finance.dashboard') }}">
-                    <span class="icon"><img src="{{ request()->routeIs('finance.dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-dash.svg') }}" alt="" class="w-5 h-5" /></span>
+                    <span class="icon"><img src="{{ request()->routeIs('finance.dashboard') ? asset('public/images/Dashboard-svg.svg') : asset('public/images/App-Dash.svg') }}" alt="" class="w-5 h-5" /></span>
                     <span class="title">Dashboard</span>
                 </a>
             </li>
@@ -44,7 +44,7 @@
             </li>
             <li class="{{ request()->routeIs('finance.guide') ? 'hovered' : '' }}">
                 <a href="{{ route('finance.guide') }}">
-                    <span class="icon"><img src="{{ request()->routeIs('finance.guide') ? asset('public/images/Faq-pink.svg') : asset('public/images/FAQ.svg') }}" alt="" /></span>
+                    <span class="icon"><img src="{{ request()->routeIs('finance.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}" alt="" /></span>
                     <span class="title">Tutorial</span>
                 </a>
             </li>

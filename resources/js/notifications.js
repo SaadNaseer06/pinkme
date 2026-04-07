@@ -1,9 +1,12 @@
 const MAX_NOTIFICATIONS = 20;
-const API_ROUTES = {
-    index: '/notifications',
-    readAll: '/notifications/read-all',
-    read: (id) => `/notifications/${id}/read`,
-};
+
+/** Prefix with meta[name="app-url"] so API works when the app lives in a subdirectory (e.g. /pinkme). */
+function notificationApiPath(path) {
+    const raw = document.querySelector('meta[name="app-url"]')?.getAttribute('content') ?? '';
+    const base = String(raw).replace(/\/+$/, '');
+    const suffix = path.startsWith('/') ? path : `/${path}`;
+    return base ? `${base}${suffix}` : suffix;
+}
 
 class NotificationManager {
     constructor() {
@@ -192,7 +195,7 @@ class NotificationManager {
 
     async fetchInitial() {
         try {
-            const response = await fetch(API_ROUTES.index, {
+            const response = await fetch(notificationApiPath('/notifications'), {
                 headers: {
                     Accept: 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
@@ -355,7 +358,7 @@ class NotificationManager {
     async markNotificationAsRead(id) {
         this.removeFromImportantQueue(id);
         try {
-            const response = await fetch(API_ROUTES.read(id), {
+            const response = await fetch(notificationApiPath(`/notifications/${id}/read`), {
                 method: 'POST',
                 headers: this.requestHeaders(),
                 credentials: 'same-origin',
@@ -374,7 +377,7 @@ class NotificationManager {
 
     async markAllAsRead() {
         try {
-            const response = await fetch(API_ROUTES.readAll, {
+            const response = await fetch(notificationApiPath('/notifications/read-all'), {
                 method: 'POST',
                 headers: this.requestHeaders(),
                 credentials: 'same-origin',

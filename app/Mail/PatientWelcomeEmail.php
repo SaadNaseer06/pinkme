@@ -13,7 +13,10 @@ class PatientWelcomeEmail extends Mailable
 
     public User $user;
 
-    public function __construct(User $user)
+    /**
+     * @param  bool  $viaGoogle  When true, copy references “Continue with Google” instead of password login.
+     */
+    public function __construct(User $user, public bool $viaGoogle = false)
     {
         $this->user = $user->loadMissing('profile');
     }
@@ -33,6 +36,7 @@ class PatientWelcomeEmail extends Mailable
                 'recipientName' => $recipientName,
                 'appName' => $appName,
                 'loginUrl' => route('register', ['tab' => 'login']),
+                'viaGoogle' => $this->viaGoogle,
             ]);
     }
 }

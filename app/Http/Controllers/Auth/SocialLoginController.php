@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PatientWelcomeEmail;
 use App\Models\Patient;
 use App\Models\Role;
 use App\Models\User;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
@@ -73,8 +75,11 @@ class SocialLoginController extends Controller
 
         DB::beginTransaction();
 
+        $isNewSocialSignup = false;
+
         try {
             if (!$user) {
+                $isNewSocialSignup = true;
                 $user = User::create([
                     'email' => $email,
                     'password' => Hash::make(Str::random(32)),
@@ -130,6 +135,14 @@ class SocialLoginController extends Controller
             report($exception);
 
             return $this->redirectWithError('Something went wrong while setting up your account. Please try again.');
+        }
+
+        if ($isNewSocialSignup && filled($user->email)) {
+            try {
+                Mail::to($user->email)->send(new PatientWelcomeEmail($user->fresh(['profile']), true));
+            } catch (Throwable $e) {
+                report($e);
+            }
         }
 
         Auth::login($user, true);

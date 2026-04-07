@@ -18,8 +18,10 @@
 <body class="min-h-screen bg-gradient-to-br from-[#FDF2F8] via-[#FFF8FC] to-[#F3E8EF] flex items-center justify-center p-4">
     <div class="w-full max-w-md">
         <div class="text-center mb-8">
-            <p class="text-sm font-semibold uppercase tracking-wider text-[#9E2469]">Pink Me</p>
-            <h1 class="mt-2 text-2xl font-semibold text-[#213430]">Staff sign in</h1>
+            <img src="{{ asset('public/images/logo.png') }}"
+                alt="{{ config('app.name', 'Pink Me') }}"
+                class="mx-auto h-16 w-auto max-w-[200px] object-contain mb-4" />
+            <h1 class="text-2xl font-semibold text-[#213430]">Staff sign in</h1>
             <p class="mt-2 text-sm text-[#6C5B68]">For administrators, case managers, and finance users. Use your work
                 email and password.</p>
         </div>

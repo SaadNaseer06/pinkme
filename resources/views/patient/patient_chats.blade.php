@@ -202,7 +202,8 @@
                     </div>
 
                     <footer class="border-t border-[#E4D6DF] bg-[#F3E8EF]">
-                        <form class="flex flex-wrap items-center gap-3 px-5 py-4" data-chat-form>
+                        <form class="flex flex-wrap items-center gap-3 px-5 py-4" data-chat-form
+                            data-no-loader="true">
                             <label
                                 class="p-2.5 rounded-full bg-white border border-[#E0D0D9] text-[#70626A] hover:text-[#9E2469] cursor-pointer shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"

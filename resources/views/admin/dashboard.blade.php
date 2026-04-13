@@ -4,17 +4,27 @@
     use App\Models\Application;
     use Carbon\Carbon;
 
-    // Get the time period from request, default to 'week'
+    // Get the time period from request, default to 'week' (must match DB-backed chart logic)
+    $allowedPeriods = ['day', 'week', 'month', 'all'];
     $timePeriod = request()->get('period', 'week');
+    if (! in_array($timePeriod, $allowedPeriods, true)) {
+        $timePeriod = 'week';
+    }
+
+    // Application.status enum: Pending, Approved, Rejected, Under Review (see migrations)
+    $stPending = 'Pending';
+    $stApproved = 'Approved';
+    $stRejected = 'Rejected';
+    $stUnderReview = 'Under Review';
 
     // For admin, get all applications (no reviewer_id filter)
     $q = Application::query();
 
     $totalCount = (clone $q)->count();
-    $approvedCount = (clone $q)->where('status', 'approved')->count();
-    $rejectedCount = (clone $q)->where('status', 'rejected')->count();
-    $pendingCount = (clone $q)->where('status', 'pending')->count();
-    $underReviewCount = (clone $q)->where('status', 'under_review')->count();
+    $approvedCount = (clone $q)->where('status', $stApproved)->count();
+    $rejectedCount = (clone $q)->where('status', $stRejected)->count();
+    $pendingCount = (clone $q)->where('status', $stPending)->count();
+    $underReviewCount = (clone $q)->where('status', $stUnderReview)->count();
     $latestPatients = App\Models\Patient::with('user')
         ->select('patients.*')
         ->join(DB::raw('(SELECT MAX(id) as id FROM patients GROUP BY user_id) as latest'), function ($join) {
@@ -49,11 +59,11 @@
 
                     $dayTotal = (clone $query)->whereDate('created_at', $day->toDateString())->count();
                     $dayApproved = (clone $query)
-                        ->where('status', 'approved')
+                        ->where('status', 'Approved')
                         ->whereDate('created_at', $day->toDateString())
                         ->count();
                     $dayRejected = (clone $query)
-                        ->where('status', 'rejected')
+                        ->where('status', 'Rejected')
                         ->whereDate('created_at', $day->toDateString())
                         ->count();
                     $dayRemain = max(0, $dayTotal - $dayApproved - $dayRejected);
@@ -83,11 +93,11 @@
 
                     $dayTotal = (clone $query)->whereDate('created_at', $day->toDateString())->count();
                     $dayApproved = (clone $query)
-                        ->where('status', 'approved')
+                        ->where('status', 'Approved')
                         ->whereDate('created_at', $day->toDateString())
                         ->count();
                     $dayRejected = (clone $query)
-                        ->where('status', 'rejected')
+                        ->where('status', 'Rejected')
                         ->whereDate('created_at', $day->toDateString())
                         ->count();
                     $dayRemain = max(0, $dayTotal - $dayApproved - $dayRejected);
@@ -118,11 +128,11 @@
 
                     $monthTotal = (clone $query)->whereBetween('created_at', [$monthStart, $monthEnd])->count();
                     $monthApproved = (clone $query)
-                        ->where('status', 'approved')
+                        ->where('status', 'Approved')
                         ->whereBetween('created_at', [$monthStart, $monthEnd])
                         ->count();
                     $monthRejected = (clone $query)
-                        ->where('status', 'rejected')
+                        ->where('status', 'Rejected')
                         ->whereBetween('created_at', [$monthStart, $monthEnd])
                         ->count();
                     $monthRemain = max(0, $monthTotal - $monthApproved - $monthRejected);
@@ -154,12 +164,12 @@
                         ->whereMonth('created_at', $month->month)
                         ->count();
                     $monthApproved = (clone $query)
-                        ->where('status', 'approved')
+                        ->where('status', 'Approved')
                         ->whereYear('created_at', $month->year)
                         ->whereMonth('created_at', $month->month)
                         ->count();
                     $monthRejected = (clone $query)
-                        ->where('status', 'rejected')
+                        ->where('status', 'Rejected')
                         ->whereYear('created_at', $month->year)
                         ->whereMonth('created_at', $month->month)
                         ->count();
@@ -249,19 +259,24 @@
                                             {{ $application->submission_date ? $application->submission_date->format('Y-m-d') : 'N/A' }}
                                         </td>
                                         <td class="p-3 align-middle">
+                                            @php
+                                                $appStatusKey = strtolower(str_replace(' ', '_', (string) $application->status));
+                                            @endphp
                                             <span
                                                 class="inline-flex items-center gap-1 text-sm font-light app-text
-                                            @if ($application->status === 'pending') text-[#8E7C93]
-                                            @elseif($application->status === 'approved') text-[#20B354]
-                                            @elseif($application->status === 'rejected') text-[#B32020]
+                                            @if ($appStatusKey === 'pending') text-[#8E7C93]
+                                            @elseif($appStatusKey === 'approved') text-[#20B354]
+                                            @elseif($appStatusKey === 'rejected') text-[#B32020]
+                                            @elseif($appStatusKey === 'under_review') text-[#91848C]
                                             @else text-[#91848C] @endif">
                                                 <span
                                                     class="w-2 h-2 rounded-full
-                                                @if ($application->status === 'pending') bg-[#8E7C93]
-                                                @elseif($application->status === 'approved') bg-[#20B354]
-                                                @elseif($application->status === 'rejected') bg-[#B32020]
+                                                @if ($appStatusKey === 'pending') bg-[#8E7C93]
+                                                @elseif($appStatusKey === 'approved') bg-[#20B354]
+                                                @elseif($appStatusKey === 'rejected') bg-[#B32020]
+                                                @elseif($appStatusKey === 'under_review') bg-[#91848C]
                                                 @else bg-[#91848C] @endif"></span>
-                                                {{ ucfirst($application->status) }}
+                                                {{ $application->status }}
                                             </span>
                                         </td>
                                         @php
@@ -342,7 +357,7 @@
                                 <div id="periodOptions"
                                     class="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-[#DCCFD8] hidden min-w-[140px] z-50">
                                     @foreach ($periodLabels as $key => $label)
-                                        <a href="{{ request()->url() }}pinkme/admin/dashboard?period={{ $key }}"
+                                        <a href="{{ route('admin.dashboard', ['period' => $key]) }}"
                                             class="block px-4 py-3 text-sm text-[#213430] hover:bg-[#F3E8EF] transition-colors first:rounded-t-lg last:rounded-b-lg {{ $timePeriod === $key ? 'bg-[#F3E8EF] font-medium text-[#9E2469]' : '' }}">
                                             {{ $label }}
                                         </a>

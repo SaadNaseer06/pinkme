@@ -342,7 +342,7 @@
                                 <div id="periodOptions"
                                     class="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-[#DCCFD8] hidden min-w-[140px] z-50">
                                     @foreach ($periodLabels as $key => $label)
-                                        <a href="{{ request()->url() }}?period={{ $key }}"
+                                        <a href="{{ request()->url() }}pinkme/admin/dashboard?period={{ $key }}"
                                             class="block px-4 py-3 text-sm text-[#213430] hover:bg-[#F3E8EF] transition-colors first:rounded-t-lg last:rounded-b-lg {{ $timePeriod === $key ? 'bg-[#F3E8EF] font-medium text-[#9E2469]' : '' }}">
                                             {{ $label }}
                                         </a>

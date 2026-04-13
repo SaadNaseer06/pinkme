@@ -1,215 +1,3 @@
-@php
-    use Illuminate\Support\Facades\Auth;
-    use Illuminate\Support\Facades\DB;
-    use App\Models\Application;
-    use Carbon\Carbon;
-
-    // Get the time period from request, default to 'week' (must match DB-backed chart logic)
-    $allowedPeriods = ['day', 'week', 'month', 'all'];
-    $timePeriod = request()->get('period', 'week');
-    if (! in_array($timePeriod, $allowedPeriods, true)) {
-        $timePeriod = 'week';
-    }
-
-    // Application.status enum: Pending, Approved, Rejected, Under Review (see migrations)
-    $stPending = 'Pending';
-    $stApproved = 'Approved';
-    $stRejected = 'Rejected';
-    $stUnderReview = 'Under Review';
-
-    // For admin, get all applications (no reviewer_id filter)
-    $q = Application::query();
-
-    $totalCount = (clone $q)->count();
-    $approvedCount = (clone $q)->where('status', $stApproved)->count();
-    $rejectedCount = (clone $q)->where('status', $stRejected)->count();
-    $pendingCount = (clone $q)->where('status', $stPending)->count();
-    $underReviewCount = (clone $q)->where('status', $stUnderReview)->count();
-    $latestPatients = App\Models\Patient::with('user')
-        ->select('patients.*')
-        ->join(DB::raw('(SELECT MAX(id) as id FROM patients GROUP BY user_id) as latest'), function ($join) {
-            $join->on('patients.id', '=', 'latest.id');
-        })
-        ->orderBy('patients.created_at', 'desc')
-        ->take(5)
-        ->get();
-
-    $acqCounts = [
-        'applications' => $totalCount,
-        'shortlisted' => $underReviewCount,
-        'rejected' => $rejectedCount,
-        'pending' => $pendingCount,
-        'approved' => $approvedCount,
-    ];
-
-    $maxAcq = max(1, max($acqCounts));
-    $acqPct = array_map(fn($c) => (int) round(($c / $maxAcq) * 100), $acqCounts);
-
-    // Function to get chart data based on time period
-    function getChartData($query, $period)
-    {
-        $chartData = [];
-
-        switch ($period) {
-            case 'day':
-                // Last 6 calendar days (including today)
-                for ($i = 5; $i >= 0; $i--) {
-                    $day = Carbon::today()->subDays($i);
-                    $label = $day->format('M d');
-
-                    $dayTotal = (clone $query)->whereDate('created_at', $day->toDateString())->count();
-                    $dayApproved = (clone $query)
-                        ->where('status', 'Approved')
-                        ->whereDate('created_at', $day->toDateString())
-                        ->count();
-                    $dayRejected = (clone $query)
-                        ->where('status', 'Rejected')
-                        ->whereDate('created_at', $day->toDateString())
-                        ->count();
-                    $dayRemain = max(0, $dayTotal - $dayApproved - $dayRejected);
-
-                    if ($dayTotal > 0) {
-                        $appsPct = (int) round(($dayRemain / $dayTotal) * 100);
-                        $approvedPct = (int) round(($dayApproved / $dayTotal) * 100);
-                        $rejectedPct = max(0, 100 - $appsPct - $approvedPct);
-                    } else {
-                        $appsPct = $approvedPct = $rejectedPct = 0;
-                    }
-
-                    $chartData[$label] = [
-                        'apps' => $appsPct,
-                        'approved' => $approvedPct,
-                        'rejected' => $rejectedPct,
-                    ];
-                }
-                break;
-
-            case 'week':
-                // Last 7 days
-                $weekdayToLabel = [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
-                for ($i = 6; $i >= 0; $i--) {
-                    $day = Carbon::today()->subDays($i);
-                    $label = $weekdayToLabel[(int) $day->isoWeekday()];
-
-                    $dayTotal = (clone $query)->whereDate('created_at', $day->toDateString())->count();
-                    $dayApproved = (clone $query)
-                        ->where('status', 'Approved')
-                        ->whereDate('created_at', $day->toDateString())
-                        ->count();
-                    $dayRejected = (clone $query)
-                        ->where('status', 'Rejected')
-                        ->whereDate('created_at', $day->toDateString())
-                        ->count();
-                    $dayRemain = max(0, $dayTotal - $dayApproved - $dayRejected);
-
-                    if ($dayTotal > 0) {
-                        $appsPct = (int) round(($dayRemain / $dayTotal) * 100);
-                        $approvedPct = (int) round(($dayApproved / $dayTotal) * 100);
-                        $rejectedPct = max(0, 100 - $appsPct - $approvedPct);
-                    } else {
-                        $appsPct = $approvedPct = $rejectedPct = 0;
-                    }
-
-                    $chartData[$label] = [
-                        'apps' => $appsPct,
-                        'approved' => $approvedPct,
-                        'rejected' => $rejectedPct,
-                    ];
-                }
-                break;
-
-            case 'month':
-                // Last 4 months
-                for ($i = 3; $i >= 0; $i--) {
-                    $monthPoint = Carbon::now()->subMonths($i);
-                    $monthStart = $monthPoint->copy()->startOfMonth();
-                    $monthEnd = $monthPoint->copy()->endOfMonth();
-                    $label = $monthPoint->format('M');
-
-                    $monthTotal = (clone $query)->whereBetween('created_at', [$monthStart, $monthEnd])->count();
-                    $monthApproved = (clone $query)
-                        ->where('status', 'Approved')
-                        ->whereBetween('created_at', [$monthStart, $monthEnd])
-                        ->count();
-                    $monthRejected = (clone $query)
-                        ->where('status', 'Rejected')
-                        ->whereBetween('created_at', [$monthStart, $monthEnd])
-                        ->count();
-                    $monthRemain = max(0, $monthTotal - $monthApproved - $monthRejected);
-
-                    if ($monthTotal > 0) {
-                        $appsPct = (int) round(($monthRemain / $monthTotal) * 100);
-                        $approvedPct = (int) round(($monthApproved / $monthTotal) * 100);
-                        $rejectedPct = max(0, 100 - $appsPct - $approvedPct);
-                    } else {
-                        $appsPct = $approvedPct = $rejectedPct = 0;
-                    }
-
-                    $chartData[$label] = [
-                        'apps' => $appsPct,
-                        'approved' => $approvedPct,
-                        'rejected' => $rejectedPct,
-                    ];
-                }
-                break;
-
-            case 'all':
-                // Last 6 months
-                for ($i = 5; $i >= 0; $i--) {
-                    $month = Carbon::now()->subMonths($i);
-                    $label = $month->format('M');
-
-                    $monthTotal = (clone $query)
-                        ->whereYear('created_at', $month->year)
-                        ->whereMonth('created_at', $month->month)
-                        ->count();
-                    $monthApproved = (clone $query)
-                        ->where('status', 'Approved')
-                        ->whereYear('created_at', $month->year)
-                        ->whereMonth('created_at', $month->month)
-                        ->count();
-                    $monthRejected = (clone $query)
-                        ->where('status', 'Rejected')
-                        ->whereYear('created_at', $month->year)
-                        ->whereMonth('created_at', $month->month)
-                        ->count();
-                    $monthRemain = max(0, $monthTotal - $monthApproved - $monthRejected);
-
-                    if ($monthTotal > 0) {
-                        $appsPct = (int) round(($monthRemain / $monthTotal) * 100);
-                        $approvedPct = (int) round(($monthApproved / $monthTotal) * 100);
-                        $rejectedPct = max(0, 100 - $appsPct - $approvedPct);
-                    } else {
-                        $appsPct = $approvedPct = $rejectedPct = 0;
-                    }
-
-                    $chartData[$label] = [
-                        'apps' => $appsPct,
-                        'approved' => $approvedPct,
-                        'rejected' => $rejectedPct,
-                    ];
-                }
-                break;
-        }
-
-        return $chartData;
-    }
-
-    $chartData = getChartData($q, $timePeriod);
-
-    // Time period labels
-    $periodLabels = [
-        'day' => 'Day',
-        'week' => 'Week',
-        'month' => 'Month',
-        'all' => 'All Time',
-    ];
-
-    $short = function ($n) {
-        return $n >= 1000 ? number_format($n / 1000, 2) . 'K' : number_format($n);
-    };
-@endphp
-
 @extends('admin.layouts.admin')
 
 @section('title', 'Dashboard')
@@ -357,10 +145,10 @@
                                 <div id="periodOptions"
                                     class="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-[#DCCFD8] hidden min-w-[140px] z-50">
                                     @foreach ($periodLabels as $key => $label)
-                                        <a href="{{ route('admin.dashboard', ['period' => $key]) }}"
-                                            class="block px-4 py-3 text-sm text-[#213430] hover:bg-[#F3E8EF] transition-colors first:rounded-t-lg last:rounded-b-lg {{ $timePeriod === $key ? 'bg-[#F3E8EF] font-medium text-[#9E2469]' : '' }}">
+                                        <button type="button" data-app-stats-period="{{ $key }}"
+                                            class="app-stats-period-option w-full text-left block px-4 py-3 text-sm text-[#213430] hover:bg-[#F3E8EF] transition-colors first:rounded-t-lg last:rounded-b-lg {{ $timePeriod === $key ? 'bg-[#F3E8EF] font-medium text-[#9E2469]' : '' }}">
                                             {{ $label }}
-                                        </a>
+                                        </button>
                                     @endforeach
                                 </div>
                             </div>
@@ -391,7 +179,7 @@
 
                         <!-- Bars (Dynamic + Toggle-able) -->
                         <div class="flex items-end justify-between h-full z-20 pl-4 laptop-bar w-full pr-4">
-                            @foreach ($chartData as $label => $bar)
+                            @foreach ($applicationStatsChart as $label => $bar)
                                 <div class="flex flex-col items-center w-2 h-full mx-1">
                                     <div class="flex flex-col justify-end h-full w-full">
                                         <!-- Applications (pink, top) -->
@@ -559,6 +347,8 @@
     {{-- JavaScript for dropdown and chart toggles --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const APPLICATION_STATS_URL = "{{ route('admin.dashboard.application_stats') }}";
+
             // Dropdown functionality
             const dropdownBtn = document.getElementById('periodDropdown');
             const dropdownOptions = document.getElementById('periodOptions');
@@ -645,31 +435,115 @@
                 });
             }
 
+            function escapeChartLabel(text) {
+                const div = document.createElement('div');
+                div.textContent = text == null ? '' : String(text);
+                return div.innerHTML;
+            }
+
+            function rebuildApplicationStatsChart(bars) {
+                const container = document.querySelector('.laptop-bar');
+                if (!container || !Array.isArray(bars)) {
+                    return;
+                }
+                const html = bars.map(function(row) {
+                    const label = escapeChartLabel(row.label);
+                    const apps = Number(row.apps) || 0;
+                    const approved = Number(row.approved) || 0;
+                    const rejected = Number(row.rejected) || 0;
+                    return '<div class="flex flex-col items-center w-2 h-full mx-1">' +
+                        '<div class="flex flex-col justify-end h-full w-full">' +
+                        '<div class="segment segment-apps w-full bg-[#9E2469] rounded-t-full" ' +
+                        'style="height: ' + apps + '%; transition: height .25s ease" data-height="' + apps + '"></div>' +
+                        '<div class="segment segment-approved w-full bg-[#20B354]" ' +
+                        'style="height: ' + approved + '%; transition: height .25s ease" data-height="' + approved +
+                        '"></div>' +
+                        '<div class="segment segment-rejected w-full bg-[#B32020] rounded-b-full" ' +
+                        'style="height: ' + rejected + '%; transition: height .25s ease" data-height="' + rejected +
+                        '"></div>' +
+                        '</div>' +
+                        '<div class="text-xs text-gray-500 mt-2">' + label + '</div>' +
+                        '</div>';
+                }).join('');
+                container.innerHTML = html;
+                if (toggles.apps && toggles.approved && toggles.rejected) {
+                    setSegmentVisibility('segment-apps', toggles.apps.checked);
+                    setSegmentVisibility('segment-approved', toggles.approved.checked);
+                    setSegmentVisibility('segment-rejected', toggles.rejected.checked);
+                }
+            }
+
             if (toggles.apps && toggles.approved && toggles.rejected) {
-                // Initialize
                 setSegmentVisibility('segment-apps', toggles.apps.checked);
                 setSegmentVisibility('segment-approved', toggles.approved.checked);
                 setSegmentVisibility('segment-rejected', toggles.rejected.checked);
 
-                // Events
-                toggles.apps.addEventListener('change', e => setSegmentVisibility('segment-apps', e.target
-                    .checked));
-                toggles.approved.addEventListener('change', e => setSegmentVisibility('segment-approved', e.target
-                    .checked));
-                toggles.rejected.addEventListener('change', e => setSegmentVisibility('segment-rejected', e.target
-                    .checked));
+                toggles.apps.addEventListener('change', function(e) {
+                    setSegmentVisibility('segment-apps', e.target.checked);
+                });
+                toggles.approved.addEventListener('change', function(e) {
+                    setSegmentVisibility('segment-approved', e.target.checked);
+                });
+                toggles.rejected.addEventListener('change', function(e) {
+                    setSegmentVisibility('segment-rejected', e.target.checked);
+                });
             }
 
-            // Add loading animation when period is changed
-            const periodLinks = document.querySelectorAll('#periodOptions a');
-            periodLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    // Show loading state
+            document.querySelectorAll('.app-stats-period-option').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const period = btn.getAttribute('data-app-stats-period');
+                    if (!period) {
+                        return;
+                    }
+                    if (dropdownOptions) {
+                        dropdownOptions.classList.add('hidden');
+                    }
+                    if (dropdownIcon) {
+                        dropdownIcon.classList.remove('rotate-180');
+                    }
                     const chartContainer = document.querySelector('.laptop-bar');
                     if (chartContainer) {
                         chartContainer.style.opacity = '0.5';
                         chartContainer.style.pointerEvents = 'none';
                     }
+                    fetch(APPLICATION_STATS_URL + '?period=' + encodeURIComponent(period), {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    }).then(function(r) {
+                        if (!r.ok) {
+                            throw new Error('Bad response');
+                        }
+                        return r.json();
+                    }).then(function(data) {
+                        const titleEl = document.getElementById('currentPeriod');
+                        if (titleEl && data.period_label) {
+                            titleEl.textContent = data.period_label;
+                        }
+                        rebuildApplicationStatsChart(data.bars);
+                        document.querySelectorAll('.app-stats-period-option').forEach(function(b) {
+                            const on = b.getAttribute('data-app-stats-period') === data.period;
+                            b.classList.toggle('bg-[#F3E8EF]', on);
+                            b.classList.toggle('font-medium', on);
+                            b.classList.toggle('text-[#9E2469]', on);
+                        });
+                        try {
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('period', data.period);
+                            window.history.replaceState({}, '', url);
+                        } catch (err) { /* ignore */ }
+                    }).catch(function() {
+                        alert('Could not load application stats. Please try again.');
+                    }).finally(function() {
+                        if (chartContainer) {
+                            chartContainer.style.opacity = '1';
+                            chartContainer.style.pointerEvents = '';
+                        }
+                    });
                 });
             });
         });
@@ -687,7 +561,7 @@
         }
 
         /* Improve dropdown hover effects */
-        #periodOptions a:hover {
+        #periodOptions .app-stats-period-option:hover {
             background-color: #F3E8EF;
             transform: translateX(2px);
         }

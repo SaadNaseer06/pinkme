@@ -114,6 +114,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     // Admin Routes
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/dashboard/application-stats', [AdminController::class, 'dashboardApplicationStats'])->name('admin.dashboard.application_stats');
     Route::get('/tutorial', [PageController::class, 'adminGuide'])->name('admin.guide');
     Route::get('/applications', [AdminController::class, 'applications'])->name('admin.applications');
     Route::get('/application/{id}', [AdminController::class, 'viewApplication'])->name('admin.viewApplication');

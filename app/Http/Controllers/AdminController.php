@@ -18,8 +18,10 @@ use App\Models\RegistrationInvoice;
 use App\Models\UserNotification;
 use App\Services\FinanceNotificationService;
 use App\Models\EventSponsorship;
+use App\Support\AdminApplicationStatsChart;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -32,7 +34,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         // Get statistics for dashboard cards
         $totalApplications = Application::count();
@@ -54,6 +56,15 @@ class AdminController extends Controller
             ->limit(5)
             ->get();
 
+        $latestPatients = Patient::with('user')
+            ->select('patients.*')
+            ->join(DB::raw('(SELECT MAX(id) as id FROM patients GROUP BY user_id) as latest'), function ($join) {
+                $join->on('patients.id', '=', 'latest.id');
+            })
+            ->orderBy('patients.created_at', 'desc')
+            ->take(5)
+            ->get();
+
         // Get monthly application data for charts (database-agnostic)
         $chartData = [];
         for ($i = 1; $i <= 12; $i++) {
@@ -61,6 +72,10 @@ class AdminController extends Controller
                 ->whereMonth('submission_date', $i)
                 ->count();
         }
+
+        $timePeriod = AdminApplicationStatsChart::normalizePeriod($request->query('period'));
+        $periodLabels = AdminApplicationStatsChart::PERIOD_LABELS;
+        $applicationStatsChart = AdminApplicationStatsChart::series(null, $timePeriod);
 
         return view('admin.dashboard', compact(
             'totalApplications',
@@ -72,8 +87,33 @@ class AdminController extends Controller
             'totalPrograms',
             'totalRaised',
             'recentApplications',
-            'chartData'
+            'latestPatients',
+            'chartData',
+            'timePeriod',
+            'periodLabels',
+            'applicationStatsChart',
         ));
+    }
+
+    public function dashboardApplicationStats(Request $request): JsonResponse
+    {
+        $period = AdminApplicationStatsChart::normalizePeriod($request->query('period'));
+        $chart = AdminApplicationStatsChart::series(null, $period);
+        $bars = [];
+        foreach ($chart as $label => $row) {
+            $bars[] = [
+                'label' => $label,
+                'apps' => $row['apps'],
+                'approved' => $row['approved'],
+                'rejected' => $row['rejected'],
+            ];
+        }
+
+        return response()->json([
+            'period' => $period,
+            'period_label' => AdminApplicationStatsChart::PERIOD_LABELS[$period] ?? 'Week',
+            'bars' => $bars,
+        ]);
     }
 
     public function applications(Request $request)

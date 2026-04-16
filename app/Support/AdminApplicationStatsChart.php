@@ -28,7 +28,6 @@ class AdminApplicationStatsChart
      */
     public static function series(?Builder $query = null, ?string $period = null): array
     {
-        $query = $query ?? Application::query();
         $period = self::normalizePeriod($period);
 
         $chartData = [];
@@ -38,7 +37,7 @@ class AdminApplicationStatsChart
                 for ($i = 5; $i >= 0; $i--) {
                     $day = Carbon::today()->subDays($i);
                     $label = $day->format('M d');
-                    self::pushBucketCounts($chartData, $label, $query, function (Builder $q) use ($day) {
+                    self::pushBucketCounts($chartData, $label, function (Builder $q) use ($day) {
                         $q->whereDate('created_at', $day->toDateString());
                     });
                 }
@@ -49,7 +48,7 @@ class AdminApplicationStatsChart
                 for ($i = 6; $i >= 0; $i--) {
                     $day = Carbon::today()->subDays($i);
                     $label = $weekdayToLabel[(int) $day->isoWeekday()];
-                    self::pushBucketCounts($chartData, $label, $query, function (Builder $q) use ($day) {
+                    self::pushBucketCounts($chartData, $label, function (Builder $q) use ($day) {
                         $q->whereDate('created_at', $day->toDateString());
                     });
                 }
@@ -61,7 +60,7 @@ class AdminApplicationStatsChart
                     $monthStart = $monthPoint->copy()->startOfMonth();
                     $monthEnd = $monthPoint->copy()->endOfMonth();
                     $label = $monthPoint->format('M');
-                    self::pushBucketCounts($chartData, $label, $query, function (Builder $q) use ($monthStart, $monthEnd) {
+                    self::pushBucketCounts($chartData, $label, function (Builder $q) use ($monthStart, $monthEnd) {
                         $q->whereBetween('created_at', [$monthStart, $monthEnd]);
                     });
                 }
@@ -71,7 +70,7 @@ class AdminApplicationStatsChart
                 for ($i = 5; $i >= 0; $i--) {
                     $month = Carbon::now()->subMonths($i);
                     $label = $month->format('M');
-                    self::pushBucketCounts($chartData, $label, $query, function (Builder $q) use ($month) {
+                    self::pushBucketCounts($chartData, $label, function (Builder $q) use ($month) {
                         $q->whereYear('created_at', $month->year)
                             ->whereMonth('created_at', $month->month);
                     });
@@ -86,13 +85,19 @@ class AdminApplicationStatsChart
      * @param  array<string, array{apps: int, approved: int, rejected: int}>  $chartData
      * @param  callable(Builder): void  $scope
      */
-    private static function pushBucketCounts(array &$chartData, string $label, Builder $base, callable $scope): void
+    private static function pushBucketCounts(array &$chartData, string $label, callable $scope): void
     {
-        $bucket = clone $base;
-        $scope($bucket);
-        $total = (clone $bucket)->count();
-        $approved = (clone $bucket)->where('status', 'Approved')->count();
-        $rejected = (clone $bucket)->where('status', 'Rejected')->count();
+        $totalQ = Application::query();
+        $scope($totalQ);
+        $total = $totalQ->count();
+
+        $approvedQ = Application::query();
+        $scope($approvedQ);
+        $approved = $approvedQ->where('status', 'Approved')->count();
+
+        $rejectedQ = Application::query();
+        $scope($rejectedQ);
+        $rejected = $rejectedQ->where('status', 'Rejected')->count();
         $remain = max(0, $total - $approved - $rejected);
 
         if ($total > 0) {

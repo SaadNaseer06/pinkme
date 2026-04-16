@@ -36,7 +36,7 @@
                                                 {{-- <img src="{{ $application->patient->user->profile->avatar ?? '' }}"
                                                     alt="" class="w-8 h-8 rounded-full" /> --}}
                                                 <span
-                                                    class="text-[#91848C] text-[16px] font-light app-text">{{ $application->patient->user->profile->full_name ?? 'N/A' }}</span>
+                                                    class="text-[#91848C] text-[16px] font-light app-text">{{ $application->patient?->user?->profile?->full_name ?? 'N/A' }}</span>
                                             </div>
                                         </td>
                                         <td
@@ -138,7 +138,7 @@
                             <div class="relative z-50">
                                 <button id="periodDropdown"
                                     class="flex items-center gap-1 hover:text-[#213430] transition-colors bg-white px-3 py-2 rounded-lg border border-[#DCCFD8] shadow-sm">
-                                    <span id="currentPeriod">{{ $periodLabels[$timePeriod] }}</span>
+                                    <span id="currentPeriod">{{ $periodLabels[$timePeriod] ?? 'Week' }}</span>
                                     <img src="{{ asset('public/images/down-arrow.svg') }}" alt="Down"
                                         class="w-3 h-3 transition-transform duration-200" id="dropdownIcon" />
                                 </button>
@@ -270,23 +270,23 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <td class="p-3">
                                         <div class="flex items-center gap-3">
-                                            <img src="{{ $patient->user ? $patient->user->avatar_url : asset('public/images/profile.png') }}" alt=""
+                                            <img src="{{ $patient->user?->avatar_url ?? asset('public/images/profile.png') }}" alt=""
                                                 class="w-8 h-8 rounded-full" />
                                             <span class="text-[#91848C] text-[16px] font-light app-text">
-                                                {{ $patient->user->name ?? 'Unknown' }}
+                                                {{ $patient->user?->name ?? 'Unknown' }}
                                             </span>
                                         </div>
                                     </td>
                                     <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text px-10">
-                                        {{ $patient->user->email ?? 'N/A' }}
+                                        {{ $patient->user?->email ?? 'N/A' }}
                                     </td>
                                     <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
-                                        {{ $patient->user->profile->phone ?? 'N/A' }}
+                                        {{ $patient->user?->profile?->phone ?? 'N/A' }}
                                     </td>
                                     <td class="p-2 align-middle">
                                         <span class="inline-flex items-center gap-1 text-[#8E7C93] text-sm app-text">
                                             @php
-                                                $dob = $patient->user->profile->date_of_birth ?? null;
+                                                $dob = $patient->user?->profile?->date_of_birth ?? null;
                                                 $age = $dob ? \Carbon\Carbon::parse($dob)->age : 'N/A';
                                             @endphp
                                             {{ $age }}
@@ -296,8 +296,8 @@
                                         {{ $patient->diagnosis ?? 'N/A' }}
                                     </td>
                                     @php
-                                        $patientQuery = $patient->user->email
-                                            ?? ($patient->user->name ?? $patient->id);
+                                        $patientQuery = $patient->user?->email
+                                            ?? ($patient->user?->name ?? $patient->id);
                                         $applicationsUrl = route('admin.applications', ['q' => $patientQuery]);
                                         $patientsUrl = route('admin.patients', ['q' => $patientQuery]);
                                     @endphp
@@ -321,8 +321,8 @@
                                                     <img src="{{ asset('public/images/assign.svg') }}" alt="" class="patient-action-icon">
                                                     <span>View Applications</span>
                                                 </a>
-                                                @if (!empty($patient->user->email))
-                                                    <a href="mailto:{{ $patient->user->email }}"
+                                                @if (!empty($patient->user?->email))
+                                                    <a href="mailto:{{ $patient->user?->email }}"
                                                         class="patient-action-item">
                                                         <i class="fas fa-envelope patient-action-icon"></i>
                                                         <span>Email Patient</span>

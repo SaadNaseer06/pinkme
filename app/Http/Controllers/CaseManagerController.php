@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\UserNotification;
 use App\Mail\ProgramRegistrationStatus;
 use App\Support\ProgramRegistrationNotifiers;
+use App\Support\BillingPaymentLinks;
 use Illuminate\Support\Facades\Mail;
 
 class CaseManagerController extends Controller
@@ -188,6 +189,29 @@ class CaseManagerController extends Controller
         return view('case_manager.program_registrations.show', [
             'registration' => $registration,
         ]);
+    }
+
+    /**
+     * Assigned case manager: save payment portal links provided by the applicant.
+     */
+    public function updateBillingPaymentLinks(Request $request, ProgramRegistration $registration)
+    {
+        if ($registration->assigned_case_manager_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'billing_urls' => ['nullable', 'array'],
+            'billing_urls.*' => ['nullable', 'string', 'max:2048'],
+        ]);
+
+        $registration->update([
+            'payment_links' => BillingPaymentLinks::paymentLinksColumnValue($data['billing_urls'] ?? []),
+        ]);
+
+        return redirect()
+            ->route('case_manager.program_registrations.show', $registration)
+            ->with('success', 'Billing payment links saved.');
     }
 
     public function approveProgramRegistration(ProgramRegistration $registration, Request $request)

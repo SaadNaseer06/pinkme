@@ -12,7 +12,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -294,52 +293,5 @@ class FinanceUserController extends Controller
         return redirect()
             ->route('finance.registrations.show', $registration)
             ->with('success', 'Invoice PDF emails were sent again to the patient and administrators.');
-    }
-
-    /**
-     * Finance-only: save online billing / payment portal links for this registration.
-     */
-    public function updateBillingPaymentLinks(Request $request, ProgramRegistration $registration)
-    {
-        if ($registration->finance_user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $data = $request->validate([
-            'billing_urls' => ['nullable', 'array'],
-            'billing_urls.*' => ['nullable', 'string', 'max:2048'],
-        ]);
-
-        $normalized = [];
-        foreach ($data['billing_urls'] ?? [] as $raw) {
-            $u = trim((string) $raw);
-            if ($u === '') {
-                continue;
-            }
-            $href = preg_match('#^https?://#i', $u) ? $u : 'https://' . $u;
-            if (! filter_var($href, FILTER_VALIDATE_URL)) {
-                throw ValidationException::withMessages([
-                    'billing_urls' => 'Invalid URL: ' . $u,
-                ]);
-            }
-            $scheme = strtolower((string) parse_url($href, PHP_URL_SCHEME));
-            if (! in_array($scheme, ['http', 'https'], true)) {
-                throw ValidationException::withMessages([
-                    'billing_urls' => 'Only http and https links are allowed: ' . $u,
-                ]);
-            }
-            $normalized[] = $href;
-        }
-
-        $normalized = array_values(array_unique($normalized));
-        $joined = implode("\n", $normalized);
-
-        $registration->update([
-            'payment_links' => $joined !== '' ? $joined : null,
-        ]);
-
-        return redirect()
-            ->route('finance.registrations.show', $registration)
-            ->with('success', 'Billing payment links saved.');
     }
 }

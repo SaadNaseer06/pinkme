@@ -269,7 +269,7 @@
                     @endif
                     <p class="text-base text-[#213430] app-text mt-2"><span class="font-medium">Billing Details:</span> {{ $registration->billing_details ?? 'N/A' }}</p>
                     @if (!empty($registration->payment_links))
-                        <p class="text-base text-[#213430] app-text mt-2"><span class="font-medium">Billing payment links (from finance):</span></p>
+                        <p class="text-base text-[#213430] app-text mt-2"><span class="font-medium">Billing payment links (case manager):</span></p>
                         <div class="text-base text-[#213430] app-text mt-1">
                             {!! \App\Support\BillingPaymentLinks::toHtml($registration->payment_links) !!}
                         </div>

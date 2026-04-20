@@ -256,7 +256,6 @@ Route::prefix('finance')->middleware(['role.restrict'])->group(function () {
     Route::get('/tutorial', [PageController::class, 'financeGuide'])->name('finance.guide');
     Route::get('/registrations', [FinanceUserController::class, 'registrations'])->name('finance.registrations');
     Route::get('/registrations/{registration}', [FinanceUserController::class, 'showRegistration'])->name('finance.registrations.show');
-    Route::post('/registrations/{registration}/billing-payment-links', [FinanceUserController::class, 'updateBillingPaymentLinks'])->name('finance.registrations.billing_payment_links');
     Route::get('/registrations/{registration}/bill-statement/{index}', [FinanceUserController::class, 'downloadBillStatement'])->name('finance.registrations.bill_statement.download')->where('index', '[0-9]+');
     Route::get('/registrations/{registration}/invoice/create', [FinanceUserController::class, 'createInvoice'])->name('finance.invoice.create');
     Route::post('/registrations/{registration}/invoice', [FinanceUserController::class, 'storeInvoice'])->name('finance.invoice.store');
@@ -272,6 +271,7 @@ Route::prefix('case_manager')->middleware(['role.restrict'])->group(function () 
     Route::get('/program-registrations/{registration}', [CaseManagerController::class, 'showProgramRegistration'])->name('case_manager.program_registrations.show');
     Route::post('/program-registrations/{registration}/approve', [CaseManagerController::class, 'approveProgramRegistration'])->name('case_manager.program_registrations.approve');
     Route::post('/program-registrations/{registration}/reject', [CaseManagerController::class, 'rejectProgramRegistration'])->name('case_manager.program_registrations.reject');
+    Route::post('/program-registrations/{registration}/billing-payment-links', [CaseManagerController::class, 'updateBillingPaymentLinks'])->name('case_manager.program_registrations.billing_payment_links');
     Route::get('/view-application/{id}', [CaseManagerController::class, 'viewAssignedApplication'])->name('case_manager.viewAssignedApplication');
     Route::post('/applications/{application}/approve', [CaseManagerController::class, 'approve'])->name('case_manager.applications.approve');
     Route::post('/applications/{application}/reject', [CaseManagerController::class, 'reject'])->name('case_manager.applications.reject');

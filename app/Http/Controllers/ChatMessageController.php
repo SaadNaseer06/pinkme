@@ -171,7 +171,13 @@ class ChatMessageController extends Controller
                 })->where('reviewer_id', $contact->id)->exists();
 
                 $hasRegistration = ProgramRegistration::where('user_id', $authUser->id)
-                    ->where('assigned_case_manager_id', $contact->id)
+                    ->where(function ($q) use ($contact) {
+                        $q->where('assigned_case_manager_id', $contact->id)
+                            ->orWhere(function ($q2) {
+                                $q2->whereNull('assigned_case_manager_id')
+                                    ->where('status', ProgramRegistration::STATUS_PENDING);
+                            });
+                    })
                     ->exists();
 
                 if (! $hasRelationship && ! $hasRegistration) {
@@ -192,8 +198,14 @@ class ChatMessageController extends Controller
                     $query->where('user_id', $contact->id);
                 })->exists();
 
-            $hasRegistration = ProgramRegistration::where('assigned_case_manager_id', $authUser->id)
-                ->where('user_id', $contact->id)
+            $hasRegistration = ProgramRegistration::where('user_id', $contact->id)
+                ->where(function ($q) use ($authUser) {
+                    $q->where('assigned_case_manager_id', $authUser->id)
+                        ->orWhere(function ($q2) {
+                            $q2->whereNull('assigned_case_manager_id')
+                                ->where('status', ProgramRegistration::STATUS_PENDING);
+                        });
+                })
                 ->exists();
 
             if (! $hasRelationship && ! $hasRegistration) {

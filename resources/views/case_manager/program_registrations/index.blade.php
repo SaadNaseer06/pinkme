@@ -18,7 +18,7 @@
                                         : 'Pending Program Registrations')) }}
                         </h2>
                         <p class="text-sm text-[#91848C] app-text mt-1">
-                            Review and manage program registration requests assigned to you.
+                            Review applications assigned to you and pending applications that are not yet assigned (claim by opening the record and approving, rejecting, or saving billing links).
                         </p>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 text-sm text-[#91848C] app-text">

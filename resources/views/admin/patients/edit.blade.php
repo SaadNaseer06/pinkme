@@ -60,19 +60,6 @@
                                     value="{{ old('phone', $patient->user?->profile?->phone) }}"
                                     class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-[#213430] mb-1">Blood Group</label>
-                                <select name="blood_group"
-                                    class="w-full rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]">
-                                    <option value="">Select</option>
-                                    @foreach (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $group)
-                                        <option value="{{ $group }}"
-                                            {{ old('blood_group', $patient->blood_group) === $group ? 'selected' : '' }}>
-                                            {{ $group }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
                         </div>
 
                         <div class="grid gap-4 md:grid-cols-2">

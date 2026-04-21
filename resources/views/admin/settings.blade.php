@@ -2,6 +2,32 @@
 
 @section('title', 'Settings')
 
+@push('head')
+    <style>
+        /* CKEditor 5 (Privacy / Terms): prevent numbered & bulleted list markers clipping on the left */
+        .ck.ck-editor__main {
+            overflow: visible;
+        }
+
+        .ck.ck-editor__editable:not(.ck-editor__nested-editable) {
+            padding-left: 1.75rem !important;
+            padding-right: 1.25rem;
+            min-height: 280px;
+        }
+
+        .ck.ck-content ol,
+        .ck.ck-content ul {
+            margin-left: 0;
+            padding-left: 1.75rem;
+            list-style-position: outside;
+        }
+
+        .ck.ck-content li {
+            margin-bottom: 0.35em;
+        }
+    </style>
+@endpush
+
 @section('content')
     @php
         $defaultPrivacyContent = <<<'HTML'

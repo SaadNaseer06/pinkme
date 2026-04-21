@@ -269,10 +269,10 @@
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
                     <h3 class="text-md font-semibold text-[#213430] app-main">Health background</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm app-text text-[#213430]">
-                        <div class="space-y-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm app-text text-[#213430] min-w-0">
+                        <div class="space-y-2 min-w-0">
                             <p class="font-medium">Are you in active treatment?</p>
-                            <div class="flex items-center gap-4">
+                            <div class="flex flex-wrap items-center gap-4">
                                 <label class="flex items-center gap-2">
                                     <input type="radio" name="active_treatment" value="1" class="text-[#9E2469]" required>
                                     <span>Yes</span>
@@ -282,31 +282,47 @@
                                     <span>No</span>
                                 </label>
                             </div>
-                            <p class="text-xs text-[#91848C] app-text">
+                            <p class="text-xs text-[#91848C] app-text break-words">
                                 Active treatment is defined as the period after a positive diagnosis of breast cancer has been made (with a diagnostic biopsy),
                                 and during which therapies are being administered, including surgical procedures to remove the cancer (e.g., single or bi-lateral
                                 mastectomy, lumpectomy, axillary dissection, or sentinel node biopsy), chemotherapy or radiation. Active treatment does not include
                                 reconstruction surgeries or long-term hormonal therapies.
                             </p>
                         </div>
-                        <div>
-                            <label class="block font-medium mb-1">Family history of breast cancer?</label>
-                            <input type="text" name="family_history" placeholder="Add answer here"
-                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        <div class="space-y-2 min-w-0">
+                            <p class="font-medium">Family history of breast cancer? *</p>
+                            <div class="flex flex-wrap items-center gap-4">
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="family_history" value="Yes" class="text-[#9E2469]" required>
+                                    <span>Yes</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="family_history" value="No" class="text-[#9E2469]">
+                                    <span>No</span>
+                                </label>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block font-medium mb-1">Received financial assistance from us before?</label>
-                            <input type="text" name="assistance_history" placeholder="Add answer here"
-                                class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        <div class="space-y-2 min-w-0">
+                            <p class="font-medium">Received financial assistance from us before? *</p>
+                            <div class="flex flex-wrap items-center gap-4">
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="assistance_history" value="Yes" class="text-[#9E2469]" required>
+                                    <span>Yes</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="radio" name="assistance_history" value="No" class="text-[#9E2469]">
+                                    <span>No</span>
+                                </label>
+                            </div>
                         </div>
                         <div>
                             <label class="block font-medium mb-1">How did you hear about us?</label>
                             <input type="text" name="heard_about" placeholder="Referral, friend, web search..."
                                 class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
                         </div>
-                        <div class="space-y-2">
-                            <p class="font-medium">Select one</p>
-                            <div class="flex items-center gap-4">
+                        <div class="space-y-2 min-w-0 md:col-span-2">
+                            <p class="font-medium">Select one *</p>
+                            <div class="flex flex-wrap items-center gap-4">
                                 <label class="flex items-center gap-2">
                                     <input type="radio" name="referral_type" value="self" class="text-[#9E2469]" required>
                                     <span>Self referral</span>
@@ -321,7 +337,7 @@
                 </div>
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
-                    <h3 class="text-md font-semibold text-[#213430] app-main">Contact & treatment details</h3>
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Applicant Information &amp; Treatment Details</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block font-medium mb-1 text-sm">First Name *</label>
@@ -377,7 +393,11 @@
                 </div>
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
-                    <h3 class="text-md font-semibold text-[#213430] app-main">Proof of income / employment status *</h3>
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Proof of Income/Employment Status *</h3>
+                    <p class="text-sm text-[#213430] app-text">
+                        <span class="font-semibold">Please provide the following: last two years of W-2, last two months pay stubs, last three months bank statements or a written signed statement.</span>
+                        Upload documents below.
+                    </p>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-[#213430] app-text">
                         <label class="flex items-center gap-2">
                             <input type="checkbox" name="proof_of_income_status[]" value="employed" class="text-[#9E2469]">
@@ -400,9 +420,6 @@
                             <span>Student</span>
                         </label>
                     </div>
-                    <p class="text-xs text-[#91848C] app-text">
-                        Provide one: last two years W-2, last two months recent pay stubs, last three months bank statements, or a written signed statement. Upload documents below.
-                    </p>
                 </div>
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
@@ -420,14 +437,14 @@
                         If your application is approved, would you like us to be able to share parts of your story to inspire others?
                         Your answer does not affect eligibility—we simply want to respect your wishes.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4 text-sm text-[#213430] app-text">
-                        <label class="inline-flex items-center gap-2">
-                            <input type="radio" name="authorization_choice" value="allow" class="text-[#9E2469]">
-                            <span>Yes—show me the sharing options below.</span>
+                    <div class="flex flex-col gap-3 text-sm text-[#213430] app-text">
+                        <label class="inline-flex items-start gap-2 min-w-0">
+                            <input type="radio" name="authorization_choice" value="allow" class="text-[#9E2469] mt-1 shrink-0">
+                            <span class="break-words">Yes—show me the sharing options below.</span>
                         </label>
-                        <label class="inline-flex items-center gap-2">
-                            <input type="radio" name="authorization_choice" value="decline" class="text-[#9E2469]" checked>
-                            <span>No thanks—please do not use my information or images.</span>
+                        <label class="inline-flex items-start gap-2 min-w-0">
+                            <input type="radio" name="authorization_choice" value="decline" class="text-[#9E2469] mt-1 shrink-0" checked>
+                            <span class="break-words">No thanks—please do not use my information or images.</span>
                         </label>
                     </div>
                     <p class="text-xs text-[#91848C] app-text hidden" data-auth-hint>Select <strong>Yes</strong> to choose what we may share; if you select <strong>No</strong>, those options stay hidden.</p>
@@ -456,10 +473,10 @@
                 </div>
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
-                    <h3 class="text-md font-semibold text-[#213430] app-main">Billing & verification</h3>
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Billing &amp; Verification</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
-                            <label class="block font-medium mb-1 text-sm">Billing address / online payment details</label>
+                            <label class="block font-medium mb-1 text-sm">Billing Address / Online Payment Details</label>
                             <textarea name="billing_details" rows="3"
                                 class="w-full px-4 py-3 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300"></textarea>
                             <p class="text-xs text-[#91848C] app-text mt-1">To help us with your bill payments and submissions, please provide the billing address or the necessary information for making online payments.</p>
@@ -479,7 +496,7 @@
                 </div>
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
-                    <h3 class="text-md font-semibold text-[#213430] app-main">Upload documentation</h3>
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Upload Documentation</h3>
                     <p class="text-xs text-[#91848C] app-text">Each file can be up to 25MB (PDF, JPG, or PNG).</p>
                     <div class="space-y-3 text-sm text-[#213430] app-text">
                         <div>

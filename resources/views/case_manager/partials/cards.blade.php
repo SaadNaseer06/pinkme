@@ -7,9 +7,9 @@
     $q = \App\Models\Application::query()->where('reviewer_id', $userId);
 
     $totalCount = (clone $q)->count();
-    $approvedCount = (clone $q)->where('status', 'approved')->count();
-    $rejectedCount = (clone $q)->where('status', 'rejected')->count();
-    $pendingCount = (clone $q)->where('status', 'pending')->count();
+    $approvedCount = (clone $q)->where('status', \App\Models\Application::STATUS_APPROVED)->count();
+    $rejectedCount = (clone $q)->where('status', \App\Models\Application::STATUS_REJECTED)->count();
+    $pendingCount = (clone $q)->where('status', \App\Models\Application::STATUS_PENDING)->count();
 
     // Short number formatter: 110150 -> "110.15K"
     $short = function ($n) {

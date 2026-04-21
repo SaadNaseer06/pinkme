@@ -32,10 +32,10 @@ class CaseManagerController extends Controller
         $applications = Application::where('reviewer_id', $user->id)->get();
 
         $total = $applications->count();
-        $pending = $applications->where('status', 'Pending')->count();
-        $underReview = $applications->where('status', 'Under Review')->count();
-        $approved = $applications->where('status', 'Approved')->count();
-        $rejected = $applications->where('status', 'Rejected')->count();
+        $pending = $applications->where('status', Application::STATUS_PENDING)->count();
+        $underReview = $applications->where('status', Application::STATUS_UNDER_REVIEW)->count();
+        $approved = $applications->where('status', Application::STATUS_APPROVED)->count();
+        $rejected = $applications->where('status', Application::STATUS_REJECTED)->count();
 
         // Helper closure to compute percentages safely
         $percentage = function ($count) use ($total) {
@@ -137,9 +137,19 @@ class CaseManagerController extends Controller
             $selectedStatus = ProgramRegistration::STATUS_PENDING;
         }
 
+        $visibleToCaseManager = function ($q): void {
+            $q->where(function ($w): void {
+                $w->where('assigned_case_manager_id', Auth::id())
+                    ->orWhere(function ($w2): void {
+                        $w2->whereNull('assigned_case_manager_id')
+                            ->where('status', ProgramRegistration::STATUS_PENDING);
+                    });
+            });
+        };
+
         $query = ProgramRegistration::query()
             ->with(['program:id,title', 'user:id,email'])
-            ->where('assigned_case_manager_id', Auth::id())
+            ->where($visibleToCaseManager)
             ->orderByDesc('created_at');
 
         if ($selectedStatus !== 'all') {
@@ -151,8 +161,9 @@ class CaseManagerController extends Controller
             ->appends($request->query());
 
         $counts = [
-            'pending' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())
+            'pending' => ProgramRegistration::query()
                 ->where('status', ProgramRegistration::STATUS_PENDING)
+                ->where($visibleToCaseManager)
                 ->count(),
             'approved' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())
                 ->where('status', ProgramRegistration::STATUS_APPROVED)
@@ -160,7 +171,7 @@ class CaseManagerController extends Controller
             'rejected' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())
                 ->where('status', ProgramRegistration::STATUS_REJECTED)
                 ->count(),
-            'all' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())->count(),
+            'all' => ProgramRegistration::query()->where($visibleToCaseManager)->count(),
         ];
 
         $payload = [
@@ -180,9 +191,7 @@ class CaseManagerController extends Controller
 
     public function showProgramRegistration(ProgramRegistration $registration)
     {
-        if ($registration->assigned_case_manager_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->assertCaseManagerMayAccessProgramRegistration($registration);
 
         $registration->load(['program', 'user', 'reviewer', 'assignedCaseManager']);
 
@@ -196,9 +205,9 @@ class CaseManagerController extends Controller
      */
     public function updateBillingPaymentLinks(Request $request, ProgramRegistration $registration)
     {
-        if ($registration->assigned_case_manager_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->assertCaseManagerMayAccessProgramRegistration($registration);
+        $this->claimProgramRegistrationIfUnassigned($registration);
+        $registration->refresh();
 
         $data = $request->validate([
             'billing_urls' => ['nullable', 'array'],
@@ -216,9 +225,9 @@ class CaseManagerController extends Controller
 
     public function approveProgramRegistration(ProgramRegistration $registration, Request $request)
     {
-        if ($registration->assigned_case_manager_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->assertCaseManagerMayAccessProgramRegistration($registration);
+        $this->claimProgramRegistrationIfUnassigned($registration);
+        $registration->refresh();
 
         if ($registration->status !== ProgramRegistration::STATUS_PENDING) {
             return redirect()
@@ -275,9 +284,9 @@ class CaseManagerController extends Controller
 
     public function rejectProgramRegistration(ProgramRegistration $registration, Request $request)
     {
-        if ($registration->assigned_case_manager_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->assertCaseManagerMayAccessProgramRegistration($registration);
+        $this->claimProgramRegistrationIfUnassigned($registration);
+        $registration->refresh();
 
         if ($registration->status !== ProgramRegistration::STATUS_PENDING) {
             return redirect()
@@ -567,7 +576,14 @@ class CaseManagerController extends Controller
             ->pluck('user_id');
 
         $registrationPatientIds = ProgramRegistration::query()
-            ->where('assigned_case_manager_id', $user->id)
+            ->where(function ($q) use ($user) {
+                $q->where('assigned_case_manager_id', $user->id)
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('assigned_case_manager_id')
+                            ->where('status', ProgramRegistration::STATUS_PENDING);
+                    });
+            })
+            ->whereNotNull('user_id')
             ->pluck('user_id');
 
         $patientUserIds = $applicationPatientIds
@@ -801,5 +817,36 @@ class CaseManagerController extends Controller
         $profile->save();
 
         return back()->with('success', 'Social media links updated.');
+    }
+
+    /**
+     * Case managers may open registrations assigned to them, or pending registrations not yet assigned.
+     */
+    private function assertCaseManagerMayAccessProgramRegistration(ProgramRegistration $registration): void
+    {
+        if ($registration->assigned_case_manager_id === Auth::id()) {
+            return;
+        }
+        if ($registration->assigned_case_manager_id === null && $registration->status === ProgramRegistration::STATUS_PENDING) {
+            return;
+        }
+        abort(403);
+    }
+
+    /**
+     * First action (approve / reject / billing links) assigns an unclaimed pending registration to this case manager.
+     */
+    private function claimProgramRegistrationIfUnassigned(ProgramRegistration $registration): void
+    {
+        if ($registration->assigned_case_manager_id !== null) {
+            return;
+        }
+        if ($registration->status !== ProgramRegistration::STATUS_PENDING) {
+            return;
+        }
+        $registration->forceFill([
+            'assigned_case_manager_id' => Auth::id(),
+            'assigned_at' => now(),
+        ])->save();
     }
 }

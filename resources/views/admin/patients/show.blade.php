@@ -35,10 +35,6 @@
                             <h3 class="text-sm font-semibold text-[#91848C] uppercase tracking-wide">Medical Details</h3>
                             <dl class="mt-3 space-y-2 text-sm text-[#213430]">
                                 <div class="flex justify-between">
-                                    <dt>Blood Group</dt>
-                                    <dd>{{ $patient->blood_group ?? 'Not specified' }}</dd>
-                                </div>
-                                <div class="flex justify-between">
                                     <dt>Disease Type</dt>
                                     <dd>{{ $patient->disease_type ?? 'Not specified' }}</dd>
                                 </div>

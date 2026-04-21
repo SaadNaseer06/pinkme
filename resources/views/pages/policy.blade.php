@@ -58,6 +58,9 @@
             margin-left: 1.5rem;
             padding-left: 1.5rem;
             color: #4C3F4C;
+            list-style-position: outside;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         .policy-content ul {
@@ -70,6 +73,13 @@
 
         .policy-content li {
             margin-bottom: 0.5rem;
+            padding-left: 0.25rem;
+        }
+
+        .policy-content {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            min-width: 0;
         }
     </style>
 </head>

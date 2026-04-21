@@ -56,6 +56,12 @@
                     </span>
                 </div>
 
+                @if ($status === ProgramRegistration::STATUS_PENDING && ! $registration->assigned_case_manager_id)
+                    <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 app-text">
+                        This application is not assigned to a case manager yet. When you approve, reject, or save billing payment links, it will be assigned to you.
+                    </div>
+                @endif
+
                 <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1]">
                     <h3 class="text-xl font-semibold text-[#213430] app-main">Assigned Case Manager</h3>
                     <p class="text-base text-[#213430] app-text mt-2">

@@ -9,6 +9,7 @@
                 <th class="p-3 text-[#91848C] font-medium app-h">Program</th>
                 <th class="p-3 text-[#91848C] font-medium app-h">Submitted</th>
                 <th class="p-3 text-[#91848C] font-medium app-h">Status</th>
+                <th class="p-3 text-[#91848C] font-medium app-h">Assignment</th>
                 <th class="p-3 text-[#91848C] font-medium app-h text-center">Action</th>
             </tr>
         </thead>
@@ -40,6 +41,13 @@
                             {{ ucfirst($rowStatus) }}
                         </span>
                     </td>
+                    <td class="p-3 app-text">
+                        @if ($registration->assigned_case_manager_id)
+                            <span class="text-xs text-[#213430]">Assigned</span>
+                        @else
+                            <span class="rounded-full text-xs font-semibold bg-amber-100 text-amber-900 px-2 py-0.5">Unassigned</span>
+                        @endif
+                    </td>
                     <td class="p-3 text-center">
                         <a href="{{ route('case_manager.program_registrations.show', $registration) }}"
                             class="inline-flex items-center px-3 py-2 text-sm text-[#9E2469] border border-[#9E2469] rounded-md hover:bg-[#9E2469] hover:text-white transition app-text">
@@ -49,7 +57,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="p-6 text-center text-[#91848C] app-text">
+                    <td colspan="6" class="p-6 text-center text-[#91848C] app-text">
                         No registration requests found for the selected filter.
                     </td>
                 </tr>

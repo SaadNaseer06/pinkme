@@ -8,10 +8,10 @@
     $q = Application::query()->where('reviewer_id', $userId);
 
     $totalCount = (clone $q)->count();
-    $approvedCount = (clone $q)->where('status', 'approved')->count();
-    $rejectedCount = (clone $q)->where('status', 'rejected')->count();
-    $pendingCount = (clone $q)->where('status', 'pending')->count();
-    $underReviewCount = (clone $q)->where('status', 'under_review')->count();
+    $approvedCount = (clone $q)->where('status', Application::STATUS_APPROVED)->count();
+    $rejectedCount = (clone $q)->where('status', Application::STATUS_REJECTED)->count();
+    $pendingCount = (clone $q)->where('status', Application::STATUS_PENDING)->count();
+    $underReviewCount = (clone $q)->where('status', Application::STATUS_UNDER_REVIEW)->count();
 
     $acqCounts = [
         'applications' => $totalCount,
@@ -31,8 +31,8 @@
         $label = $weekdayToLabel[(int) $day->isoWeekday()];
 
         $dayTotal = (clone $q)->whereDate('created_at', $day->toDateString())->count();
-        $dayApproved = (clone $q)->where('status', 'approved')->whereDate('created_at', $day->toDateString())->count();
-        $dayRejected = (clone $q)->where('status', 'rejected')->whereDate('created_at', $day->toDateString())->count();
+        $dayApproved = (clone $q)->where('status', Application::STATUS_APPROVED)->whereDate('created_at', $day->toDateString())->count();
+        $dayRejected = (clone $q)->where('status', Application::STATUS_REJECTED)->whereDate('created_at', $day->toDateString())->count();
         $dayRemain = max(0, $dayTotal - $dayApproved - $dayRejected);
 
         if ($dayTotal > 0) {

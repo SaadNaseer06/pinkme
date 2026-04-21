@@ -13,7 +13,16 @@ use App\Models\Program;
 class Application extends Model
 {
     use Notifiable, HasFactory;
-    // In your Application model
+
+    /** Matches DB enum / stored values (Title Case). */
+    public const STATUS_PENDING = 'Pending';
+
+    public const STATUS_APPROVED = 'Approved';
+
+    public const STATUS_REJECTED = 'Rejected';
+
+    public const STATUS_UNDER_REVIEW = 'Under Review';
+
     protected $casts = [
         'submission_date' => 'date',
     ];

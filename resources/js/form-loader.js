@@ -36,9 +36,13 @@ function setButtonLoading(button, loading) {
 }
 
 function initFormLoader() {
+    // Bubble phase so target-phase listeners (e.g. custom validation with preventDefault) run first.
     document.addEventListener(
         'submit',
         (event) => {
+            if (event.defaultPrevented) {
+                return;
+            }
             const form = event.target;
             if (!(form instanceof HTMLFormElement)) return;
 
@@ -49,7 +53,7 @@ function initFormLoader() {
 
             buttons.forEach((btn) => setButtonLoading(btn, true));
         },
-        true
+        false
     );
 }
 

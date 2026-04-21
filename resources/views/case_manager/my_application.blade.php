@@ -92,7 +92,7 @@
         @endif --}}
 
         {{-- Status cards --}}
-        @include('case_manager.partials.cards')
+        @include('case_manager.partials.cards', ['cm' => $cm])
 
         <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
             <div class="flex justify-between flex-col md:flex-row items-center mb-4 ml-3">

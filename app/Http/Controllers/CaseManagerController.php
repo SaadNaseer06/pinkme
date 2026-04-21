@@ -20,6 +20,7 @@ use App\Mail\ProgramRegistrationStatus;
 use App\Support\ProgramRegistrationNotifiers;
 use App\Support\BillingPaymentLinks;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Database\Eloquent\Builder;
 
 class CaseManagerController extends Controller
 {
@@ -28,30 +29,8 @@ class CaseManagerController extends Controller
     {
         $user = Auth::user();
 
-        // Fetch all applications where this user is the reviewer
-        $applications = Application::where('reviewer_id', $user->id)->get();
-
-        $total = $applications->count();
-        $pending = $applications->where('status', Application::STATUS_PENDING)->count();
-        $underReview = $applications->where('status', Application::STATUS_UNDER_REVIEW)->count();
-        $approved = $applications->where('status', Application::STATUS_APPROVED)->count();
-        $rejected = $applications->where('status', Application::STATUS_REJECTED)->count();
-
-        // Helper closure to compute percentages safely
-        $percentage = function ($count) use ($total) {
-            return $total > 0 ? round($count / $total * 100) : 0;
-        };
-
         return view('case_manager.dashboard', [
-            'totalAssigned'         => $total,
-            'pendingCount'          => $pending,
-            'underReviewCount'      => $underReview,
-            'approvedCount'         => $approved,
-            'rejectedCount'         => $rejected,
-            'pendingPercentage'     => $percentage($pending),
-            'underReviewPercentage' => $percentage($underReview),
-            'approvedPercentage'    => $percentage($approved),
-            'rejectedPercentage'    => $percentage($rejected),
+            'cm' => $this->buildCaseManagerDashboardData($user),
         ]);
     }
     // public function dashboard()
@@ -120,7 +99,10 @@ class CaseManagerController extends Controller
             ->orderBy('submission_date', 'desc')
             ->paginate(15);
 
-        return view('case_manager.my_application', compact('applications'));
+        return view('case_manager.my_application', [
+            'applications' => $applications,
+            'cm' => $this->buildCaseManagerDashboardData($user),
+        ]);
     }
 
     public function programRegistrations(Request $request)
@@ -137,19 +119,10 @@ class CaseManagerController extends Controller
             $selectedStatus = ProgramRegistration::STATUS_PENDING;
         }
 
-        $visibleToCaseManager = function ($q): void {
-            $q->where(function ($w): void {
-                $w->where('assigned_case_manager_id', Auth::id())
-                    ->orWhere(function ($w2): void {
-                        $w2->whereNull('assigned_case_manager_id')
-                            ->where('status', ProgramRegistration::STATUS_PENDING);
-                    });
-            });
-        };
+        $visibleBase = $this->programRegistrationsVisibleToCaseManagerQuery(Auth::id());
 
-        $query = ProgramRegistration::query()
+        $query = (clone $visibleBase)
             ->with(['program:id,title', 'user:id,email'])
-            ->where($visibleToCaseManager)
             ->orderByDesc('created_at');
 
         if ($selectedStatus !== 'all') {
@@ -161,9 +134,8 @@ class CaseManagerController extends Controller
             ->appends($request->query());
 
         $counts = [
-            'pending' => ProgramRegistration::query()
+            'pending' => (clone $visibleBase)
                 ->where('status', ProgramRegistration::STATUS_PENDING)
-                ->where($visibleToCaseManager)
                 ->count(),
             'approved' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())
                 ->where('status', ProgramRegistration::STATUS_APPROVED)
@@ -171,7 +143,7 @@ class CaseManagerController extends Controller
             'rejected' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())
                 ->where('status', ProgramRegistration::STATUS_REJECTED)
                 ->count(),
-            'all' => ProgramRegistration::query()->where($visibleToCaseManager)->count(),
+            'all' => (clone $visibleBase)->count(),
         ];
 
         $payload = [
@@ -848,5 +820,106 @@ class CaseManagerController extends Controller
             'assigned_case_manager_id' => Auth::id(),
             'assigned_at' => now(),
         ])->save();
+    }
+
+    /**
+     * Program registrations this case manager may see (assigned to them or pending and unassigned).
+     */
+    private function programRegistrationsVisibleToCaseManagerQuery(int $userId): Builder
+    {
+        return ProgramRegistration::query()->where(function ($w) use ($userId): void {
+            $w->where('assigned_case_manager_id', $userId)
+                ->orWhere(function ($w2): void {
+                    $w2->whereNull('assigned_case_manager_id')
+                        ->where('status', ProgramRegistration::STATUS_PENDING);
+                });
+        });
+    }
+
+    /**
+     * Dashboard metrics: legacy applications (reviewer_id) + program registrations visible to this manager.
+     *
+     * @return array{
+     *   totalCount:int,approvedCount:int,rejectedCount:int,pendingCount:int,underReviewCount:int,
+     *   weeklyBars:list<array{label:string,apps:int,approved:int,rejected:int}>,
+     *   acqPct:array<string,int>
+     * }
+     */
+    private function buildCaseManagerDashboardData(User $user): array
+    {
+        $userId = $user->id;
+        $appQ = Application::query()->where('reviewer_id', $userId);
+        $regQ = $this->programRegistrationsVisibleToCaseManagerQuery($userId);
+
+        $appTotal = (clone $appQ)->count();
+        $appApproved = (clone $appQ)->where('status', Application::STATUS_APPROVED)->count();
+        $appRejected = (clone $appQ)->where('status', Application::STATUS_REJECTED)->count();
+        $appPending = (clone $appQ)->where('status', Application::STATUS_PENDING)->count();
+        $underReviewCount = (clone $appQ)->where('status', Application::STATUS_UNDER_REVIEW)->count();
+
+        $regTotal = (clone $regQ)->count();
+        $regApproved = (clone $regQ)->where('status', ProgramRegistration::STATUS_APPROVED)->count();
+        $regRejected = (clone $regQ)->where('status', ProgramRegistration::STATUS_REJECTED)->count();
+        $regPending = (clone $regQ)->where('status', ProgramRegistration::STATUS_PENDING)->count();
+
+        $totalCount = $appTotal + $regTotal;
+        $approvedCount = $appApproved + $regApproved;
+        $rejectedCount = $appRejected + $regRejected;
+        $pendingCount = $appPending + $regPending;
+
+        $weekdayToLabel = [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thr', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
+        $weeklyBars = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $day = Carbon::today()->subDays($i);
+            $label = $weekdayToLabel[(int) $day->isoWeekday()];
+            $dateStr = $day->toDateString();
+
+            $dayAppTotal = (clone $appQ)->whereDate('created_at', $dateStr)->count();
+            $dayRegTotal = (clone $regQ)->whereDate('created_at', $dateStr)->count();
+            $dayTotal = $dayAppTotal + $dayRegTotal;
+
+            $dayApproved = (clone $appQ)->where('status', Application::STATUS_APPROVED)->whereDate('created_at', $dateStr)->count()
+                + (clone $regQ)->where('status', ProgramRegistration::STATUS_APPROVED)->whereDate('created_at', $dateStr)->count();
+            $dayRejected = (clone $appQ)->where('status', Application::STATUS_REJECTED)->whereDate('created_at', $dateStr)->count()
+                + (clone $regQ)->where('status', ProgramRegistration::STATUS_REJECTED)->whereDate('created_at', $dateStr)->count();
+            $dayRemain = max(0, $dayTotal - $dayApproved - $dayRejected);
+
+            if ($dayTotal > 0) {
+                $appsPct = (int) round(($dayRemain / $dayTotal) * 100);
+                $approvedPct = (int) round(($dayApproved / $dayTotal) * 100);
+                $rejectedPct = max(0, 100 - $appsPct - $approvedPct);
+            } else {
+                $appsPct = $approvedPct = $rejectedPct = 0;
+            }
+
+            $weeklyBars[] = [
+                'label' => $label,
+                'apps' => $appsPct,
+                'approved' => $approvedPct,
+                'rejected' => $rejectedPct,
+            ];
+        }
+
+        $acqCounts = [
+            'applications' => $totalCount,
+            'shortlisted' => $underReviewCount,
+            'rejected' => $rejectedCount,
+            'pending' => $pendingCount,
+            'approved' => $approvedCount,
+        ];
+        $maxAcq = max(1, max($acqCounts));
+        $acqPct = array_map(fn ($c) => (int) round(($c / $maxAcq) * 100), $acqCounts);
+
+        return [
+            'totalCount' => $totalCount,
+            'approvedCount' => $approvedCount,
+            'rejectedCount' => $rejectedCount,
+            'pendingCount' => $pendingCount,
+            'underReviewCount' => $underReviewCount,
+            'appTotal' => $appTotal,
+            'regTotal' => $regTotal,
+            'weeklyBars' => $weeklyBars,
+            'acqPct' => $acqPct,
+        ];
     }
 }

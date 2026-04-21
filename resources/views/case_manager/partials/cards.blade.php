@@ -1,21 +1,27 @@
 ﻿@php
     use Illuminate\Support\Facades\Auth;
 
-    // Query directly in Blade (kept simple as requested)
-    $userId = Auth::id();
+    if (! isset($cm)) {
+        $userId = Auth::id();
+        $q = \App\Models\Application::query()->where('reviewer_id', $userId);
+        $cm = [
+            'totalCount' => (clone $q)->count(),
+            'approvedCount' => (clone $q)->where('status', \App\Models\Application::STATUS_APPROVED)->count(),
+            'rejectedCount' => (clone $q)->where('status', \App\Models\Application::STATUS_REJECTED)->count(),
+            'pendingCount' => (clone $q)->where('status', \App\Models\Application::STATUS_PENDING)->count(),
+        ];
+    }
 
-    $q = \App\Models\Application::query()->where('reviewer_id', $userId);
+    $totalCount = $cm['totalCount'];
+    $approvedCount = $cm['approvedCount'];
+    $rejectedCount = $cm['rejectedCount'];
+    $pendingCount = $cm['pendingCount'];
 
-    $totalCount = (clone $q)->count();
-    $approvedCount = (clone $q)->where('status', \App\Models\Application::STATUS_APPROVED)->count();
-    $rejectedCount = (clone $q)->where('status', \App\Models\Application::STATUS_REJECTED)->count();
-    $pendingCount = (clone $q)->where('status', \App\Models\Application::STATUS_PENDING)->count();
-
-    // Short number formatter: 110150 -> "110.15K"
     $short = function ($n) {
         if ($n >= 1000) {
             return number_format($n / 1000, 2) . 'K';
         }
+
         return number_format($n);
     };
 @endphp
@@ -27,7 +33,7 @@
             <img src="{{ asset('public/images/Case-D-1.svg') }}" alt="" class="h-8 w-8 status-cards-img" />
         </div>
         <div>
-            <h3 class="text-[#213430] font-semibold status-cards-h1">Total Applications</h3>
+            <h3 class="text-[#213430] font-semibold status-cards-h1">Total (applications + program requests)</h3>
             <p class="text-md font-normal text-[#9E2469] text-right status-cards-p">
                 {{ $short($totalCount) }}
             </p>

@@ -33,7 +33,7 @@
             <img src="{{ asset('public/images/Case-D-1.svg') }}" alt="" class="h-8 w-8 status-cards-img" />
         </div>
         <div>
-            <h3 class="text-[#213430] font-semibold status-cards-h1">Total (applications + program requests)</h3>
+            <h3 class="text-[#213430] font-semibold status-cards-h1">Total Applications</h3>
             <p class="text-md font-normal text-[#9E2469] text-right status-cards-p">
                 {{ $short($totalCount) }}
             </p>

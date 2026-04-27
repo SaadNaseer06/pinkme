@@ -17,6 +17,11 @@
                 <img src="{{ request()->routeIs('finance.registrations*') || request()->routeIs('finance.invoice*') || request()->is('finance/registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}" alt="" />Patient Requests
             </a>
         </li>
+        <li class="{{ request()->routeIs('finance.team_chats') ? 'active' : '' }}">
+            <a href="{{ route('finance.team_chats') }}">
+                <img src="{{ request()->routeIs('finance.team_chats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}" alt="" />Chat
+            </a>
+        </li>
         <li class="{{ request()->routeIs('finance.guide') ? 'active' : '' }}">
             <a href="{{ route('finance.guide') }}">
                 <img src="{{ request()->routeIs('finance.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}" alt="" />Tutorial
@@ -40,6 +45,12 @@
                 <a href="{{ route('finance.registrations') }}">
                     <span class="icon"><img src="{{ request()->routeIs('finance.registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}" alt="" /></span>
                     <span class="title">Patient Requests</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('finance.team_chats') ? 'hovered' : '' }}">
+                <a href="{{ route('finance.team_chats') }}">
+                    <span class="icon"><img src="{{ request()->routeIs('finance.team_chats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}" alt="" /></span>
+                    <span class="title">Chat</span>
                 </a>
             </li>
             <li class="{{ request()->routeIs('finance.guide') ? 'hovered' : '' }}">

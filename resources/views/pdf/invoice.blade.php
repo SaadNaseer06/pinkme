@@ -118,33 +118,6 @@
             font-weight: 600;
         }
 
-        .total-box {
-            margin-top: 24px;
-            padding: 20px 24px;
-            background: #F3E8EF;
-            border: 1px solid #E5D2DE;
-        }
-
-        .total-box .label {
-            font-size: 10px;
-            color: #91848C;
-            margin-bottom: 4px;
-        }
-
-        .total-box .value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #9E2469;
-        }
-
-        .total-box .status {
-            background: #20B354;
-            color: #fff;
-            padding: 8px 16px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
         .footer {
             margin-top: 32px;
             padding-top: 16px;
@@ -215,20 +188,6 @@
             </tr>
         @endif
     </table>
-
-    <div class="total-box">
-        <table style="width: 100%;">
-            <tr>
-                <td>
-                    <div class="label">Total Amount Due</div>
-                    <div class="value">${{ number_format($invoice->amount, 2) }}</div>
-                </td>
-                <td style="text-align: right; vertical-align: middle;">
-                    <span class="status">{{ $invoice->status }}</span>
-                </td>
-            </tr>
-        </table>
-    </div>
 
     <div class="footer">
         <p>This is an official invoice from {{ config('app.name') }}. Please retain for your records.</p>

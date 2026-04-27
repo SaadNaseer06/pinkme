@@ -14,9 +14,11 @@
                                 ? 'Approved Program Registrations'
                                 : ($selectedStatus === 'rejected'
                                     ? 'Rejected Program Registrations'
-                                    : ($selectedStatus === 'all'
-                                        ? 'All Program Registrations'
-                                        : 'Pending Program Registrations')) }}
+                                    : ($selectedStatus === 'pending_finance'
+                                        ? 'Finance Queue (Program Registrations)'
+                                        : ($selectedStatus === 'all'
+                                            ? 'All Program Registrations'
+                                            : 'Pending Program Registrations'))) }}
                         </h2>
                         <p class="text-sm text-[#91848C] app-text mt-1">
                             Review and manage patient submissions for sponsorship programs.
@@ -24,6 +26,7 @@
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 text-sm text-[#91848C] app-text">
                         <span>Pending: <strong class="text-[#213430]">{{ $counts['pending'] }}</strong></span>
+                        <span>Finance queue: <strong class="text-[#213430]">{{ $counts['pending_finance'] ?? 0 }}</strong></span>
                         <span>Approved: <strong class="text-[#213430]">{{ $counts['approved'] }}</strong></span>
                         <span>Rejected: <strong class="text-[#213430]">{{ $counts['rejected'] }}</strong></span>
                         <span>Total: <strong class="text-[#213430]">{{ $counts['all'] }}</strong></span>
@@ -35,6 +38,7 @@
                         <select name="status" id="programRegStatus"
                             class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#91848C] focus:outline-none">
                             <option value="pending" {{ $selectedStatus === 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="pending_finance" {{ $selectedStatus === 'pending_finance' ? 'selected' : '' }}>Finance queue</option>
                             <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved
                             </option>
                             <option value="rejected" {{ $selectedStatus === 'rejected' ? 'selected' : '' }}>Rejected
@@ -91,15 +95,16 @@
                                     </td>
                                     <td class="p-3">
                     @php
-                        $status = strtolower($registration->status);
+                        $status = strtolower((string) $registration->status);
                         $badgeClasses = match ($status) {
-                            'approved' => 'bg-[#C5E8D1] text-[#20B354]',
-                            'rejected' => 'bg-[#FAD4D4] text-[#B32020]',
+                            \App\Models\ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354]',
+                            \App\Models\ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020]',
+                            \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE => 'bg-amber-100 text-amber-900',
                             default => 'bg-[#FDE8F3] text-[#9E2469]',
                         };
                     @endphp
                                         <span class="rounded-full text-xs font-semibold app-text {{ $badgeClasses }}">
-                                            {{ ucfirst($status) }}
+                                            {{ $registration->status_label }}
                                         </span>
                                     </td>
                                     <td class="p-3 text-center">
@@ -133,6 +138,7 @@
             const heading = document.getElementById('programRegHeading');
             const labels = {
                 pending: 'Pending Program Registrations',
+                pending_finance: 'Finance Queue (Program Registrations)',
                 approved: 'Approved Program Registrations',
                 rejected: 'Rejected Program Registrations',
                 all: 'All Program Registrations'

@@ -1,3 +1,5 @@
+import { fetchFreshCsrfToken, redirectSessionExpiredToLogin } from './session-csrf';
+
 const MAX_NOTIFICATIONS = 20;
 
 /** Prefix with meta[name="app-url"] so API works when the app lives in a subdirectory (e.g. /pinkme). */
@@ -24,6 +26,26 @@ class NotificationManager {
         this.modalElements = {};
         this.boundDocumentHandler = this.handleDocumentClick.bind(this);
         this.boundKeyHandler = this.handleKey.bind(this);
+        this.boundCsrfRefresh = () => this.collectMeta();
+    }
+
+    async fetchWithCsrfRetry(url, init = {}) {
+        const merged = { credentials: 'same-origin', ...init };
+        let response = await fetch(url, merged);
+        if (response.status === 419) {
+            const token = await fetchFreshCsrfToken();
+            if (token) {
+                this.csrfToken = token;
+                response = await fetch(url, {
+                    ...merged,
+                    headers: { ...(init.headers ?? {}), ...this.requestHeaders() },
+                });
+            }
+        }
+        if (response.status === 419) {
+            redirectSessionExpiredToLogin();
+        }
+        return response;
     }
 
     init() {
@@ -41,6 +63,7 @@ class NotificationManager {
 
         this.initialized = true;
         this.bindCenterEvents();
+        document.addEventListener('pinkme:csrf-refreshed', this.boundCsrfRefresh);
         this.fetchInitial();
         this.subscribeToRealtime();
 
@@ -195,12 +218,11 @@ class NotificationManager {
 
     async fetchInitial() {
         try {
-            const response = await fetch(notificationApiPath('/notifications'), {
+            const response = await this.fetchWithCsrfRetry(notificationApiPath('/notifications'), {
                 headers: {
                     Accept: 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
                 },
-                credentials: 'same-origin',
             });
 
             if (!response.ok) {
@@ -358,10 +380,9 @@ class NotificationManager {
     async markNotificationAsRead(id) {
         this.removeFromImportantQueue(id);
         try {
-            const response = await fetch(notificationApiPath(`/notifications/${id}/read`), {
+            const response = await this.fetchWithCsrfRetry(notificationApiPath(`/notifications/${id}/read`), {
                 method: 'POST',
                 headers: this.requestHeaders(),
-                credentials: 'same-origin',
             });
 
             if (!response.ok) {
@@ -377,10 +398,9 @@ class NotificationManager {
 
     async markAllAsRead() {
         try {
-            const response = await fetch(notificationApiPath('/notifications/read-all'), {
+            const response = await this.fetchWithCsrfRetry(notificationApiPath('/notifications/read-all'), {
                 method: 'POST',
                 headers: this.requestHeaders(),
-                credentials: 'same-origin',
             });
 
             if (!response.ok) {

@@ -26,7 +26,7 @@ class NewChatMessageEmail extends Mailable
         $senderName = optional($sender?->profile)->full_name ?? $sender?->email ?? 'Someone';
         $content = $this->message->content;
         if (strlen($content) > 500) {
-            $content = substr($content, 0, 497) . '...';
+            $content = substr($content, 0, 497).'...';
         }
         $chatUrl = url('/');
         $role = optional($receiver->role)->name;
@@ -38,14 +38,16 @@ class NewChatMessageEmail extends Mailable
             } elseif ($role === 'casemanager') {
                 $chatUrl = route('case_manager.patientChats');
             } elseif ($role === 'admin') {
-                $chatUrl = route('admin.dashboard');
+                $chatUrl = route('admin.staff_chats');
+            } elseif ($role === 'finance') {
+                $chatUrl = route('finance.team_chats');
             }
         } catch (\Throwable $e) {
             // keep default url
         }
 
         return $this
-            ->subject("You've got a new message from " . $senderName)
+            ->subject("You've got a new message from ".$senderName)
             ->view('emails.new_chat_message')
             ->with([
                 'recipientName' => $recipientName,

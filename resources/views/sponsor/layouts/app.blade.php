@@ -9,6 +9,7 @@
     <meta name="current-user-id" content="{{ optional(auth()->user())->id }}">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     @vite(['resources/css/app.css', 'resources/css/custom.css', 'resources/js/app.js'])
+    @include('partials.broadcasting-config')
     @include('partials.theme-variables')
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"

@@ -2,35 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Application;
-use App\Models\User;
-use App\Models\Patient;
-use App\Models\SponsorshipProgram;
-use App\Models\Sponsorship;
-use App\Models\Role;
 use App\Models\Event;
+use App\Models\EventSponsorship;
+use App\Models\Message;
+use App\Models\Patient;
 use App\Models\Program;
-use App\Models\SiteSetting;
-use App\Models\UserProfile;
 use App\Models\ProgramRegistration;
 use App\Models\RegistrationInvoice;
-use App\Models\UserNotification;
+use App\Models\Role;
+use App\Models\SiteSetting;
+use App\Models\Sponsorship;
+use App\Models\SponsorshipProgram;
+use App\Models\User;
+use App\Models\UserProfile;
 use App\Services\FinanceNotificationService;
-use App\Models\EventSponsorship;
 use App\Support\AdminApplicationStatsChart;
-use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\Builder;
-use Throwable;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class AdminController extends Controller
 {
@@ -125,7 +125,7 @@ class AdminController extends Controller
     {
         $application = Application::with(['patient.user.profile', 'reviewer.profile', 'program'])->find($id);
 
-        if (!$application) {
+        if (! $application) {
             return redirect()->route('admin.applications')->with('error', 'Application not found.');
         }
 
@@ -174,11 +174,9 @@ class AdminController extends Controller
         }
     }
 
-
-
     public function reviewers(Request $request)
     {
-        $status      = strtolower((string) $request->query('status', 'all'));
+        $status = strtolower((string) $request->query('status', 'all'));
         $searchQuery = trim((string) $request->query('search', ''));
         $assignedReviewer = (int) $request->query('assigned_reviewer', 0);
 
@@ -193,9 +191,9 @@ class AdminController extends Controller
             ->whereHas('profile');
 
         $reviewerCounts = [
-            'active'   => (clone $baseQuery)->whereHas('profile', fn($profile) => $profile->where('status', 1))->count(),
-            'inactive' => (clone $baseQuery)->whereHas('profile', fn($profile) => $profile->where('status', '!=', 1)->orWhereNull('status'))->count(),
-            'all'      => (clone $baseQuery)->count(),
+            'active' => (clone $baseQuery)->whereHas('profile', fn ($profile) => $profile->where('status', 1))->count(),
+            'inactive' => (clone $baseQuery)->whereHas('profile', fn ($profile) => $profile->where('status', '!=', 1)->orWhereNull('status'))->count(),
+            'all' => (clone $baseQuery)->count(),
             'assigned' => (clone $baseQuery)->whereHas('applications')->count(),
         ];
 
@@ -206,10 +204,10 @@ class AdminController extends Controller
             ])
             ->withCount('applications')
             ->when($status === 'active', function ($query) {
-                $query->whereHas('profile', fn($profile) => $profile->where('status', 1));
+                $query->whereHas('profile', fn ($profile) => $profile->where('status', 1));
             })
             ->when($status === 'inactive', function ($query) {
-                $query->whereHas('profile', fn($profile) => $profile->where('status', '!=', 1)->orWhereNull('status'));
+                $query->whereHas('profile', fn ($profile) => $profile->where('status', '!=', 1)->orWhereNull('status'));
             })
             ->when($status === 'assigned', function ($query) {
                 $query->whereHas('applications');
@@ -222,20 +220,20 @@ class AdminController extends Controller
                 $query->where(function ($inner) use ($searchQuery, $numericId) {
                     if ($numericId > 0) {
                         $inner->orWhere('id', $numericId);
-                        $inner->orWhere('reviewer_id', 'like', '%' . $numericId . '%');
+                        $inner->orWhere('reviewer_id', 'like', '%'.$numericId.'%');
                     }
 
-                    $inner->orWhere('email', 'like', '%' . $searchQuery . '%')
+                    $inner->orWhere('email', 'like', '%'.$searchQuery.'%')
                         ->orWhereHas('profile', function ($profileQuery) use ($searchQuery) {
-                            $profileQuery->where('full_name', 'like', '%' . $searchQuery . '%')
-                                ->orWhere('username', 'like', '%' . $searchQuery . '%')
-                                ->orWhere('phone', 'like', '%' . $searchQuery . '%');
+                            $profileQuery->where('full_name', 'like', '%'.$searchQuery.'%')
+                                ->orWhere('username', 'like', '%'.$searchQuery.'%')
+                                ->orWhere('phone', 'like', '%'.$searchQuery.'%');
                         });
                 });
             })
             ->when($assignedReviewer > 0, function ($query) use ($assignedReviewer) {
                 $query->where('id', $assignedReviewer)
-                    ->whereHas('applications', fn($apps) => $apps->where('reviewer_id', $assignedReviewer));
+                    ->whereHas('applications', fn ($apps) => $apps->where('reviewer_id', $assignedReviewer));
             })
             ->orderByDesc('created_at')
             ->paginate(20)
@@ -268,7 +266,6 @@ class AdminController extends Controller
         return response()->json($applications);
     }
 
-
     public function show($id)
     {
         $reviewer = User::with('profile', 'applications') // Eager load profile and applications
@@ -277,9 +274,6 @@ class AdminController extends Controller
 
         return view('admin.show', compact('reviewer'));
     }
-
-
-
 
     public function assignReviewer(Request $request, $id)
     {
@@ -294,7 +288,7 @@ class AdminController extends Controller
                 // Lock the application row for update
                 $application = Application::whereKey($id)->lockForUpdate()->first();
 
-                if (!$application) {
+                if (! $application) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Application not found.',
@@ -303,7 +297,7 @@ class AdminController extends Controller
 
                 // Load reviewer (+profile for checks)
                 $reviewer = User::with('profile')->find($validated['reviewer_id']);
-                if (!$reviewer) {
+                if (! $reviewer) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Selected reviewer not found.',
@@ -312,7 +306,7 @@ class AdminController extends Controller
 
                 // Optional: enforce case manager role
                 if ($caseManagerRoleId = Role::where('name', 'casemanager')->value('id')) {
-                    if ((int)$reviewer->role_id !== (int)$caseManagerRoleId) {
+                    if ((int) $reviewer->role_id !== (int) $caseManagerRoleId) {
                         return response()->json([
                             'success' => false,
                             'message' => 'Selected user is not a case manager.',
@@ -329,19 +323,20 @@ class AdminController extends Controller
                 }
 
                 $previousReviewerId = $application->reviewer_id;
-                $noChange = (int)$previousReviewerId === (int)$reviewer->id;
+                $noChange = (int) $previousReviewerId === (int) $reviewer->id;
 
                 // If no change, return success (idempotent)
                 if ($noChange) {
                     $reviewerName = $reviewer->profile->full_name ?? $reviewer->email ?? 'Unknown Reviewer';
+
                     return response()->json([
                         'success' => true,
                         'message' => "Reviewer already assigned: {$reviewerName}.",
                         'data' => [
                             'application_id' => $application->id,
-                            'reviewer_id'    => $reviewer->id,
-                            'reviewer_name'  => $reviewerName,
-                            'status'         => $application->status,
+                            'reviewer_id' => $reviewer->id,
+                            'reviewer_name' => $reviewerName,
+                            'status' => $application->status,
                         ],
                     ], 200);
                 }
@@ -370,11 +365,11 @@ class AdminController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => $message,
-                    'data'    => [
+                    'data' => [
                         'application_id' => $application->id,
-                        'reviewer_id'    => $reviewer->id,
-                        'reviewer_name'  => $reviewerName,
-                        'status'         => $application->status,
+                        'reviewer_id' => $reviewer->id,
+                        'reviewer_name' => $reviewerName,
+                        'status' => $application->status,
                     ],
                 ], 200);
             });
@@ -382,15 +377,15 @@ class AdminController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid data provided.',
-                'errors'  => $e->errors(),
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Throwable $e) {
             Log::error('Assign reviewer error', [
                 'application_id' => $id ?? 'unknown',
-                'reviewer_id'    => $request->reviewer_id ?? 'unknown',
-                'error_message'  => $e->getMessage(),
-                'error_file'     => $e->getFile(),
-                'error_line'     => $e->getLine(),
+                'reviewer_id' => $request->reviewer_id ?? 'unknown',
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
             ]);
 
             return response()->json([
@@ -410,7 +405,7 @@ class AdminController extends Controller
             return DB::transaction(function () use ($validated, $id) {
                 $application = Application::whereKey($id)->lockForUpdate()->first();
 
-                if (!$application) {
+                if (! $application) {
                     return response()->json(['success' => false, 'message' => 'Application not found.'], 404);
                 }
 
@@ -422,7 +417,7 @@ class AdminController extends Controller
                 }
 
                 $financeUser = User::with('profile')->find($validated['finance_user_id']);
-                if (!$financeUser) {
+                if (! $financeUser) {
                     return response()->json(['success' => false, 'message' => 'Finance user not found.'], 404);
                 }
 
@@ -477,6 +472,7 @@ class AdminController extends Controller
                 'application_id' => $id ?? 'unknown',
                 'error_message' => $e->getMessage(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'An unexpected error occurred.',
@@ -490,6 +486,7 @@ class AdminController extends Controller
             abort(404);
         }
         $invoice->load('programRegistration.program');
+
         return view('admin.registration_invoices.show', compact('registration', 'invoice'));
     }
 
@@ -499,10 +496,10 @@ class AdminController extends Controller
             abort(404);
         }
         $storedPath = $invoice->file_path;
-        if (!$storedPath) {
+        if (! $storedPath) {
             abort(404, 'No file attached to this invoice.');
         }
-        $downloadName = ($invoice->invoice_number ?: 'invoice') . '.pdf';
+        $downloadName = ($invoice->invoice_number ?: 'invoice').'.pdf';
         $publicPath = ltrim(str_replace('public/', '', $storedPath), '/');
         if (Storage::disk('public')->exists($publicPath)) {
             return Storage::disk('public')->download($publicPath, $downloadName);
@@ -517,64 +514,101 @@ class AdminController extends Controller
     {
         try {
             $validated = $request->validate([
-                'finance_user_id' => ['required', 'integer', 'exists:users,id'],
+                'finance_user_id' => ['nullable', 'integer', 'exists:users,id'],
             ]);
 
             return DB::transaction(function () use ($validated, $registration) {
                 $reg = ProgramRegistration::with('program')->whereKey($registration->id)->lockForUpdate()->first();
-                if (!$reg) {
+                if (! $reg) {
                     return response()->json(['success' => false, 'message' => 'Registration not found.'], 404);
                 }
 
-                if (strtolower($reg->status) !== ProgramRegistration::STATUS_APPROVED) {
+                $st = strtolower((string) $reg->status);
+                if (
+                    $st !== ProgramRegistration::STATUS_APPROVED
+                    && $st !== ProgramRegistration::STATUS_PENDING_FINANCE
+                ) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Only approved registrations can be sent to finance.',
+                        'message' => 'Only registrations ready for finance (approved or pending finance) can be routed.',
                     ], 400);
                 }
 
-                $financeUser = User::with('profile')->find($validated['finance_user_id']);
-                if (!$financeUser) {
-                    return response()->json(['success' => false, 'message' => 'Finance user not found.'], 404);
-                }
-
-                $financeRoleId = Role::where('name', 'finance')->value('id');
-                if ($financeRoleId && (int) $financeUser->role_id !== (int) $financeRoleId) {
+                if ($reg->registrationInvoices()->exists()) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Selected user is not a finance user.',
+                        'message' => 'Budget has already been allocated for this registration.',
                     ], 400);
                 }
 
-                if (optional($financeUser->profile)->status != 1) {
+                $financeUserId = $validated['finance_user_id'] ?? null;
+
+                if ($financeUserId) {
+                    $financeUser = User::with('profile')->find($financeUserId);
+                    if (! $financeUser) {
+                        return response()->json(['success' => false, 'message' => 'Finance user not found.'], 404);
+                    }
+
+                    $financeRoleId = Role::where('name', 'finance')->value('id');
+                    if ($financeRoleId && (int) $financeUser->role_id !== (int) $financeRoleId) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Selected user is not a finance user.',
+                        ], 400);
+                    }
+
+                    if (optional($financeUser->profile)->status != 1) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Selected finance user is not active.',
+                        ], 400);
+                    }
+
+                    $reg->update([
+                        'finance_user_id' => $financeUser->id,
+                        'sent_to_finance_at' => $reg->sent_to_finance_at ?? now(),
+                    ]);
+
+                    $financeName = $financeUser->profile->full_name ?? $financeUser->email ?? 'Unknown';
+
+                    FinanceNotificationService::notifyRegistrationAssigned($financeUser, $reg);
+
+                    Log::info('Registration sent to finance (assigned user)', [
+                        'registration_id' => $reg->id,
+                        'finance_user_id' => $financeUser->id,
+                        'sent_by' => Auth::id(),
+                    ]);
+
                     return response()->json([
-                        'success' => false,
-                        'message' => 'Selected finance user is not active.',
-                    ], 400);
+                        'success' => true,
+                        'message' => "Registration assigned to {$financeName} for budget allocation.",
+                        'data' => [
+                            'registration_id' => $reg->id,
+                            'finance_user_id' => $financeUser->id,
+                            'finance_user_name' => $financeName,
+                        ],
+                    ], 200);
                 }
 
                 $reg->update([
-                    'finance_user_id' => $financeUser->id,
-                    'sent_to_finance_at' => now(),
+                    'finance_user_id' => null,
+                    'sent_to_finance_at' => $reg->sent_to_finance_at ?? now(),
+                    'status' => ProgramRegistration::STATUS_PENDING_FINANCE,
                 ]);
 
-                $financeName = $financeUser->profile->full_name ?? $financeUser->email ?? 'Unknown';
+                FinanceNotificationService::notifyFinanceTeamRegistrationQueued($reg);
 
-                FinanceNotificationService::notifyRegistrationAssigned($financeUser, $reg);
-
-                Log::info('Registration sent to finance', [
+                Log::info('Registration placed in finance queue', [
                     'registration_id' => $reg->id,
-                    'finance_user_id' => $financeUser->id,
                     'sent_by' => Auth::id(),
                 ]);
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Registration sent to {$financeName} for budget allocation.",
+                    'message' => 'Registration placed in the finance queue. Finance users were notified.',
                     'data' => [
                         'registration_id' => $reg->id,
-                        'finance_user_id' => $financeUser->id,
-                        'finance_user_name' => $financeName,
+                        'finance_user_id' => null,
                     ],
                 ], 200);
             });
@@ -589,6 +623,7 @@ class AdminController extends Controller
                 'registration_id' => $registration->id ?? 'unknown',
                 'error_message' => $e->getMessage(),
             ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'An unexpected error occurred.',
@@ -639,7 +674,7 @@ class AdminController extends Controller
 
     public function exportPatientsCsv(Request $request): StreamedResponse
     {
-        $filename = 'patients_' . date('Y-m-d') . '.csv';
+        $filename = 'patients_'.date('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($request) {
             $out = fopen('php://output', 'w');
@@ -674,7 +709,7 @@ class AdminController extends Controller
                         : (string) $rawStatus === '1'
                             || strtolower((string) $rawStatus) === 'active';
                     $statusLbl = $isActive ? 'Active' : 'Inactive';
-                    $pid = 'P-' . str_pad((string) $p->id, 4, '0', STR_PAD_LEFT);
+                    $pid = 'P-'.str_pad((string) $p->id, 4, '0', STR_PAD_LEFT);
 
                     fputcsv($out, [
                         $p->id,
@@ -732,7 +767,7 @@ class AdminController extends Controller
 
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', $user ? 'unique:users,email,' . $user->id : 'unique:users,email'],
+            'email' => ['required', 'email', 'max:255', $user ? 'unique:users,email,'.$user->id : 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:50'],
             'blood_group' => ['nullable', 'string', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
             'diagnosis' => ['nullable', 'string', 'max:255'],
@@ -815,7 +850,7 @@ class AdminController extends Controller
 
         $programSort = $request->query('program_sort', 'latest');
         $allowedSorts = ['latest', 'oldest', 'date_asc', 'date_desc'];
-        if (!in_array($programSort, $allowedSorts, true)) {
+        if (! in_array($programSort, $allowedSorts, true)) {
             $programSort = 'latest';
         }
 
@@ -847,6 +882,7 @@ class AdminController extends Controller
     {
         $settings = SiteSetting::first();
         $admin = Auth::user()->load('profile');
+
         return view('admin.settings', compact('settings', 'admin'));
     }
 
@@ -880,8 +916,6 @@ class AdminController extends Controller
             ->with(['success' => 'Profile updated successfully.', 'active_tab' => 'general']);
     }
 
-
-
     public function editReviewer($id)
     {
         // Fetch the reviewer by id, along with their profile
@@ -891,16 +925,15 @@ class AdminController extends Controller
         return view('admin.edit_casemanager_details', compact('reviewer'));
     }
 
-
     public function updateReviewer(Request $request, $id)
     {
         // Validation rules
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:user_profiles,username,' . $id . ',user_id', // Validation for the username in the profile table
+            'username' => 'required|string|max:255|unique:user_profiles,username,'.$id.',user_id', // Validation for the username in the profile table
             'phone' => 'nullable|string|max:20',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$id,
             'gender' => 'nullable|string',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Avatar image validation
             'date_of_birth' => 'nullable|date', // Validation for date_of_birth
@@ -945,7 +978,6 @@ class AdminController extends Controller
         return redirect()->route('admin.reviewers')->with('success', 'Reviewer details updated successfully.');
     }
 
-
     public function applicationsIndex(Request $request)
     {
         return $this->renderAdminApplicationsPage($request);
@@ -958,9 +990,9 @@ class AdminController extends Controller
      */
     protected function applicationsFilteredQuery(Request $request): Builder
     {
-        $range  = $request->string('range')->toString();
-        $view   = $request->string('view')->toString();
-        $q      = trim($request->string('q')->toString());
+        $range = $request->string('range')->toString();
+        $view = $request->string('view')->toString();
+        $q = trim($request->string('q')->toString());
         $status = strtolower($request->string('status')->toString());
 
         $viewMode = $view === 'assigned' ? 'assigned' : 'all';
@@ -969,7 +1001,7 @@ class AdminController extends Controller
         $paidFinanceFilter = ($status === 'paid');
 
         $startDate = match ($range) {
-            'week'  => Carbon::now()->subWeek(),
+            'week' => Carbon::now()->subWeek(),
             'month' => Carbon::now()->subMonth(),
             default => null,
         };
@@ -1037,7 +1069,7 @@ class AdminController extends Controller
             ->appends($request->query());
 
         return view('admin.applications._table', [
-            'apps'  => $apps,
+            'apps' => $apps,
             'range' => $range,
         ]);
     }
@@ -1056,18 +1088,18 @@ class AdminController extends Controller
                 'patient.user.programRegistrations.registrationInvoices:id,program_registration_id,status',
             ]);
 
-        $filename = 'applications_' . now()->format('Ymd_His') . '.csv';
-        $headers  = [
-            'Content-Type'        => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        $filename = 'applications_'.now()->format('Ymd_His').'.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
-        $statusLabel = fn($statusValue) => match (strtolower((string) $statusValue)) {
-            'approved'     => 'Approved',
-            'rejected'     => 'Rejected',
+        $statusLabel = fn ($statusValue) => match (strtolower((string) $statusValue)) {
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
             'under_review' => 'Under Review',
-            'pending'      => 'Pending',
-            default        => ucfirst(str_replace('_', ' ', (string) $statusValue)),
+            'pending' => 'Pending',
+            default => ucfirst(str_replace('_', ' ', (string) $statusValue)),
         };
 
         $timezone = config('app.timezone');
@@ -1089,32 +1121,32 @@ class AdminController extends Controller
 
             $exportQuery->chunk(100, function ($apps) use ($handle, $statusLabel, $timezone) {
                 foreach ($apps as $app) {
-                $patientProfile  = $app->patient?->user?->profile;
-                $reviewerProfile = $app->reviewer?->profile;
-                $missingDocs     = $app->missingRequests->isNotEmpty() ? 'Yes' : 'No';
-                $submittedAt     = $app->created_at
-                    ? $app->created_at->timezone($timezone)->format('Y-m-d H:i:s')
-                    : '';
-                $hasPaidInvoice = $app->invoices->contains(fn ($inv) => $inv->status === 'Paid')
-                    || collect($app->patient?->user?->programRegistrations ?? [])
-                        ->contains(
-                            fn ($reg) => $reg->registrationInvoices->contains(
-                                fn ($inv) => $inv->status === 'Paid'
-                            )
-                        );
+                    $patientProfile = $app->patient?->user?->profile;
+                    $reviewerProfile = $app->reviewer?->profile;
+                    $missingDocs = $app->missingRequests->isNotEmpty() ? 'Yes' : 'No';
+                    $submittedAt = $app->created_at
+                        ? $app->created_at->timezone($timezone)->format('Y-m-d H:i:s')
+                        : '';
+                    $hasPaidInvoice = $app->invoices->contains(fn ($inv) => $inv->status === 'Paid')
+                        || collect($app->patient?->user?->programRegistrations ?? [])
+                            ->contains(
+                                fn ($reg) => $reg->registrationInvoices->contains(
+                                    fn ($inv) => $inv->status === 'Paid'
+                                )
+                            );
 
-                fputcsv($handle, [
-                    $app->code ?: ('APP-' . str_pad((string) $app->id, 6, '0', STR_PAD_LEFT)),
-                    $patientProfile->full_name ?? 'Unknown',
-                    $app->patient?->user?->email ?? 'N/A',
-                    $patientProfile->phone ?? 'N/A',
-                    $app->program?->title ?? 'N/A',
-                    $reviewerProfile->full_name ?? 'Unassigned',
-                    $missingDocs === 'Yes' ? 'Missing Docs Requested' : $statusLabel($app->status),
-                    $hasPaidInvoice ? 'Yes' : 'No',
-                    $missingDocs,
-                    $submittedAt,
-                ]);
+                    fputcsv($handle, [
+                        $app->code ?: ('APP-'.str_pad((string) $app->id, 6, '0', STR_PAD_LEFT)),
+                        $patientProfile->full_name ?? 'Unknown',
+                        $app->patient?->user?->email ?? 'N/A',
+                        $patientProfile->phone ?? 'N/A',
+                        $app->program?->title ?? 'N/A',
+                        $reviewerProfile->full_name ?? 'Unassigned',
+                        $missingDocs === 'Yes' ? 'Missing Docs Requested' : $statusLabel($app->status),
+                        $hasPaidInvoice ? 'Yes' : 'No',
+                        $missingDocs,
+                        $submittedAt,
+                    ]);
                 }
             });
 
@@ -1132,6 +1164,7 @@ class AdminController extends Controller
             'all',
             'paid',
             ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_PENDING_FINANCE,
             ProgramRegistration::STATUS_APPROVED,
             ProgramRegistration::STATUS_REJECTED,
         ];
@@ -1168,6 +1201,7 @@ class AdminController extends Controller
             'all',
             'paid',
             ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_PENDING_FINANCE,
             ProgramRegistration::STATUS_APPROVED,
             ProgramRegistration::STATUS_REJECTED,
         ];
@@ -1181,14 +1215,15 @@ class AdminController extends Controller
             ->appends($request->except('program_page'));
 
         $programCounts = [
-            'pending'  => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING)->count(),
+            'pending' => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING)->count(),
+            'pending_finance' => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING_FINANCE)->count(),
             'approved' => ProgramRegistration::where('status', ProgramRegistration::STATUS_APPROVED)->count(),
             'rejected' => ProgramRegistration::where('status', ProgramRegistration::STATUS_REJECTED)->count(),
-            'paid'     => ProgramRegistration::whereHas(
+            'paid' => ProgramRegistration::whereHas(
                 'registrationInvoices',
                 fn ($iq) => $iq->where('status', 'Paid')
             )->count(),
-            'all'      => ProgramRegistration::count(),
+            'all' => ProgramRegistration::count(),
         ];
 
         // Event Registrations Data
@@ -1198,13 +1233,13 @@ class AdminController extends Controller
         }
 
         $pendingEventRegistrations = EventSponsorship::with(['event', 'sponsor'])
-            ->when($eventSelectedId, fn($query) => $query->where('event_id', $eventSelectedId))
+            ->when($eventSelectedId, fn ($query) => $query->where('event_id', $eventSelectedId))
             ->where('registration_status', 'pending')
             ->orderBy('registered_at', 'desc')
             ->get();
 
         $eventRegistrations = EventSponsorship::with(['event', 'sponsor'])
-            ->when($eventSelectedId, fn($query) => $query->where('event_id', $eventSelectedId))
+            ->when($eventSelectedId, fn ($query) => $query->where('event_id', $eventSelectedId))
             ->orderBy('registered_at', 'desc')
             ->paginate(20, ['*'], 'event_page')
             ->appends($request->except('event_page'));
@@ -1212,10 +1247,10 @@ class AdminController extends Controller
         $eventsForFilter = Event::orderBy('title')->get(['id', 'title']);
 
         $eventCounts = [
-            'pending'   => EventSponsorship::where('registration_status', 'pending')->count(),
+            'pending' => EventSponsorship::where('registration_status', 'pending')->count(),
             'confirmed' => EventSponsorship::where('registration_status', 'confirmed')->count(),
             'cancelled' => EventSponsorship::where('registration_status', 'cancelled')->count(),
-            'all'       => EventSponsorship::count(),
+            'all' => EventSponsorship::count(),
         ];
 
         $caseManagerRoleId = Role::where('name', 'casemanager')->value('id');
@@ -1224,22 +1259,22 @@ class AdminController extends Controller
             ? User::where('role_id', $caseManagerRoleId)->with('profile')->orderBy('email')->get()
             : collect();
         $financeUsers = $financeRoleId
-            ? User::where('role_id', $financeRoleId)->with('profile')->whereHas('profile', fn($q) => $q->where('status', 1))->orderBy('email')->get()
+            ? User::where('role_id', $financeRoleId)->with('profile')->whereHas('profile', fn ($q) => $q->where('status', 1))->orderBy('email')->get()
             : collect();
 
         return view('admin.registrations.index', [
-            'tab'                        => $tab,
-            'programRegistrations'       => $programRegistrations,
-            'programSelectedStatus'      => $programSelectedStatus,
-            'programCounts'              => $programCounts,
-            'eventRegistrations'         => $eventRegistrations,
-            'pendingEventRegistrations'  => $pendingEventRegistrations,
-            'eventsForFilter'            => $eventsForFilter,
-            'eventSelectedId'            => $eventSelectedId,
-            'eventCounts'                => $eventCounts,
-            'displayCol'                 => $displayCol,
-            'caseManagers'               => $caseManagers,
-            'financeUsers'                => $financeUsers,
+            'tab' => $tab,
+            'programRegistrations' => $programRegistrations,
+            'programSelectedStatus' => $programSelectedStatus,
+            'programCounts' => $programCounts,
+            'eventRegistrations' => $eventRegistrations,
+            'pendingEventRegistrations' => $pendingEventRegistrations,
+            'eventsForFilter' => $eventsForFilter,
+            'eventSelectedId' => $eventSelectedId,
+            'eventCounts' => $eventCounts,
+            'displayCol' => $displayCol,
+            'caseManagers' => $caseManagers,
+            'financeUsers' => $financeUsers,
         ]);
     }
 
@@ -1259,13 +1294,13 @@ class AdminController extends Controller
             ? User::where('role_id', $caseManagerRoleId)->with('profile')->orderBy('email')->get()
             : collect();
         $financeUsers = $financeRoleId
-            ? User::where('role_id', $financeRoleId)->with('profile')->whereHas('profile', fn($q) => $q->where('status', 1))->orderBy('email')->get()
+            ? User::where('role_id', $financeRoleId)->with('profile')->whereHas('profile', fn ($q) => $q->where('status', 1))->orderBy('email')->get()
             : collect();
 
         return view('admin.registrations._table', [
-            'programRegistrations'  => $programRegistrations,
-            'caseManagers'          => $caseManagers,
-            'financeUsers'          => $financeUsers,
+            'programRegistrations' => $programRegistrations,
+            'caseManagers' => $caseManagers,
+            'financeUsers' => $financeUsers,
         ]);
     }
 
@@ -1280,10 +1315,10 @@ class AdminController extends Controller
                 'registrationInvoices:id,program_registration_id,invoice_number,status,amount,issue_date',
             ]);
 
-        $filename = 'program_applications_' . now()->format('Ymd_His') . '.csv';
-        $headers  = [
-            'Content-Type'        => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        $filename = 'program_applications_'.now()->format('Ymd_His').'.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
         $tz = config('app.timezone');
@@ -1307,7 +1342,7 @@ class AdminController extends Controller
             $exportQuery->chunk(100, function ($rows) use ($handle, $tz) {
                 foreach ($rows as $reg) {
                     $paid = $reg->registrationInvoices->contains(fn ($inv) => $inv->status === 'Paid');
-                    $inv  = $reg->registrationInvoices->first();
+                    $inv = $reg->registrationInvoices->first();
                     fputcsv($handle, [
                         $reg->id,
                         $reg->full_name,
@@ -1328,6 +1363,74 @@ class AdminController extends Controller
         }, 200, $headers);
     }
 
+    /**
+     * Chat with finance users for coordination on applications and budget.
+     */
+    public function staffChats(Request $request)
+    {
+        $user = Auth::user();
+
+        $financeRoleId = Role::where('name', 'finance')->value('id');
+        $financeUsers = $financeRoleId
+            ? User::where('role_id', $financeRoleId)->with('profile')->orderBy('email')->get()
+            : collect();
+
+        if ($financeUsers->isEmpty()) {
+            return view('admin.staff_chats', [
+                'contacts' => collect(),
+                'activeContact' => null,
+                'activeContactId' => null,
+                'messagesPayload' => [],
+            ]);
+        }
+
+        $activeContactId = (int) $request->query('contact', $financeUsers->first()->id);
+        $activeContact = $financeUsers->firstWhere('id', $activeContactId) ?? $financeUsers->first();
+
+        Message::markThreadAsRead($user->id, $activeContact->id);
+
+        $messagesPayload = Message::betweenUsers($user->id, $activeContact->id)
+            ->with(['sender.profile', 'receiver.profile'])
+            ->orderBy('sent_at')
+            ->limit(200)
+            ->get()
+            ->map->toFrontendPayload()
+            ->values();
+
+        $contactsPayload = $financeUsers->map(function (User $contact) use ($user) {
+            $latestMessage = Message::betweenUsers($user->id, $contact->id)
+                ->latest('sent_at')
+                ->first();
+
+            $unreadCount = Message::betweenUsers($user->id, $contact->id)
+                ->where('receiver_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+
+            return [
+                'id' => $contact->id,
+                'name' => optional($contact->profile)->full_name ?? $contact->email,
+                'avatar_url' => $contact->avatar_url,
+                'latest_message' => $latestMessage?->content,
+                'latest_at' => optional($latestMessage?->sent_at)->format('H:i'),
+                'unread_count' => $unreadCount,
+                'fetch_url' => route('chat.messages.index', $contact),
+                'send_url' => route('chat.messages.store', $contact),
+            ];
+        })->values();
+
+        return view('admin.staff_chats', [
+            'contacts' => $contactsPayload,
+            'activeContact' => [
+                'id' => $activeContact->id,
+                'name' => optional($activeContact->profile)->full_name ?? $activeContact->email,
+                'avatar_url' => $activeContact->avatar_url,
+            ],
+            'activeContactId' => $activeContact->id,
+            'messagesPayload' => $messagesPayload,
+        ]);
+    }
+
     private function userDisplayColumn(): string
     {
         foreach (['name', 'full_name', 'username'] as $col) {
@@ -1335,6 +1438,7 @@ class AdminController extends Controller
                 return $col;
             }
         }
+
         return 'email'; // guaranteed to exist
     }
 }

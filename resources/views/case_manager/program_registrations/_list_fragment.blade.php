@@ -1,6 +1,3 @@
-@php
-    use App\Models\ProgramRegistration;
-@endphp
 <div class="overflow-x-auto">
     <table class="min-w-full text-sm text-left">
         <thead>
@@ -30,15 +27,16 @@
                     </td>
                     <td class="p-3">
                         @php
-                            $rowStatus = strtolower($registration->status);
+                            $rowStatus = strtolower((string) $registration->status);
                             $badgeClasses = match ($rowStatus) {
-                                ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354]',
-                                ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020]',
+                                \App\Models\ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354]',
+                                \App\Models\ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020]',
+                                \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE => 'bg-amber-100 text-amber-900',
                                 default => 'bg-[#FDE8F3] text-[#9E2469]',
                             };
                         @endphp
                         <span class="rounded-full text-xs font-semibold app-text {{ $badgeClasses }}">
-                            {{ ucfirst($rowStatus) }}
+                            {{ $registration->status_label }}
                         </span>
                     </td>
                     <td class="p-3 app-text">

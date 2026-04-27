@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+import { fetchFreshCsrfToken, redirectSessionExpiredToLogin } from './session-csrf';
 
 window.axios = axios;
 window.Echo = null;
@@ -15,6 +16,27 @@ const csrfToken = document
 if (csrfToken) {
     window.axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 }
+
+window.axios.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const status = error.response?.status;
+        const config = error.config;
+        if (status === 419 && config && !config.__pinkmeCsrfRetry) {
+            config.__pinkmeCsrfRetry = true;
+            const token = await fetchFreshCsrfToken();
+            if (token) {
+                config.headers = config.headers ?? {};
+                config.headers['X-CSRF-TOKEN'] = token;
+                return window.axios.request(config);
+            }
+        }
+        if (status === 419) {
+            redirectSessionExpiredToLogin();
+        }
+        return Promise.reject(error);
+    }
+);
 
 // Subdirectory: set axios base URL so /notifications etc resolve correctly
 const appUrl = document.querySelector('meta[name="app-url"]')?.getAttribute('content');

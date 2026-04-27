@@ -13,9 +13,11 @@
                                 ? 'Approved Program Registrations'
                                 : ($selectedStatus === 'rejected'
                                     ? 'Rejected Program Registrations'
-                                    : ($selectedStatus === 'all'
-                                        ? 'All Program Registrations'
-                                        : 'Pending Program Registrations')) }}
+                                    : ($selectedStatus === 'pending_finance'
+                                        ? 'With Finance (your cases)'
+                                        : ($selectedStatus === 'all'
+                                            ? 'All Program Registrations'
+                                            : 'Pending Program Registrations'))) }}
                         </h2>
                         <p class="text-sm text-[#91848C] app-text mt-1">
                             Review applications assigned to you and pending applications that are not yet assigned (claim by opening the record and approving, rejecting, or saving billing links).
@@ -23,6 +25,7 @@
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 text-sm text-[#91848C] app-text">
                         <span>Pending: <strong class="text-[#213430]">{{ $counts['pending'] }}</strong></span>
+                        <span>With finance: <strong class="text-[#213430]">{{ $counts['pending_finance'] ?? 0 }}</strong></span>
                         <span>Approved: <strong class="text-[#213430]">{{ $counts['approved'] }}</strong></span>
                         <span>Rejected: <strong class="text-[#213430]">{{ $counts['rejected'] }}</strong></span>
                         <span>Total: <strong class="text-[#213430]">{{ $counts['all'] }}</strong></span>
@@ -35,6 +38,7 @@
                         <select name="status" id="programRegStatus"
                             class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#91848C] focus:outline-none">
                             <option value="pending" {{ $selectedStatus === 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="pending_finance" {{ $selectedStatus === 'pending_finance' ? 'selected' : '' }}>With finance</option>
                             <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
                             <option value="rejected" {{ $selectedStatus === 'rejected' ? 'selected' : '' }}>Rejected</option>
                             <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>All</option>
@@ -77,6 +81,7 @@
 
             const labels = {
                 pending: 'Pending Program Registrations',
+                pending_finance: 'With Finance (your cases)',
                 approved: 'Approved Program Registrations',
                 rejected: 'Rejected Program Registrations',
                 all: 'All Program Registrations'

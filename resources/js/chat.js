@@ -129,6 +129,9 @@ class ChatConversation {
             }
             this.handleFileChange();
         } catch (error) {
+            if (error.response?.status === 419) {
+                return;
+            }
             console.error('[chat] unable to send message', error);
             window.alert('Unable to send message. Please try again.');
         } finally {

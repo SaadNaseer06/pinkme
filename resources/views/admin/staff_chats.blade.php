@@ -1,16 +1,9 @@
-@extends('case_manager.layouts.app')
+@extends('admin.layouts.admin')
 
-@section('title', 'Patient Chats')
+@section('title', 'Finance chat')
 
 @section('content')
-    <main class="flex-1"
-        data-cm-patient-chats-page
-        data-inbox-fragment-url="{{ route('case_manager.patient_chats.claimable_fragment') }}">
-        <div data-cm-claimable-inbox>
-            @include('case_manager.partials.patient_chats_claimable', [
-                'claimableProgramRegistrations' => $claimableProgramRegistrations ?? collect(),
-            ])
-        </div>
+    <main class="flex-1">
         @if ($contacts->isEmpty())
             <div class="max-w-4xl mx-auto bg-[#F3E8EF] rounded-xl shadow-sm p-12 text-center space-y-4">
                 <div class="flex items-center justify-center">
@@ -19,16 +12,15 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                 </div>
-                <h2 class="text-xl font-semibold text-[#213430]">No Conversations Yet</h2>
-                <p class="text-sm text-[#91848C]">You can start a conversation once a patient reaches out or you send the
-                    first message from their profile.</p>
+                <h2 class="text-xl font-semibold text-[#213430]">No finance users</h2>
+                <p class="text-sm text-[#91848C]">Add finance users under Finance Users in the sidebar to enable chat with the finance team.</p>
             </div>
         @else
             <div class="flex flex-col lg:flex-row lg:max-h-[850px] max-w-8xl mx-auto gap-6">
                 <!-- Contact sidebar -->
                 <aside class="w-full lg:w-96 bg-[#F3E8EF] rounded-2xl flex flex-col overflow-hidden shadow-sm">
                     <div class="p-5 border-b border-[#E4D6DF] flex items-center justify-between">
-                        <h2 class="text-base font-semibold text-[#213430]">My Patients</h2>
+                        <h2 class="text-base font-semibold text-[#213430]">Finance team</h2>
                         <span class="text-xs text-[#91848C]">{{ $contacts->count() }} active</span>
                     </div>
                     <div class="px-5 py-4 border-b border-[#E4D6DF]">
@@ -53,7 +45,7 @@
                     </div>
                     <div class="flex-1 overflow-y-auto" data-chat-contact-list>
                         @foreach ($contacts as $contact)
-                            <a href="{{ route('case_manager.patientChats', ['contact' => $contact['id']]) }}"
+                            <a href="{{ route('admin.staff_chats', ['contact' => $contact['id']]) }}"
                                 class="flex items-center gap-3 px-5 py-4 border-b border-[#E9DCE4] hover:bg-[#F9F1F6] transition @if ($contact['id'] === $activeContactId) bg-[#F7E3ED] @endif"
                                 data-contact-item data-contact-id="{{ $contact['id'] }}">
                                 <div class="relative">
@@ -94,7 +86,7 @@
                                 class="w-12 h-12 rounded-full object-cover border border-white shadow-sm">
                             <div>
                                 <h3 class="text-base font-semibold text-[#213430]">{{ $activeContact['name'] }}</h3>
-                                <p class="text-xs text-[#91848C]">Patient conversation</p>
+                                <p class="text-xs text-[#91848C]">Finance conversation</p>
                             </div>
                         </div>
                         <div class="flex gap-3 text-[#9E2469]">

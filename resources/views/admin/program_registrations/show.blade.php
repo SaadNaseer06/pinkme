@@ -1,10 +1,10 @@
 @php
-    use App\Models\ProgramRegistration;
     $registration->loadMissing(['program', 'user', 'reviewer', 'financeUser.profile', 'registrationInvoices']);
-    $status = strtolower($registration->status);
+    $status = strtolower((string) $registration->status);
     $badgeClasses = match ($status) {
-        ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
-        ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
+        \App\Models\ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
+        \App\Models\ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
+        \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE => 'bg-amber-100 text-amber-900 border border-amber-200',
         default => 'bg-[#FDE8F3] text-[#9E2469] border border-[#F4BBD5]',
     };
 
@@ -100,15 +100,15 @@
                         </p>
                     </div>
                     <span class="flex-shrink-0 px-5 py-2 rounded-full text-base font-semibold app-text {{ $badgeClasses }}">
-                        Status: {{ ucfirst($status) }}
+                        Status: {{ $registration->status_label }}
                     </span>
                 </div>
 
                 @if ($registration->registrationInvoices->isEmpty() && $status === 'pending')
                 <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1] min-w-0">
-                    <h3 class="text-xl font-semibold text-[#213430] app-main">Assign Case Manager</h3>
+                    <h3 class="text-xl font-semibold text-[#213430] app-main">Case manager (optional override)</h3>
                     <p class="text-sm text-[#6C5F67] app-text mt-1 break-words">
-                        Assign a case manager to handle this registration.
+                        Applications normally go to the case manager shared inbox without assignment. Use this only to pre-assign or reassign when needed.
                     </p>
                     <form method="POST" action="{{ route('admin.program_registrations.assign', $registration) }}" class="mt-4 flex flex-col md:flex-row md:items-center gap-3">
                         @csrf
@@ -194,17 +194,28 @@
                                 </table>
                             </div>
                             <p class="text-sm text-[#6C5F67]">Finance user: {{ $registration->financeUser?->profile?->full_name ?? $registration->financeUser?->email ?? '—' }}</p>
-                        @elseif ($registration->finance_user_id)
+                        @elseif ($registration->finance_user_id || ($status === \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE && $registration->sent_to_finance_at))
                             <div class="flex items-center gap-2 text-amber-700">
                                 <i class="fas fa-clock"></i>
-                                <span class="font-medium">Sent to Finance</span> — awaiting budget allocation
+                                <span class="font-medium">
+                                    @if ($registration->finance_user_id)
+                                        Sent to Finance
+                                    @else
+                                        Finance queue (open — any finance user can claim)
+                                    @endif
+                                </span>
+                                @if ($registration->registrationInvoices->isEmpty())
+                                    <span class="text-sm font-normal">— awaiting budget allocation</span>
+                                @endif
                             </div>
-                            <p class="text-sm text-[#6C5F67]">Assigned to: {{ $registration->financeUser?->profile?->full_name ?? $registration->financeUser?->email ?? '—' }}</p>
+                            @if ($registration->finance_user_id)
+                                <p class="text-sm text-[#6C5F67]">Assigned to: {{ $registration->financeUser?->profile?->full_name ?? $registration->financeUser?->email ?? '—' }}</p>
+                            @endif
                             @if ($registration->sent_to_finance_at)
                                 <p class="text-xs text-[#91848C]">Sent {{ $registration->sent_to_finance_at->format('d M Y, h:i A') }}</p>
                             @endif
                         @else
-                            <p class="text-[#91848C]">Not yet sent to finance.</p>
+                            <p class="text-[#91848C]">Not yet routed to finance.</p>
                         @endif
                     </div>
                 </div>
@@ -371,7 +382,7 @@
                 </div>
             </div>
 
-            @if ($registration->status === ProgramRegistration::STATUS_PENDING)
+            @if ($registration->status === \App\Models\ProgramRegistration::STATUS_PENDING)
                 <div class="bg-white rounded-lg p-5 md:p-6 space-y-6 border border-[#E6D8E1]">
                     <h3 class="text-xl font-semibold text-[#213430] app-main">Admin Review</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

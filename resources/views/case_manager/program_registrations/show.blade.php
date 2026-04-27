@@ -1,10 +1,10 @@
 @php
-    use App\Models\ProgramRegistration;
     $registration->loadMissing(['program', 'user', 'reviewer', 'assignedCaseManager']);
-    $status = strtolower($registration->status);
+    $status = strtolower((string) $registration->status);
     $badgeClasses = match ($status) {
-        ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
-        ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
+        \App\Models\ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
+        \App\Models\ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
+        \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE => 'bg-amber-100 text-amber-900 border border-amber-200',
         default => 'bg-[#FDE8F3] text-[#9E2469] border border-[#F4BBD5]',
     };
 
@@ -52,13 +52,18 @@
                         </p>
                     </div>
                     <span class="px-5 py-2 rounded-full text-base font-semibold app-text {{ $badgeClasses }}">
-                        Status: {{ ucfirst($status) }}
+                        Status: {{ $registration->status_label }}
                     </span>
                 </div>
 
-                @if ($status === ProgramRegistration::STATUS_PENDING && ! $registration->assigned_case_manager_id)
+                @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING && ! $registration->assigned_case_manager_id)
                     <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 app-text">
-                        This application is not assigned to a case manager yet. When you approve, reject, or save billing payment links, it will be assigned to you.
+                        This application is in the shared case manager inbox. When you save billing links, approve, or reject, it will be assigned to you.
+                    </div>
+                @endif
+                @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE)
+                    <div class="rounded-lg border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#6C5F67] app-text">
+                        This application is with the finance team for budget allocation. You can review details but cannot change the decision from here.
                     </div>
                 @endif
 
@@ -161,8 +166,13 @@
                 <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1]">
                     <h3 class="text-xl font-semibold text-[#213430] app-main mb-2">Billing payment links</h3>
                     <p class="text-base text-[#6C5F67] app-text mb-4">
-                        Enter payment portal URLs shared by the applicant (one per row). Saved links are visible to finance and administrators.
+                        @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING)
+                            Enter payment portal URLs shared by the applicant (one per row). Saved links are visible to finance and administrators.
+                        @else
+                            Saved links are visible to finance and administrators.
+                        @endif
                     </p>
+                    @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING)
                     <form method="POST" action="{{ route('case_manager.program_registrations.billing_payment_links', $registration) }}" class="space-y-4" id="billing-links-form">
                         @csrf
                         <div id="billing-url-rows" class="space-y-2">
@@ -195,6 +205,7 @@
                             </button>
                         </div>
                     </form>
+                    @endif
                     @if (filled($registration->payment_links))
                         <div class="mt-5 rounded-lg border border-[#E6D8E1] bg-[#FAF7FA] p-4">
                             <p class="text-xs font-semibold text-[#213430] mb-2 app-text">Open links (preview)</p>
@@ -202,9 +213,12 @@
                                 {!! \App\Support\BillingPaymentLinks::toHtml($registration->payment_links) !!}
                             </div>
                         </div>
+                    @elseif ($status !== \App\Models\ProgramRegistration::STATUS_PENDING)
+                        <p class="text-sm text-[#91848C]">No billing links were saved before this application moved to finance.</p>
                     @endif
                 </div>
 
+                @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING)
                 <template id="billing-url-row-template">
                     <div class="billing-url-row flex flex-wrap gap-2 items-center">
                         <input type="text"
@@ -220,6 +234,7 @@
                         </button>
                     </div>
                 </template>
+                @endif
 
                 <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1]">
                     <h3 class="text-xl font-semibold text-[#213430] app-main mb-4">Supporting Documents</h3>
@@ -292,7 +307,7 @@
                     </div>
                 </div>
 
-                @if ($registration->status === ProgramRegistration::STATUS_PENDING)
+                @if ($registration->status === \App\Models\ProgramRegistration::STATUS_PENDING)
                     <div class="bg-white rounded-lg p-5 md:p-6 space-y-6 border border-[#E6D8E1]">
                         <h3 class="text-xl font-semibold text-[#213430] app-main">Case Manager Review</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

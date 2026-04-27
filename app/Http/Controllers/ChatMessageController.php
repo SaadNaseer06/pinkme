@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
+use App\Mail\ChatMessageReceived;
 use App\Models\Application;
 use App\Models\Message;
-use App\Mail\ChatMessageReceived;
 use App\Models\Patient;
 use App\Models\ProgramRegistration;
 use App\Models\User;
@@ -20,6 +20,7 @@ class ChatMessageController extends Controller
 {
     /** Cache key prefix for "user is currently in chat" - used to avoid sending email when they're online in chat. */
     public const CHAT_ACTIVE_CACHE_KEY = 'chat_active_user_';
+
     public const CHAT_ACTIVE_TTL_MINUTES = 2;
 
     public function index(Request $request, User $contact): JsonResponse
@@ -38,8 +39,8 @@ class ChatMessageController extends Controller
         if ($search = trim((string) $request->query('q', ''))) {
             $query->where(function ($q) use ($search) {
                 $q->where('content', 'like', "%{$search}%")
-                  ->orWhere('attachment_name', 'like', "%{$search}%")
-                  ->orWhere('attachment_mime', 'like', "%{$search}%");
+                    ->orWhere('attachment_name', 'like', "%{$search}%")
+                    ->orWhere('attachment_mime', 'like', "%{$search}%");
             });
         }
 
@@ -63,7 +64,7 @@ class ChatMessageController extends Controller
             'attachment' => ['nullable', 'file', 'max:5120'], // 5 MB
         ]);
 
-        if (!$request->hasFile('attachment') && !filled($data['content'] ?? null)) {
+        if (! $request->hasFile('attachment') && ! filled($data['content'] ?? null)) {
             return response()->json(['error' => 'Message content or an attachment (max 5 MB) is required.'], 422);
         }
 
@@ -96,20 +97,22 @@ class ChatMessageController extends Controller
         broadcast(new MessageSent($message))->toOthers();
 
         $contact->loadMissing('role');
-        if (!self::isUserActiveInChat($contact->id) && $contact->email) {
+        if (! self::isUserActiveInChat($contact->id) && $contact->email) {
             $snippet = $message->content !== ''
                 ? Str::limit($message->content, 240)
-                : ('Attachment: ' . ($message->attachment_name ?? 'file'));
+                : ('Attachment: '.($message->attachment_name ?? 'file'));
             $chatUrl = match ($contact->role?->name) {
-                'patient' => url('/patient/patient-chats'),
-                'casemanager' => url('/case_manager/patient-chats'),
+                'patient' => route('patient.patientChats'),
+                'casemanager' => route('case_manager.patientChats'),
+                'finance' => route('finance.team_chats'),
+                'admin' => route('admin.staff_chats'),
                 default => url('/'),
             };
             try {
                 UserNotification::create([
                     'user_id' => $contact->id,
                     'title' => 'New chat message',
-                    'message' => 'You have a new message from ' . (optional($user->profile)->full_name ?? $user->email ?? 'a contact') . '.',
+                    'message' => 'You have a new message from '.(optional($user->profile)->full_name ?? $user->email ?? 'a contact').'.',
                     'priority' => \App\Models\UserNotification::PRIORITY_IMPORTANT,
                     'link_url' => $chatUrl,
                 ]);
@@ -137,18 +140,20 @@ class ChatMessageController extends Controller
         if (optional($user->role)->name === 'patient' && ! Patient::userHasAssignedCaseManager($user)) {
             return response()->json(['ok' => false], 403);
         }
+        // Admin, case managers, and finance may use chat activity pings without patient assignment.
         $this->markUserActiveInChat($user->id);
+
         return response()->json(['ok' => true]);
     }
 
     protected function markUserActiveInChat(int $userId): void
     {
-        Cache::put(self::CHAT_ACTIVE_CACHE_KEY . $userId, now()->timestamp, now()->addMinutes(self::CHAT_ACTIVE_TTL_MINUTES));
+        Cache::put(self::CHAT_ACTIVE_CACHE_KEY.$userId, now()->timestamp, now()->addMinutes(self::CHAT_ACTIVE_TTL_MINUTES));
     }
 
     public static function isUserActiveInChat(int $userId): bool
     {
-        return Cache::has(self::CHAT_ACTIVE_CACHE_KEY . $userId);
+        return Cache::has(self::CHAT_ACTIVE_CACHE_KEY.$userId);
     }
 
     protected function authorizeConversation(User $authUser, User $contact): void
@@ -161,7 +166,7 @@ class ChatMessageController extends Controller
                 abort(403);
             }
 
-            if (!in_array($contactRole, ['admin', 'casemanager'], true)) {
+            if (! in_array($contactRole, ['admin', 'casemanager'], true)) {
                 abort(403);
             }
 
@@ -216,11 +221,19 @@ class ChatMessageController extends Controller
         }
 
         if ($authRole === 'admin') {
-            if (!in_array($contactRole, ['patient', 'casemanager', 'sponsor', 'admin'], true)) {
+            if (! in_array($contactRole, ['patient', 'casemanager', 'sponsor', 'admin', 'finance'], true)) {
                 abort(403);
             }
 
             return;
+        }
+
+        if ($authRole === 'finance') {
+            if ($contactRole === 'admin') {
+                return;
+            }
+
+            abort(403);
         }
 
         abort(403);

@@ -1,21 +1,10 @@
 <?php
 
 use App\Http\Controllers\AdminCaseManagerController;
-use App\Http\Controllers\AdminFinanceUserController;
-use App\Http\Controllers\EnrollProgramController;
-use App\Http\Controllers\EventController;
-use App\Http\Controllers\ReviewersController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\SiteSettingController;
-use App\Http\Controllers\SponsorController;
-use App\Http\Controllers\SponsorshipProgramController;
-use App\Http\Controllers\AdminSponsorController;
-use App\Http\Controllers\AdminProgramRegistrationController;
-use App\Http\Controllers\ChatMessageController;
-use App\Http\Controllers\NotificationController;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminFinanceUserController;
+use App\Http\Controllers\AdminProgramRegistrationController;
+use App\Http\Controllers\AdminSponsorController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -23,15 +12,24 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CaseManagerController;
+use App\Http\Controllers\ChatMessageController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\FinanceUserController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProgramController;
-use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProgramRegistrationController;
+use App\Http\Controllers\ReviewersController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\SiteSettingController;
+use App\Http\Controllers\SponsorController;
+use App\Http\Controllers\SponsorshipProgramController;
 use App\Http\Controllers\WebinarController;
-use App\Models\Application;
 use App\Models\Program;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -40,8 +38,8 @@ Route::get('/', function () {
         switch ($roleName) {
             case 'admin':
                 return redirect()->route('admin.dashboard');
-            // case 'sponsor':
-            //     return redirect()->route('sponsor.dashboard');
+                // case 'sponsor':
+                //     return redirect()->route('sponsor.dashboard');
             case 'casemanager':
                 return redirect()->route('case_manager.dashboard');
             case 'patient':
@@ -96,10 +94,14 @@ Route::get('/register', [RegisterController::class, 'show'])
 
 Route::post('/register', [RegisterController::class, 'register']);
 
-
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/staff/login', [LoginController::class, 'staffLogin'])->name('login.staff.submit');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+/** Same-session CSRF refresh for stale tabs (GET touches session last_activity). */
+Route::get('/session/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+})->name('session.csrf_token');
 
 Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -114,6 +116,7 @@ Route::middleware('auth')->group(function () {
 Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     // Admin Routes
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/staff-chats', [AdminController::class, 'staffChats'])->name('admin.staff_chats');
     Route::get('/dashboard/application-stats', [AdminController::class, 'dashboardApplicationStats'])->name('admin.dashboard.application_stats');
     Route::get('/tutorial', [PageController::class, 'adminGuide'])->name('admin.guide');
     Route::get('/applications', [AdminController::class, 'applications'])->name('admin.applications');
@@ -212,7 +215,6 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
         ->name('admin.applications.export');
 });
 
-
 // API routes for AJAX calls
 Route::prefix('api')->name('api.')->group(function () {
     Route::get('reviewers/search', [ReviewersController::class, 'getAvailableReviewers'])
@@ -221,7 +223,6 @@ Route::prefix('api')->name('api.')->group(function () {
     Route::delete('reviewers/{reviewer}', [ReviewersController::class, 'destroy'])
         ->name('reviewers.destroy');
 });
-
 
 // Sponsor routes - commented: sponsor user not important for now
 // Route::prefix('sponsor')->middleware(['role.restrict'])->group(function () {
@@ -250,9 +251,11 @@ Route::prefix('api')->name('api.')->group(function () {
 //     Route::put('/settings/social', [SponsorController::class, 'updateSocial'])->name('sponsor.settings.social');
 // });
 
-
 Route::prefix('finance')->middleware(['role.restrict'])->group(function () {
     Route::get('/dashboard', [FinanceUserController::class, 'dashboard'])->name('finance.dashboard');
+    Route::get('/team-chats', [FinanceUserController::class, 'teamChats'])->name('finance.team_chats');
+    Route::get('/team-chats/claimable-fragment', [FinanceUserController::class, 'teamChatsClaimableFragment'])
+        ->name('finance.team_chats.claimable_fragment');
     Route::get('/tutorial', [PageController::class, 'financeGuide'])->name('finance.guide');
     Route::get('/registrations', [FinanceUserController::class, 'registrations'])->name('finance.registrations');
     Route::get('/registrations/{registration}', [FinanceUserController::class, 'showRegistration'])->name('finance.registrations.show');
@@ -260,6 +263,7 @@ Route::prefix('finance')->middleware(['role.restrict'])->group(function () {
     Route::get('/registrations/{registration}/invoice/create', [FinanceUserController::class, 'createInvoice'])->name('finance.invoice.create');
     Route::post('/registrations/{registration}/invoice', [FinanceUserController::class, 'storeInvoice'])->name('finance.invoice.store');
     Route::post('/registrations/{registration}/invoices/{invoice}/resend-emails', [FinanceUserController::class, 'resendInvoiceEmails'])->name('finance.invoice.resend_emails');
+    Route::post('/registrations/{registration}/claim-chat', [FinanceUserController::class, 'claimRegistrationFromChat'])->name('finance.registrations.claim_chat');
 });
 
 Route::prefix('case_manager')->middleware(['role.restrict'])->group(function () {
@@ -272,12 +276,15 @@ Route::prefix('case_manager')->middleware(['role.restrict'])->group(function () 
     Route::post('/program-registrations/{registration}/approve', [CaseManagerController::class, 'approveProgramRegistration'])->name('case_manager.program_registrations.approve');
     Route::post('/program-registrations/{registration}/reject', [CaseManagerController::class, 'rejectProgramRegistration'])->name('case_manager.program_registrations.reject');
     Route::post('/program-registrations/{registration}/billing-payment-links', [CaseManagerController::class, 'updateBillingPaymentLinks'])->name('case_manager.program_registrations.billing_payment_links');
+    Route::post('/program-registrations/{registration}/claim-chat', [CaseManagerController::class, 'claimProgramRegistrationFromChat'])->name('case_manager.program_registrations.claim_chat');
     Route::get('/view-application/{id}', [CaseManagerController::class, 'viewAssignedApplication'])->name('case_manager.viewAssignedApplication');
     Route::post('/applications/{application}/approve', [CaseManagerController::class, 'approve'])->name('case_manager.applications.approve');
     Route::post('/applications/{application}/reject', [CaseManagerController::class, 'reject'])->name('case_manager.applications.reject');
     Route::post('/applications/{application}/request-missing', [CaseManagerController::class, 'requestMissing'])->name('case_manager.applications.request_missing');
     Route::get('/patient-profiles', [CaseManagerController::class, 'patientProfiles'])->name('case_manager.patientProfiles');
     Route::get('/patient-chats', [CaseManagerController::class, 'patientChats'])->name('case_manager.patientChats');
+    Route::get('/patient-chats/claimable-fragment', [CaseManagerController::class, 'patientChatsClaimableFragment'])
+        ->name('case_manager.patient_chats.claimable_fragment');
     Route::get('/setting', [CaseManagerController::class, 'setting'])->name('case_manager.setting');
     Route::put('/setting', [CaseManagerController::class, 'update'])->name('case_manager.settings.update');
     Route::put('/setting/password', [CaseManagerController::class, 'updatePassword'])->name('case_manager.setting.password');
@@ -285,7 +292,6 @@ Route::prefix('case_manager')->middleware(['role.restrict'])->group(function () 
     Route::put('/setting/account', [CaseManagerController::class, 'updateAccount'])->name('case_manager.setting.account');
     Route::put('/setting/social', [CaseManagerController::class, 'updateSocial'])->name('case_manager.setting.social');
 });
-
 
 Route::prefix('patient')->middleware(['role.restrict'])->group(function () {
     Route::get('/programs/{id}', [ProgramController::class, 'show'])->name('patient.programs.show');

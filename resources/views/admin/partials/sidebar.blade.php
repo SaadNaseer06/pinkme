@@ -1,4 +1,4 @@
-﻿<!-- Mobile Sidebar -->
+<!-- Mobile Sidebar -->
 <div class="mobile-sidebar" id="mobileSidebar">
     <!-- Close Button -->
     <button class="close-btn" id="closeBtn">
@@ -38,6 +38,11 @@
             <a href="{{ route('admin.finance-users.index') }}"><img
                     src="{{ request()->is('admin/finance-users*') ? asset('public/images/review-pink.svg') : asset('public/images/review.svg') }}"
                     alt="Finance Users" />Finance Users</a>
+        </li>
+        <li class="{{ request()->routeIs('admin.staff_chats') ? 'active' : '' }}">
+            <a href="{{ route('admin.staff_chats') }}"><img
+                    src="{{ request()->routeIs('admin.staff_chats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"
+                    alt="Finance chat" />Finance chat</a>
         </li>
         <li class="{{ request()->is('admin/patients') ? 'active' : '' }}">
             <a href="{{ route('admin.patients') }}"><img
@@ -131,6 +136,14 @@
                             src="{{ request()->is('admin/finance-users*') ? asset('public/images/review-pink.svg') : asset('public/images/review.svg') }}"
                             class="w-5 h-5" alt="Finance Users" /></span>
                     <span class="title">Finance Users</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('admin.staff_chats') ? 'hovered' : '' }}">
+                <a href="{{ route('admin.staff_chats') }}">
+                    <span class="icon"><img
+                            src="{{ request()->routeIs('admin.staff_chats') ? asset('public/images/chat-svg-pink.svg') : asset('public/images/chat.svg') }}"
+                            class="w-5 h-5" alt="Finance chat" /></span>
+                    <span class="title">Finance chat</span>
                 </a>
             </li>
             <li class="{{ request()->is('admin/patients') ? 'hovered' : '' }}">

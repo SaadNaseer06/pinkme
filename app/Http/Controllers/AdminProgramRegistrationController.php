@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ProgramRegistrationAdminNotice;
+use App\Mail\ProgramRegistrationStatus;
 use App\Models\ProgramRegistration;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserNotification;
-use App\Mail\ProgramRegistrationAdminNotice;
-use App\Mail\ProgramRegistrationStatus;
 use App\Support\ProgramRegistrationNotifiers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,14 +22,15 @@ class AdminProgramRegistrationController extends Controller
     public function index(Request $request)
     {
         $selectedStatus = strtolower((string) $request->query('status', ProgramRegistration::STATUS_PENDING));
-        $validStatuses  = [
+        $validStatuses = [
             'all',
             ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_PENDING_FINANCE,
             ProgramRegistration::STATUS_APPROVED,
             ProgramRegistration::STATUS_REJECTED,
         ];
 
-        if (!in_array($selectedStatus, $validStatuses, true)) {
+        if (! in_array($selectedStatus, $validStatuses, true)) {
             $selectedStatus = ProgramRegistration::STATUS_PENDING;
         }
 
@@ -46,16 +47,17 @@ class AdminProgramRegistrationController extends Controller
             ->appends($request->query());
 
         $counts = [
-            'pending'  => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING)->count(),
+            'pending' => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING)->count(),
+            'pending_finance' => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING_FINANCE)->count(),
             'approved' => ProgramRegistration::where('status', ProgramRegistration::STATUS_APPROVED)->count(),
             'rejected' => ProgramRegistration::where('status', ProgramRegistration::STATUS_REJECTED)->count(),
-            'all'      => ProgramRegistration::count(),
+            'all' => ProgramRegistration::count(),
         ];
 
         return view('admin.program_registrations.index', [
-            'registrations'   => $registrations,
-            'selectedStatus'  => $selectedStatus,
-            'counts'          => $counts,
+            'registrations' => $registrations,
+            'selectedStatus' => $selectedStatus,
+            'counts' => $counts,
         ]);
     }
 
@@ -95,7 +97,7 @@ class AdminProgramRegistrationController extends Controller
         $registration->loadMissing(['program', 'user']);
 
         $registration->update([
-            'status'      => ProgramRegistration::STATUS_APPROVED,
+            'status' => ProgramRegistration::STATUS_APPROVED,
             'review_note' => $data['note'] ?? null,
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
@@ -106,7 +108,7 @@ class AdminProgramRegistrationController extends Controller
                 UserNotification::create([
                     'user_id' => $registration->user_id,
                     'title' => 'Program Registration Approved',
-                    'message' => 'Your registration for "' . ($registration->program?->title ?? 'a program') . '" has been approved.',
+                    'message' => 'Your registration for "'.($registration->program?->title ?? 'a program').'" has been approved.',
                     'priority' => UserNotification::PRIORITY_IMPORTANT,
                     'link_url' => route('patient.programRegistrations.show', $registration),
                 ]);
@@ -147,7 +149,7 @@ class AdminProgramRegistrationController extends Controller
         $registration->loadMissing(['program', 'user']);
 
         $registration->update([
-            'status'      => ProgramRegistration::STATUS_REJECTED,
+            'status' => ProgramRegistration::STATUS_REJECTED,
             'review_note' => $data['note'],
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
@@ -158,7 +160,7 @@ class AdminProgramRegistrationController extends Controller
                 UserNotification::create([
                     'user_id' => $registration->user_id,
                     'title' => 'Program Registration Rejected',
-                    'message' => 'Your registration for "' . ($registration->program?->title ?? 'a program') . '" has been rejected. Reason: ' . $data['note'],
+                    'message' => 'Your registration for "'.($registration->program?->title ?? 'a program').'" has been rejected. Reason: '.$data['note'],
                     'priority' => UserNotification::PRIORITY_IMPORTANT,
                     'link_url' => route('patient.programRegistrations.show', $registration),
                 ]);
@@ -190,13 +192,13 @@ class AdminProgramRegistrationController extends Controller
             'case_manager_id' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
-        if (!empty($data['case_manager_id'])) {
+        if (! empty($data['case_manager_id'])) {
             $caseManagerRoleId = Role::where('name', 'casemanager')->value('id');
             $isCaseManager = $caseManagerRoleId
                 ? User::where('id', $data['case_manager_id'])->where('role_id', $caseManagerRoleId)->exists()
                 : false;
 
-            if (!$isCaseManager) {
+            if (! $isCaseManager) {
                 return redirect()
                     ->route('admin.program_registrations.show', $registration)
                     ->with('error', 'Selected user is not a case manager.');
@@ -205,10 +207,10 @@ class AdminProgramRegistrationController extends Controller
 
         $registration->update([
             'assigned_case_manager_id' => $data['case_manager_id'] ?? null,
-            'assigned_at' => !empty($data['case_manager_id']) ? now() : null,
+            'assigned_at' => ! empty($data['case_manager_id']) ? now() : null,
         ]);
 
-        if (!empty($data['case_manager_id'])) {
+        if (! empty($data['case_manager_id'])) {
             $registration->loadMissing(['program']);
             $caseManager = User::with('profile')->find($data['case_manager_id']);
             ProgramRegistrationNotifiers::notifyAdmins(
@@ -254,10 +256,11 @@ class AdminProgramRegistrationController extends Controller
         $validStatuses = [
             'all',
             ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_PENDING_FINANCE,
             ProgramRegistration::STATUS_APPROVED,
             ProgramRegistration::STATUS_REJECTED,
         ];
-        if (!in_array($selectedStatus, $validStatuses, true)) {
+        if (! in_array($selectedStatus, $validStatuses, true)) {
             $selectedStatus = 'all';
         }
 
@@ -268,7 +271,7 @@ class AdminProgramRegistrationController extends Controller
             $query->where('status', $selectedStatus);
         }
 
-        $filename = 'program_applications_' . date('Y-m-d') . '.csv';
+        $filename = 'program_applications_'.date('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($query) {
             $out = fopen('php://output', 'w');

@@ -1,4 +1,4 @@
-﻿@extends('finance.layouts.app')
+@extends('finance.layouts.app')
 
 @section('title', 'Finance Dashboard')
 
@@ -39,6 +39,7 @@
                             <th class="p-2 text-lg text-[#91848C] font-normal">Applicant</th>
                             <th class="p-2 text-lg text-[#91848C] font-normal">Program</th>
                             <th class="p-2 text-lg text-[#91848C] font-normal">Sent</th>
+                            <th class="p-2 text-lg text-[#91848C] font-normal">Assigned</th>
                             <th class="p-2 text-lg text-[#91848C] font-normal">Action</th>
                         </tr>
                     </thead>
@@ -48,15 +49,24 @@
                                 <td class="p-2">{{ $reg->full_name ?? $reg->email ?? '—' }}</td>
                                 <td class="p-2">{{ optional($reg->program)->title ?? '—' }}</td>
                                 <td class="p-2">{{ $reg->sent_to_finance_at ? $reg->sent_to_finance_at->format('M d, Y') : '—' }}</td>
+                                <td class="p-2 text-[#91848C] text-sm">
+                                    @if ($reg->finance_user_id)
+                                        {{ $reg->financeUser?->profile?->full_name ?? $reg->financeUser?->email ?? '—' }}
+                                    @else
+                                        Open (claim on open)
+                                    @endif
+                                </td>
                                 <td class="p-2">
                                     <a href="{{ route('finance.registrations.show', $reg) }}" class="text-[#9E2469] hover:underline text-sm">View</a>
-                                    |
-                                    <a href="{{ route('finance.invoice.create', $reg) }}" class="text-[#9E2469] hover:underline text-sm">Allocate Budget</a>
+                                    @if ($reg->finance_user_id === auth()->id())
+                                        |
+                                        <a href="{{ route('finance.invoice.create', $reg) }}" class="text-[#9E2469] hover:underline text-sm">Allocate Budget</a>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                             <tr class="border-t border-[#e0cfd8]">
-                                <td colspan="4" class="p-6 text-center text-[#91848C]">No pending requests.</td>
+                                <td colspan="5" class="p-6 text-center text-[#91848C]">No pending requests.</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -1,13 +1,13 @@
 @php
-    use App\Models\ProgramRegistration;
     $registration->loadMissing([
         'program',
     ]);
 
-    $status = strtolower($registration->status ?? ProgramRegistration::STATUS_PENDING);
+    $status = strtolower((string) ($registration->status ?? \App\Models\ProgramRegistration::STATUS_PENDING));
     $badgeClass = match ($status) {
-        ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
-        ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
+        \App\Models\ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
+        \App\Models\ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
+        \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE => 'bg-amber-100 text-amber-900 border border-amber-200',
         default => 'bg-[#FDE8F3] text-[#9E2469] border border-[#F4BBD5]',
     };
 
@@ -57,7 +57,7 @@
                         </p>
                     </div>
                     <span class="px-5 py-2 rounded-full text-base font-semibold {{ $badgeClass }} app-text">
-                        {{ ucfirst($status) }}
+                        {{ $registration->status_label }}
                     </span>
                 </div>
 

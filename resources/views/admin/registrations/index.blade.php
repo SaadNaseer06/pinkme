@@ -119,6 +119,7 @@
                         </div>
                         <div class="flex flex-wrap gap-2 text-sm text-gray-600">
                             <span>Pending: <strong class="text-pink-600">{{ $programCounts['pending'] }}</strong></span>
+                            <span>Finance queue: <strong class="text-amber-700">{{ $programCounts['pending_finance'] ?? 0 }}</strong></span>
                             <span>Approved: <strong class="text-green-600">{{ $programCounts['approved'] }}</strong></span>
                             <span>Paid (finance): <strong class="text-emerald-700">{{ $programCounts['paid'] ?? 0 }}</strong></span>
                         </div>
@@ -133,6 +134,7 @@
                                 <select name="program_status" id="programStatusFilter"
                                     class="w-full appearance-none rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
                                     <option value="pending" {{ $programSelectedStatus === 'pending' ? 'selected' : '' }}>Pending Approval</option>
+                                    <option value="pending_finance" {{ $programSelectedStatus === 'pending_finance' ? 'selected' : '' }}>Finance queue</option>
                                     <option value="approved" {{ $programSelectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
                                     <option value="paid" {{ $programSelectedStatus === 'paid' ? 'selected' : '' }}>Paid (finance)</option>
                                     <option value="all" {{ $programSelectedStatus === 'all' ? 'selected' : '' }}>All</option>
@@ -220,8 +222,8 @@
             <div class="bg-white rounded-2xl w-full max-w-md shadow-xl p-6">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900">Send to Finance User</h3>
-                        <p class="text-sm text-gray-500 mt-1">Select a finance user to allocate budget for this registration.</p>
+                        <h3 class="text-lg font-semibold text-gray-900">Route to Finance</h3>
+                        <p class="text-sm text-gray-500 mt-1">Send to the shared finance queue, or pick a specific finance user (override).</p>
                     </div>
                     <button type="button" id="sendToFinanceModalClose"
                         class="h-8 w-8 inline-flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50">
@@ -235,10 +237,10 @@
                     @csrf
                     <input type="hidden" id="sendToFinanceRegistrationId" name="registration_id" value="">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-[0.12em]">Assign To Finance User</label>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-[0.12em]">Finance user (optional)</label>
                         <select id="sendToFinanceUserId" name="finance_user_id"
                             class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
-                            <option value="">Select finance user</option>
+                            <option value="">Shared queue — notify all finance users</option>
                             @foreach ($financeUsers ?? [] as $fu)
                                 <option value="{{ $fu->id }}">{{ $fu->profile->full_name ?? $fu->email }}</option>
                             @endforeach
@@ -733,11 +735,13 @@
                     e.preventDefault();
                     const regId = sendToFinanceRegistrationId?.value;
                     const financeUserId = document.getElementById('sendToFinanceUserId')?.value;
-                    if (!regId || !financeUserId) return;
+                    if (!regId) return;
                     const submitBtn = document.getElementById('sendToFinanceSubmit');
                     if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
                     const formData = new FormData();
-                    formData.append('finance_user_id', financeUserId);
+                    if (financeUserId) {
+                        formData.append('finance_user_id', financeUserId);
+                    }
                     formData.append('_token', document.querySelector('input[name="_token"]')?.value || document.querySelector('meta[name="csrf-token"]')?.content);
                     const sendToFinanceUrl = @json(rtrim(url('/admin/program-registration-requests'), '/'));
                     fetch(`${sendToFinanceUrl}/${regId}/send-to-finance`, {

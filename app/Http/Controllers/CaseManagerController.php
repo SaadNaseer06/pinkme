@@ -2,29 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ApplicationMissingRequest;
-use Illuminate\Http\Request;
+use App\Mail\ProgramRegistrationStatus;
 use App\Models\Application;
-use App\Models\Patient;
+use App\Models\ApplicationMissingRequest;
 use App\Models\Message;
-use App\Models\User;
-use App\Models\UserProfile;
+use App\Models\Patient;
 use App\Models\ProgramRegistration;
+use App\Models\User;
+use App\Models\UserNotification;
+use App\Models\UserProfile;
+use App\Services\FinanceNotificationService;
+use App\Support\BillingPaymentLinks;
+use App\Support\ProgramRegistrationNotifiers;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
-use App\Models\UserNotification;
-use App\Mail\ProgramRegistrationStatus;
-use App\Support\ProgramRegistrationNotifiers;
-use App\Support\BillingPaymentLinks;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 
 class CaseManagerController extends Controller
 {
-
     public function dashboard()
     {
         $user = Auth::user();
@@ -111,11 +111,12 @@ class CaseManagerController extends Controller
         $validStatuses = [
             'all',
             ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_PENDING_FINANCE,
             ProgramRegistration::STATUS_APPROVED,
             ProgramRegistration::STATUS_REJECTED,
         ];
 
-        if (!in_array($selectedStatus, $validStatuses, true)) {
+        if (! in_array($selectedStatus, $validStatuses, true)) {
             $selectedStatus = ProgramRegistration::STATUS_PENDING;
         }
 
@@ -125,7 +126,10 @@ class CaseManagerController extends Controller
             ->with(['program:id,title', 'user:id,email'])
             ->orderByDesc('created_at');
 
-        if ($selectedStatus !== 'all') {
+        if ($selectedStatus === ProgramRegistration::STATUS_PENDING_FINANCE) {
+            $query->where('status', ProgramRegistration::STATUS_PENDING_FINANCE)
+                ->where('assigned_case_manager_id', Auth::id());
+        } elseif ($selectedStatus !== 'all') {
             $query->where('status', $selectedStatus);
         }
 
@@ -136,6 +140,9 @@ class CaseManagerController extends Controller
         $counts = [
             'pending' => (clone $visibleBase)
                 ->where('status', ProgramRegistration::STATUS_PENDING)
+                ->count(),
+            'pending_finance' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())
+                ->where('status', ProgramRegistration::STATUS_PENDING_FINANCE)
                 ->count(),
             'approved' => ProgramRegistration::where('assigned_case_manager_id', Auth::id())
                 ->where('status', ProgramRegistration::STATUS_APPROVED)
@@ -181,6 +188,12 @@ class CaseManagerController extends Controller
         $this->claimProgramRegistrationIfUnassigned($registration);
         $registration->refresh();
 
+        if ($registration->status !== ProgramRegistration::STATUS_PENDING) {
+            return redirect()
+                ->route('case_manager.program_registrations.show', $registration)
+                ->with('error', 'Billing links can only be edited while the application is pending case review.');
+        }
+
         $data = $request->validate([
             'billing_urls' => ['nullable', 'array'],
             'billing_urls.*' => ['nullable', 'string', 'max:2048'],
@@ -214,18 +227,20 @@ class CaseManagerController extends Controller
         $registration->loadMissing(['program', 'user']);
 
         $registration->update([
-            'status' => ProgramRegistration::STATUS_APPROVED,
+            'status' => ProgramRegistration::STATUS_PENDING_FINANCE,
             'review_note' => $data['note'] ?? null,
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
+            'finance_user_id' => null,
+            'sent_to_finance_at' => now(),
         ]);
 
         if ($registration->user) {
             try {
                 UserNotification::create([
                     'user_id' => $registration->user_id,
-                    'title' => 'Program Registration Approved',
-                    'message' => 'Your registration for "' . ($registration->program?->title ?? 'a program') . '" has been approved.',
+                    'title' => 'Application passed case review',
+                    'message' => 'Your application for "'.($registration->program?->title ?? 'a program').'" passed case manager review and is now with the finance team for final processing.',
                     'priority' => UserNotification::PRIORITY_IMPORTANT,
                     'link_url' => route('patient.programRegistrations.show', $registration),
                 ]);
@@ -237,15 +252,21 @@ class CaseManagerController extends Controller
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {
             try {
-                Mail::to($recipientEmail)->queue(new ProgramRegistrationStatus($registration, 'Approved', $data['note'] ?? null));
+                Mail::to($recipientEmail)->queue(new ProgramRegistrationStatus(
+                    $registration,
+                    'forwarded to finance',
+                    $data['note'] ?? null
+                ));
             } catch (\Throwable $e) {
                 report($e);
             }
         }
 
+        FinanceNotificationService::notifyFinanceTeamRegistrationQueued($registration);
+
         ProgramRegistrationNotifiers::notifyAdmins(
-            'Application approved by case manager',
-            'A case manager approved an application. It can now be sent to finance for budget allocation when ready.',
+            'Application routed to finance',
+            'A case manager approved an application; it is in the finance queue for budget allocation.',
             $registration
         );
 
@@ -284,7 +305,7 @@ class CaseManagerController extends Controller
                 UserNotification::create([
                     'user_id' => $registration->user_id,
                     'title' => 'Program Registration Rejected',
-                    'message' => 'Your registration for "' . ($registration->program?->title ?? 'a program') . '" has been rejected. Reason: ' . $data['note'],
+                    'message' => 'Your registration for "'.($registration->program?->title ?? 'a program').'" has been rejected. Reason: '.$data['note'],
                     'priority' => UserNotification::PRIORITY_IMPORTANT,
                     'link_url' => route('patient.programRegistrations.show', $registration),
                 ]);
@@ -336,14 +357,14 @@ class CaseManagerController extends Controller
 
             // All applications from this patient (any reviewer)
             $patientApplications = Application::where('patient_id', $patient->id)
-                ->select(['id','status','submission_date','program_id','reviewer_id','created_at'])
+                ->select(['id', 'status', 'submission_date', 'program_id', 'reviewer_id', 'created_at'])
                 ->get();
 
-            $totalRequests   = $patientApplications->count();
-            $approvedCount   = $patientApplications->where('status', 'Approved')->count();
-            $rejectedCount   = $patientApplications->where('status', 'Rejected')->count();
-            $pendingCount    = $patientApplications->where('status', 'Pending')->count();
-            $underReviewCnt  = $patientApplications->where('status', 'Under Review')->count();
+            $totalRequests = $patientApplications->count();
+            $approvedCount = $patientApplications->where('status', 'Approved')->count();
+            $rejectedCount = $patientApplications->where('status', 'Rejected')->count();
+            $pendingCount = $patientApplications->where('status', 'Pending')->count();
+            $underReviewCnt = $patientApplications->where('status', 'Under Review')->count();
 
             // Programs the patient (user) has enrolled in
             $programRegs = \App\Models\ProgramRegistration::with(['program:id,title'])
@@ -353,13 +374,13 @@ class CaseManagerController extends Controller
             $programTitles = $programRegs->pluck('program.title')->filter()->values();
 
             $patientStats = [
-                'total_requests'     => $totalRequests,
-                'approved'           => $approvedCount,
-                'rejected'           => $rejectedCount,
-                'pending'            => $pendingCount,
-                'under_review'       => $underReviewCnt,
-                'programs_enrolled'  => $programsEnrolledCount,
-                'program_titles'     => $programTitles,
+                'total_requests' => $totalRequests,
+                'approved' => $approvedCount,
+                'rejected' => $rejectedCount,
+                'pending' => $pendingCount,
+                'under_review' => $underReviewCnt,
+                'programs_enrolled' => $programsEnrolledCount,
+                'program_titles' => $programTitles,
             ];
 
             return view('case_manager.view_assigned_application', compact('application', 'patientStats'));
@@ -384,7 +405,6 @@ class CaseManagerController extends Controller
         abort(403, 'You are not authorized to view this application.');
     }
 
-
     public function approve(Application $application)
     {
         // Security: only assigned case manager can act
@@ -406,7 +426,7 @@ class CaseManagerController extends Controller
 
         if ($patientUser = optional($application->patient)->user) {
             try {
-                $code = $application->code ?: ('APP-' . str_pad((string) $application->id, 6, '0', STR_PAD_LEFT));
+                $code = $application->code ?: ('APP-'.str_pad((string) $application->id, 6, '0', STR_PAD_LEFT));
                 UserNotification::create([
                     'user_id' => $patientUser->id,
                     'title' => 'Application Approved',
@@ -447,7 +467,7 @@ class CaseManagerController extends Controller
 
         if ($patientUser = optional($application->patient)->user) {
             try {
-                $code = $application->code ?: ('APP-' . str_pad((string) $application->id, 6, '0', STR_PAD_LEFT));
+                $code = $application->code ?: ('APP-'.str_pad((string) $application->id, 6, '0', STR_PAD_LEFT));
                 UserNotification::create([
                     'user_id' => $patientUser->id,
                     'title' => 'Application Rejected',
@@ -462,7 +482,6 @@ class CaseManagerController extends Controller
 
         return back()->with('success', 'The application has been rejected and the applicant has been notified.');
     }
-
 
     public function requestMissing(Application $application, Request $request)
     {
@@ -513,7 +532,6 @@ class CaseManagerController extends Controller
         return back()->with('success', 'Your request for missing documents has been sent to the applicant.');
     }
 
-
     public function patientProfiles()
     {
         // Only show patients whose applications are assigned to the logged-in case manager
@@ -537,9 +555,47 @@ class CaseManagerController extends Controller
         return view('case_manager.patient_profiles', compact('patients'));
     }
 
+    /**
+     * Claim exclusive ownership of a pending program application from the chat page (removes it from other case managers).
+     */
+    public function claimProgramRegistrationFromChat(ProgramRegistration $registration)
+    {
+        $userId = (int) Auth::id();
+        $assignedId = $registration->assigned_case_manager_id;
+
+        // Do not use assertCaseManagerMayAccessProgramRegistration here: a race where another CM
+        // claimed first would abort(403). Redirect with a clear flash message instead.
+        if ($assignedId !== null && (int) $assignedId !== $userId) {
+            return redirect()
+                ->route('case_manager.patientChats')
+                ->with('error', 'Another case manager has already claimed this application.');
+        }
+
+        if ($registration->status !== ProgramRegistration::STATUS_PENDING) {
+            return redirect()
+                ->route('case_manager.patientChats')
+                ->with('error', 'Only pending applications can be claimed from chat.');
+        }
+
+        $this->claimProgramRegistrationIfUnassigned($registration);
+        $registration->refresh();
+
+        if ($registration->user_id) {
+            return redirect()
+                ->route('case_manager.patientChats', ['contact' => $registration->user_id])
+                ->with('success', 'You are now assigned to this application. It is removed from other case managers’ open lists.');
+        }
+
+        return redirect()
+            ->route('case_manager.patientChats')
+            ->with('success', 'Application claimed.');
+    }
+
     public function patientChats(Request $request)
     {
         $user = Auth::user();
+
+        $claimableProgramRegistrations = $this->claimableProgramRegistrationsForPatientChats();
 
         $applicationPatientIds = Patient::query()
             ->whereHas('applications', function ($query) use ($user) {
@@ -574,6 +630,7 @@ class CaseManagerController extends Controller
                 'activeContact' => null,
                 'activeContactId' => null,
                 'messagesPayload' => [],
+                'claimableProgramRegistrations' => $claimableProgramRegistrations,
             ]);
         }
 
@@ -621,7 +678,20 @@ class CaseManagerController extends Controller
             ],
             'activeContactId' => $activeContact->id,
             'messagesPayload' => $messagesPayload,
+            'claimableProgramRegistrations' => $claimableProgramRegistrations,
         ]);
+    }
+
+    /**
+     * JSON + HTML for realtime refresh of the shared “open program applications” strip on Patient Chats.
+     */
+    public function patientChatsClaimableFragment()
+    {
+        $html = view('case_manager.partials.patient_chats_claimable', [
+            'claimableProgramRegistrations' => $this->claimableProgramRegistrationsForPatientChats(),
+        ])->render();
+
+        return response()->json(['html' => $html]);
     }
 
     public function setting()
@@ -652,18 +722,18 @@ class CaseManagerController extends Controller
 
         $rules = [
             'avatar' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-            'first_name'     => 'nullable|string|max:255',
-            'last_name'      => 'nullable|string|max:255',
-            'username'       => 'nullable|string|max:255|unique:user_profiles,username,' . ($profile->id ?? 'NULL'),
-            'phone'          => 'nullable|string|max:255',
-            'email'          => 'required|email|unique:users,email,' . $user->id,
-            'gender'         => 'nullable|string|max:10',
-            'blood_group'    => 'nullable|string|max:5',
-            'date_of_birth'  => 'nullable|date',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'username' => 'nullable|string|max:255|unique:user_profiles,username,'.($profile->id ?? 'NULL'),
+            'phone' => 'nullable|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'gender' => 'nullable|string|max:10',
+            'blood_group' => 'nullable|string|max:5',
+            'date_of_birth' => 'nullable|date',
             'marital_status' => 'nullable|string|max:255',
-            'country'        => 'nullable|string|max:255',
-            'city'           => 'nullable|string|max:255',
-            'state'          => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
         ];
         $data = $request->validate($rules);
 
@@ -672,16 +742,16 @@ class CaseManagerController extends Controller
         $user->save();
 
         // Update or create profile fields
-        $profile->first_name    = $data['first_name'] ?? $profile->first_name;
-        $profile->last_name     = $data['last_name'] ?? $profile->last_name;
-        $profile->username      = $data['username'] ?? $profile->username;
-        $profile->full_name     = trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? ''));
-        $profile->phone         = $data['phone'] ?? $profile->phone;
-        $profile->gender        = $data['gender'] ?? $profile->gender;
+        $profile->first_name = $data['first_name'] ?? $profile->first_name;
+        $profile->last_name = $data['last_name'] ?? $profile->last_name;
+        $profile->username = $data['username'] ?? $profile->username;
+        $profile->full_name = trim(($data['first_name'] ?? '').' '.($data['last_name'] ?? ''));
+        $profile->phone = $data['phone'] ?? $profile->phone;
+        $profile->gender = $data['gender'] ?? $profile->gender;
         $profile->date_of_birth = $data['date_of_birth'] ?? $profile->date_of_birth;
-        $profile->country       = $data['country'] ?? $profile->country;
-        $profile->city          = $data['city'] ?? $profile->city;
-        $profile->state         = $data['state'] ?? $profile->state;
+        $profile->country = $data['country'] ?? $profile->country;
+        $profile->city = $data['city'] ?? $profile->city;
+        $profile->state = $data['state'] ?? $profile->state;
 
         // Handle avatar upload
         if ($request->hasFile('avatar')) {
@@ -691,7 +761,7 @@ class CaseManagerController extends Controller
         $profile->save();
 
         // Update patient details
-        $patient->blood_group    = $data['blood_group'] ?? $patient->blood_group;
+        $patient->blood_group = $data['blood_group'] ?? $patient->blood_group;
         $patient->marital_status = $data['marital_status'] ?? $patient->marital_status;
         $patient->save();
 
@@ -702,18 +772,17 @@ class CaseManagerController extends Controller
      * Change the logged in user’s password. Validates the current
      * password and ensures the new password is confirmed.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function updatePassword(Request $request)
     {
         $request->validate([
             'current_password' => 'required',
-            'password'         => 'required|min:8|confirmed',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         $user = $request->user();
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
 
@@ -726,16 +795,15 @@ class CaseManagerController extends Controller
     /**
      * Update email/SMS notification preferences for the user’s profile.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function updateNotifications(Request $request)
     {
         $profile = $request->user()->profile ?? new UserProfile(['user_id' => $request->user()->id]);
-        $profile->email_notification          = $request->has('email_notification');
-        $profile->sms_notification            = $request->has('sms_notification');
+        $profile->email_notification = $request->has('email_notification');
+        $profile->sms_notification = $request->has('sms_notification');
         $profile->notify_on_new_notifications = $request->has('notify_on_new_notifications');
-        $profile->notify_on_direct_message    = $request->has('notify_on_direct_message');
+        $profile->notify_on_direct_message = $request->has('notify_on_direct_message');
         $profile->save();
 
         return back()->with('success', 'Notification preferences updated.');
@@ -744,24 +812,23 @@ class CaseManagerController extends Controller
     /**
      * Update account-level fields such as username and alternate email.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function updateAccount(Request $request)
     {
-        $user    = $request->user();
+        $user = $request->user();
         $profile = $user->profile ?? new UserProfile(['user_id' => $user->id]);
 
         $data = $request->validate([
-            'username'        => 'nullable|string|max:255|unique:user_profiles,username,' . ($profile->id ?? 'NULL'),
-            'email'           => 'required|email|unique:users,email,' . $user->id,
+            'username' => 'nullable|string|max:255|unique:user_profiles,username,'.($profile->id ?? 'NULL'),
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'alternate_email' => 'nullable|email',
         ]);
 
         $user->email = $data['email'];
         $user->save();
 
-        $profile->username        = $data['username'] ?? $profile->username;
+        $profile->username = $data['username'] ?? $profile->username;
         $profile->alternate_email = $data['alternate_email'] ?? $profile->alternate_email;
         $profile->save();
 
@@ -771,24 +838,40 @@ class CaseManagerController extends Controller
     /**
      * Update social media links for the authenticated user.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function updateSocial(Request $request)
     {
         $profile = $request->user()->profile ?? new UserProfile(['user_id' => $request->user()->id]);
         $data = $request->validate([
-            'facebook'  => 'nullable|url',
-            'twitter'   => 'nullable|url',
+            'facebook' => 'nullable|url',
+            'twitter' => 'nullable|url',
             'instagram' => 'nullable|url',
         ]);
 
-        $profile->facebook  = $data['facebook'] ?? $profile->facebook;
-        $profile->twitter   = $data['twitter'] ?? $profile->twitter;
+        $profile->facebook = $data['facebook'] ?? $profile->facebook;
+        $profile->twitter = $data['twitter'] ?? $profile->twitter;
         $profile->instagram = $data['instagram'] ?? $profile->instagram;
         $profile->save();
 
         return back()->with('success', 'Social media links updated.');
+    }
+
+    /**
+     * Unclaimed pending program registrations with a linked patient account (shared inbox on Patient Chats).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, ProgramRegistration>
+     */
+    private function claimableProgramRegistrationsForPatientChats()
+    {
+        return ProgramRegistration::query()
+            ->where('status', ProgramRegistration::STATUS_PENDING)
+            ->whereNull('assigned_case_manager_id')
+            ->whereNotNull('user_id')
+            ->with(['program:id,title', 'user.profile'])
+            ->orderByDesc('created_at')
+            ->limit(40)
+            ->get();
     }
 
     /**

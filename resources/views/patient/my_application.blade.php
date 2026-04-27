@@ -1,4 +1,4 @@
-﻿@extends('patient.layouts.app')
+@extends('patient.layouts.app')
 
 @section('title', 'My Application')
 
@@ -179,12 +179,13 @@
                                             'approved' => 'bg-[#C5E8D1] text-[#20B354]',
                                             'rejected' => 'bg-[#E8C5C5] text-[#B32020]',
                                             'pending' => 'bg-[#E4D7DF] text-[#91848C]',
+                                            'pending_finance' => 'bg-amber-100 text-amber-900',
                                         ];
                                     @endphp
 
                                     <span
                                         class="{{ $statusClasses[$status] ?? 'bg-gray-200 text-gray-700' }} text-[16px] font-light px-4 py-2 rounded-sm text-xs font-medium app-text">
-                                        {{ ucfirst($status ?: 'pending') }}
+                                        {{ $registration->status_label }}
                                     </span>
                                 </td>
                                 <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">

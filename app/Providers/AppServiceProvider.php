@@ -8,6 +8,10 @@ use App\Http\Controllers\ChatMessageController;
 use App\Mail\NewChatMessageEmail;
 use App\Mail\UserNotificationEmail;
 use App\Models\Patient;
+use App\Models\ProgramRegistration;
+use App\Models\RegistrationInvoice;
+use App\Observers\ProgramRegistrationObserver;
+use App\Observers\RegistrationInvoiceObserver;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
@@ -29,6 +33,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        ProgramRegistration::observe(ProgramRegistrationObserver::class);
+        RegistrationInvoice::observe(RegistrationInvoiceObserver::class);
+
         // Force correct base URL when app is in subdirectory (e.g. /pinkme)
         $appUrl = config('app.url');
         if ($appUrl && parse_url($appUrl, PHP_URL_PATH) && parse_url($appUrl, PHP_URL_PATH) !== '/') {
@@ -56,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(MessageSent::class, function (MessageSent $event): void {
             $message = $event->message;
             $receiver = $message->receiver ?? $message->receiver()->first();
-            if (!$receiver || !filled($receiver->email)) {
+            if (! $receiver || ! filled($receiver->email)) {
                 return;
             }
             if (ChatMessageController::isUserActiveInChat($receiver->id)) {

@@ -19,3 +19,10 @@ window.PUSHER_CONFIG = {
 </script>
 @endif
 <meta name="app-url" content="{{ rtrim(config('app.url'), '/') }}">
+@php
+    $sessionExpiredRole = optional(auth()->user())->role?->name;
+    $sessionExpiredRedirect = in_array($sessionExpiredRole, ['admin', 'casemanager', 'finance'], true)
+        ? route('login.staff')
+        : route('login');
+@endphp
+<meta name="session-expired-redirect" content="{{ $sessionExpiredRedirect }}">

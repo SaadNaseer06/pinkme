@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProgramRegistration;
 use App\Models\Program;
+use App\Models\ProgramRegistration;
 use App\Support\ProgramRegistrationNotifiers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +33,7 @@ class ProgramRegistrationController extends Controller
             'medical_condition' => 'nullable|string|max:1000',
             'assistance_type' => 'nullable|string|max:255',
             'justification' => 'nullable|string|max:1000',
-            'quarter' => 'required|string|in:' . implode(',', $quarterOptions),
+            'quarter' => 'required|string|in:'.implode(',', $quarterOptions),
             'programs_applied' => 'required|array|min:1',
             'programs_applied.*' => 'string|max:255',
             'active_treatment' => 'required|boolean',
@@ -47,7 +47,7 @@ class ProgramRegistrationController extends Controller
             'state' => 'required|string|max:120',
             'postal_code' => 'required|string|max:20',
             'proof_of_income_status' => 'required|array|min:1',
-            'proof_of_income_status.*' => 'in:' . implode(',', $incomeOptions),
+            'proof_of_income_status.*' => 'in:'.implode(',', $incomeOptions),
             'story' => [
                 'required',
                 'string',
@@ -60,21 +60,21 @@ class ProgramRegistrationController extends Controller
             ],
             'authorization_choice' => 'required|string|in:allow,decline',
             'authorization_permissions' => 'required_if:authorization_choice,allow|array|min:1',
-            'authorization_permissions.*' => 'in:' . implode(',', $authorizationOptions),
+            'authorization_permissions.*' => 'in:'.implode(',', $authorizationOptions),
             'billing_details' => 'nullable|string|max:2000',
             'signature_data' => 'required|string',
-            'treatment_verification_letter' => 'required|file|mimes:pdf,jpg,jpeg,png|max:' . self::APPLICATION_FILE_MAX_KB,
+            'treatment_verification_letter' => 'required|file|mimes:pdf,jpg,jpeg,png|max:'.self::APPLICATION_FILE_MAX_KB,
             'bill_statements' => 'required|array|min:1|max:3',
-            'bill_statements.*' => 'file|mimes:pdf,jpg,jpeg,png|max:' . self::APPLICATION_FILE_MAX_KB,
+            'bill_statements.*' => 'file|mimes:pdf,jpg,jpeg,png|max:'.self::APPLICATION_FILE_MAX_KB,
             'income_documents' => 'nullable|array|max:3',
-            'income_documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:' . self::APPLICATION_FILE_MAX_KB,
+            'income_documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:'.self::APPLICATION_FILE_MAX_KB,
             'documents' => 'nullable|array',
-            'documents.*' => 'nullable|file|max:' . self::APPLICATION_FILE_MAX_KB,
+            'documents.*' => 'nullable|file|max:'.self::APPLICATION_FILE_MAX_KB,
         ]);
 
         $program = Program::findOrFail($request->program_id);
 
-        if (!$program->isApplicationOpen()) {
+        if (! $program->isApplicationOpen()) {
             return redirect()->back()->withErrors([
                 'program_id' => 'Applications for this program are not open yet or have closed. Please check the application start and end dates.',
             ]);
@@ -94,14 +94,15 @@ class ProgramRegistrationController extends Controller
         $makeFilename = function (string $label, string $extension) use ($userId, $now) {
             $safeLabel = preg_replace('/[^a-z0-9_]+/i', '_', $label);
             $safeExt = strtolower($extension ?: 'bin');
-            return strtolower($safeLabel . '_' . $userId . '_' . $now . '_' . Str::random(6) . '.' . $safeExt);
+
+            return strtolower($safeLabel.'_'.$userId.'_'.$now.'_'.Str::random(6).'.'.$safeExt);
         };
 
         $treatmentLetterPath = $request->file('treatment_verification_letter')
             ? $request->file('treatment_verification_letter')->storeAs(
                 'program_documents/treatment_letters',
                 $makeFilename(
-                    'program_' . $request->program_id . '_treatment_letter',
+                    'program_'.$request->program_id.'_treatment_letter',
                     $request->file('treatment_verification_letter')->getClientOriginalExtension()
                 ),
                 'public'
@@ -114,7 +115,7 @@ class ProgramRegistrationController extends Controller
                 $billStatements[] = $bill->storeAs(
                     'program_documents/bill_statements',
                     $makeFilename(
-                        'program_' . $request->program_id . '_bill_statement',
+                        'program_'.$request->program_id.'_bill_statement',
                         $bill->getClientOriginalExtension()
                     ),
                     'public'
@@ -128,7 +129,7 @@ class ProgramRegistrationController extends Controller
                 $incomeDocuments[] = $doc->storeAs(
                     'program_documents/income',
                     $makeFilename(
-                        'program_' . $request->program_id . '_income_document',
+                        'program_'.$request->program_id.'_income_document',
                         $doc->getClientOriginalExtension()
                     ),
                     'public'
@@ -142,7 +143,7 @@ class ProgramRegistrationController extends Controller
                 $additionalDocuments[] = $doc->storeAs(
                     'program_documents',
                     $makeFilename(
-                        'program_' . $request->program_id . '_document',
+                        'program_'.$request->program_id.'_document',
                         $doc->getClientOriginalExtension()
                     ),
                     'public'
@@ -150,7 +151,7 @@ class ProgramRegistrationController extends Controller
             }
         }
 
-        $username = strtolower(preg_replace('/\s+/', '', $request->first_name . ' ' . $request->last_name));
+        $username = strtolower(preg_replace('/\s+/', '', $request->first_name.' '.$request->last_name));
 
         $authorizationChoice = $request->input('authorization_choice', 'allow');
         $authorizationAllow = $authorizationChoice === 'allow';
@@ -160,8 +161,8 @@ class ProgramRegistrationController extends Controller
         $signatureData = $request->input('signature_data');
         if ($signatureData) {
             if (preg_match('/^data:image\\/(png|jpeg);base64,/', $signatureData)) {
-                $signaturePath = 'program_documents/signatures/' . $makeFilename(
-                    'program_' . $request->program_id . '_signature',
+                $signaturePath = 'program_documents/signatures/'.$makeFilename(
+                    'program_'.$request->program_id.'_signature',
                     'png'
                 );
                 $encoded = substr($signatureData, strpos($signatureData, ',') + 1);
@@ -217,6 +218,12 @@ class ProgramRegistrationController extends Controller
             $registration
         );
 
+        ProgramRegistrationNotifiers::notifyCaseManagersInbox(
+            'New application in your inbox',
+            'A patient submitted a financial assistance application. Open it to review, add billing links if needed, and approve or reject.',
+            $registration
+        );
+
         if ($program->max_applications) {
             $currentCount = ProgramRegistration::where('program_id', $program->id)->count();
             if ($currentCount >= $program->max_applications && $program->status !== 'completed') {
@@ -234,7 +241,7 @@ class ProgramRegistrationController extends Controller
     public function show(ProgramRegistration $registration)
     {
         $user = Auth::user();
-        abort_if(!$user || $registration->user_id !== $user->id, 403);
+        abort_if(! $user || $registration->user_id !== $user->id, 403);
 
         $registration->load(['program', 'program.sponsorships.sponsor.profile']);
 

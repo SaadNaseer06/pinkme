@@ -7,8 +7,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProgramRegistration extends Model
 {
-    public const STATUS_PENDING  = 'pending';
+    public const STATUS_PENDING = 'pending';
+
+    /** Case manager completed review; awaiting finance (level 2) budget allocation. */
+    public const STATUS_PENDING_FINANCE = 'pending_finance';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_REJECTED = 'rejected';
 
     protected $fillable = [
@@ -74,7 +79,7 @@ class ProgramRegistration extends Model
         'assigned_at' => 'datetime',
         'sent_to_finance_at' => 'datetime',
     ];
-    
+
     /**
      * Get the program this registration belongs to
      */
@@ -82,7 +87,7 @@ class ProgramRegistration extends Model
     {
         return $this->belongsTo(Program::class);
     }
-    
+
     /**
      * Get the user this registration belongs to
      */
@@ -122,21 +127,21 @@ class ProgramRegistration extends Model
     {
         return $this->hasMany(RegistrationInvoice::class);
     }
-    
+
     /**
      * Get the full name of the registrant
      */
     public function getFullNameAttribute(): string
     {
-        return trim($this->first_name . ' ' . $this->last_name);
+        return trim($this->first_name.' '.$this->last_name);
     }
-    
+
     /**
      * Get formatted document paths for display
      */
     public function getDocumentsAttribute(): array
     {
-        if (!$this->document_paths) {
+        if (! $this->document_paths) {
             return [];
         }
 
@@ -148,7 +153,8 @@ class ProgramRegistration extends Model
         return match (strtolower((string) $this->status)) {
             self::STATUS_APPROVED => 'Approved',
             self::STATUS_REJECTED => 'Rejected',
-            default               => 'Pending',
+            self::STATUS_PENDING_FINANCE => 'Finance review',
+            default => 'Pending',
         };
     }
 
@@ -159,7 +165,7 @@ class ProgramRegistration extends Model
     public function getCalculatedGrantAmountAttribute(): ?float
     {
         $programs = $this->programs_applied;
-        if (empty($programs) || !is_array($programs)) {
+        if (empty($programs) || ! is_array($programs)) {
             return null;
         }
 
@@ -190,20 +196,20 @@ class ProgramRegistration extends Model
 
     private function mapFile(?string $path): ?array
     {
-        if (!$path) {
+        if (! $path) {
             return null;
         }
 
         return [
             'path' => $path,
-            'url' => asset('storage/' . ltrim($path, '/')),
+            'url' => asset('storage/'.ltrim($path, '/')),
             'filename' => basename($path),
         ];
     }
 
     private function mapFileArray($paths): array
     {
-        if (!$paths) {
+        if (! $paths) {
             return [];
         }
 

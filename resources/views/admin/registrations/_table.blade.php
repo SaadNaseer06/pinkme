@@ -28,15 +28,16 @@
                     </td>
                     <td class="px-6 py-4 align-top">
                         @php
-                            $status = strtolower($registration->status);
+                            $status = strtolower((string) $registration->status);
                             $badgeClasses = match ($status) {
-                                'approved' => 'bg-green-100 text-green-800',
-                                'rejected' => 'bg-red-100 text-red-800',
+                                \App\Models\ProgramRegistration::STATUS_APPROVED => 'bg-green-100 text-green-800',
+                                \App\Models\ProgramRegistration::STATUS_REJECTED => 'bg-red-100 text-red-800',
+                                \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE => 'bg-amber-100 text-amber-900',
                                 default => 'bg-pink-100 text-pink-800',
                             };
                         @endphp
                         <span class="inline-flex items-center px-2.5 py-1 text-[11px] font-semibold rounded-full {{ $badgeClasses }}">
-                            {{ ucfirst($status) }}
+                            {{ $registration->status_label }}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-700 align-top">
@@ -51,9 +52,14 @@
                                 <i class="fas fa-check-circle"></i>
                                 <a href="{{ route('admin.program_registrations.show', $registration) }}#finance" class="hover:underline">{{ $financePaid ? 'Paid (finance)' : 'Budget Allocated' }}</a>
                             </span>
-                        @elseif ($registration->finance_user_id)
+                        @elseif ($registration->finance_user_id || (strtolower($registration->status ?? '') === \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE && $registration->sent_to_finance_at))
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-full bg-amber-100 text-amber-800">
-                                <i class="fas fa-clock"></i> Sent to Finance
+                                <i class="fas fa-clock"></i>
+                                @if ($registration->finance_user_id)
+                                    Sent to Finance
+                                @else
+                                    Finance queue (open)
+                                @endif
                             </span>
                         @else
                             <span class="text-gray-400 text-xs">—</span>
@@ -102,12 +108,19 @@
                                             </button>
                                         @endif
                                     @endif
-                                    @if (strtolower($registration->status ?? '') === 'approved' && !$registration->finance_user_id)
+                                    @php
+                                        $st = strtolower($registration->status ?? '');
+                                        $canRouteFinance = $registration->registrationInvoices->isEmpty()
+                                            && ($st === \App\Models\ProgramRegistration::STATUS_APPROVED
+                                                || $st === \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE);
+                                    @endphp
+                                    @if ($canRouteFinance)
                                         <button type="button"
                                             data-send-finance-trigger
                                             data-registration-id="{{ $registration->id }}"
                                             class="w-full flex items-center gap-2 px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md">
-                                            <i class="fas fa-dollar-sign text-pink-600"></i> Send to Finance
+                                            <i class="fas fa-dollar-sign text-pink-600"></i>
+                                            {{ $st === \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE ? 'Re-route / assign finance' : 'Send to Finance' }}
                                         </button>
                                     @endif
                                 </div>

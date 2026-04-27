@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Events\CaseManagerPatientChatsInboxUpdated;
 use App\Events\FinanceTeamChatsInboxUpdated;
 use App\Models\ProgramRegistration;
+use App\Support\PatientApplicationNotifications;
 
 class ProgramRegistrationObserver
 {
@@ -12,6 +13,7 @@ class ProgramRegistrationObserver
     {
         if ($registration->user_id !== null) {
             broadcast(new CaseManagerPatientChatsInboxUpdated);
+            PatientApplicationNotifications::programRegistrationSubmitted($registration);
         }
         if ($this->isFinanceQueueRow($registration)) {
             broadcast(new FinanceTeamChatsInboxUpdated);
@@ -25,6 +27,12 @@ class ProgramRegistrationObserver
         }
         if ($registration->wasChanged(['finance_user_id', 'status', 'sent_to_finance_at'])) {
             broadcast(new FinanceTeamChatsInboxUpdated);
+        }
+        if ($registration->wasChanged('assigned_case_manager_id')) {
+            $previous = $registration->getOriginal('assigned_case_manager_id');
+            if ($previous === null && $registration->assigned_case_manager_id !== null) {
+                PatientApplicationNotifications::programRegistrationCaseManagerAssigned($registration);
+            }
         }
     }
 

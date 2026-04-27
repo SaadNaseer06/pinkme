@@ -8,6 +8,7 @@ use App\Models\ProgramRegistration;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Support\PatientApplicationNotifications;
 use App\Support\ProgramRegistrationNotifiers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -103,19 +104,12 @@ class AdminProgramRegistrationController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        if ($registration->user) {
-            try {
-                UserNotification::create([
-                    'user_id' => $registration->user_id,
-                    'title' => 'Program Registration Approved',
-                    'message' => 'Your registration for "'.($registration->program?->title ?? 'a program').'" has been approved.',
-                    'priority' => UserNotification::PRIORITY_IMPORTANT,
-                    'link_url' => route('patient.programRegistrations.show', $registration),
-                ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
+        PatientApplicationNotifications::notifyProgramRegistrationPatient(
+            $registration,
+            'Program registration approved',
+            'Your registration for "'.($registration->program?->title ?? 'a program').'" has been approved.',
+            UserNotification::PRIORITY_IMPORTANT
+        );
 
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {
@@ -155,19 +149,12 @@ class AdminProgramRegistrationController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        if ($registration->user) {
-            try {
-                UserNotification::create([
-                    'user_id' => $registration->user_id,
-                    'title' => 'Program Registration Rejected',
-                    'message' => 'Your registration for "'.($registration->program?->title ?? 'a program').'" has been rejected. Reason: '.$data['note'],
-                    'priority' => UserNotification::PRIORITY_IMPORTANT,
-                    'link_url' => route('patient.programRegistrations.show', $registration),
-                ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
+        PatientApplicationNotifications::notifyProgramRegistrationPatient(
+            $registration,
+            'Program registration rejected',
+            'Your registration for "'.($registration->program?->title ?? 'a program').'" has been rejected. Reason: '.$data['note'],
+            UserNotification::PRIORITY_IMPORTANT
+        );
 
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {

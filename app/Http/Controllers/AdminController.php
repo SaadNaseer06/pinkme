@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\UserProfile;
 use App\Services\FinanceNotificationService;
 use App\Support\AdminApplicationStatsChart;
+use App\Support\PatientApplicationNotifications;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -350,6 +351,12 @@ class AdminController extends Controller
                 $application->save();
 
                 $reviewerName = $reviewer->profile->full_name ?? $reviewer->email ?? 'Unknown Reviewer';
+
+                $application->refresh();
+                $application->loadMissing(['patient.user']);
+                if ($application->patient?->user) {
+                    PatientApplicationNotifications::applicationReviewerAssigned($application, $reviewerName);
+                }
 
                 Log::info('Reviewer assigned to application', [
                     'application_id' => $application->id,

@@ -9,6 +9,7 @@ use App\Models\ProgramRegistration;
 use App\Models\RegistrationInvoice;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Support\PatientApplicationNotifications;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -250,19 +251,7 @@ class FinanceUserController extends Controller
             $registration->update(['status' => ProgramRegistration::STATUS_APPROVED]);
         }
 
-        if ($registration->user) {
-            try {
-                UserNotification::create([
-                    'user_id' => $registration->user_id,
-                    'title' => 'Budget Allocated',
-                    'message' => 'Budget has been allocated for your registration for "'.($registration->program?->title ?? '').'". Invoice #'.$invoice->invoice_number.' has been generated.',
-                    'priority' => UserNotification::PRIORITY_IMPORTANT,
-                    'link_url' => null,
-                ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
+        PatientApplicationNotifications::programRegistrationBudgetAllocated($registration, $invoice);
 
         $adminUsers = User::query()
             ->whereHas('role', fn ($q) => $q->where('name', 'admin'))

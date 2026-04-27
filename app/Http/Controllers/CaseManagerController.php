@@ -13,6 +13,7 @@ use App\Models\UserNotification;
 use App\Models\UserProfile;
 use App\Services\FinanceNotificationService;
 use App\Support\BillingPaymentLinks;
+use App\Support\PatientApplicationNotifications;
 use App\Support\ProgramRegistrationNotifiers;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -235,19 +236,12 @@ class CaseManagerController extends Controller
             'sent_to_finance_at' => now(),
         ]);
 
-        if ($registration->user) {
-            try {
-                UserNotification::create([
-                    'user_id' => $registration->user_id,
-                    'title' => 'Application passed case review',
-                    'message' => 'Your application for "'.($registration->program?->title ?? 'a program').'" passed case manager review and is now with the finance team for final processing.',
-                    'priority' => UserNotification::PRIORITY_IMPORTANT,
-                    'link_url' => route('patient.programRegistrations.show', $registration),
-                ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
+        PatientApplicationNotifications::notifyProgramRegistrationPatient(
+            $registration,
+            'Application passed case review',
+            'Your application for "'.($registration->program?->title ?? 'a program').'" passed case manager review and is now with the finance team for final processing.',
+            UserNotification::PRIORITY_IMPORTANT
+        );
 
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {
@@ -300,19 +294,12 @@ class CaseManagerController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        if ($registration->user) {
-            try {
-                UserNotification::create([
-                    'user_id' => $registration->user_id,
-                    'title' => 'Program Registration Rejected',
-                    'message' => 'Your registration for "'.($registration->program?->title ?? 'a program').'" has been rejected. Reason: '.$data['note'],
-                    'priority' => UserNotification::PRIORITY_IMPORTANT,
-                    'link_url' => route('patient.programRegistrations.show', $registration),
-                ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
+        PatientApplicationNotifications::notifyProgramRegistrationPatient(
+            $registration,
+            'Program registration rejected',
+            'Your registration for "'.($registration->program?->title ?? 'a program').'" has been rejected. Reason: '.$data['note'],
+            UserNotification::PRIORITY_IMPORTANT
+        );
 
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {
@@ -512,6 +499,8 @@ class CaseManagerController extends Controller
                 'status' => 'Required Docs',
             ]);
 
+            PatientApplicationNotifications::applicationMissingDocumentsRequested($application, $data['message']);
+
             return back()->with('success', 'Your request for missing documents has been updated successfully.');
         }
 
@@ -527,7 +516,7 @@ class CaseManagerController extends Controller
             'status' => 'Required Docs',
         ]);
 
-        // TODO (optional): notify the patient to upload the required documents
+        PatientApplicationNotifications::applicationMissingDocumentsRequested($application, $data['message']);
 
         return back()->with('success', 'Your request for missing documents has been sent to the applicant.');
     }

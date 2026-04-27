@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreApplicationRequest;
 use App\Models\Application;
 use App\Models\Patient;
 use App\Models\Program;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Support\PatientApplicationNotifications;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ApplicationController extends Controller
@@ -21,7 +21,7 @@ class ApplicationController extends Controller
         $user = Auth::user();
         $patient = Patient::where('user_id', $user->id)->first();
 
-        if (!$patient) {
+        if (! $patient) {
             $patient = Patient::create(['user_id' => $user->id]);
         }
 
@@ -109,7 +109,6 @@ class ApplicationController extends Controller
                 }
             }
 
-
             // If documents were updated, check for missing request and update status
             if ($hasNewDocuments) {
                 $missingRequest = DB::table('application_missing_requests')
@@ -122,7 +121,7 @@ class ApplicationController extends Controller
                         ->delete();
 
                     $application->update([
-                        'status' => 'Pending'
+                        'status' => 'Pending',
                     ]);
                 }
             }
@@ -133,12 +132,11 @@ class ApplicationController extends Controller
                 ->with('success', 'Application updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Application Update Error: ' . $e->getMessage());
+            Log::error('Application Update Error: '.$e->getMessage());
 
-            return back()->withErrors(['error' => 'Update failed: ' . $e->getMessage()]);
+            return back()->withErrors(['error' => 'Update failed: '.$e->getMessage()]);
         }
     }
-
 
     public function storeApplication(Request $request)
     {
@@ -196,6 +194,8 @@ class ApplicationController extends Controller
                     'link_url' => route('admin.viewApplication', $application->id),
                 ]);
             }
+
+            PatientApplicationNotifications::applicationSubmitted($application);
 
             return redirect()->route('patient.applications')
                 ->with('success', 'Your application was submitted successfully and is under review.');

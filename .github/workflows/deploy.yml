@@ -2,7 +2,7 @@
 #   CPANEL_HOST          SSH hostname (server that serves the site, e.g. same box as portal.pink-me.org)
 #   CPANEL_SSH_PORT      Usually 22
 #   CPANEL_USERNAME      SSH user (often cPanel account user)
-#   CPANEL_SSH_KEY       Private key (PEM text or base64)
+#   CPANEL_SSH_KEY       **Private** key only (-----BEGIN ... PRIVATE KEY-----). Not the ssh-rsa line.
 #   DEPLOY_PATH          Absolute path to the repo on the server (e.g. /home/portalpinkme/public_html)
 #   DEPLOY_APP_URL       Production URL, no trailing slash: https://portal.pink-me.org
 #
@@ -39,22 +39,37 @@ jobs:
         run: |
           set -e
           mkdir -p ~/.ssh
-          # Support both raw PEM and base64-encoded key
+
+          FIRST_LINE="$(echo "$SSH_KEY" | tr -d '\r' | sed '/./!d;q')"
+          if echo "$FIRST_LINE" | grep -qE '^(ssh-rsa|ssh-ed25519|ecdsa-sha2-)'; then
+            echo "ERROR: CPANEL_SSH_KEY looks like a PUBLIC key (starts with ssh-rsa / ssh-ed25519)."
+            echo "GitHub needs the PRIVATE key: lines starting with -----BEGIN ... PRIVATE KEY-----"
+            echo "Keep the matching public key on the server in ~/.ssh/authorized_keys only."
+            exit 1
+          fi
+
+          # Support both raw PEM and base64-encoded private key
           if echo "$SSH_KEY" | grep -q '^-----BEGIN'; then
-            echo "$SSH_KEY" > ~/.ssh/deploy_key
+            printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           else
             echo "$SSH_KEY" | tr -d '\n\r' | base64 -d > ~/.ssh/deploy_key 2>/dev/null || {
-              echo "ERROR: Invalid key. Use either:"
-              echo "  1) Raw PEM: paste full key (-----BEGIN ... -----END-----)"
-              echo "  2) Base64:  cat ~/.ssh/id_rsa | base64 -w 0  (Linux, no line breaks)"
+              echo "ERROR: Could not decode base64. Use either:"
+              echo "  1) Paste the full private key (-----BEGIN OPENSSH PRIVATE KEY----- ... -----END-----)"
+              echo "  2) Or base64 of that file:  base64 -w 0 < id_ed25519"
               exit 1
             }
           fi
           chmod 600 ~/.ssh/deploy_key
 
-          # Validate key format
-          if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>&1; then
-            echo "ERROR: Key file invalid or passphrase-protected. Use an unencrypted key."
+          # Validate private key (passphrase-protected keys fail here — non-interactive CI cannot unlock them)
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key >/tmp/deploy_key_pub_check.txt 2>/tmp/deploy_key_err.txt; then
+            echo "ERROR: Private key is invalid, not OpenSSH format, or passphrase-protected."
+            if grep -qi passphrase /tmp/deploy_key_err.txt 2>/dev/null; then
+              echo "Create a key with NO passphrase for CI:  ssh-keygen -t ed25519 -N \"\" -f deploy_ci -C github-actions"
+            fi
+            echo "---- ssh-keygen said:"
+            cat /tmp/deploy_key_err.txt || true
+            echo "---- First line of secret (redacted): $(head -c 40 ~/.ssh/deploy_key | tr -d '\n')..."
             exit 1
           fi
 

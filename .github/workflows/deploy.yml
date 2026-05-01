@@ -64,8 +64,11 @@ jobs:
           # Validate private key (passphrase-protected keys fail here — non-interactive CI cannot unlock them)
           if ! ssh-keygen -y -f ~/.ssh/deploy_key >/tmp/deploy_key_pub_check.txt 2>/tmp/deploy_key_err.txt; then
             echo "ERROR: Private key is invalid, not OpenSSH format, or passphrase-protected."
-            if grep -qi passphrase /tmp/deploy_key_err.txt 2>/dev/null; then
-              echo "Create a key with NO passphrase for CI:  ssh-keygen -t ed25519 -N \"\" -f deploy_ci -C github-actions"
+            if grep -qiE 'passphrase|decrypt private key' /tmp/deploy_key_err.txt 2>/dev/null; then
+              echo "This key is encrypted. GitHub Actions cannot enter a passphrase."
+              echo "Generate a deploy-only key with an empty passphrase, then replace CPANEL_SSH_KEY:"
+              echo "  ssh-keygen -t ed25519 -N \"\" -f github_deploy -C github-actions"
+              echo "Paste github_deploy (private) into the secret; add github_deploy.pub to the server's authorized_keys."
             fi
             echo "---- ssh-keygen said:"
             cat /tmp/deploy_key_err.txt || true

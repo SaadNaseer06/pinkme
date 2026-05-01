@@ -1,10 +1,6 @@
 import './bootstrap';
-import notificationManager from './notifications';
-import chatManager from './chat';
 import formLoader from './form-loader';
 import { fetchFreshCsrfToken } from './session-csrf';
-import { initCaseManagerPatientChatsInbox } from './case-manager-patient-chats-inbox';
-import { initFinanceTeamChatsInbox } from './finance-team-chats-inbox';
 
 document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('visibilitychange', () => {
@@ -13,10 +9,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    notificationManager.init();
-    chatManager.init();
     formLoader.init();
-    initCaseManagerPatientChatsInbox();
-    initFinanceTeamChatsInbox();
+
+    if (document.querySelector('[data-notification-center], [data-notification-modal]')) {
+        import('./notifications').then(({ default: notificationManager }) => notificationManager.init());
+    }
+
+    if (document.querySelector('[data-chat-app]')) {
+        import('./chat').then(({ default: chatManager }) => chatManager.init());
+    }
+
+    if (document.querySelector('[data-cm-patient-chats-page]')) {
+        import('./case-manager-patient-chats-inbox').then(({ initCaseManagerPatientChatsInbox }) => {
+            initCaseManagerPatientChatsInbox();
+        });
+    }
+
+    if (document.querySelector('[data-finance-team-chats-page]')) {
+        import('./finance-team-chats-inbox').then(({ initFinanceTeamChatsInbox }) => {
+            initFinanceTeamChatsInbox();
+        });
+    }
 });
 

@@ -267,7 +267,7 @@ class FinanceUserController extends Controller
                     'link_url' => route('admin.program_registrations.show', $registration),
                 ]);
                 if ($admin->email) {
-                    Mail::to($admin->email)->send(new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
+                    Mail::to($admin->email)->queue(new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
                 }
             } catch (\Throwable $e) {
                 report($e);
@@ -278,7 +278,7 @@ class FinanceUserController extends Controller
         $applicantMailWarning = null;
         if ($patientEmail) {
             try {
-                Mail::to($patientEmail)->send(new BudgetAllocatedToPatient($registration, $invoice, $pdfPath, $pdfDisk));
+                Mail::to($patientEmail)->queue(new BudgetAllocatedToPatient($registration, $invoice, $pdfPath, $pdfDisk));
                 Log::info('Budget allocation email sent to applicant', [
                     'registration_id' => $registration->id,
                     'email' => $patientEmail,
@@ -331,7 +331,7 @@ class FinanceUserController extends Controller
         foreach ($adminUsers as $admin) {
             if ($admin->email) {
                 try {
-                    Mail::to($admin->email)->send(new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
+                    Mail::to($admin->email)->queue(new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
                 } catch (\Throwable $e) {
                     report($e);
                 }
@@ -341,7 +341,7 @@ class FinanceUserController extends Controller
         $patientEmail = $this->resolveApplicantEmail($registration);
         if ($patientEmail) {
             try {
-                Mail::to($patientEmail)->send(new BudgetAllocatedToPatient($registration, $invoice, $pdfPath, $pdfDisk));
+                Mail::to($patientEmail)->queue(new BudgetAllocatedToPatient($registration, $invoice, $pdfPath, $pdfDisk));
                 Log::info('Budget allocation resend: email sent to applicant', [
                     'registration_id' => $registration->id,
                     'email' => $patientEmail,
@@ -450,15 +450,13 @@ class FinanceUserController extends Controller
             ->map->toFrontendPayload()
             ->values();
 
-        $contactsPayload = $adminUsers->map(function (User $contact) use ($user) {
-            $latestMessage = Message::betweenUsers($user->id, $contact->id)
-                ->latest('sent_at')
-                ->first();
+        $contactSummaries = Message::contactSummariesForUser($user->id, $adminUsers->pluck('id')->all());
+        $latestByContact = $contactSummaries['latest_by_contact'];
+        $unreadByContact = $contactSummaries['unread_by_contact'];
 
-            $unreadCount = Message::betweenUsers($user->id, $contact->id)
-                ->where('receiver_id', $user->id)
-                ->where('is_read', false)
-                ->count();
+        $contactsPayload = $adminUsers->map(function (User $contact) use ($latestByContact, $unreadByContact) {
+            $latestMessage = $latestByContact[$contact->id] ?? null;
+            $unreadCount = $unreadByContact[$contact->id] ?? 0;
 
             return [
                 'id' => $contact->id,

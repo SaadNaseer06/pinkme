@@ -15,7 +15,7 @@ class AdminCaseManagerController extends Controller
 {
     public function index()
     {
-        $caseManagers = User::whereHas('role', fn($q) => $q->where('name', 'casemanager'))
+        $caseManagers = User::whereHas('role', fn ($q) => $q->where('name', 'casemanager'))
             ->with('profile')
             ->orderByDesc('id')
             ->paginate(20);
@@ -53,14 +53,14 @@ class AdminCaseManagerController extends Controller
             'user_id' => $user->id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
-            'full_name' => trim($request->first_name . ' ' . $request->last_name),
+            'full_name' => trim($request->first_name.' '.$request->last_name),
             'phone' => $request->phone,
             'username' => $request->username,
-            'status' => (int)$request->status,
+            'status' => (int) $request->status,
         ]);
 
         try {
-            Mail::to($user->email)->send(
+            Mail::to($user->email)->queue(
                 new StaffAccountCredentialsEmail(
                     $user,
                     $plainPassword,
@@ -82,6 +82,7 @@ class AdminCaseManagerController extends Controller
             abort(404);
         }
         $user = $case_manager->load('profile');
+
         return view('admin.case_managers.edit', compact('user'));
     }
 
@@ -112,10 +113,10 @@ class AdminCaseManagerController extends Controller
         $profile = $case_manager->profile ?: new UserProfile(['user_id' => $case_manager->id]);
         $profile->first_name = $request->first_name;
         $profile->last_name = $request->last_name;
-        $profile->full_name = trim($request->first_name . ' ' . $request->last_name);
+        $profile->full_name = trim($request->first_name.' '.$request->last_name);
         $profile->phone = $request->phone;
         $profile->username = $request->username;
-        $profile->status = (int)$request->status;
+        $profile->status = (int) $request->status;
         $profile->save();
 
         return redirect()->route('admin.case-managers.index')

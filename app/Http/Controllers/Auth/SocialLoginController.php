@@ -46,7 +46,7 @@ class SocialLoginController extends Controller
         $googleId = $googleUser->getId();
         $email = $googleUser->getEmail();
 
-        if (!$googleId || !$email) {
+        if (! $googleId || ! $email) {
             return $this->redirectWithError('We could not retrieve your Google account details. Please use another login method.');
         }
 
@@ -54,7 +54,7 @@ class SocialLoginController extends Controller
             ->where('provider_id', $googleId)
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             $user = User::where('email', $email)->first();
 
             if ($user && optional($user->role)->name !== 'patient') {
@@ -78,7 +78,7 @@ class SocialLoginController extends Controller
         $isNewSocialSignup = false;
 
         try {
-            if (!$user) {
+            if (! $user) {
                 $isNewSocialSignup = true;
                 $user = User::create([
                     'email' => $email,
@@ -101,7 +101,7 @@ class SocialLoginController extends Controller
                     $user->role_id = $patientRoleId;
                 }
 
-                if (!$user->email_verified_at) {
+                if (! $user->email_verified_at) {
                     $user->email_verified_at = now();
                 }
 
@@ -116,12 +116,12 @@ class SocialLoginController extends Controller
                 'full_name' => $fullName,
                 'first_name' => $firstName,
                 'last_name' => $lastName,
-                'username' => $firstName . ' ' . $lastName,
+                'username' => $firstName.' '.$lastName,
             ]);
 
-            if (!$profile->exists) {
+            if (! $profile->exists) {
                 $profile->phone = 'N/A';
-            } elseif (!$profile->phone) {
+            } elseif (! $profile->phone) {
                 $profile->phone = 'N/A';
             }
 
@@ -139,7 +139,7 @@ class SocialLoginController extends Controller
 
         if ($isNewSocialSignup && filled($user->email)) {
             try {
-                Mail::to($user->email)->send(new PatientWelcomeEmail($user->fresh(['profile']), true));
+                Mail::to($user->email)->queue(new PatientWelcomeEmail($user->fresh(['profile']), true));
             } catch (Throwable $e) {
                 report($e);
             }

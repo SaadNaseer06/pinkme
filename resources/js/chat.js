@@ -83,10 +83,19 @@ class ChatConversation {
     startActivityPing() {
         const activityUrl = this.root?.dataset?.activityUrl || '/chat/activity';
         const ping = () => {
+            if (document.visibilityState !== 'visible') {
+                return;
+            }
             axios.post(activityUrl).catch(() => {});
         };
         ping();
-        this._activityInterval = setInterval(ping, 60000);
+        this._activityInterval = setInterval(ping, 120000);
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                ping();
+            }
+        });
     }
 
     async handleSubmit(event) {

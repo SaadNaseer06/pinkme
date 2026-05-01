@@ -1,4 +1,4 @@
-﻿@extends('sponsor.layouts.app')
+@extends('sponsor.layouts.app')
 
 @section('title', 'Become A Sponsor')
 
@@ -28,7 +28,7 @@
                 @forelse ($upcomingEvents as $event)
                     @php
                         $eventImage = $event->image
-                            ? (str_starts_with($event->image, 'http') ? $event->image : asset('storage/' . $event->image))
+                            ? (str_starts_with($event->image, 'http') ? $event->image : storage_url($event->image))
                             : asset('public/images/' . ($eventImagePool[$loop->index % count($eventImagePool)] ?? 'program-1.png'));
                         $shortDesc = Str::limit(strip_tags($event->description ?? ''), 140);
                         $fundLabel = $event->funding_goal
@@ -98,7 +98,7 @@
                                 @foreach ($ongoingEvents as $event)
                                     @php
                                         $imgSrc = $event->image
-                                            ? (str_starts_with($event->image, 'http') ? $event->image : asset('storage/' . $event->image))
+                                            ? (str_starts_with($event->image, 'http') ? $event->image : storage_url($event->image))
                                             : asset('public/images/' . ($fundImagePool[$loop->index % count($fundImagePool)] ?? 'S-1.png'));
                                         $shortDescription = Str::limit(strip_tags($event->description ?? ''), 120);
                                         $fundLabel = $event->funding_goal

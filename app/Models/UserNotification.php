@@ -11,7 +11,11 @@ class UserNotification extends Model
 {
     use HasFactory;
 
+    /** @var array<int, string|null> */
+    private static array $programBannerCache = [];
+
     public const PRIORITY_NORMAL = 'normal';
+
     public const PRIORITY_IMPORTANT = 'important';
 
     /**
@@ -73,14 +77,43 @@ class UserNotification extends Model
     public function toFrontendPayload(): array
     {
         return [
-            'id'         => $this->id,
-            'title'      => $this->title,
-            'message'    => $this->message,
-            'link_url'   => $this->link_url,
-            'priority'   => $this->priority,
-            'read_at'    => optional($this->read_at)->toISOString(),
+            'id' => $this->id,
+            'title' => $this->title,
+            'message' => $this->message,
+            'link_url' => $this->link_url,
+            'image_url' => $this->resolveImageUrl(),
+            'priority' => $this->priority,
+            'read_at' => optional($this->read_at)->toISOString(),
             'created_at' => optional($this->created_at)->toISOString(),
             'created_at_formatted' => optional($this->created_at)->format('d M Y, h:i A'),
         ];
+    }
+
+    private function resolveImageUrl(): ?string
+    {
+        if (! $this->link_url) {
+            return null;
+        }
+
+        $path = (string) parse_url($this->link_url, PHP_URL_PATH);
+        if (! preg_match('#/patient/programs/(\d+)$#', $path, $matches)) {
+            return null;
+        }
+
+        $programId = (int) ($matches[1] ?? 0);
+        if ($programId <= 0) {
+            return null;
+        }
+
+        if (! array_key_exists($programId, self::$programBannerCache)) {
+            self::$programBannerCache[$programId] = Program::query()->whereKey($programId)->value('banner');
+        }
+
+        $banner = self::$programBannerCache[$programId];
+        if (! $banner) {
+            return null;
+        }
+
+        return storage_url((string) $banner);
     }
 }

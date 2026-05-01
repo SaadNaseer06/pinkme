@@ -3,6 +3,8 @@
 namespace App\Support;
 
 use App\Models\Application;
+use App\Models\Patient;
+use App\Models\Program;
 use App\Models\ProgramRegistration;
 use App\Models\RegistrationInvoice;
 use App\Models\User;
@@ -11,6 +13,27 @@ use Illuminate\Support\Str;
 
 class PatientApplicationNotifications
 {
+    /**
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    private static function patientUserIds(): \Illuminate\Support\Collection
+    {
+        $roleBased = User::query()
+            ->whereHas('role', fn ($q) => $q->where('name', 'patient'))
+            ->pluck('id');
+
+        $patientTableBased = Patient::query()
+            ->whereNotNull('user_id')
+            ->pluck('user_id');
+
+        return $roleBased
+            ->merge($patientTableBased)
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+    }
+
     /**
      * Resolve the patient user id for in-app notifications (linked account or patient role with same email).
      */
@@ -150,5 +173,31 @@ class PatientApplicationNotifications
         } catch (\Throwable $e) {
             report($e);
         }
+    }
+
+    public static function programCreatedForPatients(Program $program): void
+    {
+        $programTitle = trim((string) ($program->title ?? 'New Program'));
+        $message = 'A new support program "'.$programTitle.'" is now available. You can review details and apply now.';
+        $link = route('patient.programs.show', ['id' => $program->id]);
+
+        $now = now();
+        self::patientUserIds()->chunk(300)->each(function ($ids) use ($message, $link, $now): void {
+            $rows = collect($ids)->map(fn ($userId): array => [
+                'user_id' => (int) $userId,
+                'title' => 'New program available',
+                'message' => $message,
+                'priority' => UserNotification::PRIORITY_IMPORTANT,
+                'link_url' => $link,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ])->all();
+
+            try {
+                UserNotification::query()->insert($rows);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        });
     }
 }

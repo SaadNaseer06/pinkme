@@ -120,7 +120,7 @@ class ChatMessageController extends Controller
                 report($e);
             }
             try {
-                Mail::to($contact->email)->send(new ChatMessageReceived($user, $contact, $snippet, $chatUrl));
+                Mail::to($contact->email)->queue(new ChatMessageReceived($user, $contact, $snippet, $chatUrl));
             } catch (\Throwable $e) {
                 report($e);
             }

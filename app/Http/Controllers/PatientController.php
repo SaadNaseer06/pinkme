@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Mail\WebinarRegistrationConfirmation;
 use App\Models\Application;
-use App\Models\ProgramRegistration;
 use App\Models\Invoice;
+use App\Models\Message;
 use App\Models\Patient;
 use App\Models\Program;
+use App\Models\ProgramRegistration;
 use App\Models\SponsorshipProgram;
-use App\Models\Message;
+use App\Models\User;
 use App\Models\Webinar;
 use App\Models\WebinarRegistration;
-use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\WebinarRegistrationConfirmation;
 
 class PatientController extends Controller
 {
@@ -26,47 +26,84 @@ class PatientController extends Controller
         $user = Auth::user();
         $patient = Patient::where('user_id', $user->id)->first();
 
-        if (!$patient) {
+        if (! $patient) {
             // Create patient record if doesn't exist
             $patient = Patient::create(['user_id' => $user->id]);
         }
 
-        // Get patient's applications
+        // Legacy patient applications
         $applications = Application::where('patient_id', $patient->id)
             ->with('program')
             ->orderByDesc('submission_date')
             ->orderByDesc('created_at')
             ->get();
 
+        // Program registrations (newer financial assistance flow)
+        $programRegistrations = ProgramRegistration::where('user_id', $user->id)
+            ->with('program')
+            ->orderByDesc('created_at')
+            ->get();
+
         // Get application statistics
         $totalApplications = $applications->count();
         $pendingApplications = $applications->filter(
-            fn($app) => strcasecmp($app->status ?? '', 'Pending') === 0
+            fn ($app) => strcasecmp($app->status ?? '', 'Pending') === 0
         )->count();
         $approvedApplications = $applications->filter(
-            fn($app) => strcasecmp($app->status ?? '', 'Approved') === 0
+            fn ($app) => strcasecmp($app->status ?? '', 'Approved') === 0
         )->count();
         $rejectedApplications = $applications->filter(
-            fn($app) => strcasecmp($app->status ?? '', 'Rejected') === 0
+            fn ($app) => strcasecmp($app->status ?? '', 'Rejected') === 0
         )->count();
 
-        // Get last application date
+        // Get last submission date across both flows
         $latestApplication = $applications->first();
-        $latestSubmittedAt = $latestApplication
+        $latestApplicationSubmittedAt = $latestApplication
             ? ($latestApplication->submission_date ?? $latestApplication->created_at)
             : null;
-        $lastApplicationDate = $latestSubmittedAt
-            ? Carbon::parse($latestSubmittedAt)->format('d/m/Y')
-            : 'N/A';
+        $latestRegistration = $programRegistrations->first();
+        $latestRegistrationSubmittedAt = $latestRegistration?->created_at;
+
+        $latestSubmittedAt = collect([$latestApplicationSubmittedAt, $latestRegistrationSubmittedAt])
+            ->filter()
+            ->map(fn ($dt) => Carbon::parse($dt))
+            ->sortDesc()
+            ->first();
+
+        $lastApplicationDate = $latestSubmittedAt ? $latestSubmittedAt->format('d/m/Y') : 'N/A';
+
         $inReviewApplications = $applications->filter(function ($app) {
             $status = strtolower((string) $app->status);
+
             return in_array($status, ['pending', 'under review', 'under_review'], true);
         })->count();
-        $latestApplicationStatus = $latestApplication ? ($latestApplication->status ?: 'N/A') : 'N/A';
-        $latestApplicationCode = $latestApplication
-            ? ($latestApplication->code ?: ('APP-' . str_pad((string) $latestApplication->id, 6, '0', STR_PAD_LEFT)))
-            : null;
-        $latestProgramTitle = optional(optional($latestApplication)->program)->title;
+        $inReviewRegistrations = $programRegistrations->filter(function ($registration) {
+            $status = strtolower((string) $registration->status);
+
+            return in_array($status, [ProgramRegistration::STATUS_PENDING, ProgramRegistration::STATUS_PENDING_FINANCE], true);
+        })->count();
+        $inReviewTotal = $inReviewApplications + $inReviewRegistrations;
+
+        $latestIsApplication = $latestApplicationSubmittedAt
+            && (! $latestRegistrationSubmittedAt || Carbon::parse($latestApplicationSubmittedAt)->gte(Carbon::parse($latestRegistrationSubmittedAt)));
+
+        $latestStatus = $latestIsApplication
+            ? ($latestApplication?->status ?: 'N/A')
+            : ($latestRegistration?->status ?: 'N/A');
+
+        $latestCode = $latestIsApplication
+            ? ($latestApplication ? ($latestApplication->code ?: ('APP-'.str_pad((string) $latestApplication->id, 6, '0', STR_PAD_LEFT))) : null)
+            : ($latestRegistration ? ('REG-'.str_pad((string) $latestRegistration->id, 6, '0', STR_PAD_LEFT)) : null);
+
+        $latestProgramTitle = $latestIsApplication
+            ? optional(optional($latestApplication)->program)->title
+            : optional(optional($latestRegistration)->program)->title;
+
+        $latestItemType = $latestIsApplication ? 'application' : 'registration';
+        $latestItemId = $latestIsApplication
+            ? ($latestApplication->id ?? null)
+            : ($latestRegistration->id ?? null);
+        $hasSubmission = (bool) $latestItemId;
 
         // Prepare stats for the view
         $stats = [
@@ -75,11 +112,13 @@ class PatientController extends Controller
             'approved_applications' => $approvedApplications,
             'rejected_applications' => $rejectedApplications,
             'last_application_date' => $lastApplicationDate,
-            'in_review_applications' => $inReviewApplications,
-            'latest_application_status' => $latestApplicationStatus,
-            'latest_application_id' => $latestApplication->id ?? null,
-            'latest_application_code' => $latestApplicationCode,
+            'in_review_applications' => $inReviewTotal,
+            'latest_application_status' => $latestStatus,
+            'latest_application_id' => $latestItemId,
+            'latest_application_code' => $latestCode,
             'latest_program_title' => $latestProgramTitle,
+            'latest_item_type' => $latestItemType,
+            'has_submission' => $hasSubmission,
         ];
 
         // Get available programs
@@ -202,15 +241,13 @@ class PatientController extends Controller
             ->map->toFrontendPayload()
             ->values();
 
-        $contactsPayload = $contacts->map(function (User $contact) use ($user) {
-            $latestMessage = Message::betweenUsers($user->id, $contact->id)
-                ->latest('sent_at')
-                ->first();
+        $contactSummaries = Message::contactSummariesForUser($user->id, $contacts->pluck('id')->all());
+        $latestByContact = $contactSummaries['latest_by_contact'];
+        $unreadByContact = $contactSummaries['unread_by_contact'];
 
-            $unreadCount = Message::betweenUsers($user->id, $contact->id)
-                ->where('receiver_id', $user->id)
-                ->where('is_read', false)
-                ->count();
+        $contactsPayload = $contacts->map(function (User $contact) use ($latestByContact, $unreadByContact) {
+            $latestMessage = $latestByContact[$contact->id] ?? null;
+            $unreadCount = $unreadByContact[$contact->id] ?? 0;
 
             return [
                 'id' => $contact->id,
@@ -246,7 +283,7 @@ class PatientController extends Controller
         $user = Auth::user();
         $patient = Patient::where('user_id', $user->id)->first();
 
-        if (!$patient) {
+        if (! $patient) {
             $patient = Patient::create(['user_id' => $user->id]);
         }
 
@@ -277,7 +314,7 @@ class PatientController extends Controller
         $user = Auth::user();
         $patient = Patient::where('user_id', $user->id)->with('user.profile')->first();
 
-        if (!$patient) {
+        if (! $patient) {
             $patient = Patient::create(['user_id' => $user->id]);
         }
 
@@ -289,7 +326,7 @@ class PatientController extends Controller
         $user = Auth::user();
         $patient = Patient::where('user_id', $user->id)->first();
 
-        if (!$patient) {
+        if (! $patient) {
             $patient = Patient::create(['user_id' => $user->id]);
         }
 
@@ -331,9 +368,9 @@ class PatientController extends Controller
         $webinars = Webinar::query()
             ->whereIn('audience', ['both', 'patient'])
             ->withCount([
-                'registrations as attendee_count' => fn($query) => $query->where('status', 'registered'),
+                'registrations as attendee_count' => fn ($query) => $query->where('status', 'registered'),
             ])
-            ->with(['registrations' => fn($query) => $query->where('user_id', $user->id)])
+            ->with(['registrations' => fn ($query) => $query->where('user_id', $user->id)])
             ->orderBy('scheduled_at')
             ->get()
             ->map(function (Webinar $webinar) {
@@ -341,6 +378,7 @@ class PatientController extends Controller
                 $webinar->current_registration = $registration;
                 $webinar->is_registered = $registration?->isRegistered() ?? false;
                 $webinar->can_join = $webinar->isJoinable();
+
                 return $webinar;
             });
 
@@ -354,7 +392,7 @@ class PatientController extends Controller
     {
         $user = Auth::user();
 
-        if (!$webinar->isJoinable()) {
+        if (! $webinar->isJoinable()) {
             return back()->with('error', 'Registration for this webinar is closed.');
         }
 
@@ -395,7 +433,7 @@ class PatientController extends Controller
             ->where('status', 'registered')
             ->first();
 
-        if (!$registration) {
+        if (! $registration) {
             return back()->with('error', 'No active registration found for this webinar.');
         }
 

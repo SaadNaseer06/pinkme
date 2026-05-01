@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProgramRegistration;
-use App\Models\SponsorshipProgram;
-use App\Support\ProgramDefaultTemplate;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Program;
+use App\Models\ProgramRegistration;
+use App\Support\PatientApplicationNotifications;
+use App\Support\ProgramDefaultTemplate;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ProgramController extends Controller
 {
@@ -40,7 +39,7 @@ class ProgramController extends Controller
 
         $program = Program::findOrFail($validated['program_id']);
 
-        if (!$program->isApplicationOpen()) {
+        if (! $program->isApplicationOpen()) {
             return back()->with('error', 'Applications for this program are not open yet or have closed. Please check the application start and end dates.');
         }
 
@@ -88,7 +87,7 @@ class ProgramController extends Controller
             'review_note' => $registration->review_note,
         ] : null;
 
-        if (!$request->expectsJson()) {
+        if (! $request->expectsJson()) {
             if ($registration) {
                 return redirect()->route('patient.programRegistrations.show', $registration);
             }
@@ -103,7 +102,7 @@ class ProgramController extends Controller
             'event_date' => Carbon::parse($program->event_date)->format('l, F d, Y'),
             'event_time' => $program->event_time ? Carbon::parse($program->event_time)->format('H:i') : null,
             'banner' => $program->banner
-                ? asset('storage/' . ltrim($program->banner, '/'))
+                ? storage_url($program->banner)
                 : asset('public/images/program-details.png'),
             'sponsor' => $sponsorPayload,
             'registration' => $registrationPayload,
@@ -141,15 +140,15 @@ class ProgramController extends Controller
     public function store(Request $r)
     {
         $validator = Validator::make($r->all(), [
-            'title'       => ['nullable', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'event_date'  => ['nullable', 'date'],
-            'event_time'  => ['nullable', 'date_format:H:i'],
+            'event_date' => ['nullable', 'date'],
+            'event_time' => ['nullable', 'date_format:H:i'],
             'application_start_date' => ['nullable', 'date'],
             'application_end_date' => ['nullable', 'date'],
             'max_applications' => ['nullable', 'integer', 'min:1'],
-            'status'      => ['nullable', 'in:upcoming,ongoing,completed'],
-            'banner'      => ['nullable', 'image', 'max:' . (25 * 1024)],
+            'status' => ['nullable', 'in:upcoming,ongoing,completed'],
+            'banner' => ['nullable', 'image', 'max:'.(25 * 1024)],
             'custom_fields' => ['array'],
             'custom_fields.*.name' => ['required', 'string', 'max:60', Rule::in($this->allowedFieldNames())],
             'custom_fields.*.id' => ['nullable', 'string', 'max:60'],
@@ -172,10 +171,11 @@ class ProgramController extends Controller
 
             $fieldValue = function (string $name) use ($fields, $r) {
                 $direct = $r->input($name);
-                if (!empty($direct)) {
+                if (! empty($direct)) {
                     return $direct;
                 }
                 $match = $fields->first(fn ($field) => ($field['name'] ?? null) === $name);
+
                 return $match['value'] ?? null;
             };
 
@@ -185,16 +185,16 @@ class ProgramController extends Controller
                 ? $names->duplicates()->unique()->values()->all()
                 : [];
 
-            if (!$hasTitleField) {
+            if (! $hasTitleField) {
                 $validator->errors()->add('custom_fields', 'Please add a Title field.');
             }
 
-            if (!$hasTitleValue) {
+            if (! $hasTitleValue) {
                 $validator->errors()->add('title', 'Title is required. Please fill in the Title field.');
             }
 
-            if (!empty($duplicateNames)) {
-                $validator->errors()->add('custom_fields', 'Do not repeat the same field: ' . implode(', ', $duplicateNames) . '.');
+            if (! empty($duplicateNames)) {
+                $validator->errors()->add('custom_fields', 'Do not repeat the same field: '.implode(', ', $duplicateNames).'.');
             }
 
             $startDate = $fieldValue('application_start_date');
@@ -221,7 +221,8 @@ class ProgramController extends Controller
         $data['custom_fields'] = $this->normalizeCustomFields($r->input('custom_fields', []));
         $data = $this->mergeDerivedDefaults($data);
 
-        Program::create($data);
+        $program = Program::create($data);
+        PatientApplicationNotifications::programCreatedForPatients($program);
 
         return redirect()->route('admin.programs-events')->with('success', 'Program created.');
     }
@@ -235,15 +236,15 @@ class ProgramController extends Controller
     public function update(Request $r, Program $program)
     {
         $validator = Validator::make($r->all(), [
-            'title'       => ['nullable', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'event_date'  => ['nullable', 'date'],
-            'event_time'  => ['nullable', 'date_format:H:i'],
+            'event_date' => ['nullable', 'date'],
+            'event_time' => ['nullable', 'date_format:H:i'],
             'application_start_date' => ['nullable', 'date'],
             'application_end_date' => ['nullable', 'date'],
             'max_applications' => ['nullable', 'integer', 'min:1'],
-            'status'      => ['nullable', 'in:upcoming,ongoing,completed'],
-            'banner'      => ['nullable', 'image', 'max:' . (25 * 1024)],
+            'status' => ['nullable', 'in:upcoming,ongoing,completed'],
+            'banner' => ['nullable', 'image', 'max:'.(25 * 1024)],
             'custom_fields' => ['array'],
             'custom_fields.*.name' => ['required', 'string', 'max:60', Rule::in($this->allowedFieldNames())],
             'custom_fields.*.id' => ['nullable', 'string', 'max:60'],
@@ -266,10 +267,11 @@ class ProgramController extends Controller
 
             $fieldValue = function (string $name) use ($fields, $r) {
                 $direct = $r->input($name);
-                if (!empty($direct)) {
+                if (! empty($direct)) {
                     return $direct;
                 }
                 $match = $fields->first(fn ($field) => ($field['name'] ?? null) === $name);
+
                 return $match['value'] ?? null;
             };
 
@@ -279,16 +281,16 @@ class ProgramController extends Controller
                 ? $names->duplicates()->unique()->values()->all()
                 : [];
 
-            if (!$hasTitleField) {
+            if (! $hasTitleField) {
                 $validator->errors()->add('custom_fields', 'Please add a Title field.');
             }
 
-            if (!$hasTitleValue) {
+            if (! $hasTitleValue) {
                 $validator->errors()->add('title', 'Title is required. Please fill in the Title field.');
             }
 
-            if (!empty($duplicateNames)) {
-                $validator->errors()->add('custom_fields', 'Do not repeat the same field: ' . implode(', ', $duplicateNames) . '.');
+            if (! empty($duplicateNames)) {
+                $validator->errors()->add('custom_fields', 'Do not repeat the same field: '.implode(', ', $duplicateNames).'.');
             }
 
             $startDate = $fieldValue('application_start_date');
@@ -361,14 +363,14 @@ class ProgramController extends Controller
         return collect($rawFields)
             ->map(function ($field) use ($allowedTypes, $allowedNames) {
                 $name = $field['name'] ?? null;
-                if (!$name || !in_array($name, $allowedNames, true)) {
+                if (! $name || ! in_array($name, $allowedNames, true)) {
                     return null;
                 }
 
                 $label = trim($field['label'] ?? '');
 
                 $type = $field['type'] ?? 'short_text';
-                if (!in_array($type, $allowedTypes, true)) {
+                if (! in_array($type, $allowedTypes, true)) {
                     $type = 'short_text';
                 }
 
@@ -380,7 +382,7 @@ class ProgramController extends Controller
                 }
 
                 return [
-                    'id' => $field['id'] ?? 'cf_' . Str::random(8),
+                    'id' => $field['id'] ?? 'cf_'.Str::random(8),
                     'name' => $name,
                     'label' => $label,
                     'type' => $type,

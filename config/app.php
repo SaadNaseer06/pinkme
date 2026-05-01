@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Public directory in URLs
+    |--------------------------------------------------------------------------
+    |
+    | When the web server document root is the project root (not Laravel's
+    | public/ folder), set USE_PUBLIC_URL_PREFIX=true so storage and other
+    | public files resolve under /public/... (e.g. /public/storage/...).
+    |
+    */
+
+    'asset_public_prefix' => (bool) env('USE_PUBLIC_URL_PREFIX', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

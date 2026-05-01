@@ -105,6 +105,8 @@ class NotificationManager {
             title: modal.querySelector('[data-modal-title]'),
             message: modal.querySelector('[data-modal-message]'),
             time: modal.querySelector('[data-modal-time]'),
+            imageWrap: modal.querySelector('[data-modal-image-wrap]'),
+            image: modal.querySelector('[data-modal-image]'),
             dismiss: modal.querySelector('[data-modal-dismiss]'),
             view: modal.querySelector('[data-modal-view]'),
             close: modal.querySelector('[data-modal-close]'),
@@ -546,7 +548,7 @@ class NotificationManager {
             return;
         }
 
-        const { title, message, time, view } = this.modalElements;
+        const { title, message, time, imageWrap, image, view } = this.modalElements;
         if (title) {
             title.textContent = notification.title || 'Notification';
         }
@@ -555,6 +557,15 @@ class NotificationManager {
         }
         if (time) {
             time.textContent = notification.created_at_formatted ? `Received on ${notification.created_at_formatted}` : '';
+        }
+        if (imageWrap && image) {
+            if (notification.image_url) {
+                image.src = notification.image_url;
+                imageWrap.classList.remove('hidden');
+            } else {
+                image.src = '';
+                imageWrap.classList.add('hidden');
+            }
         }
         if (view) {
             view.href = notification.link_url || '#';

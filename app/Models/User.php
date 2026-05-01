@@ -158,7 +158,7 @@ class User extends Authenticatable
         $profile = $this->profile;
         
         if ($profile && $profile->avatar) {
-            return asset('storage/' . ltrim($profile->avatar, '/'));
+            return storage_url(ltrim($profile->avatar, '/'));
         }
 
         if ($this->provider_avatar) {

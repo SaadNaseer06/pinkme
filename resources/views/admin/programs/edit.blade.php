@@ -59,7 +59,7 @@
 
                     @include('admin.programs.partials.banner_upload', [
                         'inputId' => 'edit-program-banner',
-                        'bannerUrl' => $program->banner ? asset('storage/' . ltrim($program->banner, '/')) : null,
+                        'bannerUrl' => $program->banner ? storage_url(ltrim($program->banner, '/')) : null,
                     ])
                 </div>
 

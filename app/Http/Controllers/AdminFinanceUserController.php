@@ -15,7 +15,7 @@ class AdminFinanceUserController extends Controller
 {
     public function index()
     {
-        $financeUsers = User::whereHas('role', fn($q) => $q->where('name', 'finance'))
+        $financeUsers = User::whereHas('role', fn ($q) => $q->where('name', 'finance'))
             ->with('profile')
             ->orderByDesc('id')
             ->paginate(20);
@@ -43,7 +43,7 @@ class AdminFinanceUserController extends Controller
         ]);
 
         $roleId = Role::where('name', 'finance')->value('id');
-        if (!$roleId) {
+        if (! $roleId) {
             return redirect()->back()->withInput()->withErrors(['email' => 'Finance role not found. Please run: php artisan db:seed --class=RoleSeeder']);
         }
 
@@ -58,14 +58,14 @@ class AdminFinanceUserController extends Controller
             'user_id' => $user->id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
-            'full_name' => trim($request->first_name . ' ' . $request->last_name),
+            'full_name' => trim($request->first_name.' '.$request->last_name),
             'phone' => $request->phone,
             'username' => $request->username,
             'status' => (int) $request->status,
         ]);
 
         try {
-            Mail::to($user->email)->send(
+            Mail::to($user->email)->queue(
                 new StaffAccountCredentialsEmail(
                     $user,
                     $plainPassword,
@@ -86,6 +86,7 @@ class AdminFinanceUserController extends Controller
             abort(404);
         }
         $user = $finance_user->load('profile');
+
         return view('admin.finance_users.edit', compact('user'));
     }
 
@@ -114,7 +115,7 @@ class AdminFinanceUserController extends Controller
         $profile = $finance_user->profile ?: new UserProfile(['user_id' => $finance_user->id]);
         $profile->first_name = $request->first_name;
         $profile->last_name = $request->last_name;
-        $profile->full_name = trim($request->first_name . ' ' . $request->last_name);
+        $profile->full_name = trim($request->first_name.' '.$request->last_name);
         $profile->phone = $request->phone;
         $profile->username = $request->filled('username') ? trim($request->username) : null;
         $profile->status = (int) $request->status;

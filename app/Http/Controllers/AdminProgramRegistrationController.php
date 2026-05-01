@@ -207,7 +207,7 @@ class AdminProgramRegistrationController extends Controller
             );
             if ($caseManager?->email) {
                 try {
-                    Mail::to($caseManager->email)->send(new ProgramRegistrationAdminNotice(
+                    Mail::to($caseManager->email)->queue(new ProgramRegistrationAdminNotice(
                         'You were assigned a new application',
                         $registration,
                         'You have been assigned to review a financial assistance application.',
@@ -220,7 +220,7 @@ class AdminProgramRegistrationController extends Controller
             $patientEmail = $registration->user?->email ?? $registration->email;
             if ($patientEmail) {
                 try {
-                    Mail::to($patientEmail)->send(new ProgramRegistrationAdminNotice(
+                    Mail::to($patientEmail)->queue(new ProgramRegistrationAdminNotice(
                         'Your application is under review',
                         $registration,
                         'Your application has been assigned to a case manager. You will be notified when there is an update.',

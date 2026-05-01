@@ -22,7 +22,7 @@ class ProgramRegistrationNotifiers
 
         foreach ($emails as $email) {
             try {
-                Mail::to($email)->send(new ProgramRegistrationAdminNotice($subject, $registration, $bodyLine));
+                Mail::to($email)->queue(new ProgramRegistrationAdminNotice($subject, $registration, $bodyLine));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -43,15 +43,21 @@ class ProgramRegistrationNotifiers
             ->where('role_id', $roleId)
             ->pluck('id');
 
-        foreach ($userIds as $userId) {
+        $now = now();
+        $linkUrl = route('case_manager.program_registrations.show', $registration);
+        $rows = $userIds->map(fn ($userId): array => [
+            'user_id' => (int) $userId,
+            'title' => $title,
+            'message' => $message,
+            'priority' => UserNotification::PRIORITY_IMPORTANT,
+            'link_url' => $linkUrl,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ])->all();
+
+        foreach (array_chunk($rows, 300) as $chunk) {
             try {
-                UserNotification::create([
-                    'user_id' => $userId,
-                    'title' => $title,
-                    'message' => $message,
-                    'priority' => UserNotification::PRIORITY_IMPORTANT,
-                    'link_url' => route('case_manager.program_registrations.show', $registration),
-                ]);
+                UserNotification::query()->insert($chunk);
             } catch (\Throwable $e) {
                 report($e);
             }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
 
 class Message extends Model
 {
@@ -67,7 +68,7 @@ class Message extends Model
             'receiver_id' => $this->receiver_id,
             'content' => $this->content,
             'attachment' => $this->attachment_path ? [
-                'url' => asset('storage/' . ltrim($this->attachment_path, '/')),
+                'url' => storage_url($this->attachment_path),
                 'name' => $this->attachment_name,
                 'size' => $this->attachment_size,
                 'mime' => $this->attachment_mime,
@@ -86,6 +87,72 @@ class Message extends Model
                 'name' => optional($this->receiver?->profile)->full_name ?? $this->receiver?->email,
                 'avatar_url' => $this->receiver?->avatar_url,
             ],
+        ];
+    }
+
+    /**
+     * Build latest-message + unread-count metadata for a contact list with minimal queries.
+     *
+     * @param  array<int, int>  $contactIds
+     * @return array{
+     *   latest_by_contact: array<int, self>,
+     *   unread_by_contact: array<int, int>
+     * }
+     */
+    public static function contactSummariesForUser(int $authUserId, array $contactIds): array
+    {
+        $contactIds = collect($contactIds)
+            ->filter(fn ($id) => (int) $id > 0)
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        if ($contactIds->isEmpty()) {
+            return [
+                'latest_by_contact' => [],
+                'unread_by_contact' => [],
+            ];
+        }
+
+        $unreadByContact = static::query()
+            ->selectRaw('sender_id, COUNT(*) as unread_count')
+            ->where('receiver_id', $authUserId)
+            ->whereIn('sender_id', $contactIds)
+            ->where('is_read', false)
+            ->groupBy('sender_id')
+            ->pluck('unread_count', 'sender_id')
+            ->map(fn ($count) => (int) $count)
+            ->all();
+
+        /** @var Collection<int, self> $ordered */
+        $ordered = static::query()
+            ->where(function (Builder $query) use ($authUserId, $contactIds): void {
+                $query->where(function (Builder $q) use ($authUserId, $contactIds): void {
+                    $q->where('sender_id', $authUserId)
+                        ->whereIn('receiver_id', $contactIds);
+                })->orWhere(function (Builder $q) use ($authUserId, $contactIds): void {
+                    $q->where('receiver_id', $authUserId)
+                        ->whereIn('sender_id', $contactIds);
+                });
+            })
+            ->orderByDesc('sent_at')
+            ->orderByDesc('id')
+            ->get();
+
+        $latestByContact = [];
+        foreach ($ordered as $message) {
+            $contactId = (int) ($message->sender_id === $authUserId ? $message->receiver_id : $message->sender_id);
+            if (! isset($latestByContact[$contactId])) {
+                $latestByContact[$contactId] = $message;
+            }
+            if (count($latestByContact) >= $contactIds->count()) {
+                break;
+            }
+        }
+
+        return [
+            'latest_by_contact' => $latestByContact,
+            'unread_by_contact' => $unreadByContact,
         ];
     }
 }

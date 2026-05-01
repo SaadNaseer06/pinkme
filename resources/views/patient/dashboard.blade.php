@@ -1,4 +1,4 @@
-﻿@php
+@php
     $user = auth()->user();
     $profile = $user->profile;
     $fullName = $profile ? $profile->full_name : 'Unknown User';
@@ -27,7 +27,7 @@
                         years, {{ $patient->user->profile->location ?? 'N/A' }}</p>
                 </div>
 
-                <div class="grid grid-cols-3 gap-6 text-center">
+                <div class="grid grid-cols-2 gap-6 text-center">
                     <div>
                         <p class="text-sm text-[#9E2469] mb-1 app-text">Gender</p>
                         <p class="text-md font-medium app-text">{{ ucfirst($patient->user->profile->gender ?? 'N/A') }}</p>
@@ -37,10 +37,6 @@
                         <p class="font-medium app-text">
                             {{ $patient->user->profile->date_of_birth ? \Carbon\Carbon::parse($patient->user->profile->date_of_birth)->format('d/m/Y') : 'N/A' }}
                         </p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-[#9E2469] mb-1 app-text">Condition</p>
-                        <p class="font-medium app-text">{{ $patient->diagnosis ?? 'N/A' }}</p>
                     </div>
                 </div>
             </div>
@@ -57,12 +53,14 @@
                 $latestCode = $stats['latest_application_code'] ?? null;
                 $latestProgram = $stats['latest_program_title'] ?? null;
                 $latestId = $stats['latest_application_id'] ?? null;
-                $hasLatest = !empty($latestId);
+                $latestItemType = $stats['latest_item_type'] ?? 'application';
+                $hasLatest = (bool) ($stats['has_submission'] ?? !empty($latestId));
                 $detailUrl = $hasLatest
-                    ? route('patient.viewApplication', $latestId)
+                    ? ($latestItemType === 'registration'
+                        ? route('patient.programRegistrations.show', $latestId)
+                        : route('patient.viewApplication', $latestId))
                     : route('patient.createApplication');
                 $detailLabel = $hasLatest ? 'View Latest Application' : 'Start a New Application';
-                $reviewEta = $inReviewCount > 0 ? 'Typically 5-7 business days' : 'No applications awaiting review';
             @endphp
             <div class="bg-[#F3E8EF] rounded-lg p-6">
                 <h3 class="text-xl font-semibold mb-2 app-main">
@@ -93,10 +91,6 @@
                     <div class="flex justify-between">
                         <span class="text-md font-semibold text-[#213430] app-text">Program</span>
                         <span class="font-normal text-[#91848C] app-text">{{ $latestProgram ?? 'N/A' }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-md font-semibold text-[#213430] app-text">Estimated Time for Review</span>
-                        <span class="font-normal text-[#91848C] app-text">{{ $reviewEta }}</span>
                     </div>
                     <!--<div class="flex justify-between items-center gap-4">-->
                     <!--    <span class="text-md font-semibold text-[#213430] app-text">Your Application Details</span>-->

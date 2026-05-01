@@ -81,7 +81,7 @@
                                                     ? \Carbon\Carbon::parse($program->event_time)
                                                     : null);
                                         $image = $program->banner
-                                            ? asset('storage/' . ltrim($program->banner, '/'))
+                                            ? storage_url($program->banner)
                                             : $program->image_url ?? asset('public/images/program-3.png');
                                         $detail = [
                                             'type' => 'program',
@@ -241,7 +241,7 @@
                                             ),
                                         );
                                         $eventImage = $event->image
-                                            ? asset('storage/' . ltrim($event->image, '/'))
+                                            ? storage_url($event->image)
                                             : asset('public/images/program-details.png');
                                         $detail = [
                                             'type' => 'event',

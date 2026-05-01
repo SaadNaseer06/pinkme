@@ -50,7 +50,7 @@
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
                             @php
-                                $bannerUrl = $program->banner ? asset('storage/' . ltrim($program->banner, '/')) : asset('public/images/program-3.png');
+                                $bannerUrl = $program->banner ? storage_url(ltrim($program->banner, '/')) : asset('public/images/program-3.png');
                                 $fallbackImg = asset('public/images/program-3.png');
                             @endphp
                             <img src="{{ $bannerUrl }}" alt="{{ $program->title }}"
@@ -87,7 +87,7 @@
                         </div>
                         <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
                             @php
-                                $bannerUrl = $program->banner ? asset('storage/' . ltrim($program->banner, '/')) : asset('public/images/program-3.png');
+                                $bannerUrl = $program->banner ? storage_url(ltrim($program->banner, '/')) : asset('public/images/program-3.png');
                                 $fallbackImg = asset('public/images/program-3.png');
                             @endphp
                             <img src="{{ $bannerUrl }}" alt="{{ $program->title }}"

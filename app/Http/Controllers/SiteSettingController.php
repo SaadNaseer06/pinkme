@@ -86,7 +86,7 @@ class SiteSettingController extends Controller
 
         $path = $request->file('upload')->store('policy-images', 'public');
 
-        $url = asset('storage/' . ltrim($path, '/'));
+        $url = storage_url(ltrim($path, '/'));
 
         return response()->json([
             // Response formats supported by CKEditor 5 upload adapters

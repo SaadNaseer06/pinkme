@@ -202,7 +202,7 @@ class ProgramRegistration extends Model
 
         return [
             'path' => $path,
-            'url' => asset('storage/'.ltrim($path, '/')),
+            'url' => storage_url($path),
             'filename' => basename($path),
         ];
     }

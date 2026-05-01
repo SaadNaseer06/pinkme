@@ -1404,15 +1404,13 @@ class AdminController extends Controller
             ->map->toFrontendPayload()
             ->values();
 
-        $contactsPayload = $financeUsers->map(function (User $contact) use ($user) {
-            $latestMessage = Message::betweenUsers($user->id, $contact->id)
-                ->latest('sent_at')
-                ->first();
+        $contactSummaries = Message::contactSummariesForUser($user->id, $financeUsers->pluck('id')->all());
+        $latestByContact = $contactSummaries['latest_by_contact'];
+        $unreadByContact = $contactSummaries['unread_by_contact'];
 
-            $unreadCount = Message::betweenUsers($user->id, $contact->id)
-                ->where('receiver_id', $user->id)
-                ->where('is_read', false)
-                ->count();
+        $contactsPayload = $financeUsers->map(function (User $contact) use ($latestByContact, $unreadByContact) {
+            $latestMessage = $latestByContact[$contact->id] ?? null;
+            $unreadCount = $unreadByContact[$contact->id] ?? 0;
 
             return [
                 'id' => $contact->id,

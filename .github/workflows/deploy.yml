@@ -1,3 +1,11 @@
+# Deploys on push to main. Configure GitHub → Settings → Secrets and variables → Actions:
+#   CPANEL_HOST          SSH hostname (server that serves the site, e.g. same box as portal.pink-me.org)
+#   CPANEL_SSH_PORT      Usually 22
+#   CPANEL_USERNAME      SSH user (often cPanel account user)
+#   CPANEL_SSH_KEY       Private key (PEM text or base64)
+#   DEPLOY_PATH          Absolute path to the repo on the server (e.g. /home/portalpinkme/public_html)
+#   DEPLOY_APP_URL       Production URL, no trailing slash: https://portal.pink-me.org
+#
 name: Deploy to cPanel
 
 on:
@@ -57,7 +65,7 @@ jobs:
             echo '=== Pulling latest code ===' && git fetch origin main && git reset --hard origin/main && \
             ([ -f .env ] || (cp .env.example .env && php artisan key:generate --force)) && \
             (grep -q 'APP_KEY=base64:' .env || php artisan key:generate --force) && \
-            ([ -z \"${{ secrets.DEPLOY_APP_URL }}\" ] || (sed -i 's|APP_URL=.*|APP_URL=${{ secrets.DEPLOY_APP_URL }}|' .env || true)) && \
+            ([ -z \"${{ secrets.DEPLOY_APP_URL }}\" ] || (sed -i 's|^APP_URL=.*|APP_URL=${{ secrets.DEPLOY_APP_URL }}|' .env && (grep -q '^ASSET_URL=' .env && sed -i 's|^ASSET_URL=.*|ASSET_URL=${{ secrets.DEPLOY_APP_URL }}|' .env || true))) && \
             echo '=== Installing dependencies ===' && \
             (command -v composer >/dev/null 2>&1 && composer install --no-dev --optimize-autoloader --no-interaction || \
             (curl -sS https://getcomposer.org/installer | php -d allow_url_fopen=On -- --install-dir=. --filename=composer.phar && php -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader --no-interaction)) && \
@@ -66,6 +74,7 @@ jobs:
             echo '=== Running migrations ===' && php artisan migrate --force && \
             echo '=== Rebuilding caches ===' && php artisan config:clear && php artisan cache:clear && \
             php artisan config:cache && php artisan route:cache && php artisan view:cache && \
+            echo '=== Restarting queue workers ===' && php artisan queue:restart || true && \
             echo '=== Deployment complete ==='"
 
           # Upload Vite build to server (after deploy so build matches deployed code)

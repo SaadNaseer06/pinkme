@@ -1,6 +1,9 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Redirect all requests to the public folder
+    # Document root is the project folder (not public/). Route requests into public/.
+    # Do NOT rewrite URLs that already start with /public/ — otherwise /public/storage/...
+    # becomes public/public/storage/... and files 404 (breaks USE_PUBLIC_URL_PREFIX URLs).
+    RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

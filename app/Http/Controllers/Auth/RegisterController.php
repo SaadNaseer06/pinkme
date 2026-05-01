@@ -65,7 +65,7 @@ class RegisterController extends Controller
         $role = Role::query()->find($validated['role_id']);
         if ($role && $role->name === 'patient' && filled($email)) {
             try {
-                Mail::to($email)->send(new PatientWelcomeEmail($user));
+                Mail::to($email)->queue(new PatientWelcomeEmail($user));
             } catch (\Throwable $e) {
                 report($e);
             }

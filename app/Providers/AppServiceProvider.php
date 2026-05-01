@@ -12,7 +12,10 @@ use App\Models\ProgramRegistration;
 use App\Models\RegistrationInvoice;
 use App\Observers\ProgramRegistrationObserver;
 use App\Observers\RegistrationInvoiceObserver;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
@@ -25,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        require_once base_path('bootstrap/helpers.php');
     }
 
     /**
@@ -35,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
     {
         ProgramRegistration::observe(ProgramRegistrationObserver::class);
         RegistrationInvoice::observe(RegistrationInvoiceObserver::class);
+        $this->registerSlowQueryLogging();
 
         // Force correct base URL when app is in subdirectory (e.g. /pinkme)
         $appUrl = config('app.url');
@@ -70,6 +74,28 @@ class AppServiceProvider extends ServiceProvider
                 return; // user is in chat, no email
             }
             Mail::to($receiver->email)->queue(new NewChatMessageEmail($message));
+        });
+    }
+
+    private function registerSlowQueryLogging(): void
+    {
+        if (! config('performance.log_enabled')) {
+            return;
+        }
+
+        $thresholdMs = (int) config('performance.slow_query_ms', 120);
+
+        DB::listen(function (QueryExecuted $query) use ($thresholdMs): void {
+            if ($query->time < $thresholdMs) {
+                return;
+            }
+
+            Log::warning('slow_query', [
+                'sql' => $query->sql,
+                'bindings' => $query->bindings,
+                'time_ms' => (float) $query->time,
+                'connection' => $query->connectionName,
+            ]);
         });
     }
 }

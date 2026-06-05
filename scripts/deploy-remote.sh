@@ -85,6 +85,12 @@ if [ -n "${APP_URL:-}" ]; then
   fi
 fi
 
+if grep -q '^USE_PUBLIC_URL_PREFIX=' .env 2>/dev/null; then
+  sed -i 's|^USE_PUBLIC_URL_PREFIX=.*|USE_PUBLIC_URL_PREFIX=true|' .env
+else
+  echo 'USE_PUBLIC_URL_PREFIX=true' >> .env
+fi
+
 echo "=== Installing Composer dependencies ==="
 # --no-scripts avoids `artisan package:discover` during install (needs proc_open on cPanel).
 run_composer install --no-dev --optimize-autoloader --no-interaction --no-scripts

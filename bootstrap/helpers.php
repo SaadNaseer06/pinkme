@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Storage;
 if (! function_exists('storage_url')) {
     /**
      * Absolute URL for a path on the public disk (storage/app/public).
-     * Honors USE_PUBLIC_URL_PREFIX when the web root is the project directory (not public/).
+     * On cPanel (project root docroot), set USE_PUBLIC_URL_PREFIX=true for /public/storage/... URLs.
      */
     function storage_url(?string $path): string
     {

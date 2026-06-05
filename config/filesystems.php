@@ -43,18 +43,17 @@ return [
             'root' => storage_path('app/public'),
             // Browser URL for files on this disk (must match how the web server exposes storage).
             // - Normal (docroot = public/): {APP_URL}/storage/... via public/storage symlink.
-            // - Project root in public_html + USE_PUBLIC_URL_PREFIX: use /storage/app/public/...
-            //   NOT /public/storage/... (that path often 404s on cPanel).
+            // - Project root in public_html + USE_PUBLIC_URL_PREFIX: {APP_URL}/public/storage/...
             // - Override: STORAGE_PUBLIC_USE_FULL_PATH=true forces /storage/app/public/...
-            // - Rare legacy: STORAGE_PUBLIC_LEGACY_SYMLINK_URL=true restores /public/storage/... when prefixed.
             'url' => (static function (): string {
                 $base = rtrim(env('APP_URL'), '/');
-                if (filter_var(env('STORAGE_PUBLIC_LEGACY_SYMLINK_URL', false), FILTER_VALIDATE_BOOLEAN)) {
-                    return $base.(config('app.asset_public_prefix') ? '/public' : '').'/storage';
-                }
-                if (filter_var(env('STORAGE_PUBLIC_USE_FULL_PATH', false), FILTER_VALIDATE_BOOLEAN)
-                    || config('app.asset_public_prefix')) {
+
+                if (filter_var(env('STORAGE_PUBLIC_USE_FULL_PATH', false), FILTER_VALIDATE_BOOLEAN)) {
                     return $base.'/storage/app/public';
+                }
+
+                if (config('app.asset_public_prefix')) {
+                    return $base.'/public/storage';
                 }
 
                 return $base.'/storage';

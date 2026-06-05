@@ -347,7 +347,14 @@
                                 @csrf
                                 <h4 class="font-semibold text-[#213430] app-main">Approve Application</h4>
                                 <p class="text-base text-[#6C5F67] app-text">Optional: add a short note for the applicant.</p>
-                                <textarea name="note" rows="3" class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]" placeholder="Optional note"></textarea>
+                                <textarea name="note" rows="3" class="w-full px-3 py-2 rounded-md border border-[#DCCFD8] bg-white text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]" placeholder="Optional note for applicant"></textarea>
+                                <div>
+                                    <label for="internal_note_for_finance" class="block text-sm font-semibold text-[#213430] app-main">Internal note for finance</label>
+                                    <p class="text-sm text-[#6C5F67] app-text mb-2">Staff only — not shown to the applicant.</p>
+                                    <textarea id="internal_note_for_finance" name="internal_note_for_finance" rows="3" maxlength="5000"
+                                        class="w-full px-3 py-2 rounded-md border border-[#E8D9A8] bg-[#FFFDF5] text-base focus:outline-none focus:ring-2 focus:ring-[#9E2469]"
+                                        placeholder="Context, billing details, or instructions for the finance team">{{ old('internal_note_for_finance') }}</textarea>
+                                </div>
                                 <button type="submit"
                                     class="w-full inline-flex justify-center items-center px-4 py-3 bg-[#20B354] text-white rounded-md text-base font-semibold hover:bg-[#1A9444] transition">
                                     Approve Request
@@ -378,6 +385,8 @@
                             </div>
                         @endif
                     </div>
+
+                    @include('partials.program_registration_internal_notes', ['registration' => $registration])
                 @endif
 
                 <div class="flex justify-between items-center pt-5 border-t border-[#DCCFD8]">

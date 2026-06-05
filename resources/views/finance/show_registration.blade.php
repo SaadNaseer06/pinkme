@@ -57,6 +57,8 @@
             </div>
         </div>
 
+        @include('partials.program_registration_internal_notes', ['registration' => $registration])
+
         @if ($pendingFinance && ! $hasInvoice)
             <div class="rounded-xl border border-[#E5D2DE] bg-white p-6 mb-6 shadow-sm">
                 <h3 class="text-lg font-semibold text-[#213430] mb-2">Upload proof of bill payments (optional, before recording bills paid)</h3>

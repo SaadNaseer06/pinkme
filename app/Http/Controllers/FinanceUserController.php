@@ -338,6 +338,7 @@ class FinanceUserController extends Controller
             'amount' => $amountRules,
             'payment_method' => ['required', 'string', 'in:Bank Transfer,Credit Card,Cheque,Check,Cash,Other'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'internal_note_for_admin' => ['nullable', 'string', 'max:5000'],
         ]);
 
         // Patient selection sets the maximum; finance may allocate a lower amount (not higher)
@@ -363,7 +364,16 @@ class FinanceUserController extends Controller
 
         $registration->refresh();
         if (strtolower((string) $registration->status) === ProgramRegistration::STATUS_PENDING_FINANCE) {
-            $registration->update(['status' => ProgramRegistration::STATUS_APPROVED]);
+            $registration->update([
+                'status' => ProgramRegistration::STATUS_APPROVED,
+                'internal_note_for_admin' => filled($data['internal_note_for_admin'] ?? null)
+                    ? trim((string) $data['internal_note_for_admin'])
+                    : $registration->internal_note_for_admin,
+            ]);
+        } elseif (filled($data['internal_note_for_admin'] ?? null)) {
+            $registration->update([
+                'internal_note_for_admin' => trim((string) $data['internal_note_for_admin']),
+            ]);
         }
 
         PatientApplicationNotifications::programRegistrationBudgetAllocated($registration, $invoice);

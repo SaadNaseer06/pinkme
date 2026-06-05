@@ -247,6 +247,7 @@ class CaseManagerController extends Controller
 
         $data = $request->validate([
             'note' => ['nullable', 'string', 'max:2000'],
+            'internal_note_for_finance' => ['nullable', 'string', 'max:5000'],
         ]);
 
         $registration->loadMissing(['program', 'user']);
@@ -254,6 +255,9 @@ class CaseManagerController extends Controller
         $registration->update([
             'status' => ProgramRegistration::STATUS_PENDING_FINANCE,
             'review_note' => $data['note'] ?? null,
+            'internal_note_for_finance' => filled($data['internal_note_for_finance'] ?? null)
+                ? trim((string) $data['internal_note_for_finance'])
+                : null,
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
             'finance_user_id' => null,

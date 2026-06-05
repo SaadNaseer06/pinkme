@@ -83,6 +83,8 @@ class ProgramRegistration extends Model
         'shipped_at',
         'shipped_by',
         'review_note',
+        'internal_note_for_finance',
+        'internal_note_for_admin',
         'assigned_case_manager_id',
         'assigned_at',
         'finance_user_id',

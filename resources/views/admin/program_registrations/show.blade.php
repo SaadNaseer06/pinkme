@@ -526,6 +526,8 @@
                     </div>
                 @endif
 
+                @include('partials.program_registration_internal_notes', ['registration' => $registration])
+
                 <div class="flex justify-between items-center pt-5 border-t border-[#DCCFD8]">
                     <a href="{{ route('admin.registrations.index', [
                         'program_type' => $isMtm ? \App\Support\ProgramType::MOMENTS_THAT_MATTER : ($registration->program?->program_type ?? 'all'),

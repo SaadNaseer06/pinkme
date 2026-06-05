@@ -62,11 +62,22 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-[#213430] mb-2">Notes (Optional)</label>
-                <textarea name="notes" rows="4"
+                <label class="block text-sm font-medium text-[#213430] mb-2">Invoice notes (Optional)</label>
+                <textarea name="notes" rows="3"
                     class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-[#4C4047] placeholder:text-[#B1A4AD] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-transparent transition resize-none"
-                    placeholder="Additional notes...">{{ old('notes') }}</textarea>
+                    placeholder="Notes stored on the invoice record">{{ old('notes') }}</textarea>
                 @error('notes')
+                    <p class="text-xs text-[#9E2469] mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-[#213430] mb-2">Internal note for admin</label>
+                <p class="text-xs text-[#6C5F67] mb-2">Staff only — shared with admins when you submit this payment record. Not visible to the applicant.</p>
+                <textarea name="internal_note_for_admin" rows="4" maxlength="5000"
+                    class="w-full rounded-xl border border-[#E8D9A8] bg-[#FFFDF5] px-4 py-3 text-[#4C4047] placeholder:text-[#B1A4AD] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-transparent transition resize-none"
+                    placeholder="Payment context, exceptions, or follow-up for the admin team">{{ old('internal_note_for_admin') }}</textarea>
+                @error('internal_note_for_admin')
                     <p class="text-xs text-[#9E2469] mt-1">{{ $message }}</p>
                 @enderror
             </div>

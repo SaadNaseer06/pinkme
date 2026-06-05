@@ -4,17 +4,56 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+detect_php() {
+  if [ -n "${PHP_BIN:-}" ] && command -v "${PHP_BIN}" >/dev/null 2>&1; then
+    echo "${PHP_BIN}"
+    return
+  fi
+  local candidate
+  for candidate in \
+    /usr/local/bin/ea-php83 \
+    /usr/local/bin/ea-php82 \
+    /opt/cpanel/ea-php83/root/usr/bin/php \
+    /opt/cpanel/ea-php82/root/usr/bin/php \
+    php; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      echo "$candidate"
+      return
+    fi
+  done
+  echo "php"
+}
+
+PHP="$(detect_php)"
+echo "Using PHP $("$PHP" -r 'echo PHP_VERSION;') ($PHP)"
+
+run_composer() {
+  if command -v composer >/dev/null 2>&1; then
+    composer "$@"
+    return
+  fi
+  if [ ! -f composer.phar ]; then
+    echo "Downloading composer.phar..."
+    curl -sS -o composer.phar https://getcomposer.org/download/latest-stable/composer.phar
+  fi
+  "$PHP" composer.phar "$@"
+}
+
+artisan() {
+  "$PHP" artisan "$@"
+}
+
 echo "=== PinkMe remote deploy ==="
 
 if [ ! -f .env ]; then
   echo "Creating .env from .env.example..."
   cp .env.example .env
-  php artisan key:generate --force
+  artisan key:generate --force
 fi
 
 if ! grep -q 'APP_KEY=base64:' .env 2>/dev/null; then
   echo "Generating APP_KEY..."
-  php artisan key:generate --force
+  artisan key:generate --force
 fi
 
 if [ -n "${APP_URL:-}" ]; then
@@ -26,28 +65,23 @@ if [ -n "${APP_URL:-}" ]; then
 fi
 
 echo "=== Installing Composer dependencies ==="
-if command -v composer >/dev/null 2>&1; then
-  composer install --no-dev --optimize-autoloader --no-interaction
-else
-  curl -sS https://getcomposer.org/installer | php -d allow_url_fopen=On -- --install-dir=. --filename=composer.phar
-  php -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader --no-interaction
-fi
+run_composer install --no-dev --optimize-autoloader --no-interaction
 
 echo "=== Setting permissions ==="
 chmod -R 775 storage bootstrap/cache
 
-php artisan storage:link 2>/dev/null || true
+artisan storage:link 2>/dev/null || true
 
 echo "=== Running migrations ==="
-php artisan migrate --force
+artisan migrate --force
 
 echo "=== Rebuilding caches ==="
-php artisan config:clear
-php artisan cache:clear
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+artisan config:clear
+artisan cache:clear
+artisan config:cache
+artisan route:cache
+artisan view:cache
 
-php artisan queue:restart 2>/dev/null || true
+artisan queue:restart 2>/dev/null || true
 
 echo "=== Remote deploy complete ==="

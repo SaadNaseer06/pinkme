@@ -33,30 +33,46 @@
                 </div>
 
                 <form id="cmProgramRegFiltersForm" method="GET" action="{{ route('case_manager.program_registrations.index') }}"
-                    class="flex flex-col md:flex-row md:items-center gap-3 mb-6">
-                    <div class="relative w-full md:w-48">
-                        <select name="status" id="programRegStatus"
-                            class="w-full appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#91848C] focus:outline-none">
-                            <option value="pending" {{ $selectedStatus === 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="pending_finance" {{ $selectedStatus === 'pending_finance' ? 'selected' : '' }}>With finance</option>
-                            <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
-                            <option value="rejected" {{ $selectedStatus === 'rejected' ? 'selected' : '' }}>Rejected</option>
-                            <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>All</option>
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
+                    class="flex flex-col gap-3 mb-6 w-full min-w-0">
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-stretch gap-3 w-full min-w-0">
+                        <div class="relative w-full sm:w-48 sm:min-w-[12rem] shrink-0">
+                            <select name="status" id="programRegStatus"
+                                class="w-full min-w-0 appearance-none rounded-md px-3 py-2 pr-10 text-sm text-[#213430] bg-white border border-[#91848C] focus:outline-none">
+                                <option value="pending" {{ $selectedStatus === 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="pending_finance" {{ $selectedStatus === 'pending_finance' ? 'selected' : '' }}>With finance</option>
+                                <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
+                                <option value="rejected" {{ $selectedStatus === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>All</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#91848C]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="relative flex-1 min-w-0 w-full sm:min-w-[200px]">
+                            <label for="programRegSearch" class="sr-only">Search applicants</label>
+                            <input type="search" name="search" id="programRegSearch" value="{{ request('search') }}"
+                                placeholder="Search by name, state, phone, or email"
+                                autocomplete="off"
+                                class="w-full min-w-0 rounded-md px-3 py-2 pl-10 text-sm text-[#213430] bg-white border border-[#91848C] placeholder:text-[#91848C] focus:outline-none focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469]" />
+                            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[#91848C]">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z" />
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+                            <button type="submit"
+                                class="w-full sm:w-auto px-4 py-2 bg-[#9E2469] text-white rounded-md text-sm font-medium hover:bg-[#B52D75] transition app-text">
+                                Apply
+                            </button>
+                            <a id="cmProgramRegReset" href="{{ route('case_manager.program_registrations.index') }}"
+                                class="w-full sm:w-auto text-center px-4 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md text-sm app-text hover:bg-[#F9EFF5] transition {{ $selectedStatus === 'pending' && ! request()->filled('search') ? 'hidden' : '' }}">
+                                Reset
+                            </a>
                         </div>
                     </div>
-                    <button type="submit"
-                        class="px-4 py-2 bg-[#9E2469] text-white rounded-md text-sm font-medium hover:bg-[#B52D75] transition app-text">
-                        Apply Filter
-                    </button>
-                    <a id="cmProgramRegReset" href="{{ route('case_manager.program_registrations.index') }}"
-                        class="px-4 py-2 border border-[#DCCFD8] text-[#91848C] rounded-md text-sm app-text hover:bg-[#F9EFF5] transition {{ $selectedStatus === 'pending' ? 'hidden' : '' }}">
-                        Reset
-                    </a>
                 </form>
 
                 <div id="cmProgramRegTableWrap" class="transition-opacity min-h-[120px]">
@@ -92,7 +108,9 @@
                     heading.textContent = labels[statusSelect.value] || 'Program Registration Requests';
                 }
                 if (resetLink) {
-                    resetLink.classList.toggle('hidden', statusSelect.value === 'pending');
+                    const searchInput = document.getElementById('programRegSearch');
+                    const hasSearch = searchInput && String(searchInput.value || '').trim() !== '';
+                    resetLink.classList.toggle('hidden', statusSelect.value === 'pending' && !hasSearch);
                 }
             }
 
@@ -138,6 +156,8 @@
                 resetLink.addEventListener('click', function (e) {
                     e.preventDefault();
                     statusSelect.value = 'pending';
+                    const searchInput = document.getElementById('programRegSearch');
+                    if (searchInput) searchInput.value = '';
                     loadProgramRegistrations(baseUrl);
                 });
             }

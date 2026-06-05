@@ -11,7 +11,7 @@
                     <i class="fas fa-clock text-white text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-[#213430] font-semibold">Pending Budget Allocation</h3>
+                    <h3 class="text-[#213430] font-semibold">Pending Patients Bills</h3>
                     <p class="text-md font-normal text-[#91848C] text-right">{{ $pendingRegistrations->total() }}</p>
                 </div>
             </div>
@@ -20,7 +20,7 @@
                     <i class="fas fa-check text-white text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-[#213430] font-semibold">Budget Allocated</h3>
+                    <h3 class="text-[#213430] font-semibold">Bills paid</h3>
                     <p class="text-md font-normal text-[#20B354] text-right">{{ $allocatedCount }}</p>
                 </div>
             </div>
@@ -28,7 +28,7 @@
 
         <div class="bg-[#F3E8EF] rounded-lg p-6">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-[#213430]">Patient Requests Awaiting Budget Allocation</h2>
+                <h2 class="text-xl font-semibold text-[#213430]">Pending Patients Bills</h2>
                 <a href="{{ route('finance.registrations') }}" class="text-[#9E2469] hover:underline text-sm">View All</a>
             </div>
 
@@ -60,7 +60,7 @@
                                     <a href="{{ route('finance.registrations.show', $reg) }}" class="text-[#9E2469] hover:underline text-sm">View</a>
                                     @if ($reg->finance_user_id === auth()->id())
                                         |
-                                        <a href="{{ route('finance.invoice.create', $reg) }}" class="text-[#9E2469] hover:underline text-sm">Allocate Budget</a>
+                                        <a href="{{ route('finance.invoice.create', $reg) }}" class="text-[#9E2469] hover:underline text-sm">Record bills paid</a>
                                     @endif
                                 </td>
                             </tr>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PINK "ME" - Authentication</title>
+    <title>{{ $brandName ?? config('app.brand_name', 'PINK "ME"®') }} - Authentication</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -111,8 +111,11 @@
             color: rgb(55 65 81 / var(--tw-text-opacity, 1));
         }
 
-        .form-input:focus+.floating-label,
-        .form-input:not(:placeholder-shown)+.floating-label {
+        /* Use ~ not +: whitespace/newlines between </input> and <label> insert a text node and break input + label */
+        .form-input:focus~.floating-label,
+        .form-input:not(:placeholder-shown)~.floating-label,
+        .form-input:-webkit-autofill~.floating-label,
+        .form-input:autofill~.floating-label {
             top: 0.25rem;
             font-size: 0.75rem;
             color: rgb(55 65 81 / var(--tw-text-opacity, 1));
@@ -411,6 +414,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center;
+            transform: scale(1.03);
         }
 
         .mobile-hero::after {
@@ -418,6 +423,15 @@
             position: absolute;
             inset: 0;
             background: linear-gradient(135deg, rgba(219, 105, 162, 0.85) 0%, rgba(254, 110, 182, 0.6) 100%);
+        }
+
+        .mobile-hero.is-login #mobile-login-bg {
+            object-position: right center;
+            transform: scale(1.07);
+        }
+
+        .mobile-hero.is-login::after {
+            background: linear-gradient(135deg, rgba(189, 84, 142, 0.88) 0%, rgba(219, 105, 162, 0.78) 100%);
         }
 
         .mobile-hero__copy {
@@ -488,16 +502,23 @@
         body {
             background: linear-gradient(135deg, #FAF5F8 0%, #F3E8EF 100%);
         }
+
+        /* Prevent horizontal scroll on narrow viewports */
+        html,
+        body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
     </style>
 </head>
 
 <body
-    class="font-sans bg-gradient-to-br from-pink-50 via-white to-purple-50 min-h-screen flex items-center justify-center p-4 mobile-container">
-    <div class="container mx-auto max-w-6xl px-2 sm:px-4">
-        <div class="glass-effect rounded-[32px] shadow-2xl overflow-hidden animate-fade-in">
-            <div class="flex flex-col md:flex-row min-h-[720px]">
-                <!-- Left Panel with Dynamic Background and Tabs -->
-                <div class="w-1/3 relative sidebar tab-form-img">
+    class="font-sans bg-gradient-to-br from-pink-50 via-white to-purple-50 min-h-screen flex items-center justify-center p-3 sm:p-4 mobile-container w-full max-w-[100vw] box-border">
+    <div class="container mx-auto w-full max-w-6xl px-2 sm:px-4 min-w-0">
+        <div class="glass-effect rounded-[32px] shadow-2xl overflow-hidden animate-fade-in max-w-full min-w-0">
+            <div class="flex flex-col md:flex-row md:min-h-[720px] min-w-0">
+                <!-- Left Panel with Dynamic Background and Tabs (desktop only — stacks on mobile via hero + toggle) -->
+                <div class="hidden md:flex w-full md:w-1/3 shrink-0 relative sidebar tab-form-img">
                     <!-- Background image -->
                     <img id="signup-bg" src="{{ asset('public/images/Patient Signup.png') }}" alt="Signup Background"
                         class="absolute inset-0 w-full h-full object-cover z-0" />
@@ -510,12 +531,12 @@
                     </div>
                 </div>
 
-                <!-- Right Panel - Forms -->
-                <div class="w-full md:w-2/3 p-4 md:p-12 flex items-center justify-center tab-form bg-white/40 md:bg-transparent"
+                <!-- Right Panel - Forms (column stack on mobile — avoids row overflow) -->
+                <div class="w-full md:w-2/3 min-w-0 p-4 md:p-12 flex flex-col items-stretch justify-start md:justify-center tab-form bg-white/40 md:bg-transparent gap-0"
                     id="form-container">
                     <!-- Mobile hero -->
-                    <div class="w-full md:hidden">
-                        <div class="mobile-hero mb-6">
+                    <div class="w-full max-w-full md:hidden shrink-0">
+                        <div id="mobile-hero-card" class="mobile-hero mb-6">
                             <img id="mobile-signup-bg" src="{{ asset('public/images/Patient Signup.png') }}"
                                 alt="Sign up illustration">
                             <img id="mobile-login-bg" src="{{ asset('public/images/Patient Login.png') }}"
@@ -538,8 +559,8 @@
                     </div>
 
                     <!-- Mobile toggle buttons -->
-                    <div class="w-full mb-8 md:hidden">
-                        <div class="mobile-toggle">
+                    <div class="w-full max-w-full mb-6 md:hidden shrink-0">
+                        <div class="mobile-toggle max-w-full">
                             <button id="mobile-signup" type="button" class="mobile-tab-btn"
                                 onclick="toggleForm('signup')">Sign Up</button>
                             <button id="mobile-login" type="button" class="mobile-tab-btn"
@@ -548,13 +569,13 @@
                     </div>
 
                     <!-- Signup Form -->
-                    <div id="signup-form" class="form-wrapper auth-shell animate-fade-in mobile-form-section">
+                    <div id="signup-form" class="form-wrapper auth-shell animate-fade-in mobile-form-section w-full max-w-full min-w-0 mx-auto shrink-0">
                         <div class="text-center mb-8">
                             <div class="flex justify-center mb-4">
                                 <img src="{{ asset('public/images/logo.png') }}" alt="Logo" class="h-16 tab-logo" />
                             </div>
                             <h2 class="text-3xl font-bold text-gray-800 mb-2 mobile-h1">
-                                Welcome to PINK "ME"
+                                Welcome To The {{ $brandName ?? config('app.brand_name', 'PINK "ME"®') }} Portal
                             </h2>
                             <p class="text-gray-600 text-lg mobile-h2">Create your account to get started</p>
                         </div>
@@ -939,18 +960,26 @@
                     </div>
 
                     <!-- Login Form -->
-                    <div id="login-form" class="hidden form-wrapper auth-shell animate-fade-in mobile-form-section">
+                    <div id="login-form" class="hidden form-wrapper auth-shell animate-fade-in mobile-form-section w-full max-w-full min-w-0 mx-auto shrink-0">
                         <div class="text-center mb-8">
                             <div class="flex justify-center mb-4">
                                 <img src="{{ asset('public/images/logo.png') }}" alt="Logo"
                                     class="h-16 tab-logo" />
                             </div>
                             <h2 class="text-3xl font-bold text-gray-800 mb-2 mobile-h1">
-                                Welcome Back
+                                Welcome Back To The {{ $brandName ?? config('app.brand_name', 'PINK "ME"®') }} Portal
                             </h2>
                             <p class="text-gray-600 text-lg mobile-h2">
                                 Sign in to your account
                             </p>
+                        </div>
+
+                        <div class="flex justify-center mb-6 -mt-2 px-1">
+                            <a href="{{ route('login.staff') }}"
+                                class="inline-flex flex-wrap items-center justify-center gap-2 text-center text-sm sm:text-base font-medium text-[#DB69A2] hover:text-[#C63A85] transition-colors max-w-full">
+                                <i class="fas fa-briefcase shrink-0" aria-hidden="true"></i>
+                                <span class="min-w-0">Staff, admin, or case manager? Sign in here</span>
+                            </a>
                         </div>
 
                         <form method="POST" action="{{ route('login') }}" class="space-y-6 mobile-space-y">
@@ -1062,6 +1091,7 @@
             const mobileHeroTitle = document.getElementById("mobile-hero-title");
             const mobileHeroSubtitle = document.getElementById("mobile-hero-subtitle");
             const mobileHeroBadge = document.getElementById("mobile-hero-badge");
+            const mobileHeroCard = document.getElementById("mobile-hero-card");
 
             const heroCopy = {
                 signup: {
@@ -1087,6 +1117,7 @@
                 mobileLogin?.classList.remove("active");
                 mobileSignupBg?.classList.remove("hidden");
                 mobileLoginBg?.classList.add("hidden");
+                mobileHeroCard?.classList.remove("is-login");
             } else {
                 signupForm.classList.add("hidden");
                 loginForm.classList.remove("hidden");
@@ -1098,6 +1129,7 @@
                 mobileSignup?.classList.remove("active");
                 mobileLoginBg?.classList.remove("hidden");
                 mobileSignupBg?.classList.add("hidden");
+                mobileHeroCard?.classList.add("is-login");
             }
 
             if (mobileHeroTitle && mobileHeroSubtitle && mobileHeroBadge) {

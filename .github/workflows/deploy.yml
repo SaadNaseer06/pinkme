@@ -1,25 +1,37 @@
-# Deploys on push to main. Configure GitHub → Settings → Secrets and variables → Actions:
-#   CPANEL_HOST          SSH hostname (server that serves the site, e.g. same box as portal.pink-me.org)
-#   CPANEL_SSH_PORT      Usually 22
-#   CPANEL_USERNAME      SSH user (often cPanel account user)
-#   CPANEL_SSH_KEY       **Private** key only (-----BEGIN ... PRIVATE KEY-----). Not the ssh-rsa line.
-#   DEPLOY_PATH          Absolute path to the repo on the server (e.g. /home/portalpinkme/public_html)
-#   DEPLOY_APP_URL       Production URL, no trailing slash: https://portal.pink-me.org
-#
+# Deploys to cPanel on push to main (after CI passes).
+# Setup: see CI_CD.md and configure GitHub repository secrets.
 name: Deploy to cPanel
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cpanel-production
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -27,74 +39,95 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies and build assets
+      - name: Build frontend assets
         run: |
           npm ci
           npm run build
 
-      - name: Deploy via SSH
+      - name: Upload Vite build
+        uses: actions/upload-artifact@v4
+        with:
+          name: vite-build
+          path: public/build
+          retention-days: 1
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Vite build
+        uses: actions/download-artifact@v4
+        with:
+          name: vite-build
+          path: public/build
+
+      - name: Configure SSH key
         env:
           SSH_KEY: ${{ secrets.CPANEL_SSH_KEY }}
-          APP_URL: ${{ secrets.DEPLOY_APP_URL }}
         run: |
           set -e
           mkdir -p ~/.ssh
 
           FIRST_LINE="$(echo "$SSH_KEY" | tr -d '\r' | sed '/./!d;q')"
           if echo "$FIRST_LINE" | grep -qE '^(ssh-rsa|ssh-ed25519|ecdsa-sha2-)'; then
-            echo "ERROR: CPANEL_SSH_KEY looks like a PUBLIC key (starts with ssh-rsa / ssh-ed25519)."
-            echo "GitHub needs the PRIVATE key: lines starting with -----BEGIN ... PRIVATE KEY-----"
-            echo "Keep the matching public key on the server in ~/.ssh/authorized_keys only."
+            echo "ERROR: CPANEL_SSH_KEY looks like a PUBLIC key."
+            echo "Use the private key (-----BEGIN ... PRIVATE KEY-----)."
             exit 1
           fi
 
-          # Support both raw PEM and base64-encoded private key
           if echo "$SSH_KEY" | grep -q '^-----BEGIN'; then
             printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           else
             echo "$SSH_KEY" | tr -d '\n\r' | base64 -d > ~/.ssh/deploy_key 2>/dev/null || {
-              echo "ERROR: Could not decode base64. Use either:"
-              echo "  1) Paste the full private key (-----BEGIN OPENSSH PRIVATE KEY----- ... -----END-----)"
-              echo "  2) Or base64 of that file:  base64 -w 0 < id_ed25519"
+              echo "ERROR: Could not decode CPANEL_SSH_KEY as base64 or PEM."
               exit 1
             }
           fi
           chmod 600 ~/.ssh/deploy_key
 
-          # Validate private key (passphrase-protected keys fail here — non-interactive CI cannot unlock them)
-          if ! ssh-keygen -y -f ~/.ssh/deploy_key >/tmp/deploy_key_pub_check.txt 2>/tmp/deploy_key_err.txt; then
-            echo "ERROR: Private key is invalid, not OpenSSH format, or passphrase-protected."
-            if grep -qiE 'passphrase|decrypt private key' /tmp/deploy_key_err.txt 2>/dev/null; then
-              echo "This key is encrypted. GitHub Actions cannot enter a passphrase."
-              echo "Generate a deploy-only key with an empty passphrase, then replace CPANEL_SSH_KEY:"
-              echo "  ssh-keygen -t ed25519 -N \"\" -f github_deploy -C github-actions"
-              echo "Paste github_deploy (private) into the secret; add github_deploy.pub to the server's authorized_keys."
-            fi
-            echo "---- ssh-keygen said:"
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>/tmp/deploy_key_err.txt; then
+            echo "ERROR: Invalid or passphrase-protected private key."
             cat /tmp/deploy_key_err.txt || true
-            echo "---- First line of secret (redacted): $(head -c 40 ~/.ssh/deploy_key | tr -d '\n')..."
+            echo "Generate a deploy key with no passphrase: ssh-keygen -t ed25519 -N \"\" -f github_deploy"
             exit 1
           fi
 
-          # Run deployment commands on remote server
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key \
-            -p ${{ secrets.CPANEL_SSH_PORT }} \
-            ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_HOST }} "set -e && cd ${{ secrets.DEPLOY_PATH }} && \
-            echo '=== Pulling latest code ===' && git fetch origin main && git reset --hard origin/main && \
-            ([ -f .env ] || (cp .env.example .env && php artisan key:generate --force)) && \
-            (grep -q 'APP_KEY=base64:' .env || php artisan key:generate --force) && \
-            ([ -z \"${{ secrets.DEPLOY_APP_URL }}\" ] || (sed -i 's|^APP_URL=.*|APP_URL=${{ secrets.DEPLOY_APP_URL }}|' .env && (grep -q '^ASSET_URL=' .env && sed -i 's|^ASSET_URL=.*|ASSET_URL=${{ secrets.DEPLOY_APP_URL }}|' .env || true))) && \
-            echo '=== Installing dependencies ===' && \
-            (command -v composer >/dev/null 2>&1 && composer install --no-dev --optimize-autoloader --no-interaction || \
-            (curl -sS https://getcomposer.org/installer | php -d allow_url_fopen=On -- --install-dir=. --filename=composer.phar && php -d allow_url_fopen=On composer.phar install --no-dev --optimize-autoloader --no-interaction)) && \
-            echo '=== Setting permissions ===' && chmod -R 775 storage bootstrap/cache && \
-            php artisan storage:link && \
-            echo '=== Running migrations ===' && php artisan migrate --force && \
-            echo '=== Rebuilding caches ===' && php artisan config:clear && php artisan cache:clear && \
-            php artisan config:cache && php artisan route:cache && php artisan view:cache && \
-            echo '=== Restarting queue workers ===' && php artisan queue:restart || true && \
-            echo '=== Deployment complete ==='"
+      - name: Deploy application on server
+        env:
+          APP_URL: ${{ secrets.DEPLOY_APP_URL }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
+          CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
+          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+        run: |
+          set -e
+          SSH_OPTS="-o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -p ${CPANEL_SSH_PORT:-22}"
 
-          # Upload Vite build to server (after deploy so build matches deployed code)
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -P ${{ secrets.CPANEL_SSH_PORT }} \
-            -r public/build ${{ secrets.CPANEL_USERNAME }}@${{ secrets.CPANEL_HOST }}:${{ secrets.DEPLOY_PATH }}/public/
+          ssh ${SSH_OPTS} "${CPANEL_USERNAME}@${CPANEL_HOST}" bash -s <<REMOTE
+          set -euo pipefail
+          cd "${DEPLOY_PATH}"
+          echo "=== Pulling latest code ==="
+          git fetch origin main
+          git reset --hard origin/main
+          chmod +x scripts/deploy-remote.sh
+          export APP_URL="${APP_URL}"
+          bash scripts/deploy-remote.sh
+          REMOTE
+
+      - name: Upload Vite build to server
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
+          CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
+          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+        run: |
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -P "${CPANEL_SSH_PORT:-22}" \
+            -r public/build "${CPANEL_USERNAME}@${CPANEL_HOST}:${DEPLOY_PATH}/public/"
+
+      - name: Deployment summary
+        env:
+          APP_URL: ${{ secrets.DEPLOY_APP_URL }}
+        run: |
+          echo "Deployed to ${APP_URL:-cPanel server}"
+          echo "Commit: ${GITHUB_SHA}"

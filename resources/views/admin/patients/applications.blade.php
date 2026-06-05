@@ -62,7 +62,7 @@
                                                 {{ $application->reviewer?->profile?->full_name ?? 'Unassigned' }}
                                             </td>
                                             <td class="p-3">
-                                                {{ optional($application->submission_date)->format('M d, Y h:i A') ?? 'N/A' }}
+                                                {{ $application->submission_date ? $application->submission_date->timezone(config('app.timezone'))->format('M d, Y h:i A') : 'N/A' }}
                                             </td>
                                             <td class="p-3">
                                                 <a href="{{ route('admin.viewApplication', $application->id) }}"

@@ -10,9 +10,11 @@ use App\Models\User;
 use App\Models\UserNotification;
 use App\Support\PatientApplicationNotifications;
 use App\Support\ProgramRegistrationNotifiers;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
+use App\Support\TransactionalMail;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminProgramRegistrationController extends Controller
@@ -28,6 +30,7 @@ class AdminProgramRegistrationController extends Controller
             ProgramRegistration::STATUS_PENDING,
             ProgramRegistration::STATUS_PENDING_FINANCE,
             ProgramRegistration::STATUS_APPROVED,
+            ProgramRegistration::STATUS_SHIPPED,
             ProgramRegistration::STATUS_REJECTED,
         ];
 
@@ -51,6 +54,7 @@ class AdminProgramRegistrationController extends Controller
             'pending' => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING)->count(),
             'pending_finance' => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING_FINANCE)->count(),
             'approved' => ProgramRegistration::where('status', ProgramRegistration::STATUS_APPROVED)->count(),
+            'shipped' => ProgramRegistration::where('status', ProgramRegistration::STATUS_SHIPPED)->count(),
             'rejected' => ProgramRegistration::where('status', ProgramRegistration::STATUS_REJECTED)->count(),
             'all' => ProgramRegistration::count(),
         ];
@@ -67,7 +71,7 @@ class AdminProgramRegistrationController extends Controller
      */
     public function show(ProgramRegistration $registration)
     {
-        $registration->load(['program', 'user', 'reviewer', 'assignedCaseManager.profile']);
+        $registration->load(['program', 'user', 'reviewer', 'shipper.profile', 'assignedCaseManager.profile']);
 
         $caseManagerRoleId = Role::where('name', 'casemanager')->value('id');
         $caseManagers = $caseManagerRoleId
@@ -85,6 +89,13 @@ class AdminProgramRegistrationController extends Controller
      */
     public function approve(ProgramRegistration $registration, Request $request)
     {
+        $registration->loadMissing('program');
+        if ($registration->isMomentsThatMatterApplication()) {
+            return redirect()
+                ->route('admin.program_registrations.show', $registration)
+                ->with('error', 'Moments That Matter applications are fulfilled by marking them as shipped only.');
+        }
+
         if ($registration->status !== ProgramRegistration::STATUS_PENDING) {
             return redirect()
                 ->route('admin.program_registrations.show', $registration)
@@ -104,17 +115,22 @@ class AdminProgramRegistrationController extends Controller
             'reviewed_at' => now(),
         ]);
 
+        $isMtm = $registration->isMomentsThatMatterApplication();
+        $programTitle = $registration->program?->title ?? 'a program';
+
         PatientApplicationNotifications::notifyProgramRegistrationPatient(
             $registration,
-            'Program registration approved',
-            'Your registration for "'.($registration->program?->title ?? 'a program').'" has been approved.',
+            $isMtm ? 'Care package application approved' : 'Program registration approved',
+            $isMtm
+                ? 'Your Moments That Matter application for "'.$programTitle.'" has been approved. We will prepare and ship your care package soon.'
+                : 'Your registration for "'.$programTitle.'" has been approved.',
             UserNotification::PRIORITY_IMPORTANT
         );
 
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {
             try {
-                Mail::to($recipientEmail)->queue(new ProgramRegistrationStatus($registration, 'Approved', $data['note'] ?? null));
+                TransactionalMail::send($recipientEmail, new ProgramRegistrationStatus($registration, 'Approved', $data['note'] ?? null));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -130,6 +146,13 @@ class AdminProgramRegistrationController extends Controller
      */
     public function reject(ProgramRegistration $registration, Request $request)
     {
+        $registration->loadMissing('program');
+        if ($registration->isMomentsThatMatterApplication()) {
+            return redirect()
+                ->route('admin.program_registrations.show', $registration)
+                ->with('error', 'Moments That Matter applications cannot be rejected from this workflow. Mark as shipped when the care package is sent.');
+        }
+
         if ($registration->status !== ProgramRegistration::STATUS_PENDING) {
             return redirect()
                 ->route('admin.program_registrations.show', $registration)
@@ -159,7 +182,7 @@ class AdminProgramRegistrationController extends Controller
         $recipientEmail = $registration->user?->email ?? $registration->email;
         if ($recipientEmail) {
             try {
-                Mail::to($recipientEmail)->queue(new ProgramRegistrationStatus($registration, 'Rejected', $data['note']));
+                TransactionalMail::send($recipientEmail, new ProgramRegistrationStatus($registration, 'Rejected', $data['note']));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -171,10 +194,87 @@ class AdminProgramRegistrationController extends Controller
     }
 
     /**
+     * Moments That Matter: mark application as shipped (admin only).
+     */
+    public function markShipped(ProgramRegistration $registration, Request $request): RedirectResponse
+    {
+        $registration->loadMissing('program');
+
+        if (! $registration->isMomentsThatMatterApplication()) {
+            return redirect()
+                ->route('admin.program_registrations.show', $registration)
+                ->with('error', 'Only Moments That Matter applications can be marked as shipped.');
+        }
+
+        $shippableStatuses = [
+            ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_APPROVED,
+        ];
+        if (! in_array($registration->status, $shippableStatuses, true)) {
+            return redirect()
+                ->route('admin.program_registrations.show', $registration)
+                ->with('error', 'This application has already been marked as shipped.');
+        }
+
+        $data = $request->validate([
+            'note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $registration->loadMissing(['program', 'user']);
+
+        $registration->update([
+            'status' => ProgramRegistration::STATUS_SHIPPED,
+            'shipped_at' => now(),
+            'shipped_by' => Auth::id(),
+            'review_note' => $data['note'] ?? $registration->review_note,
+            'reviewed_by' => $registration->reviewed_by ?? Auth::id(),
+            'reviewed_at' => $registration->reviewed_at ?? now(),
+        ]);
+
+        $programTitle = $registration->program?->title ?? 'Moments That Matter';
+        $body = 'Your care package for "'.$programTitle.'" has been shipped.';
+        if (! empty($data['note'])) {
+            $body .= ' Note: '.$data['note'];
+        }
+
+        PatientApplicationNotifications::notifyProgramRegistrationPatient(
+            $registration,
+            'Care package shipped',
+            $body,
+            UserNotification::PRIORITY_IMPORTANT
+        );
+
+        $recipientEmail = $registration->user?->email ?? $registration->email;
+        if ($recipientEmail) {
+            try {
+                TransactionalMail::send($recipientEmail, new ProgramRegistrationStatus($registration, 'Shipped', $data['note'] ?? null));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        return redirect()
+            ->route('admin.program_registrations.show', $registration)
+            ->with('success', 'The application has been marked as shipped.');
+    }
+
+    /**
      * Assign a case manager to a registration.
      */
-    public function assignCaseManager(ProgramRegistration $registration, Request $request)
+    public function assignCaseManager(ProgramRegistration $registration, Request $request): JsonResponse|RedirectResponse
     {
+        if ($request->isMethod('GET')) {
+            return redirect()->route('admin.program_registrations.show', $registration);
+        }
+
+        $registration->loadMissing('program');
+        if ($registration->isMomentsThatMatterApplication()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Moments That Matter applications are reviewed by admin only and cannot be assigned to a case manager.',
+            ], 400);
+        }
+
         $data = $request->validate([
             'case_manager_id' => ['nullable', 'integer', 'exists:users,id'],
         ]);
@@ -186,9 +286,10 @@ class AdminProgramRegistrationController extends Controller
                 : false;
 
             if (! $isCaseManager) {
-                return redirect()
-                    ->route('admin.program_registrations.show', $registration)
-                    ->with('error', 'Selected user is not a case manager.');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Selected user is not a case manager.',
+                ], 400);
             }
         }
 
@@ -197,44 +298,55 @@ class AdminProgramRegistrationController extends Controller
             'assigned_at' => ! empty($data['case_manager_id']) ? now() : null,
         ]);
 
-        if (! empty($data['case_manager_id'])) {
-            $registration->loadMissing(['program']);
-            $caseManager = User::with('profile')->find($data['case_manager_id']);
-            ProgramRegistrationNotifiers::notifyAdmins(
-                'Application assigned to case manager',
-                'An application has been assigned to a case manager for review.',
-                $registration
-            );
-            if ($caseManager?->email) {
-                try {
-                    Mail::to($caseManager->email)->queue(new ProgramRegistrationAdminNotice(
+        $caseManagerId = $data['case_manager_id'] ?? null;
+        if ($caseManagerId) {
+            $registrationId = $registration->id;
+            dispatch(function () use ($registrationId, $caseManagerId): void {
+                $registration = ProgramRegistration::query()->with(['program', 'user'])->find($registrationId);
+                if (! $registration) {
+                    return;
+                }
+
+                $caseManager = User::with('profile')->find($caseManagerId);
+                ProgramRegistrationNotifiers::notifyAdmins(
+                    'Application assigned to case manager',
+                    'An application has been assigned to a case manager for review.',
+                    $registration
+                );
+                if ($caseManager?->email) {
+                    TransactionalMail::send($caseManager->email, new ProgramRegistrationAdminNotice(
                         'You were assigned a new application',
                         $registration,
                         'You have been assigned to review a financial assistance application.',
                         route('case_manager.program_registrations.show', $registration)
                     ));
-                } catch (\Throwable $e) {
-                    report($e);
                 }
-            }
-            $patientEmail = $registration->user?->email ?? $registration->email;
-            if ($patientEmail) {
-                try {
-                    Mail::to($patientEmail)->queue(new ProgramRegistrationAdminNotice(
+                $patientEmail = $registration->user?->email ?? $registration->email;
+                if ($patientEmail) {
+                    TransactionalMail::send($patientEmail, new ProgramRegistrationAdminNotice(
                         'Your application is under review',
                         $registration,
                         'Your application has been assigned to a case manager. You will be notified when there is an update.',
                         route('patient.programRegistrations.show', $registration)
                     ));
-                } catch (\Throwable $e) {
-                    report($e);
                 }
-            }
+            })->afterResponse();
         }
 
-        return redirect()
-            ->route('admin.program_registrations.show', $registration)
-            ->with('success', 'Case manager assignment updated.');
+        $registration->loadMissing(['assignedCaseManager.profile']);
+        $assignedName = $registration->assignedCaseManager?->profile?->full_name
+            ?? $registration->assignedCaseManager?->email
+            ?? 'Unassigned';
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Case manager assignment updated.',
+            'data' => [
+                'registration_id' => $registration->id,
+                'assigned_case_manager_id' => $registration->assigned_case_manager_id,
+                'assigned_name' => $assignedName,
+            ],
+        ]);
     }
 
     public function exportCsv(Request $request): StreamedResponse
@@ -245,6 +357,7 @@ class AdminProgramRegistrationController extends Controller
             ProgramRegistration::STATUS_PENDING,
             ProgramRegistration::STATUS_PENDING_FINANCE,
             ProgramRegistration::STATUS_APPROVED,
+            ProgramRegistration::STATUS_SHIPPED,
             ProgramRegistration::STATUS_REJECTED,
         ];
         if (! in_array($selectedStatus, $validStatuses, true)) {

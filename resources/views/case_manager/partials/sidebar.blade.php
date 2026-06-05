@@ -7,7 +7,7 @@
 
     <!-- Logo -->
     <div class="mobile-logo">
-        <img src="{{ asset('public/images/pink_me_logo.png') }}" alt="PINK ME Logo">
+        <img src="{{ asset('public/images/pink_me_logo.png') }}" alt="{{ $brandName }}">
     </div>
 
     <!-- Menu -->

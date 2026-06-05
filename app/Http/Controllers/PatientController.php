@@ -13,6 +13,8 @@ use App\Models\SponsorshipProgram;
 use App\Models\User;
 use App\Models\Webinar;
 use App\Models\WebinarRegistration;
+use App\Support\ProgramApplicationCapacity;
+use App\Support\TransactionalMail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -98,6 +100,7 @@ class PatientController extends Controller
         $latestProgramTitle = $latestIsApplication
             ? optional(optional($latestApplication)->program)->title
             : optional(optional($latestRegistration)->program)->title;
+        $latestBreastCancerStage = $latestRegistration?->breast_cancer_stage;
 
         $latestItemType = $latestIsApplication ? 'application' : 'registration';
         $latestItemId = $latestIsApplication
@@ -117,6 +120,7 @@ class PatientController extends Controller
             'latest_application_id' => $latestItemId,
             'latest_application_code' => $latestCode,
             'latest_program_title' => $latestProgramTitle,
+            'latest_breast_cancer_stage' => $latestBreastCancerStage,
             'latest_item_type' => $latestItemType,
             'has_submission' => $hasSubmission,
         ];
@@ -128,35 +132,60 @@ class PatientController extends Controller
             ->limit(5)
             ->get();
 
+        $ongoingPrograms = Program::effectiveOngoing()->get();
+        $financialAssistanceClosed = ProgramApplicationCapacity::financialAssistanceClosed($ongoingPrograms);
+
         return view('patient.dashboard', compact(
             'applications',
             'stats',
             'availablePrograms',
-            'patient'
+            'patient',
+            'financialAssistanceClosed'
         ));
     }
 
-    public function myApplications()
+    public function myApplications(Request $request)
     {
         $user = Auth::user();
 
         $baseQuery = ProgramRegistration::where('user_id', $user->id)->with('program');
 
-        $registrations = (clone $baseQuery)
-            ->orderByDesc('created_at')
-            ->paginate(10);
-
         $totalRegistrations = (clone $baseQuery)->count();
         $pendingRegistrations = (clone $baseQuery)->where('status', ProgramRegistration::STATUS_PENDING)->count();
-        $approvedRegistrations = (clone $baseQuery)->where('status', ProgramRegistration::STATUS_APPROVED)->count();
+        $approvedRegistrations = (clone $baseQuery)->whereIn('status', [
+            ProgramRegistration::STATUS_APPROVED,
+            ProgramRegistration::STATUS_SHIPPED,
+        ])->count();
         $rejectedRegistrations = (clone $baseQuery)->where('status', ProgramRegistration::STATUS_REJECTED)->count();
+
+        $validTabs = ['all', ProgramRegistration::STATUS_PENDING, ProgramRegistration::STATUS_APPROVED, ProgramRegistration::STATUS_REJECTED];
+        $activeTab = strtolower((string) $request->query('status', 'all'));
+        if (! in_array($activeTab, $validTabs, true)) {
+            $activeTab = 'all';
+        }
+
+        $listQuery = clone $baseQuery;
+        if ($activeTab === ProgramRegistration::STATUS_APPROVED) {
+            $listQuery->whereIn('status', [
+                ProgramRegistration::STATUS_APPROVED,
+                ProgramRegistration::STATUS_SHIPPED,
+            ]);
+        } elseif ($activeTab !== 'all') {
+            $listQuery->where('status', $activeTab);
+        }
+
+        $registrations = $listQuery
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->appends($request->only('status'));
 
         return view('patient.my_application', compact(
             'registrations',
             'totalRegistrations',
             'pendingRegistrations',
             'approvedRegistrations',
-            'rejectedRegistrations'
+            'rejectedRegistrations',
+            'activeTab'
         ));
     }
 
@@ -179,7 +208,16 @@ class PatientController extends Controller
             ->orderBy('event_date')
             ->get();
 
-        return view('patient.programs_and_aids', compact('programs', 'upcomingPrograms', 'ongoingPrograms'));
+        $financialAssistanceClosed = ProgramApplicationCapacity::financialAssistanceClosed($ongoingPrograms);
+        $programsAtCapacityIds = ProgramApplicationCapacity::programIdsAtCapacity($ongoingPrograms);
+
+        return view('patient.programs_and_aids', compact(
+            'programs',
+            'upcomingPrograms',
+            'ongoingPrograms',
+            'financialAssistanceClosed',
+            'programsAtCapacityIds'
+        ));
     }
 
     public function patientChats(Request $request)
@@ -449,7 +487,7 @@ class PatientController extends Controller
     private function sendWebinarRegistrationEmail(Webinar $webinar, $user): void
     {
         try {
-            Mail::to($user->email)->queue(new WebinarRegistrationConfirmation($webinar, $user));
+            TransactionalMail::send($user->email, new WebinarRegistrationConfirmation($webinar, $user));
         } catch (\Throwable $e) {
             Log::warning('Failed to send webinar registration email', [
                 'user_id' => $user->id ?? null,

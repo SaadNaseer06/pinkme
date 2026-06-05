@@ -2,7 +2,8 @@
     use Illuminate\Contracts\Pagination\LengthAwarePaginator;
     use Carbon\Carbon;
 
-    $fmtDate = fn($dt) => $dt ? Carbon::parse($dt)->format('Y-m-d') : '—';
+    $appTz = config('app.timezone');
+    $fmtDate = fn ($dt) => $dt ? Carbon::parse($dt)->timezone($appTz)->format('M j, Y g:i A') : '—';
     $appCode = fn($app) => $app->code ?: 'APP-' . str_pad((string) $app->id, 6, '0', STR_PAD_LEFT);
 
     $statusBadge = function ($status) {
@@ -29,10 +30,10 @@
             <tr class="border-t border-[#e0cfd8]">
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h">Patient Name</th>
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h pad-left">Applications ID</th>
-                <th class="p-2 text-lg text-[#91848C] font-normal app-h">Sub. Date</th>
+                <th class="p-2 text-lg text-[#91848C] font-normal app-h">Submitted</th>
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h">Email</th>
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h">Contact</th>
-                <th class="p-2 text-lg text-[#91848C] font-normal app-h">Assigned Case Manager</th>
+                <th class="p-2 text-lg text-[#91848C] font-normal app-h">Patient Support Coordinator</th>
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h">Status</th>
                 <th class="p-2 text-lg text-[#91848C] font-normal app-h">Action</th>
             </tr>
@@ -73,14 +74,14 @@
                             </a>
                             @if ($app->reviewer_id)
                                 <div class="px-4 py-2 text-sm text-[#6C5F67] border-b border-[#E5D6E0]">
-                                    <span class="font-medium text-[#213430]">Case Manager:</span> {{ $reviewerName }}
+                                    <span class="font-medium text-[#213430]">Patient Support Coordinator:</span> {{ $reviewerName }}
                                 </div>
                                 <a href="#" onclick="openAssignModal({{ $app->id }}, {{ $app->reviewer_id }}, @json($reviewerName))" class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm">
-                                    <i class="fas fa-user-edit mr-2"></i> Change Case Manager
+                                    <i class="fas fa-user-edit mr-2"></i> Change Patient Support Coordinator
                                 </a>
                             @else
                                 <a href="#" onclick="openAssignModal({{ $app->id }}, null, null)" class="flex items-center px-4 py-2 text-[#91848C] hover:bg-pink-100 text-sm">
-                                    <i class="fas fa-user-plus mr-2"></i> Assign Case Manager
+                                    <i class="fas fa-user-plus mr-2"></i> Assign Coordinator
                                 </a>
                             @endif
                             <a href="#" onclick="openRejectModal({{ $app->id }})" class="flex items-center px-4 py-2 gap-2 text-[#91848C] text-sm">

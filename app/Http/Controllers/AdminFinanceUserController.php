@@ -64,20 +64,27 @@ class AdminFinanceUserController extends Controller
             'status' => (int) $request->status,
         ]);
 
+        $mailWarning = null;
         try {
-            Mail::to($user->email)->queue(
+            Mail::to($user->email)->send(
                 new StaffAccountCredentialsEmail(
                     $user,
                     $plainPassword,
-                    'Finance',
+                    'Finance team (Board Member)',
                 ),
             );
         } catch (\Throwable $e) {
             report($e);
+            $mailWarning = 'Finance user account was created, but the credentials email could not be sent. Please verify mail settings and resend credentials.';
         }
 
-        return redirect()->route('admin.finance-users.index')
+        $redirect = redirect()->route('admin.finance-users.index')
             ->with('success', 'Finance user created successfully.');
+        if ($mailWarning) {
+            $redirect->with('warning', $mailWarning);
+        }
+
+        return $redirect;
     }
 
     public function edit(User $finance_user)

@@ -1,19 +1,20 @@
-﻿@php
-
-    $applications = \App\Models\Application::all();
-    $totalApplications = $applications->count();
-    $pendingApplications = $applications->where('status', 'Pending')->count();
-    $approvedApplications = $applications->where('status', 'Approved')->count();
-    $rejectedApplications = $applications->where('status', 'Rejected')->count();
-    $lastApplicationDate = $applications->max('created_at');
-
-    $stats = [
-        'total_applications' => $totalApplications,
-        'pending_applications' => $pendingApplications,
-        'approved_applications' => $approvedApplications,
-        'rejected_applications' => $rejectedApplications,
-        'last_application_date' => $lastApplicationDate,
-    ];
+@php
+    /* Prefer aggregates from the controller when provided (avoids Application::all() and stays consistent). */
+    if (isset($totalApplications, $pendingApplications, $approvedApplications, $rejectedApplications)) {
+        $stats = [
+            'total_applications' => $totalApplications,
+            'pending_applications' => $pendingApplications,
+            'approved_applications' => $approvedApplications,
+            'rejected_applications' => $rejectedApplications,
+        ];
+    } else {
+        $stats = [
+            'total_applications' => \App\Models\Application::count(),
+            'pending_applications' => \App\Models\Application::where('status', 'Pending')->count(),
+            'approved_applications' => \App\Models\Application::where('status', 'Approved')->count(),
+            'rejected_applications' => \App\Models\Application::where('status', 'Rejected')->count(),
+        ];
+    }
 @endphp
 
 <!-- Status Cards -->

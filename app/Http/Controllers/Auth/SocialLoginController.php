@@ -139,7 +139,7 @@ class SocialLoginController extends Controller
 
         if ($isNewSocialSignup && filled($user->email)) {
             try {
-                Mail::to($user->email)->queue(new PatientWelcomeEmail($user->fresh(['profile']), true));
+                Mail::to($user->email)->send(new PatientWelcomeEmail($user->fresh(['profile']), true));
             } catch (Throwable $e) {
                 report($e);
             }

@@ -14,7 +14,7 @@
                 <div class="bg-[#F3E8EF] rounded-lg p-3">
                     <div class="flex justify-between items-center mb-4 mt-3">
                         <h2 class="text-lg font-semibold text-[#213430] px-3 pt-3 app-main">
-                            Recent Applications
+                            Recent program applications
                         </h2>
                     </div>
                     <div class="table-container">
@@ -29,80 +29,134 @@
                                 </tr>
                             </thead>
                             <tbody class="text-gray-700">
-                                @forelse($recentApplications ?? [] as $application)
-                                    <tr class="border-t border-[#e0cfd8]">
-                                        <td class="p-2">
-                                            <div class="flex items-center gap-2">
-                                                {{-- <img src="{{ $application->patient->user->profile->avatar ?? '' }}"
-                                                    alt="" class="w-8 h-8 rounded-full" /> --}}
+                                @forelse($recentDashboardItems ?? [] as $item)
+                                    @if (($item['type'] ?? '') === 'program_registration')
+                                        @php $registration = $item['registration']; @endphp
+                                        <tr class="border-t border-[#e0cfd8]">
+                                            <td class="p-2">
+                                                <span class="text-[#91848C] text-[16px] font-light app-text">{{ $registration->full_name }}</span>
+                                            </td>
+                                            <td class="p-3 align-middle text-[#91848C] text-[16px] font-light app-text pad-left">
+                                                {{ $registration->public_reference }}
+                                            </td>
+                                            <td class="p-3 align-middle text-[#91848C] text-[16px] font-light app-text">
+                                                {{ $registration->created_at?->timezone(config('app.timezone'))->format('Y-m-d') ?? 'N/A' }}
+                                            </td>
+                                            <td class="p-3 align-middle">
+                                                @php
+                                                    $regStatusKey = strtolower(str_replace(' ', '_', (string) $registration->status_label));
+                                                @endphp
                                                 <span
-                                                    class="text-[#91848C] text-[16px] font-light app-text">{{ $application->patient?->user?->profile?->full_name ?? 'N/A' }}</span>
-                                            </div>
-                                        </td>
-                                        <td
-                                            class="p-3 align-middle text-[#91848C] text-[16px] font-light app-text pad-left">
-                                            APP-{{ str_pad($application->id, 6, '0', STR_PAD_LEFT) }}
-                                        </td>
-                                        <td class="p-3 align-middle text-[#91848C] text-[16px] font-light app-text">
-                                            {{ $application->submission_date ? $application->submission_date->format('Y-m-d') : 'N/A' }}
-                                        </td>
-                                        <td class="p-3 align-middle">
-                                            @php
-                                                $appStatusKey = strtolower(str_replace(' ', '_', (string) $application->status));
-                                            @endphp
-                                            <span
-                                                class="inline-flex items-center gap-1 text-sm font-light app-text
-                                            @if ($appStatusKey === 'pending') text-[#8E7C93]
-                                            @elseif($appStatusKey === 'approved') text-[#20B354]
-                                            @elseif($appStatusKey === 'rejected') text-[#B32020]
-                                            @elseif($appStatusKey === 'under_review') text-[#91848C]
-                                            @else text-[#91848C] @endif">
-                                                <span
-                                                    class="w-2 h-2 rounded-full
-                                                @if ($appStatusKey === 'pending') bg-[#8E7C93]
-                                                @elseif($appStatusKey === 'approved') bg-[#20B354]
-                                                @elseif($appStatusKey === 'rejected') bg-[#B32020]
-                                                @elseif($appStatusKey === 'under_review') bg-[#91848C]
-                                                @else bg-[#91848C] @endif"></span>
-                                                {{ $application->status }}
-                                            </span>
-                                        </td>
-                                        @php
-                                            $appViewUrl = route('admin.viewApplication', $application->id);
-                                            $appFilterId = $application->code ?? $application->id;
-                                            $appListUrl = route('admin.applications', ['q' => $appFilterId]);
-                                            $patientEmail = optional($application->patient?->user)->email;
-                                        @endphp
-                                        <td class="p-3">
-                                            <div class="action-menu-wrapper relative inline-block" data-action-wrapper>
-                                                <button type="button" data-action-toggle
-                                                    class="text-[#213430] p-2 rounded-md focus:outline-none hover:text-[#9E2469] transition-colors">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                                    </svg>
-                                                </button>
-                                                <div data-action-menu class="patient-action-menu absolute right-0 top-10 z-20 hidden">
-                                                    <a href="{{ $appViewUrl }}" class="patient-action-item">
-                                                        <i class="fas fa-eye patient-action-icon"></i>
-                                                        <span>View Application</span>
-                                                    </a>
-                                                    <a href="{{ $appListUrl }}" class="patient-action-item">
-                                                        <img src="{{ asset('public/images/assign.svg') }}" alt="" class="patient-action-icon">
-                                                        <span>Open Applications List</span>
-                                                    </a>
-                                                    {{-- @if (!empty($patientEmail))
-                                                        <a href="mailto:{{ $patientEmail }}" class="patient-action-item">
-                                                            <i class="fas fa-envelope patient-action-icon"></i>
-                                                            <span>Email Patient</span>
+                                                    class="inline-flex items-center gap-1 text-sm font-light app-text
+                                                @if ($regStatusKey === 'pending') text-[#8E7C93]
+                                                @elseif($regStatusKey === 'approved') text-[#20B354]
+                                                @elseif($regStatusKey === 'rejected') text-[#B32020]
+                                                @elseif(str_contains($regStatusKey, 'finance')) text-[#91848C]
+                                                @else text-[#91848C] @endif">
+                                                    <span
+                                                        class="w-2 h-2 rounded-full
+                                                    @if ($regStatusKey === 'pending') bg-[#8E7C93]
+                                                    @elseif($regStatusKey === 'approved') bg-[#20B354]
+                                                    @elseif($regStatusKey === 'rejected') bg-[#B32020]
+                                                    @elseif(str_contains($regStatusKey, 'finance')) bg-[#91848C]
+                                                    @else bg-[#91848C] @endif"></span>
+                                                    {{ $registration->status_label }}
+                                                </span>
+                                            </td>
+                                            <td class="p-3">
+                                                <div class="action-menu-wrapper relative inline-block" data-action-wrapper>
+                                                    <button type="button" data-action-toggle
+                                                        class="text-[#213430] p-2 rounded-md focus:outline-none hover:text-[#9E2469] transition-colors">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                                        </svg>
+                                                    </button>
+                                                    <div data-action-menu class="patient-action-menu absolute right-0 top-10 z-20 hidden">
+                                                        <a href="{{ route('admin.program_registrations.show', $registration) }}" class="patient-action-item">
+                                                            <i class="fas fa-eye patient-action-icon"></i>
+                                                            <span>View application</span>
                                                         </a>
-                                                    @endif --}}
+                                                        <a href="{{ route('admin.registrations.index') }}" class="patient-action-item">
+                                                            <img src="{{ asset('public/images/assign.svg') }}" alt="" class="patient-action-icon">
+                                                            <span>Open applications management</span>
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                        </tr>
+                                    @elseif (($item['type'] ?? '') === 'legacy_application')
+                                        @php $application = $item['application'] ?? null; @endphp
+                                        @if (!$application)
+                                            @continue
+                                        @endif
+                                        <tr class="border-t border-[#e0cfd8]">
+                                            <td class="p-2">
+                                                <div class="flex items-center gap-2">
+                                                    <span
+                                                        class="text-[#91848C] text-[16px] font-light app-text">{{ $application->patient?->user?->profile?->full_name ?? 'N/A' }}</span>
+                                                </div>
+                                            </td>
+                                            <td
+                                                class="p-3 align-middle text-[#91848C] text-[16px] font-light app-text pad-left">
+                                                APP-{{ str_pad($application->id, 6, '0', STR_PAD_LEFT) }}
+                                            </td>
+                                            <td class="p-3 align-middle text-[#91848C] text-[16px] font-light app-text">
+                                                {{ $application->submission_date?->timezone(config('app.timezone'))->format('Y-m-d') ?? 'N/A' }}
+                                            </td>
+                                            <td class="p-3 align-middle">
+                                                @php
+                                                    $appStatusKey = strtolower(str_replace(' ', '_', (string) $application->status));
+                                                @endphp
+                                                <span
+                                                    class="inline-flex items-center gap-1 text-sm font-light app-text
+                                                @if ($appStatusKey === 'pending') text-[#8E7C93]
+                                                @elseif($appStatusKey === 'approved') text-[#20B354]
+                                                @elseif($appStatusKey === 'rejected') text-[#B32020]
+                                                @elseif($appStatusKey === 'under_review') text-[#91848C]
+                                                @else text-[#91848C] @endif">
+                                                    <span
+                                                        class="w-2 h-2 rounded-full
+                                                    @if ($appStatusKey === 'pending') bg-[#8E7C93]
+                                                    @elseif($appStatusKey === 'approved') bg-[#20B354]
+                                                    @elseif($appStatusKey === 'rejected') bg-[#B32020]
+                                                    @elseif($appStatusKey === 'under_review') bg-[#91848C]
+                                                    @else bg-[#91848C] @endif"></span>
+                                                    {{ $application->status }}
+                                                </span>
+                                            </td>
+                                            @php
+                                                $appViewUrl = route('admin.viewApplication', $application->id);
+                                                $appFilterId = $application->code ?? $application->id;
+                                                $appListUrl = route('admin.applications', ['q' => $appFilterId]);
+                                            @endphp
+                                            <td class="p-3">
+                                                <div class="action-menu-wrapper relative inline-block" data-action-wrapper>
+                                                    <button type="button" data-action-toggle
+                                                        class="text-[#213430] p-2 rounded-md focus:outline-none hover:text-[#9E2469] transition-colors">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                                        </svg>
+                                                    </button>
+                                                    <div data-action-menu class="patient-action-menu absolute right-0 top-10 z-20 hidden">
+                                                        <a href="{{ $appViewUrl }}" class="patient-action-item">
+                                                            <i class="fas fa-eye patient-action-icon"></i>
+                                                            <span>View application</span>
+                                                        </a>
+                                                        <a href="{{ $appListUrl }}" class="patient-action-item">
+                                                            <img src="{{ asset('public/images/assign.svg') }}" alt="" class="patient-action-icon">
+                                                            <span>Open legacy applications list</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @empty
                                     <tr class="border-t border-[#e0cfd8]">
                                         <td colspan="5"
@@ -155,10 +209,10 @@
                         </div>
                     </div>
 
-                    <!-- Chart -->
-                    <div class="relative h-72 flex items-end mt-10 z-10">
+                    <!-- Chart (items-stretch so bar columns get a definite height; items-end breaks % heights) -->
+                    <div class="relative h-72 flex items-stretch mt-10 z-10">
                         <!-- Y-axis -->
-                        <div class="flex flex-col justify-between h-full text-xs text-gray-400 pr-3 leading-none z-20">
+                        <div class="flex flex-col justify-between shrink-0 h-full text-xs text-gray-400 pr-3 leading-none z-20">
                             <span>100%</span>
                             <span>80%</span>
                             <span>60%</span>
@@ -178,10 +232,10 @@
                         </div>
 
                         <!-- Bars (Dynamic + Toggle-able) -->
-                        <div class="flex items-end justify-between h-full z-20 pl-4 laptop-bar w-full pr-4">
+                        <div class="flex items-end justify-between flex-1 min-h-0 min-w-0 h-full z-20 pl-4 laptop-bar pr-4">
                             @foreach ($applicationStatsChart as $label => $bar)
-                                <div class="flex flex-col items-center w-2 h-full mx-1">
-                                    <div class="flex flex-col justify-end h-full w-full">
+                                <div class="flex flex-col items-center w-2 shrink-0 h-full mx-1">
+                                    <div class="flex flex-col justify-end flex-1 min-h-0 w-full">
                                         <!-- Applications (pink, top) -->
                                         <div class="segment segment-apps w-full bg-[#9E2469] rounded-t-full"
                                             style="height: {{ $bar['apps'] }}%; transition: height .25s ease"
@@ -197,7 +251,7 @@
                                             style="height: {{ $bar['rejected'] }}%; transition: height .25s ease"
                                             data-height="{{ $bar['rejected'] }}"></div>
                                     </div>
-                                    <div class="text-xs text-gray-500 mt-2">{{ $label }}</div>
+                                    <div class="text-xs text-gray-500 mt-2 shrink-0">{{ $label }}</div>
                                 </div>
                             @endforeach
                         </div>
@@ -245,8 +299,18 @@
             <div class="bg-[#F3E8EF] rounded-lg p-6 mt-10">
                 <div class="flex justify-between items-center mb-2 pb-4">
                     <h2 class="text-xl font-medium text-[#213430] app-main">
-                        Patients Lists
+                        Patient Lists (Sign up only)
                     </h2>
+                    <div class="flex items-center gap-2">
+                        <label for="dashboardStateFilter" class="text-sm text-[#91848C] app-text">State</label>
+                        <select id="dashboardStateFilter"
+                            class="rounded-md border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                            <option value="">All</option>
+                            @foreach (collect($latestPatients)->pluck('dashboard_state')->filter()->unique()->sort()->values() as $stateOption)
+                                <option value="{{ strtolower((string) $stateOption) }}">{{ $stateOption }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     {{-- <a href="{{ route('patients.all') }}" --}}
                     {{-- <a href="#" class="text-lg font-medium text-decoration underline text-[#9E2469] app-main">
                         View All
@@ -257,18 +321,18 @@
                     <table class="min-w-full text-sm text-left mt-2">
                         <thead>
                             <tr class="border-t border-[#e0cfd8]">
-                                <th class="p-2 text-lg text-[#91848C] font-medium app-h">Patient</th>
-                                <th class="p-2 text-lg text-[#91848C] font-medium app-h px-10">Email</th>
+                                {{-- <th class="p-2 text-lg text-[#91848C] font-medium app-h">Patient</th> --}}
+                                    <th class="p-2 text-lg text-[#91848C] font-medium app-h px-10">Full Name</th>
                                 <th class="p-2 text-lg text-[#91848C] font-medium app-h">Contact</th>
-                                <th class="p-2 text-lg text-[#91848C] font-medium app-h">Age</th>
+                                    <th class="p-2 text-lg text-[#91848C] font-medium app-h">State</th>
                                 <th class="p-2 text-lg text-[#91848C] font-medium app-h">Stage</th>
                                 <th class="p-2 text-lg text-[#91848C] font-medium app-h">Action</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-700">
                             @forelse($latestPatients as $patient)
-                                <tr class="border-t border-[#e0cfd8]">
-                                    <td class="p-3">
+                                <tr class="border-t border-[#e0cfd8]" data-dashboard-patient-row data-state="{{ strtolower((string) ($patient->dashboard_state ?? '')) }}">
+                                    {{-- <td class="p-3">
                                         <div class="flex items-center gap-3">
                                             <img src="{{ $patient->user?->avatar_url ?? asset('public/images/profile.png') }}" alt=""
                                                 class="w-8 h-8 rounded-full" />
@@ -276,24 +340,18 @@
                                                 {{ $patient->user?->name ?? 'Unknown' }}
                                             </span>
                                         </div>
-                                    </td>
+                                    </td> --}}
                                     <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text px-10">
-                                        {{ $patient->user?->email ?? 'N/A' }}
+                                        {{ $patient->user?->profile?->full_name ?? ($patient->user?->email ?? 'N/A') }}
                                     </td>
                                     <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
                                         {{ $patient->user?->profile?->phone ?? 'N/A' }}
                                     </td>
-                                    <td class="p-2 align-middle">
-                                        <span class="inline-flex items-center gap-1 text-[#8E7C93] text-sm app-text">
-                                            @php
-                                                $dob = $patient->user?->profile?->date_of_birth ?? null;
-                                                $age = $dob ? \Carbon\Carbon::parse($dob)->age : 'N/A';
-                                            @endphp
-                                            {{ $age }}
-                                        </span>
+                                    <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
+                                        {{ $patient->dashboard_state ?? 'N/A' }}
                                     </td>
                                     <td class="p-2 align-middle text-[#91848C] text-[16px] font-light app-text">
-                                        {{ $patient->diagnosis ?? 'N/A' }}
+                                        {{ $patient->dashboard_stage ?? 'N/A' }}
                                     </td>
                                     @php
                                         $patientQuery = $patient->user?->email
@@ -343,6 +401,23 @@
             </div>
         </div>
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stateFilter = document.getElementById('dashboardStateFilter');
+            const rows = Array.from(document.querySelectorAll('[data-dashboard-patient-row]'));
+            if (!stateFilter || !rows.length) return;
+
+            const applyStateFilter = () => {
+                const selected = (stateFilter.value || '').toLowerCase();
+                rows.forEach((row) => {
+                    const rowState = (row.dataset.state || '').toLowerCase();
+                    row.classList.toggle('hidden', selected !== '' && rowState !== selected);
+                });
+            };
+            stateFilter.addEventListener('change', applyStateFilter);
+            applyStateFilter();
+        });
+    </script>
 
     {{-- JavaScript for dropdown and chart toggles --}}
     <script>
@@ -451,8 +526,8 @@
                     const apps = Number(row.apps) || 0;
                     const approved = Number(row.approved) || 0;
                     const rejected = Number(row.rejected) || 0;
-                    return '<div class="flex flex-col items-center w-2 h-full mx-1">' +
-                        '<div class="flex flex-col justify-end h-full w-full">' +
+                    return '<div class="flex flex-col items-center w-2 shrink-0 h-full mx-1">' +
+                        '<div class="flex flex-col justify-end flex-1 min-h-0 w-full">' +
                         '<div class="segment segment-apps w-full bg-[#9E2469] rounded-t-full" ' +
                         'style="height: ' + apps + '%; transition: height .25s ease" data-height="' + apps + '"></div>' +
                         '<div class="segment segment-approved w-full bg-[#20B354]" ' +
@@ -462,7 +537,7 @@
                         'style="height: ' + rejected + '%; transition: height .25s ease" data-height="' + rejected +
                         '"></div>' +
                         '</div>' +
-                        '<div class="text-xs text-gray-500 mt-2">' + label + '</div>' +
+                        '<div class="text-xs text-gray-500 mt-2 shrink-0">' + label + '</div>' +
                         '</div>';
                 }).join('');
                 container.innerHTML = html;

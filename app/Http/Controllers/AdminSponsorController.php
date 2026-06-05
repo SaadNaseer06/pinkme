@@ -6,6 +6,7 @@ use App\Models\SponsorDetail;
 use App\Models\User;
 use App\Models\Role;
 use App\Mail\SponsorCredentials;
+use App\Support\TransactionalMail;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
@@ -80,7 +81,7 @@ class AdminSponsorController extends Controller
 
         try {
             $loginUrl = route('login');
-            Mail::to($sponsor->email)->queue(new SponsorCredentials($sponsor, $data['password'], $loginUrl));
+            TransactionalMail::send($sponsor->email, new SponsorCredentials($sponsor, $data['password'], $loginUrl));
         } catch (\Throwable $e) {
             Log::warning('Failed to send sponsor credentials email', [
                 'sponsor_id' => $sponsor->id ?? null,

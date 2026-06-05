@@ -8,6 +8,7 @@ use App\Models\EventSponsorship;
 use App\Models\SponsorshipProgram;
 use App\Models\User;
 use App\Mail\EventRegistrationStatus;
+use App\Support\TransactionalMail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -278,7 +279,7 @@ class EventController extends Controller
 
         $registration->loadMissing(['event', 'sponsor.profile']);
         if ($registration->sponsor?->email) {
-            Mail::to($registration->sponsor->email)->queue(new EventRegistrationStatus($registration, 'Approved'));
+            TransactionalMail::send($registration->sponsor->email, new EventRegistrationStatus($registration, 'Approved'));
         }
         
         return back()->with('success', 'Event registration approved successfully!');
@@ -297,7 +298,7 @@ class EventController extends Controller
 
         $registration->loadMissing(['event', 'sponsor.profile']);
         if ($registration->sponsor?->email) {
-            Mail::to($registration->sponsor->email)->queue(new EventRegistrationStatus($registration, 'Rejected'));
+            TransactionalMail::send($registration->sponsor->email, new EventRegistrationStatus($registration, 'Rejected'));
         }
         
         return back()->with('success', 'Event registration rejected.');

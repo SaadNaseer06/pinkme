@@ -134,7 +134,7 @@
         <table style="width: 100%;">
             <tr>
                 <td>
-                    <div class="brand">PINK "ME"</div>
+                    <div class="brand">{{ config('app.brand_name', 'PINK "ME"®') }}</div>
                     <div class="tagline">A NON-PROFIT BREAST CANCER ORGANIZATION</div>
                 </td>
                 <td style="text-align: right; vertical-align: top;">

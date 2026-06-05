@@ -9,9 +9,15 @@ final class BillingPaymentLinks
     /**
      * Convert plain text (possibly multiple lines / URLs) to HTML with clickable http(s) links.
      */
-    public static function toHtml(?string $text): string
+    public static function toHtml(null|string|array $text): string
     {
-        if ($text === null || trim($text) === '') {
+        if ($text === null) {
+            return '';
+        }
+        if (is_array($text)) {
+            $text = implode("\n", array_map(static fn ($v) => is_scalar($v) ? (string) $v : '', $text));
+        }
+        if (trim($text) === '') {
             return '';
         }
 

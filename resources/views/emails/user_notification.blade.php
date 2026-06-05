@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <div style="max-width: 640px; margin: 0 auto; padding: 24px;">
         <h2 style="margin: 0 0 16px; color: #9E2469;">{{ $title }}</h2>
         <p style="margin: 0 0 12px;">Hi {{ $recipientName }},</p>
-        <p style="margin: 0 0 12px;">{{ $message }}</p>
+        <p style="margin: 0 0 12px;">{{ $notificationBody }}</p>
         @if(!empty($linkUrl))
             <p style="margin: 0 0 8px;">View details:</p>
             <p style="margin: 0;">

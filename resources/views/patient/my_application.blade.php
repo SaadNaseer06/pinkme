@@ -50,9 +50,13 @@
 
     <!-- Dashboard Content -->
     <main class="flex-1">
+        @php
+            $activeTab = $activeTab ?? 'all';
+            $tabLink = fn (string $status) => route('patient.myApplication', $status === 'all' ? [] : ['status' => $status]);
+            $tabRing = fn (string $status) => $activeTab === $status ? 'ring-2 ring-[#9E2469]' : 'ring-2 ring-transparent hover:ring-[#DCCFD8]';
+        @endphp
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 box-gap">
-            <!--- Box 1 -->
-            <div class="bg-[#F3E8EF] rounded-lg p-4  flex items-center space-x-4 box-padding">
+            <a href="{{ $tabLink('all') }}" class="bg-[#F3E8EF] rounded-lg p-4 flex items-center space-x-4 box-padding transition {{ $tabRing('all') }}">
                 <img src="{{ asset('public/images/app-icon-1.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
                 <div class="space-y-2">
                     <h1 class="text-lg font-semibold text-gray-800 app-text ">
@@ -60,9 +64,8 @@
                     </h1>
                     <h2 class="text-md text-gray-400 app-text">{{ $totalRegistrations }}</h2>
                 </div>
-            </div>
-            <!--- Box 2 -->
-            <div class="bg-[#F3E8EF] rounded-lg p-4  flex items-center space-x-4 box-padding">
+            </a>
+            <a href="{{ $tabLink('pending') }}" class="bg-[#F3E8EF] rounded-lg p-4 flex items-center space-x-4 box-padding transition {{ $tabRing('pending') }}">
                 <img src="{{ asset('public/images/app-icon-2.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
                 <div class="space-y-2">
                     <h1 class="text-lg font-semibold text-gray-800 app-text">
@@ -70,9 +73,8 @@
                     </h1>
                     <h2 class="text-md text-gray-400 app-text">{{ $pendingRegistrations }}</h2>
                 </div>
-            </div>
-            <!--- Box 3 -->
-            <div class="bg-[#F3E8EF] rounded-lg p-4  flex items-center space-x-4 box-padding">
+            </a>
+            <a href="{{ $tabLink('approved') }}" class="bg-[#F3E8EF] rounded-lg p-4 flex items-center space-x-4 box-padding transition {{ $tabRing('approved') }}">
                 <img src="{{ asset('public/images/app-icon-3.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
                 <div class="space-y-2">
                     <h1 class="text-lg font-semibold text-gray-800 app-text">
@@ -80,9 +82,8 @@
                     </h1>
                     <h2 class="text-md text-gray-400 app-text">{{ $approvedRegistrations }}</h2>
                 </div>
-            </div>
-            <!--- Box 4 -->
-            <div class="bg-[#F3E8EF] rounded-lg p-4  flex items-center space-x-4 box-padding">
+            </a>
+            <a href="{{ $tabLink('rejected') }}" class="bg-[#F3E8EF] rounded-lg p-4 flex items-center space-x-4 box-padding transition {{ $tabRing('rejected') }}">
                 <img src="{{ asset('public/images/app-icon-4.svg') }}" alt="Application Icon" class="w-24 h-24 app-img" />
                 <div class="space-y-2">
                     <h1 class="text-lg font-semibold text-gray-800 app-text">
@@ -90,13 +91,21 @@
                     </h1>
                     <h2 class="text-md text-gray-400 app-text">{{ $rejectedRegistrations }}</h2>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
             <div class="flex justify-between items-center mb-4 ml-3">
                 <h2 class="text-xl font-semibold text-[#213430] app-main">
-                    All Applications List
+                    @if ($activeTab === 'rejected')
+                        Rejected Applications
+                    @elseif ($activeTab === 'pending')
+                        Pending Applications
+                    @elseif ($activeTab === 'approved')
+                        Approved Applications
+                    @else
+                        All Applications List
+                    @endif
                 </h2>
                 <div class="flex space-x-4">
                     <div class="relative w-[200px] md:flex hidden">
@@ -177,6 +186,7 @@
                                         $status = strtolower((string) $registration->status);
                                         $statusClasses = [
                                             'approved' => 'bg-[#C5E8D1] text-[#20B354]',
+                                            'shipped' => 'bg-[#D4E8FA] text-[#1A6BB3]',
                                             'rejected' => 'bg-[#E8C5C5] text-[#B32020]',
                                             'pending' => 'bg-[#E4D7DF] text-[#91848C]',
                                             'pending_finance' => 'bg-amber-100 text-amber-900',

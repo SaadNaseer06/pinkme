@@ -28,6 +28,7 @@
                         <span>Pending: <strong class="text-[#213430]">{{ $counts['pending'] }}</strong></span>
                         <span>Finance queue: <strong class="text-[#213430]">{{ $counts['pending_finance'] ?? 0 }}</strong></span>
                         <span>Approved: <strong class="text-[#213430]">{{ $counts['approved'] }}</strong></span>
+                        <span>Shipped: <strong class="text-[#213430]">{{ $counts['shipped'] ?? 0 }}</strong></span>
                         <span>Rejected: <strong class="text-[#213430]">{{ $counts['rejected'] }}</strong></span>
                         <span>Total: <strong class="text-[#213430]">{{ $counts['all'] }}</strong></span>
                     </div>
@@ -40,6 +41,8 @@
                             <option value="pending" {{ $selectedStatus === 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="pending_finance" {{ $selectedStatus === 'pending_finance' ? 'selected' : '' }}>Finance queue</option>
                             <option value="approved" {{ $selectedStatus === 'approved' ? 'selected' : '' }}>Approved
+                            </option>
+                            <option value="shipped" {{ $selectedStatus === 'shipped' ? 'selected' : '' }}>Shipped
                             </option>
                             <option value="rejected" {{ $selectedStatus === 'rejected' ? 'selected' : '' }}>Rejected
                             </option>
@@ -91,13 +94,14 @@
                                         {{ $registration->program->title ?? 'N/A' }}
                                     </td>
                                     <td class="p-3 app-text">
-                                        {{ $registration->created_at?->format('d M Y, h:i A') ?? 'N/A' }}
+                                        {{ $registration->created_at?->timezone(config('app.timezone'))->format('d M Y, h:i A') ?? 'N/A' }}
                                     </td>
                                     <td class="p-3">
                     @php
                         $status = strtolower((string) $registration->status);
                         $badgeClasses = match ($status) {
                             \App\Models\ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354]',
+                            \App\Models\ProgramRegistration::STATUS_SHIPPED => 'bg-[#D4E8FA] text-[#1A6BB3]',
                             \App\Models\ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020]',
                             \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE => 'bg-amber-100 text-amber-900',
                             default => 'bg-[#FDE8F3] text-[#9E2469]',

@@ -59,20 +59,27 @@ class AdminCaseManagerController extends Controller
             'status' => (int) $request->status,
         ]);
 
+        $mailWarning = null;
         try {
-            Mail::to($user->email)->queue(
+            Mail::to($user->email)->send(
                 new StaffAccountCredentialsEmail(
                     $user,
                     $plainPassword,
-                    'Case Manager',
+                    'Patient Support Coordinator',
                 ),
             );
         } catch (\Throwable $e) {
             report($e);
+            $mailWarning = 'Case manager account was created, but the credentials email could not be sent. Please verify mail settings and resend credentials.';
         }
 
-        return redirect()->route('admin.case-managers.index')
+        $redirect = redirect()->route('admin.case-managers.index')
             ->with('success', 'Case manager created successfully.');
+        if ($mailWarning) {
+            $redirect->with('warning', $mailWarning);
+        }
+
+        return $redirect;
     }
 
     public function edit(User $case_manager)

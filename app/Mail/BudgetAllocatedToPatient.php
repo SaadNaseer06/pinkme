@@ -7,9 +7,6 @@ use App\Models\RegistrationInvoice;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-
 class BudgetAllocatedToPatient extends Mailable
 {
     use Queueable, SerializesModels;
@@ -37,39 +34,24 @@ class BudgetAllocatedToPatient extends Mailable
 
     public function build()
     {
-        $recipientName = optional($this->registration->user?->profile)->full_name
-            ?? $this->registration->full_name
-            ?? $this->registration->user?->email
-            ?? $this->registration->email
+        $firstName = $this->registration->first_name
+            ?? (optional($this->registration->user?->profile)->first_name)
+            ?? explode(' ', trim((string) (optional($this->registration->user?->profile)->full_name ?? $this->registration->full_name)))[0]
             ?? 'there';
 
-        $programTitle = $this->registration->program?->title ?? 'a program';
+        $brandName = \App\Support\Brand::name();
 
-        $mailable = $this
-            ->subject('Budget Allocated: ' . $programTitle . ' – Invoice #' . $this->invoice->invoice_number)
+        /* Patients receive confirmation only — no invoice or payment receipt attachments (proof stays with staff). */
+        return $this
+            ->subject('Your bill has been paid - '.$brandName.' financial assistance program.')
             ->view('emails.finance.budget_allocated_to_patient')
             ->with([
-                'recipientName' => $recipientName,
-                'programTitle' => $programTitle,
+                'firstName' => $firstName,
+                'brandName' => $brandName,
+                'programTitle' => $this->registration->program?->title ?? 'financial assistance program',
                 'invoice' => $this->invoice,
                 'registration' => $this->registration,
+                'portalUrl' => route('patient.dashboard'),
             ]);
-
-        if ($this->pdfPath && Storage::disk($this->pdfDisk)->exists($this->pdfPath)) {
-            $mailable->attachFromStorageDisk(
-                $this->pdfDisk,
-                $this->pdfPath,
-                'Invoice-' . $this->invoice->invoice_number . '.pdf',
-                ['mime' => 'application/pdf'],
-            );
-        } elseif ($this->pdfPath) {
-            Log::warning('Budget invoice PDF missing for patient email attachment', [
-                'path' => $this->pdfPath,
-                'disk' => $this->pdfDisk,
-                'invoice_id' => $this->invoice->id ?? null,
-            ]);
-        }
-
-        return $mailable;
     }
 }

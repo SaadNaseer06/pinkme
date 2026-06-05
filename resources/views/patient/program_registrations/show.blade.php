@@ -6,6 +6,7 @@
     $status = strtolower((string) ($registration->status ?? \App\Models\ProgramRegistration::STATUS_PENDING));
     $badgeClass = match ($status) {
         \App\Models\ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354] border border-[#A5D0B7]',
+        \App\Models\ProgramRegistration::STATUS_SHIPPED => 'bg-[#D4E8FA] text-[#1A6BB3] border border-[#A5C8E6]',
         \App\Models\ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020] border border-[#E6A5A5]',
         \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE => 'bg-amber-100 text-amber-900 border border-amber-200',
         default => 'bg-[#FDE8F3] text-[#9E2469] border border-[#F4BBD5]',
@@ -39,6 +40,8 @@
         'option1' => 'Option 1: May through June',
         'option2' => 'Option 2: November through December',
     ];
+
+    $isMtm = $registration->isMomentsThatMatterApplication();
 @endphp
 
 @extends('patient.layouts.app')
@@ -60,6 +63,10 @@
                         {{ $registration->status_label }}
                     </span>
                 </div>
+
+                @if ($isMtm)
+                    @include('partials.moments_that_matter_submission_notice')
+                @endif
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 border border-[#E6D8E1]">
@@ -97,8 +104,11 @@
                     </div>
                 </div>
 
+                @include('partials.moments_that_matter_registration_details', ['registration' => $registration])
+
                 <div class="bg-white rounded-lg p-5 md:p-6 space-y-4 border border-[#E6D8E1]">
                     <h2 class="text-xl font-semibold text-[#213430] app-main">Application Details</h2>
+                    @unless ($registration->program?->isMomentsThatMatter() || $registration->mtm_package)
                     <p class="text-base text-[#213430] app-text"><span class="font-medium">Quarter:</span>
                         {{ $quarterLabels[$registration->quarter_applied] ?? 'N/A' }}</p>
                     <p class="text-base text-[#213430] app-text"><span class="font-medium">Programs Applied:</span>
@@ -115,8 +125,10 @@
                     <p class="text-base text-[#213430] app-text"><span class="font-medium">Proof of Income Status:</span>
                         {{ collect($registration->proof_of_income_status ?? [])->map(fn ($p) => $incomeLabels[$p] ?? $p)->filter()->implode(', ') ?: 'N/A' }}
                     </p>
+                    @endunless
                 </div>
 
+                @unless ($registration->program?->isMomentsThatMatter() || $registration->mtm_package)
                 <div class="bg-white rounded-lg p-5 md:p-6 space-y-4 border border-[#E6D8E1]">
                     <h2 class="text-xl font-semibold text-[#213430] app-main">Your Story & Authorization</h2>
                     <div>
@@ -152,7 +164,19 @@
                         @endif
                     </div>
                 </div>
+                @endunless
 
+                @if ($registration->signature)
+                    <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1]">
+                        <h2 class="text-xl font-semibold text-[#213430] app-main mb-2">Signature</h2>
+                        <img src="{{ storage_url($registration->signature) }}" alt="Signature" class="h-24 object-contain">
+                        @if ($registration->signature_date)
+                            <p class="text-sm text-[#91848C] mt-2">Signed {{ $registration->signature_date->format('M j, Y') }}</p>
+                        @endif
+                    </div>
+                @endif
+
+                @unless ($registration->program?->isMomentsThatMatter() || $registration->mtm_package)
                 <div class="bg-white rounded-lg p-5 md:p-6 border border-[#E6D8E1]">
                     <h2 class="text-xl font-semibold text-[#213430] app-main mb-4">Uploaded Documents</h2>
                     <div class="space-y-4 text-base app-text">
@@ -226,6 +250,7 @@
                         @endif
                     </div>
                 </div>
+                @endunless
 
                 @if ($registration->review_note)
                     <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 text-base text-[#213430] app-text border border-[#E6D8E1]">

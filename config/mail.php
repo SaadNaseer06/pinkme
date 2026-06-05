@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => env('MAIL_MAILER', 'smtp'),
 
     /*
     |--------------------------------------------------------------------------
@@ -116,5 +116,16 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Transactional mail delivery
+    |--------------------------------------------------------------------------
+    |
+    | When true (default), notification and chat emails send immediately instead
+    | of being queued. Set false only if a queue worker processes mail reliably.
+    |
+    */
+    'send_transactional_sync' => env('MAIL_SEND_TRANSACTIONAL_SYNC', true),
 
 ];

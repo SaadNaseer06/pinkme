@@ -62,10 +62,11 @@ class RegisterController extends Controller
             ]);
         }
 
-        $role = Role::query()->find($validated['role_id']);
-        if ($role && $role->name === 'patient' && filled($email)) {
+        $patientRoleId = Role::query()->where('name', 'patient')->value('id');
+        if ($patientRoleId && (int) $validated['role_id'] === (int) $patientRoleId && filled($email)) {
             try {
-                Mail::to($email)->queue(new PatientWelcomeEmail($user));
+                // Synchronous send so the message is delivered without a queue worker.
+                Mail::to($email)->send(new PatientWelcomeEmail($user->load('profile')));
             } catch (\Throwable $e) {
                 report($e);
             }

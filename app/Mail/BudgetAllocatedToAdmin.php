@@ -41,7 +41,7 @@ class BudgetAllocatedToAdmin extends Mailable
         $programTitle = $this->registration->program?->title ?? 'Program';
 
         $mailable = $this
-            ->subject('Finance: Budget Allocated – ' . $applicantName . ' – ' . $programTitle)
+            ->subject('A Patient Bill(s) Paid By Finance & Grant Team – '.$applicantName.' – '.$programTitle)
             ->view('emails.finance.budget_allocated_to_admin')
             ->with([
                 'applicantName' => $applicantName,

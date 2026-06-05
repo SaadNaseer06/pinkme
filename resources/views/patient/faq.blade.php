@@ -1,4 +1,4 @@
-﻿@extends('patient.layouts.app')
+@extends('patient.layouts.app')
 
 @section('title', 'FAQ')
 
@@ -164,6 +164,20 @@
                     <div class="faq-answer hidden px-6 pb-2 text-[#91848C] app-text">
                         <p>No, you can't edit the application after submission. Please review all details carefully before
                             submitting.</p>
+                    </div>
+                </div>
+                <div class="bg-[#F3E8EF] rounded-lg overflow-hidden">
+                    <div onclick="toggleFAQ(this)"
+                        class="faq-header px-6 py-4 flex justify-between items-center cursor-pointer">
+                        <h3 class="text-[#91848C] font-normal app-text">Can I submit more than one application for the same program cycle?</h3>
+                        <svg class="w-5 h-5 text-[#91848C] transition-transform duration-300" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="faq-answer hidden px-6 pb-2 text-[#91848C] app-text">
+                        <p>Our records indicate that only one submission is permitted per applicant during each application cycle for a program. If you already applied, the portal will show that your application is already submitted.</p>
                     </div>
                 </div>
 

@@ -13,8 +13,8 @@ class ProgramRegistrationObserver
     {
         if ($registration->user_id !== null) {
             broadcast(new CaseManagerPatientChatsInboxUpdated);
-            PatientApplicationNotifications::programRegistrationSubmitted($registration);
         }
+        PatientApplicationNotifications::programRegistrationSubmitted($registration);
         if ($this->isFinanceQueueRow($registration)) {
             broadcast(new FinanceTeamChatsInboxUpdated);
         }

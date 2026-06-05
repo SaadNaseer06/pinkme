@@ -53,7 +53,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span class="font-medium">Submission Date</span>
-                            <span>{{ $application->created_at ? $application->created_at->format('F d, Y') : 'N/A' }}</span>
+                            <span>{{ $application->created_at ? $application->created_at->timezone(config('app.timezone'))->format('F d, Y') : 'N/A' }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="font-medium">Application ID</span>
@@ -72,7 +72,7 @@
                             </span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="font-medium">Assigned Reviewer</span>
+                            <span class="font-medium">Patient Support Coordinator</span>
                             <span>{{ optional($application->reviewer?->profile)->full_name ?? 'N/A' }}</span>
                         </div>
                     </div>

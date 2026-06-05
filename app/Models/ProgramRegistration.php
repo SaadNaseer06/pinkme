@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\ProgramType;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -9,12 +11,15 @@ class ProgramRegistration extends Model
 {
     public const STATUS_PENDING = 'pending';
 
-    /** Case manager completed review; awaiting finance (level 2) budget allocation. */
+    /** Case manager completed review; awaiting finance (level 2) payment processing. */
     public const STATUS_PENDING_FINANCE = 'pending_finance';
 
     public const STATUS_APPROVED = 'approved';
 
     public const STATUS_REJECTED = 'rejected';
+
+    /** Moments That Matter: care package shipped to applicant. */
+    public const STATUS_SHIPPED = 'shipped';
 
     protected $fillable = [
         'program_id',
@@ -28,6 +33,8 @@ class ProgramRegistration extends Model
         'gender',
         'blood_group',
         'medical_condition',
+        'breast_cancer_stage',
+        'ethnicity',
         'assistance_type',
         'quarter_applied',
         'programs_applied',
@@ -39,16 +46,32 @@ class ProgramRegistration extends Model
         'referral_type',
         'treatment_facility_name',
         'street_address',
+        'apartment_suite',
+        'shipping_usa',
+        'mtm_package',
+        'applying_for',
+        'patient_loved_one_name',
+        'mtm_treatment_status',
+        'mtm_treatment_status_other',
+        'mtm_diagnosis_type',
+        'mtm_diagnosis_date',
+        'mtm_story_permission',
+        'mtm_acknowledgments',
         'city',
         'state',
         'postal_code',
         'proof_of_income_status',
         'story',
+        'story_media_paths',
+        'story_notes',
         'authorization_allow',
         'authorization_permissions',
         'billing_details',
+        'patient_bill_line_items',
         'payment_links',
+        'finance_pre_payment_proof_paths',
         'signature',
+        'signature_date',
         'justification',
         'document_paths',
         'treatment_letter_path',
@@ -57,6 +80,8 @@ class ProgramRegistration extends Model
         'status',
         'reviewed_by',
         'reviewed_at',
+        'shipped_at',
+        'shipped_by',
         'review_note',
         'assigned_case_manager_id',
         'assigned_at',
@@ -72,10 +97,18 @@ class ProgramRegistration extends Model
         'proof_of_income_status' => 'array',
         'authorization_permissions' => 'array',
         'authorization_allow' => 'boolean',
+        'finance_pre_payment_proof_paths' => 'array',
         'bill_statement_paths' => 'array',
         'income_document_paths' => 'array',
+        'patient_bill_line_items' => 'array',
+        'story_media_paths' => 'array',
+        'mtm_acknowledgments' => 'array',
+        'shipping_usa' => 'boolean',
+        'mtm_diagnosis_date' => 'date',
+        'signature_date' => 'date',
         'dob' => 'date',
         'reviewed_at' => 'datetime',
+        'shipped_at' => 'datetime',
         'assigned_at' => 'datetime',
         'sent_to_finance_at' => 'datetime',
     ];
@@ -104,6 +137,11 @@ class ProgramRegistration extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
+    public function shipper(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'shipped_by');
+    }
+
     /**
      * Case manager assigned to handle this registration.
      */
@@ -121,7 +159,7 @@ class ProgramRegistration extends Model
     }
 
     /**
-     * Invoices generated for this registration (budget allocation).
+     * Invoices generated for this registration (bills paid).
      */
     public function registrationInvoices()
     {
@@ -137,6 +175,16 @@ class ProgramRegistration extends Model
     }
 
     /**
+     * Human-readable application id for finance emails (e.g. PRG-2026-000042).
+     */
+    public function getPublicReferenceAttribute(): string
+    {
+        $t = $this->created_at ?? now();
+
+        return 'PRG-'.$t->format('Y').'-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
      * Get formatted document paths for display
      */
     public function getDocumentsAttribute(): array
@@ -148,12 +196,56 @@ class ProgramRegistration extends Model
         return $this->mapFileArray($this->document_paths);
     }
 
+    public function isMomentsThatMatterApplication(): bool
+    {
+        if (filled($this->mtm_package)) {
+            return true;
+        }
+
+        return $this->relationLoaded('program')
+            ? $this->program?->isMomentsThatMatter() === true
+            : $this->program()->where('program_type', ProgramType::MOMENTS_THAT_MATTER)->exists();
+    }
+
+    /**
+     * @param  'all'|'financial_assistance'|'moments_that_matter'  $type
+     */
+    public function scopeForApplicationType(Builder $query, string $type): Builder
+    {
+        if ($type === 'all') {
+            return $query;
+        }
+
+        if ($type === ProgramType::MOMENTS_THAT_MATTER) {
+            return $query->where(function (Builder $w): void {
+                $w->whereNotNull('mtm_package')
+                    ->where('mtm_package', '!=', '')
+                    ->orWhereHas('program', fn (Builder $q) => $q->where('program_type', ProgramType::MOMENTS_THAT_MATTER));
+            });
+        }
+
+        return $query->where(function (Builder $w): void {
+            $w->where(function (Builder $w2): void {
+                $w2->whereNull('mtm_package')->orWhere('mtm_package', '');
+            })->whereDoesntHave('program', fn (Builder $q) => $q->where('program_type', ProgramType::MOMENTS_THAT_MATTER));
+        });
+    }
+
     public function getStatusLabelAttribute(): string
     {
+        if ($this->isMomentsThatMatterApplication()) {
+            return match (strtolower((string) $this->status)) {
+                self::STATUS_SHIPPED => 'Shipped',
+                self::STATUS_APPROVED => 'Awaiting shipment',
+                default => 'Awaiting shipment',
+            };
+        }
+
         return match (strtolower((string) $this->status)) {
             self::STATUS_APPROVED => 'Approved',
             self::STATUS_REJECTED => 'Rejected',
             self::STATUS_PENDING_FINANCE => 'Finance review',
+            self::STATUS_SHIPPED => 'Shipped',
             default => 'Pending',
         };
     }
@@ -194,9 +286,9 @@ class ProgramRegistration extends Model
         return $this->mapFileArray($this->income_document_paths);
     }
 
-    private function mapFile(?string $path): ?array
+    private function mapFile(mixed $path): ?array
     {
-        if (! $path) {
+        if (! is_string($path) || $path === '') {
             return null;
         }
 

@@ -19,6 +19,7 @@ use App\Models\UserProfile;
 use App\Services\FinanceNotificationService;
 use App\Support\AdminApplicationStatsChart;
 use App\Support\PatientApplicationNotifications;
+use App\Support\ProgramType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -37,11 +38,30 @@ class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
-        // Get statistics for dashboard cards
-        $totalApplications = Application::count();
-        $pendingApplications = Application::where('status', 'Pending')->count();
-        $approvedApplications = Application::where('status', 'Approved')->count();
-        $rejectedApplications = Application::where('status', 'Rejected')->count();
+        /*
+         * Cards + chart must include program registrations (`program_registrations`), which power
+         * /admin/registrations. Legacy `applications` rows are still counted when present.
+         */
+        $regTotal = ProgramRegistration::count();
+        $regApproved = ProgramRegistration::where('status', ProgramRegistration::STATUS_APPROVED)->count();
+        $regRejected = ProgramRegistration::where('status', ProgramRegistration::STATUS_REJECTED)->count();
+        $regPendingPipeline = ProgramRegistration::whereIn('status', [
+            ProgramRegistration::STATUS_PENDING,
+            ProgramRegistration::STATUS_PENDING_FINANCE,
+        ])->count();
+
+        $legacyTotal = Application::count();
+        $legacyApproved = Application::where('status', Application::STATUS_APPROVED)->count();
+        $legacyRejected = Application::where('status', Application::STATUS_REJECTED)->count();
+        $legacyPending = Application::whereIn('status', [
+            Application::STATUS_PENDING,
+            Application::STATUS_UNDER_REVIEW,
+        ])->count();
+
+        $totalApplications = $regTotal + $legacyTotal;
+        $approvedApplications = $regApproved + $legacyApproved;
+        $rejectedApplications = $regRejected + $legacyRejected;
+        $pendingApplications = $regPendingPipeline + $legacyPending;
 
         $totalPatients = Patient::count();
         $totalSponsors = User::whereHas('role', function ($query) {
@@ -51,11 +71,42 @@ class AdminController extends Controller
         $totalPrograms = SponsorshipProgram::count();
         $totalRaised = Sponsorship::sum('amount');
 
-        // Get recent applications with patient details
-        $recentApplications = Application::with(['patient.user.profile', 'program'])
-            ->orderBy('submission_date', 'desc')
-            ->limit(5)
+        $recentRegs = ProgramRegistration::query()
+            ->with(['program:id,title', 'assignedCaseManager.profile:id,user_id,full_name'])
+            ->orderByDesc('created_at')
+            ->limit(10)
             ->get();
+
+        $recentLegacyApps = Application::query()
+            ->with(['patient.user.profile', 'program:id,title'])
+            ->orderByDesc('submission_date')
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
+        $recentDashboardItems = collect();
+        foreach ($recentRegs as $reg) {
+            $recentDashboardItems->push([
+                'type' => 'program_registration',
+                'submitted_at' => $reg->created_at,
+                'registration' => $reg,
+            ]);
+        }
+        foreach ($recentLegacyApps as $app) {
+            $recentDashboardItems->push([
+                'type' => 'legacy_application',
+                'submitted_at' => $app->submission_date ?? $app->created_at,
+                'application' => $app,
+            ]);
+        }
+        $recentDashboardItems = $recentDashboardItems
+            ->sortByDesc(function (array $item) {
+                $d = $item['submitted_at'] ?? null;
+
+                return $d instanceof \Carbon\CarbonInterface ? $d->timestamp : 0;
+            })
+            ->take(5)
+            ->values();
 
         $latestPatients = Patient::with('user')
             ->select('patients.*')
@@ -66,12 +117,35 @@ class AdminController extends Controller
             ->take(5)
             ->get();
 
-        // Get monthly application data for charts (database-agnostic)
+        $latestPatientUserIds = $latestPatients->pluck('user_id')->filter()->values();
+        $latestRegistrationByUserId = ProgramRegistration::query()
+            ->whereIn('user_id', $latestPatientUserIds)
+            ->orderByDesc('id')
+            ->get(['user_id', 'breast_cancer_stage', 'state'])
+            ->unique('user_id')
+            ->keyBy(fn (ProgramRegistration $registration) => (int) $registration->user_id);
+        $latestPatients->each(function (Patient $patient) use ($latestRegistrationByUserId): void {
+            /** @var ProgramRegistration|null $latestRegistration */
+            $latestRegistration = $latestRegistrationByUserId->get((int) $patient->user_id);
+            $stage = $latestRegistration?->breast_cancer_stage
+                ?? ($patient->disease_stage ?: null)
+                ?? ($patient->diagnosis ?: null);
+            $state = $latestRegistration?->state
+                ?? ($patient->user?->profile?->state ?: null);
+            $patient->setAttribute('dashboard_stage', $stage ?: 'N/A');
+            $patient->setAttribute('dashboard_state', $state ?: 'N/A');
+        });
+
+        // Legacy monthly series (reserved for future widgets): legacy apps + program registrations
         $chartData = [];
+        $year = Carbon::now()->year;
         for ($i = 1; $i <= 12; $i++) {
-            $chartData[] = Application::whereYear('submission_date', Carbon::now()->year)
+            $chartData[] = Application::whereYear('submission_date', $year)
                 ->whereMonth('submission_date', $i)
-                ->count();
+                ->count()
+                + ProgramRegistration::whereYear('created_at', $year)
+                    ->whereMonth('created_at', $i)
+                    ->count();
         }
 
         $timePeriod = AdminApplicationStatsChart::normalizePeriod($request->query('period'));
@@ -87,7 +161,7 @@ class AdminController extends Controller
             'totalSponsors',
             'totalPrograms',
             'totalRaised',
-            'recentApplications',
+            'recentDashboardItems',
             'latestPatients',
             'chartData',
             'timePeriod',
@@ -450,6 +524,10 @@ class AdminController extends Controller
 
                 $financeName = $financeUser->profile->full_name ?? $financeUser->email ?? 'Unknown';
 
+                $application->refresh();
+                $application->loadMissing(['patient.user', 'program']);
+                PatientApplicationNotifications::legacyApplicationSentToFinance($application, $financeName);
+
                 FinanceNotificationService::notifyApplicationAssigned($financeUser, $application);
 
                 Log::info('Application sent to finance', [
@@ -460,7 +538,7 @@ class AdminController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Application sent to {$financeName} for budget allocation.",
+                    'message' => "Application sent to {$financeName} for payment processing.",
                     'data' => [
                         'application_id' => $application->id,
                         'finance_user_id' => $financeUser->id,
@@ -544,7 +622,7 @@ class AdminController extends Controller
                 if ($reg->registrationInvoices()->exists()) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Budget has already been allocated for this registration.',
+                        'message' => 'Bills have already been recorded for this registration.',
                     ], 400);
                 }
 
@@ -580,6 +658,17 @@ class AdminController extends Controller
 
                     FinanceNotificationService::notifyRegistrationAssigned($financeUser, $reg);
 
+                    $reg->refresh();
+                    $reg->loadMissing('program');
+                    $programTitle = $reg->program?->title ?? 'a program';
+                    PatientApplicationNotifications::notifyProgramRegistrationApplicant(
+                        $reg,
+                        'With finance',
+                        'Application with finance team',
+                        'Your application for "'.$programTitle.'" has been assigned to '.$financeName.' for payment processing.',
+                        null,
+                    );
+
                     Log::info('Registration sent to finance (assigned user)', [
                         'registration_id' => $reg->id,
                         'finance_user_id' => $financeUser->id,
@@ -588,7 +677,7 @@ class AdminController extends Controller
 
                     return response()->json([
                         'success' => true,
-                        'message' => "Registration assigned to {$financeName} for budget allocation.",
+                        'message' => "Registration assigned to {$financeName} for payment processing.",
                         'data' => [
                             'registration_id' => $reg->id,
                             'finance_user_id' => $financeUser->id,
@@ -604,6 +693,17 @@ class AdminController extends Controller
                 ]);
 
                 FinanceNotificationService::notifyFinanceTeamRegistrationQueued($reg);
+
+                $reg->refresh();
+                $reg->loadMissing('program');
+                $programTitleQueued = $reg->program?->title ?? 'a program';
+                PatientApplicationNotifications::notifyProgramRegistrationApplicant(
+                    $reg,
+                    'Forwarded to finance',
+                    'Application with finance team',
+                    'Your application for "'.$programTitleQueued.'" is in the finance queue for payment processing.',
+                    null,
+                );
 
                 Log::info('Registration placed in finance queue', [
                     'registration_id' => $reg->id,
@@ -902,6 +1002,7 @@ class AdminController extends Controller
             'username' => ['nullable', 'string', 'max:255', Rule::unique('user_profiles', 'username')->ignore($admin->profile?->id)],
             'full_name' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:50',
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ];
 
         $validated = $request->validate($rules);
@@ -913,6 +1014,14 @@ class AdminController extends Controller
             ['user_id' => $admin->id],
             ['full_name' => $admin->email, 'phone' => '']
         );
+
+        if ($request->hasFile('avatar')) {
+            if ($profile->avatar && ! str_contains((string) $profile->avatar, '://')) {
+                Storage::disk('public')->delete($profile->avatar);
+            }
+            $profile->avatar = $request->file('avatar')->store('avatars', 'public');
+        }
+
         $profile->full_name = $validated['full_name'] ?? $profile->full_name ?? $admin->email;
         $profile->phone = $validated['phone'] ?? $profile->phone ?? '';
         $profile->username = $validated['username'] ?? $profile->username;
@@ -993,7 +1102,7 @@ class AdminController extends Controller
     /**
      * Shared filters for admin assistance applications list + CSV export.
      * Status "paid" = application has a paid assistance invoice and/or the patient user has a program
-     * registration with a paid registration invoice (finance budget allocation).
+     * registration with a paid registration invoice (finance bills paid).
      */
     protected function applicationsFilteredQuery(Request $request): Builder
     {
@@ -1162,6 +1271,43 @@ class AdminController extends Controller
     }
 
     /**
+     * @return 'all'|'financial_assistance'|'moments_that_matter'
+     */
+    protected function resolveProgramApplicationTypeFilter(Request $request): string
+    {
+        $type = strtolower((string) $request->query('program_type', 'all'));
+        $valid = ['all', ProgramType::FINANCIAL_ASSISTANCE, ProgramType::MOMENTS_THAT_MATTER];
+
+        return in_array($type, $valid, true) ? $type : 'all';
+    }
+
+    protected function programRegistrationsCountQuery(string $programType): Builder
+    {
+        return ProgramRegistration::query()->forApplicationType($programType);
+    }
+
+    /**
+     * @return array{pending:int,pending_finance:int,approved:int,shipped:int,rejected:int,paid:int,all:int}
+     */
+    protected function programRegistrationCountsForType(string $programType): array
+    {
+        $base = $this->programRegistrationsCountQuery($programType);
+
+        return [
+            'pending' => (clone $base)->where('status', ProgramRegistration::STATUS_PENDING)->count(),
+            'pending_finance' => (clone $base)->where('status', ProgramRegistration::STATUS_PENDING_FINANCE)->count(),
+            'approved' => (clone $base)->where('status', ProgramRegistration::STATUS_APPROVED)->count(),
+            'shipped' => (clone $base)->where('status', ProgramRegistration::STATUS_SHIPPED)->count(),
+            'rejected' => (clone $base)->where('status', ProgramRegistration::STATUS_REJECTED)->count(),
+            'paid' => (clone $base)->whereHas(
+                'registrationInvoices',
+                fn ($iq) => $iq->where('status', 'Paid')
+            )->count(),
+            'all' => (clone $base)->count(),
+        ];
+    }
+
+    /**
      * Program applications query for /admin/registrations (status includes virtual "paid" = finance paid invoice).
      */
     protected function programRegistrationsFilteredQuery(Request $request): Builder
@@ -1173,6 +1319,7 @@ class AdminController extends Controller
             ProgramRegistration::STATUS_PENDING,
             ProgramRegistration::STATUS_PENDING_FINANCE,
             ProgramRegistration::STATUS_APPROVED,
+            ProgramRegistration::STATUS_SHIPPED,
             ProgramRegistration::STATUS_REJECTED,
         ];
 
@@ -1180,7 +1327,9 @@ class AdminController extends Controller
             $programSelectedStatus = 'all';
         }
 
-        $query = ProgramRegistration::query();
+        $programType = $this->resolveProgramApplicationTypeFilter($request);
+
+        $query = ProgramRegistration::query()->forApplicationType($programType);
 
         if ($programSelectedStatus === 'paid') {
             $query->whereHas(
@@ -1210,28 +1359,21 @@ class AdminController extends Controller
             ProgramRegistration::STATUS_PENDING,
             ProgramRegistration::STATUS_PENDING_FINANCE,
             ProgramRegistration::STATUS_APPROVED,
+            ProgramRegistration::STATUS_SHIPPED,
             ProgramRegistration::STATUS_REJECTED,
         ];
         if (! in_array($programSelectedStatus, $validProgramStatuses, true)) {
             $programSelectedStatus = 'all';
         }
 
+        $programSelectedType = $this->resolveProgramApplicationTypeFilter($request);
+
         $programRegistrations = $this->programRegistrationsFilteredQuery($request)
-            ->with(['program:id,title', 'user:id,email', 'assignedCaseManager.profile', 'financeUser.profile', 'registrationInvoices'])
+            ->with(['program:id,title,program_type', 'user:id,email', 'assignedCaseManager.profile', 'financeUser.profile', 'registrationInvoices'])
             ->paginate(15, ['*'], 'program_page')
             ->appends($request->except('program_page'));
 
-        $programCounts = [
-            'pending' => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING)->count(),
-            'pending_finance' => ProgramRegistration::where('status', ProgramRegistration::STATUS_PENDING_FINANCE)->count(),
-            'approved' => ProgramRegistration::where('status', ProgramRegistration::STATUS_APPROVED)->count(),
-            'rejected' => ProgramRegistration::where('status', ProgramRegistration::STATUS_REJECTED)->count(),
-            'paid' => ProgramRegistration::whereHas(
-                'registrationInvoices',
-                fn ($iq) => $iq->where('status', 'Paid')
-            )->count(),
-            'all' => ProgramRegistration::count(),
-        ];
+        $programCounts = $this->programRegistrationCountsForType($programSelectedType);
 
         // Event Registrations Data
         $eventSelectedId = (int) $request->query('event_id');
@@ -1273,6 +1415,7 @@ class AdminController extends Controller
             'tab' => $tab,
             'programRegistrations' => $programRegistrations,
             'programSelectedStatus' => $programSelectedStatus,
+            'programSelectedType' => $programSelectedType,
             'programCounts' => $programCounts,
             'eventRegistrations' => $eventRegistrations,
             'pendingEventRegistrations' => $pendingEventRegistrations,
@@ -1291,7 +1434,7 @@ class AdminController extends Controller
     public function registrationsList(Request $request)
     {
         $programRegistrations = $this->programRegistrationsFilteredQuery($request)
-            ->with(['program:id,title', 'user:id,email', 'assignedCaseManager.profile', 'financeUser.profile', 'registrationInvoices'])
+            ->with(['program:id,title,program_type', 'user:id,email', 'assignedCaseManager.profile', 'financeUser.profile', 'registrationInvoices'])
             ->paginate(15, ['*'], 'program_page')
             ->appends($request->except('program_page'));
 
@@ -1336,6 +1479,9 @@ class AdminController extends Controller
                 'ID',
                 'Applicant name',
                 'Email',
+                'Phone',
+                'Ethnicity',
+                'Breast cancer stage',
                 'Program',
                 'Application status',
                 'Case manager',
@@ -1344,16 +1490,26 @@ class AdminController extends Controller
                 'Invoice #',
                 'Invoice amount',
                 'Submitted at',
+                'Bill: service provider name',
+                'Bill: payment link',
+                'Bill: amount due',
+                'Bill: type of support expenses',
+                'Bill: provider contact',
+                'Bill: account number',
+                'Bill: notes (optional)',
             ]);
 
             $exportQuery->chunk(100, function ($rows) use ($handle, $tz) {
                 foreach ($rows as $reg) {
                     $paid = $reg->registrationInvoices->contains(fn ($inv) => $inv->status === 'Paid');
                     $inv = $reg->registrationInvoices->first();
-                    fputcsv($handle, [
+                    $base = [
                         $reg->id,
                         $reg->full_name,
                         $reg->email,
+                        $reg->phone ?? '',
+                        $reg->ethnicity ?? '',
+                        $reg->breast_cancer_stage ?? '',
                         $reg->program?->title ?? '',
                         $reg->status,
                         $reg->assignedCaseManager?->profile?->full_name ?? $reg->assignedCaseManager?->email ?? '',
@@ -1362,7 +1518,23 @@ class AdminController extends Controller
                         $inv?->invoice_number ?? '',
                         $inv !== null ? number_format((float) $inv->amount, 2, '.', '') : '',
                         $reg->created_at?->timezone($tz)->format('Y-m-d H:i:s') ?? '',
-                    ]);
+                    ];
+                    $lines = $reg->patient_bill_line_items;
+                    if (! is_array($lines) || $lines === []) {
+                        fputcsv($handle, array_merge($base, ['', '', '', '', '', '', '']));
+                    } else {
+                        foreach ($lines as $line) {
+                            fputcsv($handle, array_merge($base, [
+                                $line['name'] ?? '',
+                                $line['url'] ?? '',
+                                $line['amount'] ?? '',
+                                $line['support_expense_type'] ?? '',
+                                $line['provider_contact'] ?? '',
+                                $line['account_number'] ?? '',
+                                $line['notes'] ?? '',
+                            ]));
+                        }
+                    }
                 }
             });
 

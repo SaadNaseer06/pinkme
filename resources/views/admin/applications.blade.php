@@ -18,7 +18,8 @@
     $selectedStatus = strtolower((string) request('status'));
 
     // --- Helpers ---
-    $fmtDate = fn($dt) => $dt ? Carbon::parse($dt)->format('Y-m-d') : '—';
+    $appTz = config('app.timezone');
+    $fmtDate = fn ($dt) => $dt ? Carbon::parse($dt)->timezone($appTz)->format('M j, Y g:i A') : '—';
     $appCode = fn($app) => $app->code ?: 'APP-' . str_pad((string) $app->id, 6, '0', STR_PAD_LEFT);
 
     $statusBadge = function ($status) {
@@ -185,7 +186,7 @@
     {{-- Assign Case Manager Modal --}}
     <div id="assignModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-[#F9EEF6] rounded-xl shadow-lg w-full max-w-[20rem] md:max-w-md p-6">
-            <h2 id="assignModalTitle" class="text-xl font-semibold text-gray-800 mb-2">Assign Case Manager</h2>
+            <h2 id="assignModalTitle" class="text-xl font-semibold text-gray-800 mb-2">Assign Coordinator</h2>
             <p id="assignModalSubtitle" class="text-sm text-[#6C5F67] mb-4 hidden"></p>
             <input id="reviewerSearch" type="text" placeholder="Enter name to find the case manager"
                 class="w-full mb-4 px-4 py-2 rounded-md border border-[#E4D2DB] bg-transparent text-sm placeholder-[#B1A4AD] focus:outline-none focus:ring-2 focus:ring-[#9E2469]" />
@@ -343,7 +344,7 @@
                 $title.text('Change Case Manager');
                 $subtitle.text('Currently assigned to: ' + reviewerName).removeClass('hidden');
             } else {
-                $title.text('Assign Case Manager');
+                $title.text('Assign Coordinator');
                 $subtitle.addClass('hidden');
             }
 

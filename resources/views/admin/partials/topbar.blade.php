@@ -1,28 +1,23 @@
 @php
     $user = auth()->user();
     $profile = $user->profile;
-    $fullName = $profile ? $profile->full_name : 'Unknown User';
+    $fullName = $profile ? $profile->full_name : ($user->email ?? 'User');
 @endphp
 
 <!-- Top Navigation Bar -->
 <header
     class="mt-4 mr-6 bg-[#F3E8EF] p-4 justify-between items-center rounded-lg tab-head md:flex hidden tab-header-1">
     <!-- Search Bar -->
-    <div class="relative">
-        {{-- <input type="text" placeholder="Type here to search..."
-            class="pl-4 pr-10 py-2 rounded-md bg-transparent text-[#B9B1B6] text-sm border border-[#B9B1B6] tab-search focus:outline-none focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469]" />
-        <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#9E2469] mt-[12px]">
-            <i class="fas fa-search"></i>
-        </button> --}}
+    <div class="relative flex-1 min-w-0 max-w-md mr-4">
     </div>
 
     <!-- User Menu -->
-    <div class="flex items-center space-x-4 tab-p">
+    <div class="flex items-center space-x-4 tab-p shrink-0">
         <div class="flex items-center space-x-6 ml-2">
 
             <img src="{{ asset('images/HAM.svg') }}" alt="Menu " class="hamburger hamburgerBtn">
 
-            <button id="fullscreenBtn">
+            <button type="button" class="fullscreen-toggle">
                 <img src="{{ asset('images/scanner.svg') }}" alt="Scanner" class="h-3" />
             </button>
             @include('partials.notification-center')
@@ -31,11 +26,11 @@
         <!-- Profile Dropdown -->
         <div class="relative inline-block profileWrapper">
             <div class="flex items-center space-x-2 cursor-pointer" onclick="toggleProfileDropdown(event)">
-                <div class="w-10 h-10 overflow-hidden rounded-full border">
-                    <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" class="w-full h-full object-cover" />
+                <div class="w-10 h-10 overflow-hidden rounded-full border bg-white flex items-center justify-center shrink-0">
+                    <img src="{{ $user->avatar_url }}" alt="" class="w-full h-full object-cover" />
                 </div>
-                <div class="text-left">
-                    <p class="text-sm font-normal text-[#213430]">Admin</p>
+                <div class="text-left min-w-0 max-w-[10rem]">
+                    <p class="text-sm font-normal text-[#213430] truncate">{{ $fullName }}</p>
                     <p class="text-xs text-[#9E2469]">Online</p>
                 </div>
             </div>
@@ -89,26 +84,70 @@
 
 
     <!-- User Menu -->
-    <div class="flex items-center justify-between w-full  ">
-        <img src="{{ asset('images/HAM.svg') }}" alt="Menu " class="hamburger mt-2 ml-2 hamburgerBtn">
-        <div class="flex items-center space-x-4 tab-p">
-            <div class="flex items-center space-x-6 ml-2">
+    <div class="flex items-center justify-between w-full min-w-0">
+        <img src="{{ asset('images/HAM.svg') }}" alt="Menu " class="hamburger mt-2 ml-2 hamburgerBtn shrink-0">
+        <div class="flex items-center space-x-4 tab-p min-w-0">
+            <div class="flex items-center space-x-4 ml-2 shrink-0">
 
 
 
-                <button id="fullscreenBtn">
+                <button type="button" class="fullscreen-toggle">
                     <img src="{{ asset('images/scanner.svg') }}" alt="Scanner" class="h-3" />
                 </button>
                 @include('partials.notification-center', ['iconClass' => 'h-4'])
             </div>
 
-            <div class="flex items-center space-x-2 ">
-                <div class="w-10 h-10 overflow-hidden">
-                    <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" class="w-full h-full object-cover" />
+            <div class="relative inline-block profileWrapper min-w-0">
+                <div class="flex items-center space-x-2 cursor-pointer min-w-0" onclick="toggleProfileDropdown(event)">
+                    <div class="w-10 h-10 overflow-hidden rounded-full border bg-white shrink-0 flex items-center justify-center">
+                        <img src="{{ $user->avatar_url }}" alt="" class="w-full h-full object-cover" />
+                    </div>
+                    <div class="text-left min-w-0 max-w-[120px] sm:max-w-[180px]">
+                        <p class="text-xs font-normal text-[#213430] truncate">{{ $fullName }}</p>
+                        <p class="text-xs text-[#9E2469]">Online</p>
+                    </div>
                 </div>
-                <div class="text-left">
-                    <p class="text-sm font-normal text-[#213430]">{{ $fullName }}</p>
-                    <p class="text-xs text-[#9E2469]">Online</p>
+
+                <div class="hidden fixed right-4 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-[#F7EBF3] rounded-xl z-50 profileDropdown">
+                    <div class="px-4 py-3 bg-[#9E2469] rounded-t-xl">
+                        <p class="text-white text-sm font-semibold">All Notification</p>
+                        <p class="text-white text-xs font-light">Available</p>
+                    </div>
+
+                    <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto bg-transparent">
+                        <div class="p-3 space-y-3">
+                            <a href="{{ route('admin.settings') }}" class="flex items-start space-x-3 p-2 rounded-md">
+                                <img src="{{ asset('images/p-1.svg') }}" class="w-5 h-5 mt-1" alt="" />
+                                <div>
+                                    <p class="text-sm font-semibold text-[#213430]">My Profile</p>
+                                    <p class="text-xs text-[#A9A9A9]">View personal profile details.</p>
+                                </div>
+                            </a>
+                            <div class="border-b border-[#B9B1B6]"></div>
+                            <a href="{{ route('admin.settings') }}" class="flex items-start space-x-3 p-2 rounded-md">
+                                <img src="{{ asset('images/p-2.svg') }}" class="w-5 h-5 mt-1" alt="" />
+                                <div>
+                                    <p class="text-sm font-semibold text-[#213430]">Edit Profile</p>
+                                    <p class="text-xs text-[#A9A9A9]">Modify your personal details.</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="px-4 pb-3">
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit"
+                                class="w-full text-center bg-[#9E2469] text-white text-sm font-semibold py-2 rounded-md flex items-center justify-center gap-2">
+                                Sign Out
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -258,14 +297,16 @@
 
 
 
-    document.getElementById("fullscreenBtn").addEventListener("click", () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch((err) => {
-                console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
-            });
-        } else {
-            document.exitFullscreen();
-        }
+    document.querySelectorAll(".fullscreen-toggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch((err) => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
     });
 
     // Mobile sidebar toggle
@@ -298,7 +339,9 @@
         e.stopPropagation();
 
         const wrapper = e.currentTarget.closest(".profileWrapper");
+        if (!wrapper) return;
         const dropdown = wrapper.querySelector(".profileDropdown");
+        if (!dropdown) return;
 
         // Hide all other dropdowns first
         document.querySelectorAll(".profileDropdown").forEach((dd) => {
@@ -307,4 +350,13 @@
 
         dropdown.classList.toggle("hidden");
     }
+
+    document.addEventListener("click", (e) => {
+        document.querySelectorAll(".profileDropdown").forEach((dd) => {
+            const wrapper = dd.closest(".profileWrapper");
+            if (wrapper && !wrapper.contains(e.target)) {
+                dd.classList.add("hidden");
+            }
+        });
+    });
 </script>

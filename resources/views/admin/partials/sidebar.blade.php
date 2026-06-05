@@ -32,22 +32,23 @@
         <li class="{{ request()->is('admin/reviewers*') ? 'active' : '' }}">
             <a href="{{ route('admin.reviewers') }}"><img
                     src="{{ request()->is('admin/reviewers*') ? asset('images/review-pink.svg') : asset('images/review.svg') }}"
-                    alt="Case Managers" />Case Managers</a>
+                    alt="Case Managers" /><span
+                    style="white-space: normal; line-height: 1.25;">Patient Support<br />Coordinator</span></a>
         </li>
         <li class="{{ request()->is('admin/finance-users*') ? 'active' : '' }}">
             <a href="{{ route('admin.finance-users.index') }}"><img
                     src="{{ request()->is('admin/finance-users*') ? asset('images/review-pink.svg') : asset('images/review.svg') }}"
-                    alt="Finance Users" />Finance Users</a>
+                    alt="Finance Users" />Finance & Grant Team</a>
         </li>
         <li class="{{ request()->routeIs('admin.staff_chats') ? 'active' : '' }}">
             <a href="{{ route('admin.staff_chats') }}"><img
                     src="{{ request()->routeIs('admin.staff_chats') ? asset('images/chat-svg-pink.svg') : asset('images/chat.svg') }}"
-                    alt="Finance chat" />Finance chat</a>
+                    alt="Finance chat" />Financial Support Chat</a>
         </li>
         <li class="{{ request()->is('admin/patients') ? 'active' : '' }}">
             <a href="{{ route('admin.patients') }}"><img
                     src="{{ request()->is('admin/patients') ? asset('images/patient-pink.svg') : asset('images/patient.svg') }}"
-                    alt="" />Patients</a>
+                    alt="" />PINK “ME” Friends</a>
         </li>
         {{-- Sponsors - commented: sponsor not important for now
         <li class="{{ request()->is('admin/sponsors*') ? 'active' : '' }}">
@@ -127,7 +128,8 @@
                     <span class="icon"><img
                             src="{{ request()->is('admin/reviewers*') ? asset('images/review-pink.svg') : asset('images/review.svg') }}"
                             class="w-5 h-5" alt="Case Managers" /></span>
-                    <span class="title">Case Managers</span>
+                    <span class="title"
+                        style="white-space: normal; line-height: 1.25; height: auto; min-height: 60px; padding: 12px 10px; overflow-wrap: break-word; word-break: break-word; min-width: 0; flex: 1 1 auto;">Patient Support<br />Coordinator</span>
                 </a>
             </li>
             <li class="{{ request()->is('admin/finance-users*') ? 'hovered' : '' }}">
@@ -135,7 +137,7 @@
                     <span class="icon"><img
                             src="{{ request()->is('admin/finance-users*') ? asset('images/review-pink.svg') : asset('images/review.svg') }}"
                             class="w-5 h-5" alt="Finance Users" /></span>
-                    <span class="title">Finance Users</span>
+                    <span class="title">Finance & Grant Team</span>
                 </a>
             </li>
             <li class="{{ request()->routeIs('admin.staff_chats') ? 'hovered' : '' }}">
@@ -143,7 +145,7 @@
                     <span class="icon"><img
                             src="{{ request()->routeIs('admin.staff_chats') ? asset('images/chat-svg-pink.svg') : asset('images/chat.svg') }}"
                             class="w-5 h-5" alt="Finance chat" /></span>
-                    <span class="title">Finance chat</span>
+                    <span class="title">Financial Support Chat</span>
                 </a>
             </li>
             <li class="{{ request()->is('admin/patients') ? 'hovered' : '' }}">
@@ -151,7 +153,7 @@
                     <span class="icon"><img
                             src="{{ request()->is('admin/patients') ? asset('images/patient-pink.svg') : asset('images/patient.svg') }}"
                             class="w-5 h-5" /></span>
-                    <span class="title">Patients</span>
+                    <span class="title">PINK “ME” Friends</span>
                 </a>
             </li>
             {{-- Sponsors - commented: sponsor not important for now

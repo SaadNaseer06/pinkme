@@ -30,6 +30,7 @@
                             $rowStatus = strtolower((string) $registration->status);
                             $badgeClasses = match ($rowStatus) {
                                 \App\Models\ProgramRegistration::STATUS_APPROVED => 'bg-[#C5E8D1] text-[#20B354]',
+                                \App\Models\ProgramRegistration::STATUS_SHIPPED => 'bg-[#D4E8FA] text-[#1A6BB3]',
                                 \App\Models\ProgramRegistration::STATUS_REJECTED => 'bg-[#FAD4D4] text-[#B32020]',
                                 \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE => 'bg-amber-100 text-amber-900',
                                 default => 'bg-[#FDE8F3] text-[#9E2469]',

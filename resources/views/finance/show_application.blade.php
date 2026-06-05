@@ -18,10 +18,10 @@
             </a>
             @if (!$application->invoices->isNotEmpty())
                 <a href="{{ route('finance.invoice.create', $application) }}" class="bg-[#9E2469] text-white px-4 py-2 rounded-md text-sm hover:bg-[#B52D75]">
-                    <i class="fas fa-dollar-sign mr-1"></i> Allocate Budget (Generate Invoice)
+                    <i class="fas fa-dollar-sign mr-1"></i> Record bills paid (Generate Invoice)
                 </a>
             @else
-                <span class="px-4 py-2 rounded-md text-sm bg-green-100 text-green-700">Budget Already Allocated</span>
+                <span class="px-4 py-2 rounded-md text-sm bg-green-100 text-green-700">Bills paid</span>
             @endif
         </div>
 

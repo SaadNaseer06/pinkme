@@ -121,7 +121,7 @@
                         </div>
                         <a href="{{ route('admin.case-managers.create') }}"
                             class="inline-flex items-center bg-[#9E2469] text-white text-sm px-4 py-2 rounded-md app-h hover:bg-[#B52D75]">
-                            Add Case Manager
+                            Add Coordinator
                         </a>
                     </div>
 

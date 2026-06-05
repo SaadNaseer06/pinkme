@@ -121,7 +121,8 @@
         color: #9E2469 !important;
         position: relative;
     }
-    .navigation ul li.hovered a::before {
+    /* Curved “tab” shadows spill into adjacent rows; admin uses .admin-sidebar-nav and skips these */
+    .navigation:not(.admin-sidebar-nav) ul li.hovered a::before {
         content: "";
         position: absolute;
         right: 0;
@@ -133,7 +134,7 @@
         box-shadow: 35px 35px 0 10px #F3E8EF;
         pointer-events: none;
     }
-    .navigation ul li.hovered a::after {
+    .navigation:not(.admin-sidebar-nav) ul li.hovered a::after {
         content: "";
         position: absolute;
         right: 0;

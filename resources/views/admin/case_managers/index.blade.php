@@ -16,10 +16,10 @@
                     <div class="mb-4 ml-3">
                         <!-- Header -->
                         <div class="flex justify-between items-center">
-                            <h2 class="text-xl font-semibold text-[#213430] app-main">All Case Managers List</h2>
+                            <h2 class="text-xl font-semibold text-[#213430] app-main">All Coordinators List</h2>
                             <a href="{{ route('admin.case-managers.create') }}"
                                 class="bg-[#9E2469] text-white px-4 py-2 rounded-md text-sm hover:bg-[#B52D75] transition">
-                                Add Case Manager
+                                Add Coordinator
                             </a>
                         </div>
 

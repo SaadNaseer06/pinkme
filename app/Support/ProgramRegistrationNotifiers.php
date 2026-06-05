@@ -7,8 +7,6 @@ use App\Models\ProgramRegistration;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserNotification;
-use Illuminate\Support\Facades\Mail;
-
 class ProgramRegistrationNotifiers
 {
     public static function notifyAdmins(string $subject, string $bodyLine, ProgramRegistration $registration): void
@@ -22,7 +20,7 @@ class ProgramRegistrationNotifiers
 
         foreach ($emails as $email) {
             try {
-                Mail::to($email)->queue(new ProgramRegistrationAdminNotice($subject, $registration, $bodyLine));
+                TransactionalMail::send($email, new ProgramRegistrationAdminNotice($subject, $registration, $bodyLine));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -43,21 +41,17 @@ class ProgramRegistrationNotifiers
             ->where('role_id', $roleId)
             ->pluck('id');
 
-        $now = now();
         $linkUrl = route('case_manager.program_registrations.show', $registration);
-        $rows = $userIds->map(fn ($userId): array => [
-            'user_id' => (int) $userId,
-            'title' => $title,
-            'message' => $message,
-            'priority' => UserNotification::PRIORITY_IMPORTANT,
-            'link_url' => $linkUrl,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ])->all();
 
-        foreach (array_chunk($rows, 300) as $chunk) {
+        foreach ($userIds as $userId) {
             try {
-                UserNotification::query()->insert($chunk);
+                UserNotification::create([
+                    'user_id' => (int) $userId,
+                    'title' => $title,
+                    'message' => $message,
+                    'priority' => UserNotification::PRIORITY_IMPORTANT,
+                    'link_url' => $linkUrl,
+                ]);
             } catch (\Throwable $e) {
                 report($e);
             }

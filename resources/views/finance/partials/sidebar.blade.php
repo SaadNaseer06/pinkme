@@ -14,7 +14,7 @@
         </li>
         <li class="{{ request()->routeIs('finance.registrations*') || request()->routeIs('finance.invoice*') || request()->is('finance/registrations*') ? 'active' : '' }}">
             <a href="{{ route('finance.registrations') }}">
-                <img src="{{ request()->routeIs('finance.registrations*') || request()->routeIs('finance.invoice*') || request()->is('finance/registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}" alt="" />Patient Requests
+                <img src="{{ request()->routeIs('finance.registrations*') || request()->routeIs('finance.invoice*') || request()->is('finance/registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}" alt="" />Payments
             </a>
         </li>
         <li class="{{ request()->routeIs('finance.team_chats') ? 'active' : '' }}">
@@ -25,6 +25,11 @@
         <li class="{{ request()->routeIs('finance.guide') ? 'active' : '' }}">
             <a href="{{ route('finance.guide') }}">
                 <img src="{{ request()->routeIs('finance.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}" alt="" />Tutorial
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('finance.setting') ? 'active' : '' }}">
+            <a href="{{ route('finance.setting') }}">
+                <img src="{{ request()->routeIs('finance.setting') ? asset('public/images/setting-pink.svg') : asset('public/images/setting.svg') }}" alt="" />Settings
             </a>
         </li>
     </ul>
@@ -44,7 +49,7 @@
             <li class="{{ request()->routeIs('finance.registrations*') ? 'hovered' : '' }}">
                 <a href="{{ route('finance.registrations') }}">
                     <span class="icon"><img src="{{ request()->routeIs('finance.registrations*') ? asset('public/images/document-pink.svg') : asset('public/images/document.svg') }}" alt="" /></span>
-                    <span class="title">Patient Requests</span>
+                    <span class="title">Payments</span>
                 </a>
             </li>
             <li class="{{ request()->routeIs('finance.team_chats') ? 'hovered' : '' }}">
@@ -57,6 +62,12 @@
                 <a href="{{ route('finance.guide') }}">
                     <span class="icon"><img src="{{ request()->routeIs('finance.guide') ? asset('public/images/FAQ-pink.svg') : asset('public/images/FAQ.svg') }}" alt="" /></span>
                     <span class="title">Tutorial</span>
+                </a>
+            </li>
+            <li class="{{ request()->routeIs('finance.setting') ? 'hovered' : '' }}">
+                <a href="{{ route('finance.setting') }}">
+                    <span class="icon"><img src="{{ request()->routeIs('finance.setting') ? asset('public/images/setting-pink.svg') : asset('public/images/setting.svg') }}" alt="" /></span>
+                    <span class="title">Settings</span>
                 </a>
             </li>
         </ul>

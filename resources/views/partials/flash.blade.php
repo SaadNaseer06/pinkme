@@ -1,12 +1,16 @@
-﻿@php
+@php
     $successMessage = session('success');
     $errorMessage = session('error');
     $warningMessage = session('warning');
     $formErrors = ($errors ?? null) instanceof \Illuminate\Support\ViewErrorBag ? $errors->all() : [];
 @endphp
 
-@if ($successMessage || $errorMessage || $warningMessage || !empty($formErrors))
+@if (session('mtm_submission_notice') || $successMessage || $errorMessage || $warningMessage || !empty($formErrors))
     <div class="mb-6 space-y-3">
+        @if (session('mtm_submission_notice'))
+            @include('partials.moments_that_matter_submission_notice')
+        @endif
+
         @if ($successMessage)
             <div class="rounded-xl border border-[#F4C9DD] bg-[#FEF6FB] px-5 py-4 shadow-sm">
                 <div class="flex items-start gap-3 text-[#6C5B68]">

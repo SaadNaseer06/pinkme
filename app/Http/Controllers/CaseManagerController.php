@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\ProgramRegistrationStatus;
 use App\Models\Application;
 use App\Models\ApplicationMissingRequest;
 use App\Models\Message;
@@ -15,13 +14,13 @@ use App\Services\FinanceNotificationService;
 use App\Support\BillingPaymentLinks;
 use App\Support\PatientApplicationNotifications;
 use App\Support\ProgramRegistrationNotifiers;
+use App\Support\ProgramType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class CaseManagerController extends Controller
@@ -121,6 +120,8 @@ class CaseManagerController extends Controller
             $selectedStatus = ProgramRegistration::STATUS_PENDING;
         }
 
+        $search = trim((string) $request->query('search', ''));
+
         $visibleBase = $this->programRegistrationsVisibleToCaseManagerQuery(Auth::id());
 
         $query = (clone $visibleBase)
@@ -132,6 +133,22 @@ class CaseManagerController extends Controller
                 ->where('assigned_case_manager_id', Auth::id());
         } elseif ($selectedStatus !== 'all') {
             $query->where('status', $selectedStatus);
+        }
+
+        if ($search !== '') {
+            $tokens = array_values(array_filter(array_map('trim', preg_split('/\s+/', $search))));
+            $query->where(function ($outer) use ($tokens): void {
+                foreach ($tokens as $token) {
+                    $like = '%'.addcslashes($token, '%_\\').'%';
+                    $outer->where(function ($q) use ($like): void {
+                        $q->where('first_name', 'like', $like)
+                            ->orWhere('last_name', 'like', $like)
+                            ->orWhere('email', 'like', $like)
+                            ->orWhere('phone', 'like', $like)
+                            ->orWhere('state', 'like', $like);
+                    });
+                }
+            });
         }
 
         $registrations = $query
@@ -185,6 +202,7 @@ class CaseManagerController extends Controller
      */
     public function updateBillingPaymentLinks(Request $request, ProgramRegistration $registration)
     {
+        $registration->loadMissing('program');
         $this->assertCaseManagerMayAccessProgramRegistration($registration);
         $this->claimProgramRegistrationIfUnassigned($registration);
         $registration->refresh();
@@ -212,6 +230,12 @@ class CaseManagerController extends Controller
     public function approveProgramRegistration(ProgramRegistration $registration, Request $request)
     {
         $this->assertCaseManagerMayAccessProgramRegistration($registration);
+
+        if ($registration->isMomentsThatMatterApplication()) {
+            return redirect()
+                ->route('case_manager.program_registrations.index')
+                ->with('error', 'Moments That Matter applications are reviewed by admin only.');
+        }
         $this->claimProgramRegistrationIfUnassigned($registration);
         $registration->refresh();
 
@@ -236,42 +260,43 @@ class CaseManagerController extends Controller
             'sent_to_finance_at' => now(),
         ]);
 
-        PatientApplicationNotifications::notifyProgramRegistrationPatient(
+        $programTitle = $registration->program?->title ?? 'program';
+        $note = $data['note'] ?? null;
+        $body = 'We wanted to inform you that your registration for '.$programTitle.' has been forwarded to the finance team. Status: Forwarded to finance. Note: Ready to be processed by the finance team.';
+        if ($note) {
+            $body .= ' Case manager note: '.$note;
+        }
+        PatientApplicationNotifications::notifyProgramRegistrationApplicant(
             $registration,
-            'Application passed case review',
-            'Your application for "'.($registration->program?->title ?? 'a program').'" passed case manager review and is now with the finance team for final processing.',
+            'Forwarded to finance',
+            'Your application is forwarded to the Finance',
+            $body,
+            $note,
             UserNotification::PRIORITY_IMPORTANT
         );
-
-        $recipientEmail = $registration->user?->email ?? $registration->email;
-        if ($recipientEmail) {
-            try {
-                Mail::to($recipientEmail)->queue(new ProgramRegistrationStatus(
-                    $registration,
-                    'forwarded to finance',
-                    $data['note'] ?? null
-                ));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
 
         FinanceNotificationService::notifyFinanceTeamRegistrationQueued($registration);
 
         ProgramRegistrationNotifiers::notifyAdmins(
             'Application routed to finance',
-            'A case manager approved an application; it is in the finance queue for budget allocation.',
+            'A case manager approved an application; it is in the finance queue for payment processing.',
             $registration
         );
 
         return redirect()
             ->route('case_manager.program_registrations.show', $registration)
-            ->with('success', 'The registration has been approved.');
+            ->with('success', 'The application has been approved.');
     }
 
     public function rejectProgramRegistration(ProgramRegistration $registration, Request $request)
     {
         $this->assertCaseManagerMayAccessProgramRegistration($registration);
+
+        if ($registration->isMomentsThatMatterApplication()) {
+            return redirect()
+                ->route('case_manager.program_registrations.index')
+                ->with('error', 'Moments That Matter applications are reviewed by admin only.');
+        }
         $this->claimProgramRegistrationIfUnassigned($registration);
         $registration->refresh();
 
@@ -294,21 +319,15 @@ class CaseManagerController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        PatientApplicationNotifications::notifyProgramRegistrationPatient(
+        $programTitle = $registration->program?->title ?? 'a program';
+        PatientApplicationNotifications::notifyProgramRegistrationApplicant(
             $registration,
+            'Rejected',
             'Program registration rejected',
-            'Your registration for "'.($registration->program?->title ?? 'a program').'" has been rejected. Reason: '.$data['note'],
+            'Your registration for "'.$programTitle.'" has been rejected. Reason: '.$data['note'],
+            $data['note'],
             UserNotification::PRIORITY_IMPORTANT
         );
-
-        $recipientEmail = $registration->user?->email ?? $registration->email;
-        if ($recipientEmail) {
-            try {
-                Mail::to($recipientEmail)->queue(new ProgramRegistrationStatus($registration, 'Rejected', $data['note']));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
 
         ProgramRegistrationNotifiers::notifyAdmins(
             'Application rejected by case manager',
@@ -521,27 +540,76 @@ class CaseManagerController extends Controller
         return back()->with('success', 'Your request for missing documents has been sent to the applicant.');
     }
 
-    public function patientProfiles()
+    public function patientProfiles(Request $request)
     {
-        // Only show patients whose applications are assigned to the logged-in case manager
         $reviewerId = Auth::id();
 
-        $patients = Patient::query()
-            ->whereHas('applications', function ($q) use ($reviewerId) {
-                $q->where('reviewer_id', $reviewerId);
-            })
+        $userIdsFromApplications = Application::query()
+            ->where('reviewer_id', $reviewerId)
+            ->whereHas('patient')
+            ->join('patients', 'patients.id', '=', 'applications.patient_id')
+            ->pluck('patients.user_id');
+
+        $userIdsFromRegistrations = ProgramRegistration::query()
+            ->where('assigned_case_manager_id', $reviewerId)
+            ->whereNotNull('user_id')
+            ->pluck('user_id');
+
+        $userIds = $userIdsFromApplications
+            ->merge($userIdsFromRegistrations)
+            ->unique()
+            ->filter()
+            ->values();
+
+        $search = trim((string) $request->query('search', ''));
+
+        $usersQuery = User::query()
+            ->whereIn('id', $userIds)
             ->with([
-                'user.profile',
-                'applications' => function ($q) use ($reviewerId) {
+                'profile',
+                'patient.applications' => function ($q) use ($reviewerId) {
                     $q->where('reviewer_id', $reviewerId)
                         ->with('program')
                         ->orderByDesc('submission_date');
                 },
+                'programRegistrations' => function ($q) use ($reviewerId) {
+                    $q->where('assigned_case_manager_id', $reviewerId)
+                        ->with('program')
+                        ->orderByDesc('created_at');
+                },
             ])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->orderByDesc('created_at');
 
-        return view('case_manager.patient_profiles', compact('patients'));
+        if ($search !== '') {
+            $tokens = array_values(array_filter(array_map('trim', preg_split('/\s+/', $search))));
+            $usersQuery->where(function ($outer) use ($tokens, $reviewerId): void {
+                foreach ($tokens as $token) {
+                    $like = '%'.addcslashes($token, '%_\\').'%';
+                    $outer->where(function ($q) use ($like, $reviewerId): void {
+                        $q->where('email', 'like', $like)
+                            ->orWhereHas('profile', function ($p) use ($like): void {
+                                $p->where('full_name', 'like', $like)
+                                    ->orWhere('phone', 'like', $like)
+                                    ->orWhere('state', 'like', $like);
+                            })
+                            ->orWhereHas('programRegistrations', function ($pr) use ($like, $reviewerId): void {
+                                $pr->where('assigned_case_manager_id', $reviewerId)
+                                    ->where(function ($inner) use ($like): void {
+                                        $inner->where('email', 'like', $like)
+                                            ->orWhere('phone', 'like', $like)
+                                            ->orWhere('state', 'like', $like)
+                                            ->orWhere('first_name', 'like', $like)
+                                            ->orWhere('last_name', 'like', $like);
+                                    });
+                            });
+                    });
+                }
+            });
+        }
+
+        $patientUsers = $usersQuery->paginate(20)->appends($request->query());
+
+        return view('case_manager.patient_profiles', ['patientUsers' => $patientUsers]);
     }
 
     /**
@@ -549,6 +617,13 @@ class CaseManagerController extends Controller
      */
     public function claimProgramRegistrationFromChat(ProgramRegistration $registration)
     {
+        $registration->loadMissing('program');
+        if ($registration->isMomentsThatMatterApplication()) {
+            return redirect()
+                ->route('case_manager.patientChats')
+                ->with('error', 'Moments That Matter applications are reviewed by admin only.');
+        }
+
         $userId = (int) Auth::id();
         $assignedId = $registration->assigned_case_manager_id;
 
@@ -866,6 +941,11 @@ class CaseManagerController extends Controller
      */
     private function assertCaseManagerMayAccessProgramRegistration(ProgramRegistration $registration): void
     {
+        $registration->loadMissing('program');
+        if ($registration->isMomentsThatMatterApplication()) {
+            abort(403, 'Moments That Matter applications are reviewed by admin only.');
+        }
+
         if ($registration->assigned_case_manager_id === Auth::id()) {
             return;
         }
@@ -897,13 +977,18 @@ class CaseManagerController extends Controller
      */
     private function programRegistrationsVisibleToCaseManagerQuery(int $userId): Builder
     {
-        return ProgramRegistration::query()->where(function ($w) use ($userId): void {
-            $w->where('assigned_case_manager_id', $userId)
-                ->orWhere(function ($w2): void {
-                    $w2->whereNull('assigned_case_manager_id')
-                        ->where('status', ProgramRegistration::STATUS_PENDING);
-                });
-        });
+        return ProgramRegistration::query()
+            ->where(function ($w) use ($userId): void {
+                $w->where('assigned_case_manager_id', $userId)
+                    ->orWhere(function ($w2): void {
+                        $w2->whereNull('assigned_case_manager_id')
+                            ->where('status', ProgramRegistration::STATUS_PENDING);
+                    });
+            })
+            ->where(function ($w): void {
+                $w->whereNull('mtm_package')
+                    ->whereDoesntHave('program', fn ($q) => $q->where('program_type', ProgramType::MOMENTS_THAT_MATTER));
+            });
     }
 
     /**

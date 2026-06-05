@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Application;
+use App\Models\ProgramRegistration;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -87,17 +88,30 @@ class AdminApplicationStatsChart
      */
     private static function pushBucketCounts(array &$chartData, string $label, callable $scope): void
     {
-        $totalQ = Application::query();
-        $scope($totalQ);
-        $total = $totalQ->count();
+        $total = 0;
+        $approved = 0;
+        $rejected = 0;
 
-        $approvedQ = Application::query();
-        $scope($approvedQ);
-        $approved = $approvedQ->where('status', 'Approved')->count();
+        foreach ([Application::class, ProgramRegistration::class] as $modelClass) {
+            $totalQ = $modelClass::query();
+            $scope($totalQ);
+            $total += $totalQ->count();
 
-        $rejectedQ = Application::query();
-        $scope($rejectedQ);
-        $rejected = $rejectedQ->where('status', 'Rejected')->count();
+            $approvedQ = $modelClass::query();
+            $scope($approvedQ);
+            $approved += $approvedQ->where(
+                'status',
+                $modelClass === Application::class ? Application::STATUS_APPROVED : ProgramRegistration::STATUS_APPROVED
+            )->count();
+
+            $rejectedQ = $modelClass::query();
+            $scope($rejectedQ);
+            $rejected += $rejectedQ->where(
+                'status',
+                $modelClass === Application::class ? Application::STATUS_REJECTED : ProgramRegistration::STATUS_REJECTED
+            )->count();
+        }
+
         $remain = max(0, $total - $approved - $rejected);
 
         if ($total > 0) {

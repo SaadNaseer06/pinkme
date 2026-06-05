@@ -141,7 +141,9 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     Route::get('/program-registration-requests/{registration}', [AdminProgramRegistrationController::class, 'show'])->name('admin.program_registrations.show');
     Route::post('/program-registration-requests/{registration}/approve', [AdminProgramRegistrationController::class, 'approve'])->name('admin.program_registrations.approve');
     Route::post('/program-registration-requests/{registration}/reject', [AdminProgramRegistrationController::class, 'reject'])->name('admin.program_registrations.reject');
-    Route::post('/program-registration-requests/{registration}/assign', [AdminProgramRegistrationController::class, 'assignCaseManager'])->name('admin.program_registrations.assign');
+    Route::post('/program-registration-requests/{registration}/mark-shipped', [AdminProgramRegistrationController::class, 'markShipped'])->name('admin.program_registrations.markShipped');
+    Route::match(['get', 'post'], '/program-registration-requests/{registration}/assign', [AdminProgramRegistrationController::class, 'assignCaseManager'])
+        ->name('admin.program_registrations.assign');
     Route::post('/program-registration-requests/{registration}/send-to-finance', [AdminController::class, 'sendRegistrationToFinance'])->name('admin.program_registrations.sendToFinance');
     Route::get('/program-registration-requests/{registration}/invoices/{invoice}', [AdminController::class, 'showRegistrationInvoice'])->name('admin.registration_invoices.show');
     Route::get('/program-registration-requests/{registration}/invoices/{invoice}/download', [AdminController::class, 'downloadRegistrationInvoice'])->name('admin.registration_invoices.download');
@@ -257,12 +259,19 @@ Route::prefix('finance')->middleware(['role.restrict'])->group(function () {
     Route::get('/team-chats/claimable-fragment', [FinanceUserController::class, 'teamChatsClaimableFragment'])
         ->name('finance.team_chats.claimable_fragment');
     Route::get('/tutorial', [PageController::class, 'financeGuide'])->name('finance.guide');
+    Route::get('/setting', [FinanceUserController::class, 'setting'])->name('finance.setting');
+    Route::put('/setting', [FinanceUserController::class, 'updateProfile'])->name('finance.settings.update');
     Route::get('/registrations', [FinanceUserController::class, 'registrations'])->name('finance.registrations');
     Route::get('/registrations/{registration}', [FinanceUserController::class, 'showRegistration'])->name('finance.registrations.show');
+    Route::post('/registrations/{registration}/reject', [FinanceUserController::class, 'rejectRegistration'])->name('finance.registrations.reject');
     Route::get('/registrations/{registration}/bill-statement/{index}', [FinanceUserController::class, 'downloadBillStatement'])->name('finance.registrations.bill_statement.download')->where('index', '[0-9]+');
     Route::get('/registrations/{registration}/invoice/create', [FinanceUserController::class, 'createInvoice'])->name('finance.invoice.create');
+    // Browsers may GET /invoice after back/refresh from the POST submit URL — serve the same form instead of 405.
+    Route::get('/registrations/{registration}/invoice', [FinanceUserController::class, 'createInvoice']);
     Route::post('/registrations/{registration}/invoice', [FinanceUserController::class, 'storeInvoice'])->name('finance.invoice.store');
     Route::post('/registrations/{registration}/invoices/{invoice}/resend-emails', [FinanceUserController::class, 'resendInvoiceEmails'])->name('finance.invoice.resend_emails');
+    Route::post('/registrations/{registration}/invoices/{invoice}/payment-proof', [FinanceUserController::class, 'uploadPaymentProof'])->name('finance.invoice.payment_proof');
+    Route::post('/registrations/{registration}/pre-payment-proofs', [FinanceUserController::class, 'uploadPrePaymentProofs'])->name('finance.registrations.pre_payment_proofs');
     Route::post('/registrations/{registration}/claim-chat', [FinanceUserController::class, 'claimRegistrationFromChat'])->name('finance.registrations.claim_chat');
 });
 

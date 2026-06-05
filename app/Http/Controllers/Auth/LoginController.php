@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -16,11 +17,44 @@ class LoginController extends Controller
 
     private const COOKIE_STAFF_PASSWORD = 'staff_remembered_password';
 
-    public function showStaffLoginForm()
+    private const STAFF_PORTALS = [
+        'admin' => [
+            'heading' => 'Admin sign in',
+            'expected_role' => 'admin',
+        ],
+        'coordinator' => [
+            'heading' => 'Patient Coordinator sign in',
+            'expected_role' => 'casemanager',
+        ],
+        'finance' => [
+            'heading' => 'Finance & Grant Manager sign in',
+            'expected_role' => 'finance',
+        ],
+    ];
+
+    public function showStaffLoginForm(Request $request)
     {
+        $portal = strtolower((string) $request->query('portal', ''));
+        if ($portal === '' && ! $request->boolean('finance')) {
+            return view('auth.staff_portal');
+        }
+
+        if ($request->boolean('finance') && $portal === '') {
+            $portal = 'finance';
+        }
+
+        $portalConfig = self::STAFF_PORTALS[$portal] ?? null;
+        if ($portalConfig === null) {
+            return view('auth.staff_portal');
+        }
+
         return view('auth.staff_login', [
             'rememberedStaffEmail' => Cookie::get(self::COOKIE_STAFF_EMAIL),
             'rememberedStaffPassword' => Cookie::get(self::COOKIE_STAFF_PASSWORD),
+            'staffLoginHeading' => $portalConfig['heading'],
+            'staffAccessNotice' => Brand::staffAccessNotice(),
+            'staffPortal' => $portal,
+            'staffPortalBackUrl' => route('login.staff'),
         ]);
     }
 
@@ -45,7 +79,11 @@ class LoginController extends Controller
             }
             Cookie::queue(Cookie::forget(self::COOKIE_STAFF_PASSWORD));
 
-            return redirect()->route('login.staff')
+            $redirectParams = array_filter([
+                'portal' => $request->input('portal'),
+            ]);
+
+            return redirect()->route('login.staff', $redirectParams)
                 ->withInput($request->only('email', 'remember'))
                 ->withErrors([
                     'email' => __('These credentials do not match our records.'),
@@ -54,6 +92,32 @@ class LoginController extends Controller
 
         $user = Auth::user();
         $roleName = $user->role?->name;
+        $portal = strtolower((string) $request->input('portal', ''));
+        $expectedRole = self::STAFF_PORTALS[$portal]['expected_role'] ?? null;
+
+        if ($expectedRole !== null && $roleName !== $expectedRole) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            if (! $remember) {
+                Cookie::queue(Cookie::forget(self::COOKIE_STAFF_EMAIL));
+            }
+            Cookie::queue(Cookie::forget(self::COOKIE_STAFF_PASSWORD));
+
+            $portalLabel = match ($expectedRole) {
+                'admin' => 'Admin',
+                'casemanager' => 'Patient Coordinator',
+                'finance' => 'Finance & Grant Manager',
+                default => 'staff',
+            };
+
+            return redirect()->route('login.staff', ['portal' => $portal ?: null])
+                ->withInput($request->only('email', 'remember'))
+                ->withErrors([
+                    'email' => __('This account cannot sign in through the :portal portal. Please choose the correct role or contact your administrator.', ['portal' => $portalLabel]),
+                ]);
+        }
 
         if (! in_array($roleName, self::STAFF_ROLES, true)) {
             Auth::logout();

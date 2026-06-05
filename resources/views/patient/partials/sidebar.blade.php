@@ -1,4 +1,63 @@
-﻿<!-- Mobile Sidebar -->
+{{-- Inline styles: production may not load Vite-built patient.css; keep Apply here layout reliable. --}}
+<style>
+    .patient-nav-programs-mobile-link {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .patient-nav-programs-mobile-text {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+    .patient-nav-apply-badge-inline {
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+        border-radius: 9999px;
+        background: #9e2469;
+        color: #fff;
+        padding: 0.125rem 0.5rem;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        line-height: 1.2;
+    }
+    .navigation ul li a .title.patient-nav-programs-title {
+        white-space: normal;
+        line-height: 1.2;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        height: 60px;
+        padding: 8px 10px;
+        box-sizing: border-box;
+    }
+    .patient-nav-programs-label {
+        display: block;
+    }
+    .patient-nav-apply-badge {
+        display: inline-block;
+        margin-top: 4px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border-radius: 9999px;
+        background: #9e2469;
+        color: #fff;
+        line-height: 1.2;
+    }
+</style>
+
+<!-- Mobile Sidebar -->
 <div class="mobile-sidebar" id="mobileSidebar">
     <!-- Close Button -->
     <button class="close-btn" id="closeBtn">
@@ -31,10 +90,13 @@
         </li>
 
         <li class="{{ request()->routeIs('patient.programsAndAids') ? 'active' : '' }}">
-            <a href="{{ route('patient.programsAndAids') }}">
+            <a href="{{ route('patient.programsAndAids') }}" class="patient-nav-programs-mobile-link">
                 <img src="{{ request()->routeIs('patient.programsAndAids') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
                     alt="">
-                Programs & Aids
+                <span class="patient-nav-programs-mobile-text">
+                    <span>Programs & Services</span>
+                    <span class="patient-nav-apply-badge-inline">Apply here</span>
+                </span>
             </a>
         </li>
         {{-- Webinars - commented: sponsor/webinars not important for now
@@ -120,11 +182,14 @@
                 </a>
             </li>
             <li class="{{ request()->routeIs('patient.programsAndAids') ? 'hovered' : '' }}">
-                <a href="{{ route('patient.programsAndAids') }}">
+                <a href="{{ route('patient.programsAndAids') }}" class="patient-nav-programs-link">
                     <span class="icon"><img
                             src="{{ request()->routeIs('patient.programsAndAids') ? asset('public/images/program-svg.svg') : asset('public/images/program.svg') }}"
                             alt="" /></span>
-                    <span class="title">Programs & Aids</span>
+                    <span class="title patient-nav-programs-title">
+                        <span class="patient-nav-programs-label">Programs & Services</span>
+                        <span class="patient-nav-apply-badge" title="Apply for financial assistance">Apply here</span>
+                    </span>
                 </a>
             </li>
             {{-- Webinars - commented: sponsor/webinars not important for now

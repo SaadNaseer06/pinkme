@@ -32,7 +32,8 @@ class UserNotificationEmail extends Mailable
             ->with([
                 'recipientName' => $recipientName,
                 'title' => $this->userNotification->title ?: 'Notification',
-                'message' => $this->userNotification->message,
+                // Never use key "message" — Laravel injects $message (Symfony mail object) into mail views.
+                'notificationBody' => $this->userNotification->message,
                 'linkUrl' => $linkUrl,
             ]);
     }

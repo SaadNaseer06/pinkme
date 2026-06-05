@@ -44,7 +44,7 @@
                         <!-- Support Programs Section -->
                         <div class="mt-6 mb-6">
                             <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-2xl font-semibold text-[#213430] program-main">Support Programs</h2>
+                                <h2 class="text-2xl font-semibold text-[#213430] program-main">PINK “ME” Assistance Programs</h2>
                                 @if ($programs->count() > 0)
                                     <div class="flex items-center space-x-4">
                                         <form method="GET" class="flex items-center gap-2">
@@ -80,19 +80,24 @@
                                                 : ($program->event_time
                                                     ? \Carbon\Carbon::parse($program->event_time)
                                                     : null);
+                                        $fallbackImage = asset('public/images/program-3.png');
                                         $image = $program->banner
-                                            ? storage_url($program->banner)
-                                            : $program->image_url ?? asset('public/images/program-3.png');
+                                            ? storage_url(ltrim($program->banner, '/'))
+                                            : $fallbackImage;
                                         $detail = [
                                             'type' => 'program',
                                             'title' => $program->title,
                                             'description' => $program->description,
                                             'image' => $image,
+                                            'image_fallback' => $fallbackImage,
                                             'date' => $programDate ? $programDate->format('l, F d, Y') : null,
                                             'time' => $programTime ? $programTime->format('h:i A') : null,
-                                            'status' => $program->status,
+                                            'status' => $program->effective_status_label ?? $program->status,
+                                            'program_type_label' => $program->programTypeLabel(),
                                             'registrations' => $program->registrations_count ?? 0,
                                             'show_url' => route('programs.edit', $program),
+                                            'sponsor_name' => $program->sponsor_name,
+                                            'sponsor_logo' => $program->sponsorLogoUrl(),
                                         ];
                                     @endphp
                                     <!-- Desktop Program Card -->
@@ -125,9 +130,20 @@
                                         <div class="flex items-center gap-2">
                                             <a href="{{ route('programs.edit', $program) }}"
                                                 class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-[#213430] shadow-sm hover:bg-[#F6EDF5] transition">Edit</a>
-                                            <button onclick='openProgramDetailModal(@json($detail))'
+                                            <button type="button" onclick='openProgramDetailModal(@json($detail))'
                                                 class="bg-[#9E2469] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#B52D75] transition">View
                                                 Details</button>
+                                            <form action="{{ route('programs.destroy', $program) }}" method="POST" class="inline-flex"
+                                                onsubmit="return confirm(@js(
+                                                    'Delete this program?'
+                                                    .(($program->registrations_count ?? 0) > 0 ? ' '.$program->registrations_count.' application(s) will be removed too.' : '')
+                                                    .' This cannot be undone.'
+                                                ));">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 transition">Delete</button>
+                                            </form>
                                         </div>
                                     </div>
                                     <!-- Mobile Program Card -->
@@ -156,11 +172,22 @@
                                                     <span><i class="fas fa-users mr-1"></i>Regs:
                                                         {{ $program->registrations_count ?? 0 }}</span>
                                                 </div>
-                                                <div class="flex gap-2">
+                                                <div class="flex flex-wrap gap-2">
                                                     <a href="{{ route('programs.edit', $program) }}"
-                                                        class="flex-1 text-center border border-[#213430] text-[#213430] text-xs py-2 rounded-md program-btn">Edit</a>
-                                                    <button onclick='openProgramDetailModal(@json($detail))'
-                                                        class="flex-1 text-center bg-[#9E2469] text-white text-xs py-2 rounded-md program-btn">View</button>
+                                                        class="flex-1 min-w-[4.5rem] text-center border border-[#213430] text-[#213430] text-xs py-2 rounded-md program-btn">Edit</a>
+                                                    <button type="button" onclick='openProgramDetailModal(@json($detail))'
+                                                        class="flex-1 min-w-[4.5rem] text-center bg-[#9E2469] text-white text-xs py-2 rounded-md program-btn">View</button>
+                                                    <form action="{{ route('programs.destroy', $program) }}" method="POST" class="flex-1 min-w-[4.5rem]"
+                                                        onsubmit="return confirm(@js(
+                                                            'Delete this program?'
+                                                            .(($program->registrations_count ?? 0) > 0 ? ' '.$program->registrations_count.' application(s) will be removed too.' : '')
+                                                            .' This cannot be undone.'
+                                                        ));">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="w-full text-center border border-red-200 text-red-600 text-xs py-2 rounded-md program-btn hover:bg-red-50">Delete</button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>
@@ -384,10 +411,16 @@
                                 </svg>
                             </button>
                         </div>
-                        <div class="w-full h-64 overflow-hidden">
-                            <img id="programDetailModalImage" src="{{ asset('public/images/program-details.png') }}"
-                                alt="" class="w-full h-full object-cover" />
+                        <div class="w-full h-64 overflow-hidden bg-[#F3E8EF]">
+                            <img id="programDetailModalImage" src="{{ asset('public/images/program-3.png') }}"
+                                alt="" class="w-full h-full object-cover"
+                                onerror="this.onerror=null;this.src=this.dataset.fallback||'{{ asset('public/images/program-3.png') }}';" />
                         </div>
+
+                        <div class="px-5 pt-4">
+                            @include('patient.programs.partials.sponsor_modal_block', ['prefix' => 'programDetailModal'])
+                        </div>
+
                         <div class="p-5 space-y-6 text-sm">
                             <p class="text-[#4A3F47] leading-relaxed" id="programDetailModalDescription">Loading description...</p>
 
@@ -418,6 +451,11 @@
                                         id="programDetailModalRegistrationsWrapper" hidden>
                                         <span class="text-xs uppercase tracking-wide text-[#91848C]">Applications Received</span>
                                         <p class="text-[#213430]" id="programDetailModalRegistrations">0</p>
+                                    </div>
+                                    <div class="flex flex-col gap-1 rounded-lg border border-[#DCCFD8] bg-white px-4 py-3"
+                                        id="programDetailModalTypeWrapper" hidden>
+                                        <span class="text-xs uppercase tracking-wide text-[#91848C]">Program type</span>
+                                        <p class="text-[#213430]" id="programDetailModalProgramType">&mdash;</p>
                                     </div>
                                 </div>
                             </div>
@@ -600,6 +638,37 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         };
 
+        function updateProgramSponsor(prefix, data) {
+            const block = document.getElementById(prefix + '-sponsor-block');
+            const logoWrap = document.getElementById(prefix + '-sponsor-logo-wrap');
+            const logo = document.getElementById(prefix + '-sponsor-logo');
+            const nameEl = document.getElementById(prefix + '-sponsor-name');
+            if (!block) return;
+
+            const name = (data?.sponsor_name || '').trim();
+            const logoUrl = (data?.sponsor_logo || '').trim();
+            const hasSponsor = !!(name || logoUrl);
+
+            block.classList.toggle('hidden', !hasSponsor);
+
+            if (nameEl) {
+                nameEl.textContent = name;
+                nameEl.classList.toggle('hidden', !name);
+            }
+
+            if (logo && logoWrap) {
+                if (logoUrl) {
+                    logo.src = logoUrl;
+                    logo.alt = name ? (name + ' logo') : 'Sponsor logo';
+                    logo.onerror = () => logoWrap.classList.add('hidden');
+                    logoWrap.classList.remove('hidden');
+                } else {
+                    logo.src = '';
+                    logoWrap.classList.add('hidden');
+                }
+            }
+        }
+
         function openProgramDetailModal(payload) {
             openDetailModal(payload, {
                 modalId: 'programDetailModal',
@@ -620,6 +689,8 @@
                 typeLabel: 'Program',
                 showEndDates: false,
             });
+            updateProgramSponsor('programDetailModal', payload);
+            applyValue('programDetailModalTypeWrapper', 'programDetailModalProgramType', payload?.program_type_label);
         }
 
         function openEventDetailModal(payload) {
@@ -689,6 +760,13 @@
             if (imageEl) {
                 imageEl.src = imageUrl;
                 imageEl.alt = title;
+                if (data.image_fallback) {
+                    imageEl.dataset.fallback = data.image_fallback;
+                }
+                imageEl.onerror = function() {
+                    this.onerror = null;
+                    this.src = this.dataset.fallback || "{{ asset('public/images/program-3.png') }}";
+                };
             }
 
             const scheduleWrapper = document.getElementById(config.scheduleWrapperId);

@@ -25,6 +25,42 @@
         .ck.ck-content li {
             margin-bottom: 0.35em;
         }
+
+        /* Mobile: keep CKEditor fully inside card and prevent toolbar/content clipping */
+        @media (max-width: 640px) {
+            .ck.ck-editor {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .ck.ck-toolbar {
+                flex-wrap: wrap;
+                row-gap: 0.35rem;
+                padding-right: 0.35rem;
+            }
+
+            .ck.ck-toolbar .ck-toolbar__items {
+                flex-wrap: wrap;
+            }
+
+            .ck.ck-toolbar .ck-button {
+                min-width: 30px;
+                min-height: 30px;
+            }
+
+            .ck.ck-editor__editable:not(.ck-editor__nested-editable) {
+                padding-left: 0.9rem !important;
+                padding-right: 0.9rem !important;
+                min-height: 220px;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+            }
+
+            .ck.ck-content ol,
+            .ck.ck-content ul {
+                padding-left: 1.1rem;
+            }
+        }
     </style>
 @endpush
 
@@ -118,9 +154,33 @@ HTML;
                             <div class="mb-6 rounded-lg border-2 border-green-300 bg-green-50 px-4 py-3 text-green-800">{{ session('success') }}</div>
                         @endif --}}
 
-                        <form action="{{ route('admin.settings.profile') }}" method="POST">
+                        <form action="{{ route('admin.settings.profile') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
+
+                            <div class="flex justify-center md:justify-start mb-8">
+                                <div class="relative">
+                                    <div class="w-28 h-28 rounded-full p-1">
+                                        <div class="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center border border-[#DCCFD8]">
+                                            <img id="adminAvatarPreview" src="{{ $admin->avatar_url }}" alt="Profile photo"
+                                                class="object-cover w-full h-full" />
+                                        </div>
+                                    </div>
+                                    <label for="admin_avatar"
+                                        class="absolute bottom-[10px] right-[7px] bg-[#9E2469] text-white rounded-full w-8 h-8 flex items-center justify-center cursor-pointer shadow-md hover:bg-[#B52D75]"
+                                        title="Change photo">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </label>
+                                    <input id="admin_avatar" name="avatar" type="file" class="hidden" accept="image/jpeg,image/png,image/gif,image/webp" />
+                                </div>
+                            </div>
+                            @error('avatar')
+                                <p class="text-xs text-[#9E2469] mb-4">{{ $message }}</p>
+                            @enderror
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -397,18 +457,24 @@ HTML;
             }
         });
 
-        ['#privacy_editor', '#terms_editor'].forEach((selector) => {
+        const editorInstances = {};
+
+        const ensureEditor = async (selector) => {
+            if (editorInstances[selector]) {
+                return editorInstances[selector];
+            }
             const element = document.querySelector(selector);
             if (!element) {
-                return;
+                return null;
             }
-
-            ClassicEditor
-                .create(element, getEditorConfig())
-                .catch(error => {
-                    console.error('Editor initialization error', error);
-                });
-        });
+            try {
+                editorInstances[selector] = await ClassicEditor.create(element, getEditorConfig());
+                return editorInstances[selector];
+            } catch (error) {
+                console.error('Editor initialization error', error);
+                return null;
+            }
+        };
     </script>
 
     <script>
@@ -422,10 +488,33 @@ HTML;
             document.getElementById(tabId).classList.remove('hidden');
             document.getElementById(tabId + '-tab').classList.remove('bg-[#F3E8EF]', 'text-[#91848C]');
             document.getElementById(tabId + '-tab').classList.add('bg-[#9E2469]', 'text-white');
+
+            // Initialize CKEditor only when the tab becomes visible (fixes bad mobile sizing).
+            if (tabId === 'privacy') {
+                ensureEditor('#privacy_editor');
+            } else if (tabId === 'terms') {
+                ensureEditor('#terms_editor');
+            }
         }
 
         const defaultTab = @json($activeTab ?? 'general');
         showTab(defaultTab || 'general');
+
+        const adminAvatarInput = document.getElementById('admin_avatar');
+        const adminAvatarPreview = document.getElementById('adminAvatarPreview');
+        if (adminAvatarInput && adminAvatarPreview) {
+            adminAvatarInput.addEventListener('change', function (e) {
+                const file = e.target.files && e.target.files[0];
+                if (! file || ! file.type.startsWith('image/')) {
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    adminAvatarPreview.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
     </script>
 
 @endsection

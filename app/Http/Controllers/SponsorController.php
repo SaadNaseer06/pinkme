@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Mail\WebinarRegistrationConfirmation;
+use App\Support\TransactionalMail;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
 
@@ -931,7 +932,7 @@ class SponsorController extends Controller
     private function sendWebinarRegistrationEmail(Webinar $webinar, $user): void
     {
         try {
-            Mail::to($user->email)->queue(new WebinarRegistrationConfirmation($webinar, $user));
+            TransactionalMail::send($user->email, new WebinarRegistrationConfirmation($webinar, $user));
         } catch (\Throwable $e) {
             Log::warning('Failed to send webinar registration email', [
                 'user_id' => $user->id ?? null,

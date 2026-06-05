@@ -89,7 +89,7 @@ HTML;
                 'quickStart' => [
                     'Open the dashboard to monitor current request volumes and recent activity.',
                     'Go to Applications to review new patient submissions and registration records.',
-                    'Assign the appropriate case manager so each request moves into review.',
+                    'Assign the appropriate Patient Support Coordinator so each request moves into review.',
                     'Track approved registrations and send them to finance when they are ready.',
                 ],
                 'sections' => [
@@ -98,16 +98,16 @@ HTML;
                         'items' => [
                             ['label' => 'Dashboard', 'text' => 'View overall activity, recent applications, and operational summaries.'],
                             ['label' => 'Applications', 'text' => 'Review patient requests and registration items waiting for action.'],
-                            ['label' => 'Case Managers', 'text' => 'Manage review staff and assign work.'],
+                            ['label' => 'Patient Support Coordinators', 'text' => 'Manage coordinator staff and assign work.'],
                             ['label' => 'Finance Users', 'text' => 'Manage finance access for invoice and budget processing.'],
                             ['label' => 'Programs', 'text' => 'Create and manage programs available to patients.'],
                         ],
                     ],
                     [
-                        'title' => 'Typical Workflow',
+                        'title' => 'Workflow',
                         'items' => [
                             ['label' => '1', 'text' => 'Review newly submitted requests.'],
-                            ['label' => '2', 'text' => 'Assign each request to a case manager.'],
+                            ['label' => '2', 'text' => 'Assign each request to a Patient Support Coordinator.'],
                             ['label' => '3', 'text' => 'Monitor status updates and outcomes.'],
                             ['label' => '4', 'text' => 'Send approved registrations to finance when budget action is required.'],
                         ],
@@ -126,7 +126,7 @@ HTML;
                 'intro' => 'Use this portal to submit requests, upload documents, follow progress, and communicate with the support team.',
                 'quickStart' => [
                     'Open Dashboard to see your current activity and latest updates.',
-                    'Use Programs & Aids to review available opportunities and open programs.',
+                    'Use Programs & Services to review available opportunities and open programs.',
                     'Use My Application to track requests you have already submitted.',
                     'Open Chat if you need to respond to the support team or ask a question.',
                 ],
@@ -136,13 +136,13 @@ HTML;
                         'items' => [
                             ['label' => 'Dashboard', 'text' => 'See a summary of your requests and latest activity.'],
                             ['label' => 'My Application', 'text' => 'View submitted applications and registration progress.'],
-                            ['label' => 'Programs & Aids', 'text' => 'Browse programs that are currently available.'],
+                            ['label' => 'Programs & Services', 'text' => 'Browse programs that are currently available.'],
                             ['label' => 'Chat', 'text' => 'Communicate directly with the team when follow-up is needed.'],
                             ['label' => 'Settings', 'text' => 'Update your account and profile information.'],
                         ],
                     ],
                     [
-                        'title' => 'Typical Workflow',
+                        'title' => 'Workflow',
                         'items' => [
                             ['label' => '1', 'text' => 'Submit an application or register for a program.'],
                             ['label' => '2', 'text' => 'Upload all requested documents.'],
@@ -180,7 +180,7 @@ HTML;
                         ],
                     ],
                     [
-                        'title' => 'Typical Workflow',
+                        'title' => 'Workflow',
                         'items' => [
                             ['label' => '1', 'text' => 'Open the assigned case.'],
                             ['label' => '2', 'text' => 'Review all submitted information and documents.'],
@@ -199,7 +199,7 @@ HTML;
                 'layout' => 'finance.layouts.app',
                 'title' => 'Portal Tutorial',
                 'portalName' => 'Finance Portal Tutorial',
-                'intro' => 'Use this portal to process approved cases that require invoice creation and budget allocation.',
+                'intro' => 'Use this portal to process approved cases that require recording bills paid and invoice creation.',
                 'quickStart' => [
                     'Check Dashboard to see requests waiting for finance action.',
                     'Open Patient Requests to review approved registrations assigned to you.',
@@ -215,12 +215,12 @@ HTML;
                         ],
                     ],
                     [
-                        'title' => 'Typical Workflow',
+                        'title' => 'Workflow',
                         'items' => [
                             ['label' => '1', 'text' => 'Open an approved registration assigned to finance.'],
                             ['label' => '2', 'text' => 'Review the supporting billing documents.'],
                             ['label' => '3', 'text' => 'Create the invoice.'],
-                            ['label' => '4', 'text' => 'Complete the budget allocation step and confirm the record is finalized.'],
+                            ['label' => '4', 'text' => 'Complete recording bills paid and confirm the record is finalized.'],
                         ],
                     ],
                 ],

@@ -6,21 +6,23 @@ use App\Models\Program;
 use App\Models\ProgramRegistration;
 use App\Support\PatientApplicationNotifications;
 use App\Support\ProgramDefaultTemplate;
+use App\Support\ProgramType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ProgramController extends Controller
 {
+    /**
+     * Admin resource index — list lives on Programs & Events, not a separate patient view.
+     */
     public function index()
     {
-        $upcomingPrograms = Program::where('status', 'upcoming')->get();
-        $ongoingPrograms = Program::where('status', 'ongoing')->get();
-
-        return view('patient.programs.index', compact('upcomingPrograms', 'ongoingPrograms'));
+        return redirect()->route('admin.programs-events');
     }
 
     public function register(Request $request)
@@ -43,11 +45,8 @@ class ProgramController extends Controller
             return back()->with('error', 'Applications for this program are not open yet or have closed. Please check the application start and end dates.');
         }
 
-        if ($program->max_applications) {
-            $currentCount = ProgramRegistration::where('program_id', $program->id)->count();
-            if ($currentCount >= $program->max_applications) {
-                return back()->with('error', 'Applications for this program are closed.');
-            }
+        if ($program->hasReachedMaxApplications()) {
+            return back()->with('error', \App\Support\ProgramApplicationCapacity::CLOSED_MESSAGE);
         }
 
         ProgramRegistration::create($validated);
@@ -99,7 +98,9 @@ class ProgramController extends Controller
         return response()->json([
             'title' => $program->title,
             'description' => $program->description,
-            'event_date' => Carbon::parse($program->event_date)->format('l, F d, Y'),
+            'event_date' => $program->event_date
+                ? $program->event_date->format('l, F d, Y')
+                : null,
             'event_time' => $program->event_time ? Carbon::parse($program->event_time)->format('H:i') : null,
             'banner' => $program->banner
                 ? storage_url($program->banner)
@@ -112,6 +113,12 @@ class ProgramController extends Controller
             'application_start_date' => $program->application_start_date?->format('d M Y'),
             'application_end_date' => $program->application_end_date?->format('d M Y'),
             'is_application_open' => $program->isApplicationOpen(),
+            'is_at_capacity' => $program->hasReachedMaxApplications(),
+            'is_accepting_applications' => $program->isAcceptingApplications(),
+            'program_type' => $program->program_type ?? ProgramType::FINANCIAL_ASSISTANCE,
+            'program_type_label' => $program->programTypeLabel(),
+            'sponsor_name' => $program->sponsor_name,
+            'sponsor_logo' => $program->sponsorLogoUrl(),
         ]);
     }
 
@@ -148,6 +155,9 @@ class ProgramController extends Controller
             'application_end_date' => ['nullable', 'date'],
             'max_applications' => ['nullable', 'integer', 'min:1'],
             'status' => ['nullable', 'in:upcoming,ongoing,completed'],
+            'program_type' => ['nullable', 'string', Rule::in(array_keys(ProgramType::options()))],
+            'sponsor_name' => ['nullable', 'string', 'max:255'],
+            'sponsor_logo' => ['nullable', 'image', 'max:'.(25 * 1024)],
             'banner' => ['nullable', 'image', 'max:'.(25 * 1024)],
             'custom_fields' => ['array'],
             'custom_fields.*.name' => ['required', 'string', 'max:60', Rule::in($this->allowedFieldNames())],
@@ -218,6 +228,13 @@ class ProgramController extends Controller
             $data['banner'] = $r->file('banner')->store('programs', 'public');
         }
 
+        if ($r->hasFile('sponsor_logo')) {
+            $data['sponsor_logo'] = $r->file('sponsor_logo')->store('programs/sponsors', 'public');
+        }
+
+        $data['program_type'] = $r->input('program_type', ProgramType::FINANCIAL_ASSISTANCE);
+        $data['sponsor_name'] = $r->input('sponsor_name');
+
         $data['custom_fields'] = $this->normalizeCustomFields($r->input('custom_fields', []));
         $data = $this->mergeDerivedDefaults($data);
 
@@ -229,7 +246,8 @@ class ProgramController extends Controller
 
     public function edit(Program $program)
     {
-        // Render the edit form
+        $program->loadCount('registrations');
+
         return view('admin.programs.edit', compact('program'));
     }
 
@@ -244,6 +262,9 @@ class ProgramController extends Controller
             'application_end_date' => ['nullable', 'date'],
             'max_applications' => ['nullable', 'integer', 'min:1'],
             'status' => ['nullable', 'in:upcoming,ongoing,completed'],
+            'program_type' => ['nullable', 'string', Rule::in(array_keys(ProgramType::options()))],
+            'sponsor_name' => ['nullable', 'string', 'max:255'],
+            'sponsor_logo' => ['nullable', 'image', 'max:'.(25 * 1024)],
             'banner' => ['nullable', 'image', 'max:'.(25 * 1024)],
             'custom_fields' => ['array'],
             'custom_fields.*.name' => ['required', 'string', 'max:60', Rule::in($this->allowedFieldNames())],
@@ -313,9 +334,17 @@ class ProgramController extends Controller
         if ($r->hasFile('banner')) {
             $data['banner'] = $r->file('banner')->store('programs', 'public');
         } else {
-            // Keep existing banner if not replaced
             unset($data['banner']);
         }
+
+        if ($r->hasFile('sponsor_logo')) {
+            $data['sponsor_logo'] = $r->file('sponsor_logo')->store('programs/sponsors', 'public');
+        } else {
+            unset($data['sponsor_logo']);
+        }
+
+        $data['program_type'] = $r->input('program_type', $program->program_type ?? ProgramType::FINANCIAL_ASSISTANCE);
+        $data['sponsor_name'] = $r->input('sponsor_name');
 
         $data['custom_fields'] = $this->normalizeCustomFields($r->input('custom_fields', []));
         $data = $this->mergeDerivedDefaults($data, $program);
@@ -323,6 +352,28 @@ class ProgramController extends Controller
         $program->update($data);
 
         return redirect()->route('admin.programs-events')->with('success', 'Program updated.');
+    }
+
+    public function destroy(Program $program)
+    {
+        $title = $program->title ?? 'Program';
+        $registrationCount = $program->registrations()->count();
+
+        foreach (['banner', 'sponsor_logo'] as $pathColumn) {
+            $path = $program->{$pathColumn};
+            if (filled($path) && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        $program->delete();
+
+        $message = 'Program "'.$title.'" was deleted.';
+        if ($registrationCount > 0) {
+            $message .= ' '.$registrationCount.' linked application(s) were removed as well.';
+        }
+
+        return redirect()->route('admin.programs-events')->with('success', $message);
     }
 
     /**

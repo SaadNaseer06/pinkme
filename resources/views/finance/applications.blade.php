@@ -30,7 +30,7 @@
                                 <td class="p-2">{{ $app->sent_to_finance_at ? $app->sent_to_finance_at->format('M d, Y') : '—' }}</td>
                                 <td class="p-2">
                                     @if ($app->invoices->isNotEmpty())
-                                        <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-700">Budget Allocated</span>
+                                        <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-700">Bills paid</span>
                                     @else
                                         <span class="px-2 py-1 rounded text-xs bg-amber-100 text-amber-700">Pending</span>
                                     @endif
@@ -38,7 +38,7 @@
                                 <td class="p-2">
                                     <a href="{{ route('finance.applications.show', $app) }}" class="text-[#9E2469] hover:underline text-sm">View</a>
                                     @if (!$app->invoices->isNotEmpty())
-                                        | <a href="{{ route('finance.invoice.create', $app) }}" class="text-[#9E2469] hover:underline text-sm">Allocate Budget</a>
+                                        | <a href="{{ route('finance.invoice.create', $app) }}" class="text-[#9E2469] hover:underline text-sm">Record bills paid</a>
                                     @endif
                                 </td>
                             </tr>

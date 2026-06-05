@@ -1,7 +1,7 @@
 @php
     $user = auth()->user();
     $profile = $user->profile ?? null;
-    $fullName = $profile?->full_name ?? 'Finance User';
+    $fullName = $profile?->full_name ?? $user->email ?? 'Finance User';
 @endphp
 <header class="mt-4 mr-6 bg-[#F3E8EF] p-4 justify-between items-center rounded-lg tab-head md:flex hidden tab-header-1">
     <div class="relative flex items-center">
@@ -25,6 +25,17 @@
                 <div class="px-4 py-3 bg-[#9E2469] rounded-t-xl">
                     <p class="text-white text-sm font-semibold">{{ $fullName }}</p>
                     <p class="text-white text-xs font-light">Finance</p>
+                </div>
+                <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto bg-transparent">
+                    <div class="p-3">
+                        <a href="{{ route('finance.setting') }}" class="flex items-start space-x-3 p-2 rounded-md hover:bg-white/60">
+                            <i class="fas fa-user-edit text-[#9E2469] mt-1 w-5 text-center"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-[#213430]">My profile</p>
+                                <p class="text-xs text-[#A9A9A9]">Update name, email, phone, and photo.</p>
+                            </div>
+                        </a>
+                    </div>
                 </div>
                 <div class="px-4 pb-3 pt-3">
                     <form action="{{ route('logout') }}" method="POST">
@@ -62,11 +73,22 @@
                     </div>
                 </div>
                 <div class="hidden fixed right-6 mt-2 w-72 bg-[#F7EBF3] rounded-xl z-50 profileDropdown">
-                    <div class="px-4 py-3 bg-[#9E2469] rounded-t-xl">
-                        <p class="text-white text-sm font-semibold">{{ $fullName }}</p>
-                        <p class="text-white text-xs font-light">Finance</p>
+                <div class="px-4 py-3 bg-[#9E2469] rounded-t-xl">
+                    <p class="text-white text-sm font-semibold">{{ $fullName }}</p>
+                    <p class="text-white text-xs font-light">Finance</p>
+                </div>
+                <div class="divide-y divide-[#E5D6E0] max-h-80 overflow-y-auto bg-transparent">
+                    <div class="p-3">
+                        <a href="{{ route('finance.setting') }}" class="flex items-start space-x-3 p-2 rounded-md hover:bg-white/60">
+                            <i class="fas fa-user-edit text-[#9E2469] mt-1 w-5 text-center"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-[#213430]">My profile</p>
+                                <p class="text-xs text-[#A9A9A9]">Update name, email, phone, and photo.</p>
+                            </div>
+                        </a>
                     </div>
-                    <div class="px-4 pb-3 pt-3">
+                </div>
+                <div class="px-4 pb-3 pt-3">
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
                             <button type="submit"

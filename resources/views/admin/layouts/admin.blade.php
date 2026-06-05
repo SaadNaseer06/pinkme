@@ -35,6 +35,9 @@
                     fontFamily: {
                         sans: ["Poppins", "ui-sans-serif", "system-ui"],
                     },
+                    maxWidth: {
+                        "8xl": "96rem",
+                    },
                 },
             },
         };
@@ -98,7 +101,7 @@
     @include('admin.partials.sidebar')
     <div class="flex-1 flex flex-col min-w-0">
         @include('admin.partials.topbar')
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-6 w-full min-w-0">
             @include('partials.flash')
             @yield('content')
         </main>

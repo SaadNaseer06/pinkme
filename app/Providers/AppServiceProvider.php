@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use App\Events\MessageSent;
 use App\Events\UserNotificationCreated;
-use App\Http\Controllers\ChatMessageController;
-use App\Mail\NewChatMessageEmail;
 use App\Mail\UserNotificationEmail;
+use App\Support\Brand;
+use App\Support\TransactionalMail;
 use App\Models\Patient;
+use App\Support\PatientApplicationNotifications;
 use App\Models\ProgramRegistration;
 use App\Models\RegistrationInvoice;
 use App\Observers\ProgramRegistrationObserver;
@@ -16,7 +16,6 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -45,6 +44,14 @@ class AppServiceProvider extends ServiceProvider
         if ($appUrl && parse_url($appUrl, PHP_URL_PATH) && parse_url($appUrl, PHP_URL_PATH) !== '/') {
             URL::forceRootUrl($appUrl);
         }
+        if (is_string($appUrl) && str_starts_with($appUrl, 'https://')) {
+            URL::forceScheme('https');
+        } elseif (request()->isSecure() || request()->header('X-Forwarded-Proto') === 'https') {
+            URL::forceScheme('https');
+        }
+
+        View::share('brandName', Brand::name());
+        View::share('staffAccessNotice', Brand::staffAccessNotice());
 
         View::composer('patient.partials.sidebar', function ($view): void {
             $user = auth()->user();
@@ -57,23 +64,13 @@ class AppServiceProvider extends ServiceProvider
         // Send email when a user receives a notification
         Event::listen(UserNotificationCreated::class, function (UserNotificationCreated $event): void {
             $notification = $event->notification;
-            $user = $notification->user ?? $notification->user()->first();
-            if ($user && filled($user->email)) {
-                Mail::to($user->email)->queue(new UserNotificationEmail($notification));
-            }
-        });
-
-        // Send "you've got a new message" email only when the receiver is NOT currently in chat
-        Event::listen(MessageSent::class, function (MessageSent $event): void {
-            $message = $event->message;
-            $receiver = $message->receiver ?? $message->receiver()->first();
-            if (! $receiver || ! filled($receiver->email)) {
+            if (PatientApplicationNotifications::shouldSkipGenericNotificationEmail($notification)) {
                 return;
             }
-            if (ChatMessageController::isUserActiveInChat($receiver->id)) {
-                return; // user is in chat, no email
+            $user = $notification->user ?? $notification->user()->first();
+            if ($user && filled($user->email)) {
+                TransactionalMail::send($user->email, new UserNotificationEmail($notification));
             }
-            Mail::to($receiver->email)->queue(new NewChatMessageEmail($message));
         });
     }
 

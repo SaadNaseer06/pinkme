@@ -1,91 +1,101 @@
 @extends('admin.layouts.admin')
 
 @section('content')
-    <div class="container mx-auto py-6">
-        <!-- Header -->
-        <div class="flex justify-between flex-col gap-4 md:flex-row md:items-center mb-6">
-            <div>
-                <h1 class="text-2xl font-semibold text-gray-800">Applications Management</h1>
-                <p class="text-gray-600">Review and manage all program application requests</p>
-            </div>
-        </div>
+    @php
+        $programSelectedType = $programSelectedType ?? 'all';
+        $isMtmApplicationsView = $programSelectedType === \App\Support\ProgramType::MOMENTS_THAT_MATTER;
+        $isFinancialApplicationsView = $programSelectedType === \App\Support\ProgramType::FINANCIAL_ASSISTANCE;
+        $kpiGridClass = match (true) {
+            $isMtmApplicationsView => 'admin-kpi-grid admin-kpi-grid--mtm',
+            $isFinancialApplicationsView => 'admin-kpi-grid admin-kpi-grid--financial',
+            default => 'admin-kpi-grid admin-kpi-grid--all',
+        };
+    @endphp
+    <div class="admin-registrations-page max-w-8xl mx-auto w-full px-4 sm:px-6 py-6">
+        <header class="mb-8">
+            <h1 class="text-2xl font-semibold text-[#213430] tracking-tight">Applications Management</h1>
+            <p class="mt-1 text-sm text-[#6C5F67]">Review and manage program application requests across Financial Assistance and Moments That Matter.</p>
+        </header>
 
-        <!-- Tab Navigation - Event tab commented: sponsor-related -->
-        <div class="bg-white rounded-lg shadow-md mb-6">
-            <div class="border-b border-gray-200">
-                <nav class="flex -mb-px" aria-label="Tabs">
-                    <div class="flex-1 py-4 px-6 text-center border-b-2 border-pink-600">
-                        <div class="flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Program Applications
-                            @if($programCounts['pending'] > 0)
-                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
-                                    {{ $programCounts['pending'] }}
-                                </span>
-                            @endif
-                        </div>
+        <section class="mb-8" aria-labelledby="applications-overview-heading">
+            <h2 id="applications-overview-heading" class="text-xs font-semibold uppercase tracking-wider text-[#91848C] mb-4">Overview</h2>
+            <div class="{{ $kpiGridClass }}" id="statsCards">
+            @unless ($isMtmApplicationsView)
+                <article class="stat-card program-stats admin-kpi-card admin-kpi-card--pending" data-tab="programs" style="display: {{ $tab === 'programs' ? '' : 'none' }};">
+                    <div class="admin-kpi-card__icon" aria-hidden="true">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
-                </nav>
-            </div>
-        </div>
-  
-        <!-- Dynamic Stats Dashboard -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6" id="statsCards">
-            <!-- Program Stats (shown when programs tab is active) -->
-            <div class="stat-card program-stats" data-tab="programs" style="display: {{ $tab === 'programs' ? 'block' : 'none' }}; transition: opacity 0.3s ease;">
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-pink-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Pending Approval</p>
-                            <p class="text-2xl font-semibold text-gray-900 mt-1" id="program-pending-count">
-                                {{ $programCounts['pending'] }}
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
+                    <div class="admin-kpi-card__body">
+                        <p class="admin-kpi-card__label">Pending (case review)</p>
+                        <p class="admin-kpi-card__value" id="program-pending-count">{{ $programCounts['pending'] }}</p>
                     </div>
-                </div>
-            </div>
-            <div class="stat-card program-stats" data-tab="programs" style="display: {{ $tab === 'programs' ? 'block' : 'none' }};">
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Approved</p>
-                            <p class="text-2xl font-semibold text-gray-900 mt-1" id="program-approved-count">
-                                {{ $programCounts['approved'] }}
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
+                </article>
+                <article class="stat-card program-stats finance-stat-card admin-kpi-card admin-kpi-card--finance" data-tab="programs" style="display: {{ ($tab === 'programs' && ! $isMtmApplicationsView) ? '' : 'none' }};">
+                    <div class="admin-kpi-card__icon" aria-hidden="true">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
-                </div>
-            </div>
-            {{-- Rejected stat removed per client request --}}
-            <div class="stat-card program-stats" data-tab="programs" style="display: {{ $tab === 'programs' ? 'block' : 'none' }};">
-                <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Total</p>
-                            <p class="text-2xl font-semibold text-gray-900 mt-1" id="program-total-count">
-                                {{ $programCounts['all'] }}
-                            </p>
-                        </div>
-                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
+                    <div class="admin-kpi-card__body">
+                        <p class="admin-kpi-card__label">Finance queue</p>
+                        <p class="admin-kpi-card__value" id="program-finance-queue-count">{{ $programCounts['pending_finance'] ?? 0 }}</p>
+                        <p class="admin-kpi-card__hint">Awaiting payment processing</p>
                     </div>
-                </div>
-            </div>
+                </article>
+                <article class="stat-card program-stats admin-kpi-card admin-kpi-card--approved" data-tab="programs" style="display: {{ $tab === 'programs' ? '' : 'none' }};">
+                    <div class="admin-kpi-card__icon" aria-hidden="true">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div class="admin-kpi-card__body">
+                        <p class="admin-kpi-card__label">Approved (final)</p>
+                        <p class="admin-kpi-card__value" id="program-approved-count">{{ $programCounts['approved'] }}</p>
+                        <p class="admin-kpi-card__hint">After finance completes payment</p>
+                    </div>
+                </article>
+                <article class="stat-card program-stats finance-stat-card admin-kpi-card admin-kpi-card--paid" data-tab="programs" style="display: {{ ($tab === 'programs' && ! $isMtmApplicationsView) ? '' : 'none' }};">
+                    <div class="admin-kpi-card__icon" aria-hidden="true">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div class="admin-kpi-card__body">
+                        <p class="admin-kpi-card__label">Patient bills paid</p>
+                        <p class="admin-kpi-card__value" id="program-paid-count">{{ $programCounts['paid'] ?? 0 }}</p>
+                        <p class="admin-kpi-card__hint">Invoice recorded by finance</p>
+                    </div>
+                </article>
+                <article class="stat-card program-stats admin-kpi-card admin-kpi-card--rejected" data-tab="programs" style="display: {{ $tab === 'programs' ? '' : 'none' }};">
+                    <div class="admin-kpi-card__icon" aria-hidden="true">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div class="admin-kpi-card__body">
+                        <p class="admin-kpi-card__label">Rejected</p>
+                        <p class="admin-kpi-card__value" id="program-rejected-count">{{ $programCounts['rejected'] }}</p>
+                    </div>
+                </article>
+            @endunless
+
+            @if ($isMtmApplicationsView)
+                <article class="stat-card program-stats admin-kpi-card admin-kpi-card--pending" data-tab="programs" style="display: {{ $tab === 'programs' ? '' : 'none' }};">
+                    <div class="admin-kpi-card__icon" aria-hidden="true">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div class="admin-kpi-card__body">
+                        <p class="admin-kpi-card__label">Awaiting shipment</p>
+                        <p class="admin-kpi-card__value" id="program-pending-count">{{ $programCounts['pending'] + ($programCounts['approved'] ?? 0) }}</p>
+                        <p class="admin-kpi-card__hint">Care package not yet marked shipped</p>
+                    </div>
+                </article>
+            @endif
+
+            @if ($isMtmApplicationsView || ($programSelectedType ?? 'all') === 'all')
+                <article class="stat-card program-stats mtm-shipped-stat-card admin-kpi-card admin-kpi-card--shipped" data-tab="programs" style="display: {{ $tab === 'programs' ? '' : 'none' }};">
+                    <div class="admin-kpi-card__icon" aria-hidden="true">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                    </div>
+                    <div class="admin-kpi-card__body">
+                        <p class="admin-kpi-card__label">Shipped</p>
+                        <p class="admin-kpi-card__value" id="program-shipped-count">{{ $programCounts['shipped'] ?? 0 }}</p>
+                        <p class="admin-kpi-card__hint">Moments That Matter care packages</p>
+                    </div>
+                </article>
+            @endif
 
             {{-- Event Stats - commented: sponsor-related, sponsor not wanted for now
             <div class="stat-card event-stats" data-tab="events" style="display: {{ $tab === 'events' ? 'block' : 'none' }}; transition: opacity 0.3s ease;">
@@ -106,37 +116,58 @@
                 </div>
             </div>
             --}}
-        </div>
+            </div>
+        </section>
 
-        <!-- Program Registrations Tab Content -->
-        <div id="programs-content" class="tab-content" style="display: block;">
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="px-6 py-4 bg-pink-50 border-b border-pink-200">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                    <h3 class="text-lg font-medium text-gray-900">Program Applications</h3>
-                    <p class="text-sm text-gray-600 mt-1">Manage patient program application requests</p>
-                        </div>
-                        <div class="flex flex-wrap gap-2 text-sm text-gray-600">
-                            <span>Pending: <strong class="text-pink-600">{{ $programCounts['pending'] }}</strong></span>
-                            <span>Finance queue: <strong class="text-amber-700">{{ $programCounts['pending_finance'] ?? 0 }}</strong></span>
-                            <span>Approved: <strong class="text-green-600">{{ $programCounts['approved'] }}</strong></span>
-                            <span>Paid (finance): <strong class="text-emerald-700">{{ $programCounts['paid'] ?? 0 }}</strong></span>
-                        </div>
+        <div id="programs-content" class="tab-content admin-apps-panel" style="display: block;">
+            <div class="admin-apps-panel__card">
+                <div class="admin-apps-panel__header">
+                    <div>
+                        <h2 class="text-lg font-semibold text-[#213430]">Application requests</h2>
+                        <p class="text-sm text-[#6C5F67] mt-0.5">Filter by program type and status, then open a row to review details.</p>
                     </div>
+                    <nav class="admin-segmented-tabs" aria-label="Application type" id="programTypeTabs">
+                        <a href="{{ route('admin.registrations.index', ['program_type' => 'all', 'program_status' => $programSelectedStatus]) }}"
+                            data-program-type-tab
+                            data-program-type="all"
+                            class="admin-segmented-tabs__item program-type-tab {{ $programSelectedType === 'all' ? 'is-active' : '' }}">
+                            All
+                        </a>
+                        <a href="{{ route('admin.registrations.index', ['program_type' => \App\Support\ProgramType::FINANCIAL_ASSISTANCE, 'program_status' => $programSelectedStatus]) }}"
+                            data-program-type-tab
+                            data-program-type="{{ \App\Support\ProgramType::FINANCIAL_ASSISTANCE }}"
+                            class="admin-segmented-tabs__item program-type-tab {{ $isFinancialApplicationsView ? 'is-active' : '' }}">
+                            Financial Assistance
+                        </a>
+                        <a href="{{ route('admin.registrations.index', ['program_type' => \App\Support\ProgramType::MOMENTS_THAT_MATTER, 'program_status' => $programSelectedStatus]) }}"
+                            data-program-type-tab
+                            data-program-type="{{ \App\Support\ProgramType::MOMENTS_THAT_MATTER }}"
+                            class="admin-segmented-tabs__item program-type-tab {{ $isMtmApplicationsView ? 'is-active' : '' }}">
+                            Moments That Matter
+                        </a>
+                    </nav>
                 </div>
 
-                <!-- Filters -->
-                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                            <div class="relative w-full sm:w-56">
+                <div class="admin-apps-panel__toolbar">
+                    <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+                        <input type="hidden" id="programTypeFilter" value="{{ $programSelectedType }}">
+                        <label class="admin-filter-field">
+                            <span class="admin-filter-field__label">Status</span>
+                            <div class="relative w-full sm:w-52">
                                 <select name="program_status" id="programStatusFilter"
-                                    class="w-full appearance-none rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500">
-                                    <option value="pending" {{ $programSelectedStatus === 'pending' ? 'selected' : '' }}>Pending Approval</option>
-                                    <option value="pending_finance" {{ $programSelectedStatus === 'pending_finance' ? 'selected' : '' }}>Finance queue</option>
-                                    <option value="approved" {{ $programSelectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
-                                    <option value="paid" {{ $programSelectedStatus === 'paid' ? 'selected' : '' }}>Paid (finance)</option>
+                                    class="admin-filter-field__select">
+                                    <option value="pending" {{ $programSelectedStatus === 'pending' ? 'selected' : '' }}>{{ $isMtmApplicationsView ? 'Awaiting shipment' : 'Pending' }}</option>
+                                    @unless ($isMtmApplicationsView)
+                                        <option value="pending_finance" {{ $programSelectedStatus === 'pending_finance' ? 'selected' : '' }}>Finance queue</option>
+                                        <option value="approved" {{ $programSelectedStatus === 'approved' ? 'selected' : '' }}>Approved</option>
+                                    @endunless
+                                    <option value="shipped" {{ $programSelectedStatus === 'shipped' ? 'selected' : '' }}>Shipped</option>
+                                    @unless ($isMtmApplicationsView)
+                                        <option value="rejected" {{ $programSelectedStatus === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                    @endunless
+                                    @unless ($isMtmApplicationsView)
+                                        <option value="paid" {{ $programSelectedStatus === 'paid' ? 'selected' : '' }}>Patient bills paid</option>
+                                    @endunless
                                     <option value="all" {{ $programSelectedStatus === 'all' ? 'selected' : '' }}>All</option>
                                 </select>
                                 <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
@@ -145,22 +176,21 @@
                                     </svg>
                                 </span>
                             </div>
-                            @if ($programSelectedStatus !== 'all')
-                                <a href="{{ route('admin.registrations.index', ['tab' => 'programs', 'program_status' => 'all']) }}"
-                                    class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 transition">
-                                    Reset
-                                </a>
-                            @endif
-                        </div>
-                        <button type="button" id="exportProgramRegistrationsBtn"
-                            class="inline-flex items-center justify-center px-4 py-2 bg-pink-600 text-white rounded-md text-sm font-medium shadow-sm hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-1 transition">
-                            Export CSV
-                        </button>
+                        </label>
+                        @if ($programSelectedStatus !== 'all' || $programSelectedType !== 'all')
+                            <a href="{{ route('admin.registrations.index', ['tab' => 'programs', 'program_type' => $programSelectedType, 'program_status' => 'all']) }}"
+                                class="admin-btn-ghost">
+                                Clear filters
+                            </a>
+                        @endif
                     </div>
+                    <button type="button" id="exportProgramRegistrationsBtn" class="admin-btn-primary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        Export CSV
+                    </button>
                 </div>
 
-                <!-- Table (AJAX-loaded) -->
-                <div id="programRegistrationsTableWrapper">
+                <div id="programRegistrationsTableWrapper" class="admin-apps-panel__table">
                     @include('admin.registrations._table', [
                         'programRegistrations' => $programRegistrations,
                         'caseManagers' => $caseManagers,
@@ -174,7 +204,7 @@
             <div class="bg-white rounded-2xl w-full max-w-md shadow-xl p-6">
                 <div class="flex items-start justify-between gap-4">
                     <div>
-                        <h3 id="assignModalTitle" class="text-lg font-semibold text-gray-900">Assign Case Manager</h3>
+                        <h3 id="assignModalTitle" class="text-lg font-semibold text-gray-900">Assign Coordinator</h3>
                         <p id="assignModalSubtitle" class="text-sm text-gray-500 mt-1">Select a case manager to handle this registration.</p>
                     </div>
                     <button type="button" id="assignModalClose"
@@ -472,23 +502,238 @@
     </div>
 
     <style>
-        .tab-content {
-            animation: fadeIn 0.3s ease-in;
+        .admin-registrations-page .tab-content,
+        .admin-registrations-page .stat-card {
+            animation: fadeIn 0.35s ease-out;
         }
-        
-        .stat-card {
-            animation: fadeIn 0.3s ease-in;
-        }
-        
+
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .admin-kpi-grid {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+        @media (min-width: 640px) {
+            .admin-kpi-grid--mtm { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .admin-kpi-grid--financial { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .admin-kpi-grid--all { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (min-width: 1024px) {
+            .admin-kpi-grid--financial { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .admin-kpi-grid--all { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @media (min-width: 1280px) {
+            .admin-kpi-grid--financial { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+            .admin-kpi-grid--all { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+        }
+
+        .admin-kpi-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            min-height: 7.25rem;
+            padding: 1.25rem 1.35rem;
+            background: #fff;
+            border: 1px solid #E8DCE4;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 2px rgba(33, 52, 48, 0.04);
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .admin-kpi-card:hover {
+            border-color: #D4B8C8;
+            box-shadow: 0 4px 14px rgba(158, 36, 105, 0.08);
+        }
+        .admin-kpi-card__icon {
+            flex-shrink: 0;
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .admin-kpi-card__body { flex: 1; min-width: 0; }
+        .admin-kpi-card__label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #6C5F67;
+            line-height: 1.3;
+        }
+        .admin-kpi-card__value {
+            margin-top: 0.35rem;
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #213430;
+            font-variant-numeric: tabular-nums;
+        }
+        .admin-kpi-card__hint {
+            margin-top: 0.5rem;
+            font-size: 0.6875rem;
+            line-height: 1.35;
+            color: #91848C;
+        }
+        .admin-kpi-card--pending .admin-kpi-card__icon { background: #F3E8EF; color: #9E2469; }
+        .admin-kpi-card--finance .admin-kpi-card__icon { background: #FEF3C7; color: #B45309; }
+        .admin-kpi-card--shipped .admin-kpi-card__icon { background: #DBEAFE; color: #1D4ED8; }
+        .admin-kpi-card--approved .admin-kpi-card__icon { background: #D1FAE5; color: #047857; }
+        .admin-kpi-card--paid .admin-kpi-card__icon { background: #D1FAE5; color: #065F46; }
+        .admin-kpi-card--rejected .admin-kpi-card__icon { background: #FEE2E2; color: #B91C1C; }
+
+        .admin-apps-panel__card {
+            background: #fff;
+            border: 1px solid #E8DCE4;
+            border-radius: 0.875rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(33, 52, 48, 0.06);
+        }
+        .admin-apps-panel__header {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            padding: 1.5rem 1.5rem 1.25rem;
+            border-bottom: 1px solid #F0E6EC;
+            background: linear-gradient(180deg, #FDF9FB 0%, #fff 100%);
+        }
+        @media (min-width: 768px) {
+            .admin-apps-panel__header {
+                flex-direction: row;
+                align-items: flex-end;
+                justify-content: space-between;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+        }
+        .admin-segmented-tabs {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 0;
+            padding: 0.25rem;
+            background: #F5EFF3;
+            border-radius: 0.625rem;
+            border: 1px solid #E6D8E1;
+        }
+        .admin-segmented-tabs__item {
+            padding: 0.5rem 1rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #6C5F67;
+            border-radius: 0.5rem;
+            transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+            white-space: nowrap;
+        }
+        .admin-segmented-tabs__item:hover:not(.is-active) {
+            color: #9E2469;
+            background: rgba(255, 255, 255, 0.6);
+        }
+        .admin-segmented-tabs__item.is-active {
+            background: #9E2469;
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(158, 36, 105, 0.25);
+        }
+        .admin-apps-panel__toolbar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: #FAF7FA;
+            border-bottom: 1px solid #E6D8E1;
+        }
+        @media (min-width: 768px) {
+            .admin-apps-panel__toolbar {
+                flex-direction: row;
+                align-items: flex-end;
+                justify-content: space-between;
             }
+        }
+        .admin-filter-field__label {
+            display: block;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #91848C;
+            margin-bottom: 0.35rem;
+        }
+        .admin-filter-field__select {
+            width: 100%;
+            appearance: none;
+            border-radius: 0.5rem;
+            border: 1px solid #DCCFD8;
+            background: #fff;
+            padding: 0.5rem 2.25rem 0.5rem 0.875rem;
+            font-size: 0.875rem;
+            color: #213430;
+        }
+        .admin-filter-field__select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(158, 36, 105, 0.35);
+            border-color: #9E2469;
+        }
+        .admin-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.125rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #fff;
+            background: #9E2469;
+            border-radius: 0.5rem;
+            border: none;
+            box-shadow: 0 1px 2px rgba(158, 36, 105, 0.2);
+            transition: background 0.15s;
+            flex-shrink: 0;
+        }
+        .admin-btn-primary:hover { background: #7F1D55; }
+        .admin-btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 0.875rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #6C5F67;
+            border: 1px solid #DCCFD8;
+            border-radius: 0.5rem;
+            background: #fff;
+        }
+        .admin-btn-ghost:hover { border-color: #9E2469; color: #9E2469; }
+        .admin-apps-panel__table { padding: 0 1rem 1rem; }
+        .admin-apps-panel__table > .overflow-x-auto {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: none;
+        }
+
+        /* Program registrations pagination theme */
+        #programRegistrationsTableWrapper nav[role="navigation"] {
+            display: flex;
+            justify-content: center;
+        }
+
+        #programRegistrationsTableWrapper nav[role="navigation"] > div:first-child {
+            display: none;
+        }
+
+        #programRegistrationsTableWrapper nav[role="navigation"] > div:last-child span,
+        #programRegistrationsTableWrapper nav[role="navigation"] > div:last-child a {
+            border-radius: 0.5rem;
+            border-color: #e9d3e1 !important;
+            color: #7b5b6b !important;
+        }
+
+        #programRegistrationsTableWrapper nav[role="navigation"] > div:last-child a:hover {
+            background-color: #fdf2f8 !important;
+            color: #9e2469 !important;
+        }
+
+        #programRegistrationsTableWrapper nav[role="navigation"] span[aria-current="page"] span {
+            background-color: #9e2469 !important;
+            border-color: #9e2469 !important;
+            color: #fff !important;
         }
     </style>
 
@@ -515,8 +760,15 @@
             }, 3500);
         }
 
+        function currentProgramTypeFilter() {
+            return ($('#programTypeFilter').val() || 'all').toString();
+        }
+
         function loadProgramRegistrations(params) {
-            const query = $.param(params || {});
+            const merged = Object.assign({
+                program_type: currentProgramTypeFilter(),
+            }, params || {});
+            const query = $.param(merged);
             $('#programRegistrationsTableWrapper').addClass('opacity-60');
             $.get(REGISTRATIONS_LIST_URL + (query ? ('?' + query) : ''))
                 .done(function(html) {
@@ -537,22 +789,45 @@
 
             $('#exportProgramRegistrationsBtn').on('click', function() {
                 const status = $('#programStatusFilter').val() || 'all';
-                const q = $.param({ program_status: status });
+                const q = $.param({
+                    program_status: status,
+                    program_type: currentProgramTypeFilter(),
+                });
                 window.location.href = REGISTRATIONS_EXPORT_URL + (q ? ('?' + q) : '');
             });
 
-            // Pagination: load via AJAX without reload
+            function loadProgramRegistrationsByHref(href) {
+                if (!href) return;
+                const parsedUrl = new URL(href, window.location.origin);
+                const params = new URLSearchParams(parsedUrl.search);
+
+                // Keep currently selected filter if pagination link does not include it.
+                if (!params.has('program_status')) {
+                    const currentStatus = ($('#programStatusFilter').val() || 'all').toString();
+                    params.set('program_status', currentStatus);
+                }
+                if (!params.has('program_type')) {
+                    params.set('program_type', currentProgramTypeFilter());
+                }
+
+                $('#programRegistrationsTableWrapper').addClass('opacity-60');
+                $.get(REGISTRATIONS_LIST_URL + '?' + params.toString())
+                    .done(function(html) {
+                        $('#programRegistrationsTableWrapper').html(html).removeClass('opacity-60');
+                    })
+                    .fail(function() {
+                        $('#programRegistrationsTableWrapper').removeClass('opacity-60');
+                        alert('Failed to load applications.');
+                    });
+            }
+
+            // Pagination: load via AJAX without full page reload
             $(document).on('click', '#programRegistrationsTableWrapper a', function(e) {
                 const href = this.getAttribute('href') || '';
-                const isPagination = href.indexOf('program_page') !== -1 || href.indexOf('registrations/list') !== -1;
+                const isPagination = href.indexOf('program_page=') !== -1;
                 if (isPagination) {
                     e.preventDefault();
-                    const query = href.indexOf('?') !== -1 ? href.substring(href.indexOf('?')) : '';
-                    const url = href.indexOf('http') === 0 ? href : REGISTRATIONS_LIST_URL + (href.indexOf('?') !== -1 ? href.substring(href.indexOf('?')) : '');
-                    $('#programRegistrationsTableWrapper').addClass('opacity-60');
-                    $.get(url)
-                        .done(function(html) { $('#programRegistrationsTableWrapper').html(html).removeClass('opacity-60'); })
-                        .fail(function() { $('#programRegistrationsTableWrapper').removeClass('opacity-60'); alert('Failed to load applications.'); });
+                    loadProgramRegistrationsByHref(href);
                 }
             });
 
@@ -586,7 +861,7 @@
                 statCards.forEach(card => {
                     const cardTab = card.getAttribute('data-tab');
                     if (cardTab === activeTab) {
-                        card.style.display = 'block';
+                        card.style.display = '';
                     } else {
                         card.style.display = 'none';
                     }
@@ -638,21 +913,22 @@
                 const assignTrigger = e.target.closest('[data-assign-trigger]');
                 if (assignTrigger) {
                     e.preventDefault();
-                    const url = assignTrigger.getAttribute('data-assign-url');
+                    const url = assignTrigger.getAttribute('data-assign-path');
                     const currentId = assignTrigger.getAttribute('data-assign-current');
                     const assignName = assignTrigger.getAttribute('data-assign-name') || '';
                     closeActionMenus();
                     if (url && assignModal && assignModalForm) {
+                        assignModalForm.setAttribute('data-assign-path', url);
                         assignModalForm.action = url;
                         const select = assignModalForm.querySelector('select[name="case_manager_id"]');
                         if (select) select.value = currentId || '';
                         const titleEl = document.getElementById('assignModalTitle');
                         const subtitleEl = document.getElementById('assignModalSubtitle');
                         if (assignName) {
-                            if (titleEl) titleEl.textContent = 'Change Case Manager';
+                            if (titleEl) titleEl.textContent = 'Change Coordinator';
                             if (subtitleEl) subtitleEl.textContent = 'Currently assigned to: ' + assignName;
                         } else {
-                            if (titleEl) titleEl.textContent = 'Assign Case Manager';
+                            if (titleEl) titleEl.textContent = 'Assign Coordinator';
                             if (subtitleEl) subtitleEl.textContent = 'Select a case manager to handle this registration.';
                         }
                         assignModal.classList.remove('hidden');
@@ -708,6 +984,90 @@
 
             if (assignModalCancel) {
                 assignModalCancel.addEventListener('click', closeAssignModal);
+            }
+
+            let assignInFlight = false;
+
+            if (assignModalForm) {
+                assignModalForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (assignInFlight) {
+                        return;
+                    }
+                    const path = assignModalForm.getAttribute('data-assign-path') || assignModalForm.action || '';
+                    if (!path || !String(path).includes('/assign')) {
+                        showToast('Assignment URL is missing. Please close the modal and try again.', 'error');
+                        return;
+                    }
+                    assignInFlight = true;
+                    const submitBtn = assignModalForm.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = 'Assigning...';
+                    }
+                    const formData = new FormData(assignModalForm);
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+                        || document.querySelector('input[name="_token"]')?.value;
+                    let assignUrl;
+                    if (path.startsWith('http://') || path.startsWith('https://')) {
+                        try {
+                            const parsed = new URL(path);
+                            assignUrl = window.location.origin + parsed.pathname + parsed.search;
+                        } catch {
+                            assignUrl = path;
+                        }
+                    } else {
+                        assignUrl = window.location.origin + (path.startsWith('/') ? path : '/' + path);
+                    }
+                    fetch(assignUrl, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        redirect: 'manual',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: formData,
+                    })
+                        .then(async (response) => {
+                            const data = await response.json().catch(() => ({}));
+                            if (response.status >= 200 && response.status < 300) {
+                                if (data.success === false) {
+                                    throw new Error(data.message || 'Failed to assign case manager.');
+                                }
+                                return data;
+                            }
+                            if (response.status >= 300 && response.status < 400) {
+                                return {
+                                    success: true,
+                                    message: data.message || 'Case manager assignment updated.',
+                                };
+                            }
+                            throw new Error(data.message || 'Failed to assign case manager.');
+                        })
+                        .then((data) => {
+                            closeAssignModal();
+                            showToast(data.message || 'Case manager assigned successfully!', 'success');
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 800);
+                        })
+                        .catch((error) => {
+                            if (error?.name === 'AbortError') {
+                                return;
+                            }
+                            showToast(error.message || 'An error occurred.', 'error');
+                        })
+                        .finally(() => {
+                            assignInFlight = false;
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.textContent = 'Confirm & Assign';
+                            }
+                        });
+                });
             }
 
             // Send to Finance Modal

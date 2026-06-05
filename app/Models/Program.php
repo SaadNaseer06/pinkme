@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ProgramType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,6 +19,9 @@ class Program extends Model
         'max_applications',
         'banner',
         'status',
+        'program_type',
+        'sponsor_name',
+        'sponsor_logo',
         'custom_fields',
     ];
 
@@ -117,6 +121,49 @@ class Program extends Model
     public function isApplicationOpen(): bool
     {
         return $this->effective_status === 'ongoing';
+    }
+
+    public function registrationCount(): int
+    {
+        return $this->registrations()->count();
+    }
+
+    public function hasReachedMaxApplications(): bool
+    {
+        if (! $this->max_applications) {
+            return false;
+        }
+
+        return $this->registrationCount() >= (int) $this->max_applications;
+    }
+
+    public function isAcceptingApplications(): bool
+    {
+        return $this->isApplicationOpen() && ! $this->hasReachedMaxApplications();
+    }
+
+    public function isMomentsThatMatter(): bool
+    {
+        return ProgramType::isMomentsThatMatter($this->program_type);
+    }
+
+    public function isFinancialAssistance(): bool
+    {
+        return ($this->program_type ?? ProgramType::FINANCIAL_ASSISTANCE) === ProgramType::FINANCIAL_ASSISTANCE;
+    }
+
+    public function programTypeLabel(): string
+    {
+        return ProgramType::label($this->program_type);
+    }
+
+    public function sponsorLogoUrl(): ?string
+    {
+        if (! $this->sponsor_logo) {
+            return null;
+        }
+
+        return storage_url(ltrim($this->sponsor_logo, '/'));
     }
 
     public function sponsorships(): HasMany

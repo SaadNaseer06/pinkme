@@ -315,18 +315,18 @@ class NotificationManager {
         accent.innerHTML = `<span class="inline-block h-2.5 w-2.5 rounded-full ${isUnread ? 'bg-[#9E2469]' : 'bg-gray-300'}"></span>`;
 
         const body = document.createElement('div');
-        body.className = 'flex-1 space-y-1';
+        body.className = 'flex-1 min-w-0 space-y-1';
 
         const title = document.createElement('p');
-        title.className = 'text-sm font-semibold text-[#213430]';
+        title.className = 'text-sm font-semibold text-[#213430] break-words';
         title.textContent = notification.title || 'Notification';
 
         const message = document.createElement('p');
-        message.className = 'text-xs text-[#6B5F65] leading-relaxed';
+        message.className = 'text-xs text-[#6B5F65] leading-relaxed break-words';
         message.textContent = notification.message || '';
 
         const meta = document.createElement('p');
-        meta.className = 'text-[11px] text-[#A9A9A9]';
+        meta.className = 'text-[11px] text-[#A9A9A9] break-words';
         meta.textContent = notification.created_at_formatted || '';
 
         body.appendChild(title);

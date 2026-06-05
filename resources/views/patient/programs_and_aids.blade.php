@@ -1,13 +1,30 @@
 @extends('patient.layouts.app')
 
-@section('title', 'Programs & Aids')
+@section('title', 'Programs & Services')
 
 @section('content')
+    @push('head')
+        <style>
+            /* Program cards: limit description height when Tailwind line-clamp is unavailable */
+            .program-card-desc-clamp {
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 3;
+                overflow: hidden;
+                word-break: break-word;
+            }
+        </style>
+    @endpush
     @php
-        // Fetch IDs of programs the current user has registered for
+        // Fetch IDs of programs the current user has registered for (integers for consistent matching)
         $registeredProgramIds = \App\Models\ProgramRegistration::where('user_id', auth()->id())
             ->pluck('program_id')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
             ->toArray();
+        $programsAtCapacityIds = $programsAtCapacityIds ?? [];
+        $financialAssistanceClosed = $financialAssistanceClosed ?? false;
         // $upcomingPrograms and $ongoingPrograms come from controller (effective date-based status)
     @endphp
     <main class="flex-1 overflow-hidden">
@@ -27,10 +44,16 @@
             </div>
         @endif --}}
 
-        <!-- All Programs Header -->
+        <!-- Programs & Services header -->
         <div class="bg-[#F3E8EF] p-4 rounded-lg mb-6">
-            <h2 class="text-lg font-medium text-[#91848C] app-main">All Programs</h2>
+            <h2 class="text-lg font-medium text-[#91848C] app-main">Programs & Services</h2>
         </div>
+
+        @if (!empty($financialAssistanceClosed))
+            <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 md:p-5 shadow-sm">
+                <p class="text-sm text-[#213430] app-text whitespace-pre-line">{{ \App\Support\ProgramApplicationCapacity::CLOSED_MESSAGE }}</p>
+            </div>
+        @endif
 
         <!-- Upcoming Programs Section -->
         <div class="mb-6">
@@ -39,16 +62,16 @@
             </h2>
 
             @forelse($upcomingPrograms as $program)
-                <div class="bg-[#F3E8EF] rounded-lg p-4 mb-4 flex items-center justify-between md:flex hidden">
-                    <div class="flex items-center">
+                <div class="bg-[#F3E8EF] rounded-lg p-4 mb-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-start min-w-0 flex-1 w-full">
                         <div
-                            class="flex flex-col items-center justify-center w-20 h-20 border-2 border-pink rounded-lg mr-4 bg-[#FFF7FC]">
+                            class="flex flex-col items-center justify-center w-20 h-20 shrink-0 border-2 border-pink rounded-lg mr-4 bg-[#FFF7FC]">
                             <span
                                 class="text-sm text-pink">{{ \Carbon\Carbon::parse($program->event_date)->format('M') }}</span>
                             <span
                                 class="text-4xl font-bold text-pink">{{ \Carbon\Carbon::parse($program->event_date)->format('d') }}</span>
                         </div>
-                        <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
+                        <div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden mr-4">
                             @php
                                 $bannerUrl = $program->banner ? storage_url(ltrim($program->banner, '/')) : asset('public/images/program-3.png');
                                 $fallbackImg = asset('public/images/program-3.png');
@@ -56,15 +79,17 @@
                             <img src="{{ $bannerUrl }}" alt="{{ $program->title }}"
                                 class="w-full h-full object-cover" onerror="this.src='{{ $fallbackImg }}'" />
                         </div>
-                        <div>
+                        <div class="min-w-0 flex-1">
                             <h3 class="text-xl font-semibold text-[#213430] mb-1 program-h">{{ $program->title }}</h3>
-                            <p class="text-sm text-[#91848C] program-p">{{ $program->description }}</p>
+                            <p class="text-sm text-[#91848C] program-p program-card-desc-clamp leading-snug">{{ $program->description }}</p>
                         </div>
                     </div>
-                    <button onclick="openModal({{ $program->id }})"
-                        class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white py-4 px-8 rounded-lg program-btn">
-                        View Details
-                    </button>
+                    <div class="flex flex-row items-center gap-3 w-full md:w-auto md:justify-end">
+                        <button type="button" onclick="openModal({{ $program->id }})"
+                            class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white py-2 px-5 md:py-4 md:px-8 rounded-lg program-btn">
+                            View Details
+                        </button>
+                    </div>
                 </div>
             @empty
                 <p class="text-[#91848C]">No upcoming programs found.</p>
@@ -76,16 +101,16 @@
             <h2 class="text-2xl font-semibold text-[#213430] mb-4 program-main">Ongoing Programs</h2>
 
             @forelse($ongoingPrograms as $program)
-                <div class="bg-[#F3E8EF] rounded-lg p-4 mb-4 flex items-center justify-between md:flex hidden">
-                    <div class="flex items-center">
+                <div class="bg-[#F3E8EF] rounded-lg p-4 mb-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-start min-w-0 flex-1 w-full">
                         <div
-                            class="flex flex-col items-center justify-center w-20 h-20 border-2 border-pink rounded-lg mr-4 bg-[#FFF7FC]">
+                            class="flex flex-col items-center justify-center w-20 h-20 shrink-0 border-2 border-pink rounded-lg mr-4 bg-[#FFF7FC]">
                             <span
                                 class="text-sm text-pink">{{ \Carbon\Carbon::parse($program->event_date)->format('M') }}</span>
                             <span
                                 class="text-4xl font-bold text-pink">{{ \Carbon\Carbon::parse($program->event_date)->format('d') }}</span>
                         </div>
-                        <div class="w-20 h-20 rounded-lg overflow-hidden mr-4">
+                        <div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden mr-4">
                             @php
                                 $bannerUrl = $program->banner ? storage_url(ltrim($program->banner, '/')) : asset('public/images/program-3.png');
                                 $fallbackImg = asset('public/images/program-3.png');
@@ -93,21 +118,48 @@
                             <img src="{{ $bannerUrl }}" alt="{{ $program->title }}"
                                 class="w-full h-full object-cover" onerror="this.src='{{ $fallbackImg }}'" />
                         </div>
-                        <div>
+                        <div class="min-w-0 flex-1">
                             <h3 class="text-xl font-semibold text-[#213430] mb-1 program-h">{{ $program->title }}</h3>
-                            <p class="text-sm text-[#91848C] program-p">{{ $program->description }}</p>
+                            <p class="text-sm text-[#91848C] program-p program-card-desc-clamp leading-snug">{{ $program->description }}</p>
                         </div>
                     </div>
-                    <button onclick="openModal({{ $program->id }})"
-                        class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white py-4 px-8 rounded-lg program-btn">
-                        View Details
-                    </button>
+                    <div class="flex flex-row items-center gap-3 w-full md:w-auto md:justify-end">
+                        @php
+                            // FA closure banner is global; only FA program cards should be blocked by it (not Moments That Matter).
+                            $cardApplicationsClosed = ! $program->isAcceptingApplications()
+                                || (! empty($financialAssistanceClosed) && $program->isFinancialAssistance());
+                        @endphp
+                        @if ($cardApplicationsClosed)
+                            <button type="button" disabled
+                                title="Applications are closed for this program."
+                                class="py-2 px-5 md:py-4 md:px-8 rounded-lg program-btn font-medium bg-gray-400 text-white border border-gray-400 opacity-70 cursor-not-allowed whitespace-nowrap">
+                                Applications closed
+                            </button>
+                        @elseif (!in_array($program->id, $registeredProgramIds, true))
+                            <button type="button" onclick="openApplyFromCard({{ $program->id }})"
+                                class="py-2 px-5 md:py-4 md:px-8 rounded-lg program-btn font-medium bg-pink text-white border border-pink hover:bg-[#9E2469] hover:border-[#9E2469] whitespace-nowrap">
+                                Apply
+                            </button>
+                        @else
+                            <button type="button" disabled
+                                title="Our records indicate that an application has already been submitted for this program. Please note only one submission is permitted per applicant during each application cycle. Thank you allowing PINK “ME” to support you during your journey."
+                                class="py-2 px-5 md:py-4 md:px-8 rounded-lg program-btn font-medium bg-gray-400 text-white border border-gray-400 opacity-70 cursor-not-allowed whitespace-nowrap">
+                                You already applied
+                            </button>
+                        @endif
+                        <button type="button" onclick="openModal({{ $program->id }})"
+                            class="bg-transparent border border-[#213430] text-[#213430] hover:bg-[#9E2469] hover:border-none hover:text-white py-2 px-5 md:py-4 md:px-8 rounded-lg program-btn">
+                            View Details
+                        </button>
+                    </div>
                 </div>
             @empty
                 <p class="text-[#91848C]">No ongoing programs found.</p>
             @endforelse
         </div>
     </main>
+
+    @include('patient.programs.partials.moments_that_matter_form')
 
     <!-- Modal -->
     <div id="registerModal" class="modal-overlay fixed inset-0 z-50 bg-black/50 hidden flex items-start justify-end overflow-y-auto">
@@ -123,9 +175,11 @@
                     <img src="{{ asset('public/images/program-3.png') }}" alt="Program Banner" class="modal-banner w-full h-full object-cover" onerror="this.src='{{ asset('public/images/program-3.png') }}'">
                 </div>
 
+                @include('patient.programs.partials.sponsor_modal_block', ['prefix' => 'modal'])
+
                 <!-- Modal Body -->
                 <div class="py-3 text-md text-gray-800 space-y-6">
-                    <p class="text-[#91848C] app-text modal-description">Loading description...</p>
+                    <p class="text-[#91848C] app-text modal-description whitespace-pre-line leading-relaxed text-sm">Loading description...</p>
 
                     <!-- Date & Time -->
                     <div>
@@ -201,7 +255,7 @@
     <!-- Application form modal -->
     <div id="popupModal" class="fixed inset-0 z-50 hidden flex items-start sm:items-center justify-center bg-black/60 px-4 py-6 overflow-y-auto">
         <!-- Modal Box -->
-        <div class="bg-[#F3E8EF] p-6 rounded-lg w-full max-w-4xl relative overflow-y-auto max-h-[90vh] shadow-xl border border-[#DCCFD8]">
+        <div class="bg-[#F3E8EF] p-6 rounded-lg w-full max-w-4xl min-w-0 relative overflow-y-auto max-h-[90vh] shadow-xl border border-[#DCCFD8]">
 
             <!-- Close Button -->
             <button onclick="document.getElementById('popupModal').classList.add('hidden')"
@@ -213,7 +267,7 @@
             <h2 class="text-lg font-medium text-black app-main mb-4">Financial Assistance Pre-Qualification</h2>
 
             <!-- Form Start -->
-            <form action="{{ route('program.register') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+            <form action="{{ route('program.register') }}" method="POST" enctype="multipart/form-data" class="space-y-8 min-w-0 max-w-full">
                 @csrf
                 <input type="hidden" name="program_id" id="program_id" value="">
 
@@ -235,8 +289,8 @@
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm app-text text-[#213430]">
                         <div class="space-y-3">
-                            <p class="font-medium">Choose one application period (select only one option; grants are paid over the course of 3 months): *</p>
-                            <p class="text-xs text-[#91848C] app-text">Option 1: May through June · Option 2: November through December</p>
+                            <p class="font-medium">Choose one application period (select only one option): *</p>
+                            <p class="text-xs text-[#91848C] app-text">Grants are distributed in <strong>June</strong> for option 1 and <strong>December</strong> for option 2.</p>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-2">
                                     <input type="radio" name="quarter" value="option1" class="text-[#9E2469]" required>
@@ -249,21 +303,31 @@
                             </div>
                         </div>
                         <div class="space-y-3">
-                            <p class="font-medium">Please indicate which program you are applying for: *</p>
+                            <p class="font-medium">Please select one program (only one may be chosen): *</p>
                             <p class="text-xs text-[#91848C] app-text">
                                 Selected from the program list: <span id="selected-program-name" class="font-medium text-[#213430]">-</span>
                             </p>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="programs_applied[]" value="Breast Cancer Treatment Assistance Program (up to $500)" class="text-[#9E2469]">
+                                    <input type="radio" name="programs_applied" value="Breast Cancer Treatment Assistance Program (up to $500)" class="text-[#9E2469]" required>
                                     <span>Breast Cancer Treatment Assistance Program (up to $500)</span>
                                 </label>
                                 <label class="flex items-center gap-2">
-                                    <input type="checkbox" name="programs_applied[]" value="Survivor Health and Wellness Assistance Program (up to $250)" class="text-[#9E2469]">
+                                    <input type="radio" name="programs_applied" value="Survivor Health and Wellness Assistance Program (up to $250)" class="text-[#9E2469]">
                                     <span>Survivor Health and Wellness Assistance Program (up to $250)</span>
                                 </label>
                             </div>
                         </div>
+                    </div>
+                    <div class="mt-4 rounded-lg border border-[#EADFF0] bg-[#FDF7FB] p-4 text-sm text-[#213430] app-text space-y-2">
+                        <p class="font-semibold app-main">Program(s) Summary</p>
+                        <p>PINK “ME” offers financial assistance through two programs:</p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>Breast Cancer Treatment Grant – Up to $500</li>
+                            <li>Survivor Health and Wellness Grant – Up to $250</li>
+                        </ul>
+                        <p>Payments are made through the patient portal to service providers or as direct bill payments. Partial payments are not available.</p>
+                        <p class="text-[#B32020] font-medium">(Please do not submit partial payments.)</p>
                     </div>
                 </div>
 
@@ -288,6 +352,29 @@
                                 mastectomy, lumpectomy, axillary dissection, or sentinel node biopsy), chemotherapy or radiation. Active treatment does not include
                                 reconstruction surgeries or long-term hormonal therapies.
                             </p>
+                        </div>
+                        <div class="space-y-2 min-w-0 md:col-span-2">
+                            <p class="font-medium">Stage of Breast Cancer *</p>
+                            <select name="breast_cancer_stage" required
+                                class="w-full max-w-md px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                                <option value="">Select one…</option>
+                                <option value="0">0 (Non-Invasive)</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4 (Metastatic)</option>
+                                <option value="unknown">Unknown</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2 min-w-0 md:col-span-2">
+                            <label class="block font-medium">Race / Ethnicity (select one) *</label>
+                            <select name="ethnicity" required
+                                class="w-full max-w-md px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                                <option value="">Select one…</option>
+                                @foreach (\App\Support\ProgramApplicationEthnicityOptions::OPTIONS as $ethnicityOption)
+                                    <option value="{{ $ethnicityOption }}">{{ $ethnicityOption }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="space-y-2 min-w-0">
                             <p class="font-medium">Family history of breast cancer? *</p>
@@ -316,8 +403,8 @@
                             </div>
                         </div>
                         <div>
-                            <label class="block font-medium mb-1">How did you hear about us?</label>
-                            <input type="text" name="heard_about" placeholder="Referral, friend, web search..."
+                            <label class="block font-medium mb-1">How did you hear about us? *</label>
+                            <input type="text" name="heard_about" placeholder="Referral, friend, web search..." required
                                 class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300">
                         </div>
                         <div class="space-y-2 min-w-0 md:col-span-2">
@@ -395,28 +482,28 @@
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
                     <h3 class="text-md font-semibold text-[#213430] app-main">Proof of Income/Employment Status *</h3>
                     <p class="text-sm text-[#213430] app-text">
-                        <span class="font-semibold">Please provide the following: last two years of W-2, last two months pay stubs, last three months bank statements or a written signed statement.</span>
-                        Upload documents below.
+                        To help us better understand your needs, income verification is required. Please provide paystubs, W-2s or other proof of income. Upload documents below.
                     </p>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-[#213430] app-text">
+                    <p class="text-sm font-medium text-[#213430]">Select one employment category *</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-[#213430] app-text">
                         <label class="flex items-center gap-2">
-                            <input type="checkbox" name="proof_of_income_status[]" value="employed" class="text-[#9E2469]">
+                            <input type="radio" name="proof_of_income_status" value="employed" class="text-[#9E2469]" required>
                             <span>Employed</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="checkbox" name="proof_of_income_status[]" value="self_employed" class="text-[#9E2469]">
+                            <input type="radio" name="proof_of_income_status" value="self_employed" class="text-[#9E2469]">
                             <span>Self Employed</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="checkbox" name="proof_of_income_status[]" value="disabled" class="text-[#9E2469]">
+                            <input type="radio" name="proof_of_income_status" value="disabled" class="text-[#9E2469]">
                             <span>Disabled</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="checkbox" name="proof_of_income_status[]" value="retired" class="text-[#9E2469]">
+                            <input type="radio" name="proof_of_income_status" value="retired" class="text-[#9E2469]">
                             <span>Retired</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="checkbox" name="proof_of_income_status[]" value="student" class="text-[#9E2469]">
+                            <input type="radio" name="proof_of_income_status" value="student" class="text-[#9E2469]">
                             <span>Student</span>
                         </label>
                     </div>
@@ -434,54 +521,176 @@
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-3">
                     <h3 class="text-md font-semibold text-[#213430] app-main">Sharing your story (optional)</h3>
                     <p class="text-sm text-[#91848C] app-text">
-                        If your application is approved, would you like us to be able to share parts of your story to inspire others?
-                        Your answer does not affect eligibility—we simply want to respect your wishes.
+                        If your application is approved, would you like us to consider sharing your story to inspire others?
+                        Your answer does not affect eligibility.
                     </p>
                     <div class="flex flex-col gap-3 text-sm text-[#213430] app-text">
                         <label class="inline-flex items-start gap-2 min-w-0">
                             <input type="radio" name="authorization_choice" value="allow" class="text-[#9E2469] mt-1 shrink-0">
-                            <span class="break-words">Yes—show me the sharing options below.</span>
+                            <span class="break-words">Yes—show optional sharing fields below.</span>
                         </label>
                         <label class="inline-flex items-start gap-2 min-w-0">
                             <input type="radio" name="authorization_choice" value="decline" class="text-[#9E2469] mt-1 shrink-0" checked>
                             <span class="break-words">No thanks—please do not use my information or images.</span>
                         </label>
                     </div>
-                    <p class="text-xs text-[#91848C] app-text hidden" data-auth-hint>Select <strong>Yes</strong> to choose what we may share; if you select <strong>No</strong>, those options stay hidden.</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-[#213430] app-text" data-auth-permissions>
-                        <label class="flex items-start gap-2">
-                            <input type="checkbox" name="authorization_permissions[]" value="full_name" class="mt-1 text-[#9E2469]">
-                            <span>Use my full name</span>
-                        </label>
-                        <label class="flex items-start gap-2">
-                            <input type="checkbox" name="authorization_permissions[]" value="story_anonymous" class="mt-1 text-[#9E2469]">
-                            <span>Share part of my story anonymously</span>
-                        </label>
-                        <label class="flex items-start gap-2">
-                            <input type="checkbox" name="authorization_permissions[]" value="story_full" class="mt-1 text-[#9E2469]">
-                            <span>Share my story with my name</span>
-                        </label>
-                        <label class="flex items-start gap-2">
-                            <input type="checkbox" name="authorization_permissions[]" value="photos" class="mt-1 text-[#9E2469]">
-                            <span>Use photos / media of me or my journey</span>
-                        </label>
-                        <label class="flex items-start gap-2">
-                            <input type="checkbox" name="authorization_permissions[]" value="contact_details" class="mt-1 text-[#9E2469]">
-                            <span>Contact me for follow-ups related to my story</span>
-                        </label>
+                    <div class="space-y-3 mt-4 pt-4 border-t border-[#EADFF0]" data-auth-extra>
+                        <label class="block text-sm font-medium text-[#213430]">Optional Photo Upload</label>
+                        <input type="file" name="story_media[]" accept=".pdf,.jpg,.jpeg,.png" multiple
+                            class="w-full px-4 py-2 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] focus:outline-none focus:ring-2 focus:ring-pink-300">
+                        <p class="text-xs text-[#91848C]">Photo related to your breast cancer journey of yourself.</p>
+                        <label class="block text-sm font-medium text-[#213430] mt-2">Note area</label>
+                        <textarea name="story_notes" rows="4"
+                            class="w-full px-4 py-3 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300"
+                            placeholder="Your team story can help inspire and support others. Participation is completely optional."></textarea>
                     </div>
+                    <p class="text-xs text-[#91848C] app-text mt-2">Your team story can help inspire and support others. Participation is completely optional.</p>
                 </div>
 
                 <div class="border border-[#DCCFD8] bg-white/60 rounded-lg p-4 space-y-4">
-                    <h3 class="text-md font-semibold text-[#213430] app-main">Billing &amp; Verification</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 class="text-md font-semibold text-[#213430] app-main">Billing Address / Online Payment Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 min-w-0">
                         <div class="md:col-span-2">
-                            <label class="block font-medium mb-1 text-sm">Billing Address / Online Payment Details</label>
-                            <textarea name="billing_details" rows="3"
-                                class="w-full px-4 py-3 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300"></textarea>
-                            <p class="text-xs text-[#91848C] app-text mt-1">To help us with your bill payments and submissions, please provide the billing address or the necessary information for making online payments.</p>
+                            {{-- <label class="block font-medium mb-1 text-sm">Billing Address / Online Payment Details</label> --}}
+                            {{-- <textarea name="billing_details" rows="3"
+                                class="w-full px-4 py-3 rounded-md border border-[#DCCFD8] bg-[#FDF7FB] text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-pink-300"></textarea> --}}
+                            {{-- <p class="text-xs text-[#91848C] app-text mt-1">To help us with your bill payments and submissions, please provide the billing address or the necessary information for making online payments.</p> --}}
                         </div>
-                        <div class="space-y-2">
+                        <div class="md:col-span-2 w-full min-w-0 max-w-full">
+                            {{-- <p class="text-sm font-medium text-[#213430] mb-1">Bills to be considered</p> --}}
+                            <p class="text-xs text-[#91848C] mb-3">Note: To ensure proper processing, the bill must be in your name to qualify for assistance.To help us with your bill payments and submissions, please provide the billing address or the necessary information for making online payments.</p>
+                            <div id="patient-bill-blocks" class="space-y-3 w-full min-w-0">
+                                <div class="patient-bill-block rounded-md border border-[#DCCFD8] bg-[#F3E8EF] p-3 sm:p-4 w-full min-w-0 max-w-full box-border">
+                                    <div class="flex items-center justify-between gap-2 mb-3">
+                                        <span class="text-xs font-semibold text-[#213430] patient-bill-block-label">Bill 1</span>
+                                        <button type="button" class="patient-bill-remove shrink-0 px-3 py-1.5 text-xs rounded-md border border-[#91848C] text-[#213430] hover:bg-white/80 disabled:opacity-40 disabled:cursor-not-allowed" title="Remove this bill" disabled>Remove</button>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                                        <div class="min-w-0 sm:col-span-2">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Service Provider Name</label>
+                                            <input type="text" name="bill_name[]" autocomplete="organization"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                        <div class="min-w-0 sm:col-span-2">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Bill Payment Link(s)</label>
+                                            <input type="text" name="bill_url[]" placeholder="https://"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                        <div class="min-w-0">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Amount Due</label>
+                                            <input type="number" name="bill_amount[]" inputmode="decimal" placeholder="0.00" min="0" max="500" step="0.01"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                        <div class="min-w-0">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Type of Support Expenses</label>
+                                            <select name="bill_support_expense[]" class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                                <option value="">Select type…</option>
+                                                @foreach (\App\Support\PatientBillSupportExpenseTypes::OPTIONS as $expenseOption)
+                                                    <option value="{{ $expenseOption }}">{{ $expenseOption }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="min-w-0 sm:col-span-2">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Provider Contact Information</label>
+                                            <input type="text" name="bill_provider_contact[]" autocomplete="off" placeholder="Phone or email"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                        <div class="min-w-0 sm:col-span-2">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Account Number</label>
+                                            <input type="text" name="bill_account[]" autocomplete="off"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                        <div class="min-w-0 sm:col-span-2">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Notes (optional)</label>
+                                            <input type="text" name="bill_notes[]"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" id="patient-bill-add" class="mt-3 px-4 py-2 rounded-md border border-[#9E2469] text-[#9E2469] text-sm font-medium hover:bg-[#FDE8F3] w-full sm:w-auto">
+                                Add another bill
+                            </button>
+                            <p class="text-xs text-[#91848C] mt-2">Amount Due cannot be more than $500 per bill entry.</p>
+                            <div id="food-assistance-followup" class="mt-3 hidden rounded-md border border-[#DCCFD8] bg-white px-3 py-3">
+                                <p class="text-sm font-medium text-[#213430]">Do you need support with Food Assistance?</p>
+                                <div class="mt-2 flex items-center gap-4 text-sm text-[#213430]">
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="needs_food_assistance" value="yes" class="text-[#9E2469]">
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="needs_food_assistance" value="no" class="text-[#9E2469]">
+                                        <span>No</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="medical-bills-followup" class="mt-3 hidden rounded-md border border-[#DCCFD8] bg-white px-3 py-3">
+                                <p class="text-sm font-medium text-[#213430]">Do you need support with Medical Bill(s) Assistance?</p>
+                                <div class="mt-2 flex items-center gap-4 text-sm text-[#213430]">
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="needs_medical_bills_assistance" value="yes" class="text-[#9E2469]">
+                                        <span>Yes</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" name="needs_medical_bills_assistance" value="no" class="text-[#9E2469]">
+                                        <span>No</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <template id="patient-bill-block-template">
+                                <div class="patient-bill-block rounded-md border border-[#DCCFD8] bg-[#F3E8EF] p-3 sm:p-4 w-full min-w-0 max-w-full box-border">
+                                    <div class="flex items-center justify-between gap-2 mb-3">
+                                        <span class="text-xs font-semibold text-[#213430] patient-bill-block-label">Bill</span>
+                                        <button type="button" class="patient-bill-remove shrink-0 px-3 py-1.5 text-xs rounded-md border border-[#91848C] text-[#213430] hover:bg-white/80 disabled:opacity-40 disabled:cursor-not-allowed" title="Remove this bill">Remove</button>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full min-w-0">
+                                        <div class="min-w-0 sm:col-span-2">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Service Provider Name</label>
+                                            <input type="text" name="bill_name[]" autocomplete="organization"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                        <div class="min-w-0 sm:col-span-2">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Bill Payment Link(s)</label>
+                                            <input type="text" name="bill_url[]" placeholder="https://"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                        <div class="min-w-0">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Amount Due</label>
+                                            <input type="number" name="bill_amount[]" inputmode="decimal" placeholder="0.00" min="0" max="500" step="0.01"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                        <div class="min-w-0">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Type of Support Expenses</label>
+                                            <select name="bill_support_expense[]" class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                                <option value="">Select type…</option>
+                                                @foreach (\App\Support\PatientBillSupportExpenseTypes::OPTIONS as $expenseOption)
+                                                    <option value="{{ $expenseOption }}">{{ $expenseOption }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="min-w-0 sm:col-span-2">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Provider Contact Information</label>
+                                            <input type="text" name="bill_provider_contact[]" autocomplete="off" placeholder="Phone or email"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] placeholder-[#91848C] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                        <div class="min-w-0 sm:col-span-2">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Account Number</label>
+                                            <input type="text" name="bill_account[]" autocomplete="off"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                        <div class="min-w-0 sm:col-span-2">
+                                            <label class="block text-xs font-medium text-[#213430] mb-1">Notes (optional)</label>
+                                            <input type="text" name="bill_notes[]"
+                                                class="w-full min-w-0 box-border px-3 py-2 text-sm rounded-md border border-[#DCCFD8] bg-white text-[#213430] focus:outline-none focus:ring-2 focus:ring-[#9E2469]/30">
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="md:col-span-2 space-y-2 w-full min-w-0">
                             <label class="block font-medium mb-1 text-sm">Signature *</label>
                             <div class="border border-dashed border-[#DCCFD8] rounded-lg bg-white">
                                 <canvas id="signature-pad" class="w-full h-40" style="touch-action: none;"></canvas>
@@ -556,6 +765,7 @@
     <script>
         // List of program IDs the current user has already registered for
         const registeredPrograms = @json($registeredProgramIds);
+        const financialAssistanceClosed = @json($financialAssistanceClosed ?? false);
         const customFieldsContainer = document.querySelector('[data-custom-fields]');
         const customFieldsEmptyState = document.querySelector('[data-custom-fields-empty]');
         const defaultLabels = {
@@ -627,8 +837,23 @@
                 return;
             }
 
+            /* Omit fields duplicated elsewhere; omit Program date (event_date) when empty — Date & Time above may still show derived dates. */
             const filteredFields = Array.isArray(fields)
-                ? fields.filter((field) => !['payment_type', 'program_fund', 'max_applications', 'status'].includes(field?.name))
+                ? fields.filter((field) => {
+                    if (!field?.name) {
+                        return false;
+                    }
+                    if (['payment_type', 'program_fund', 'max_applications', 'status', 'description'].includes(field.name)) {
+                        return false;
+                    }
+                    if (field.name === 'event_date') {
+                        const v = field.value;
+                        if (v === null || v === undefined || String(v).trim() === '') {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
                 : [];
 
             customFieldsContainer.innerHTML = '';
@@ -687,22 +912,120 @@
             document.getElementById('program_id').value = programId;
         }
 
+        /**
+         * From program list: open application form when eligible; otherwise show details modal.
+         */
+        function openApplyFromCard(programId) {
+            currentProgramId = programId;
+            fetch('{{ url('/patient/programs') }}/' + programId, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    currentProgramTitle = data.title || '';
+                    const registrationInfo = data.registration || null;
+                    const alreadyRegistered = registrationInfo !== null || registeredPrograms.map(Number).includes(Number(programId));
+                    const applicationOpen = data.is_application_open !== false;
+                    const atCapacity = data.is_at_capacity === true;
+                    currentProgramType = data.program_type || 'financial_assistance';
+
+                    if (alreadyRegistered || !applicationOpen || atCapacity) {
+                        openModal(programId);
+                        return;
+                    }
+
+                    if (currentProgramType === 'moments_that_matter') {
+                        document.getElementById('mtm_program_id').value = programId;
+                        const mtmTitle = document.getElementById('mtm-modal-program-title');
+                        if (mtmTitle) {
+                            mtmTitle.textContent = currentProgramTitle || 'Care package application';
+                        }
+                        openMtmApplicationModal();
+                        return;
+                    }
+
+                    document.getElementById('program_id').value = programId;
+                    const selectedProgramName = document.getElementById('selected-program-name');
+                    if (selectedProgramName) {
+                        selectedProgramName.textContent = currentProgramTitle || 'N/A';
+                    }
+                    syncProgramSelection();
+                    document.getElementById('registerModal').classList.add('hidden');
+                    document.getElementById('popupModal').classList.remove('hidden');
+                    setTimeout(() => {
+                        initSignaturePad();
+                    }, 50);
+                })
+                .catch(err => {
+                    alert('Failed to load program.');
+                    console.error(err);
+                });
+        }
+
         let currentProgramId = null;
         let currentProgramTitle = "";
+        let currentProgramType = 'financial_assistance';
+
+        function openMtmApplicationModal() {
+            document.getElementById('registerModal')?.classList.add('hidden');
+            document.getElementById('popupModal')?.classList.add('hidden');
+            const modal = document.getElementById('mtmPopupModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+            initMtmSignaturePad();
+        }
+
+        function updateProgramSponsor(prefix, data) {
+            const block = document.getElementById(prefix + '-sponsor-block');
+            const logoWrap = document.getElementById(prefix + '-sponsor-logo-wrap');
+            const logo = document.getElementById(prefix + '-sponsor-logo');
+            const nameEl = document.getElementById(prefix + '-sponsor-name');
+            if (!block) return;
+
+            const name = (data?.sponsor_name || '').trim();
+            const logoUrl = (data?.sponsor_logo || '').trim();
+            const hasSponsor = !!(name || logoUrl);
+
+            block.classList.toggle('hidden', !hasSponsor);
+
+            if (nameEl) {
+                nameEl.textContent = name;
+                nameEl.classList.toggle('hidden', !name);
+            }
+
+            if (logo && logoWrap) {
+                if (logoUrl) {
+                    logo.src = logoUrl;
+                    logo.alt = name ? (name + ' logo') : 'Sponsor logo';
+                    logo.onerror = () => {
+                        logoWrap.classList.add('hidden');
+                    };
+                    logoWrap.classList.remove('hidden');
+                } else {
+                    logo.src = '';
+                    logoWrap.classList.add('hidden');
+                }
+            }
+        }
 
         const syncProgramSelection = () => {
-            const checkboxes = document.querySelectorAll('input[name="programs_applied[]"]');
-            if (!checkboxes.length) {
+            const radios = document.querySelectorAll('input[name="programs_applied"]');
+            if (!radios.length) {
                 return;
             }
-            const hasChecked = Array.from(checkboxes).some((checkbox) => checkbox.checked);
+            const hasChecked = Array.from(radios).some((r) => r.checked);
             const normalizedTitle = (currentProgramTitle || '').trim().toLowerCase();
             if (!normalizedTitle || hasChecked) {
                 return;
             }
-            checkboxes.forEach((checkbox) => {
-                const normalizedValue = (checkbox.value || '').trim().toLowerCase();
-                checkbox.checked = normalizedValue === normalizedTitle;
+            radios.forEach((radio) => {
+                const normalizedValue = (radio.value || '').trim().toLowerCase();
+                if (normalizedValue === normalizedTitle) {
+                    radio.checked = true;
+                }
             });
         };
 
@@ -719,7 +1042,9 @@
                 .then(res => res.json())
                 .then(data => {
                     currentProgramTitle = data.title || "";
-                    document.querySelector('#registerModal .modal-title').textContent = data.title || 'â€”';
+                    currentProgramType = data.program_type || 'financial_assistance';
+                    updateProgramSponsor('modal', data);
+                    document.querySelector('#registerModal .modal-title').textContent = data.title || '—';
                     document.querySelector('#registerModal .modal-description').textContent = data.description || 'â€”';
                     document.querySelector('#registerModal .modal-date').textContent = data.event_date || 'â€”';
                     document.querySelector('#registerModal .modal-time').textContent = data.event_time || 'â€”';
@@ -766,9 +1091,10 @@
                     const registrationNote = registrationPanel.querySelector('.registration-note');
                     const registrationNoteText = registrationPanel.querySelector('.registration-note-text');
                     const registrationInfo = data.registration || null;
-                    const alreadyRegistered = registrationInfo !== null || registeredPrograms.includes(id);
+                    const alreadyRegistered = registrationInfo !== null || registeredPrograms.map(Number).includes(Number(id));
 
                     if (alreadyRegistered) {
+                        registerButton.classList.remove('hidden');
                         // Already registered: disable the button and update text/style
                         registerButton.textContent = 'Application submitted';
                         registerButton.disabled = true;
@@ -794,16 +1120,22 @@
                             registrationNoteText.textContent = '';
                         }
                     } else {
-                        // Not registered: enable Register only when applications are open
+                        // Not registered: Apply only when program is effectively ongoing (applications open)
                         const applicationOpen = data.is_application_open !== false;
-                        if (applicationOpen) {
+                        if (data.effective_status === 'upcoming') {
+                            registerButton.classList.add('hidden');
+                            registerButton.disabled = true;
+                            registerButton.onclick = null;
+                        } else if (applicationOpen) {
+                            registerButton.classList.remove('hidden');
                             registerButton.textContent = 'Apply now';
                             registerButton.disabled = false;
                             registerButton.classList.remove('bg-gray-400', 'opacity-50', 'cursor-not-allowed');
                             registerButton.classList.add('bg-pink', 'hover:bg-pink-dark');
                             registerButton.onclick = () => openRegistrationForm();
                         } else {
-                            registerButton.textContent = data.effective_status === 'upcoming' ? 'Not yet open' : 'Applications closed';
+                            registerButton.classList.remove('hidden');
+                            registerButton.textContent = 'Applications closed';
                             registerButton.disabled = true;
                             registerButton.classList.remove('bg-pink', 'hover:bg-pink-dark');
                             registerButton.classList.add('bg-gray-400', 'opacity-50', 'cursor-not-allowed');
@@ -827,7 +1159,16 @@
         }
 
         function openRegistrationForm() {
-            // set the hidden input value in the popup modal form
+            if (currentProgramType === 'moments_that_matter') {
+                document.getElementById('mtm_program_id').value = currentProgramId;
+                const mtmTitle = document.getElementById('mtm-modal-program-title');
+                if (mtmTitle) {
+                    mtmTitle.textContent = currentProgramTitle || 'Care package application';
+                }
+                openMtmApplicationModal();
+                return;
+            }
+
             document.getElementById('program_id').value = currentProgramId;
             const selectedProgramName = document.getElementById('selected-program-name');
             if (selectedProgramName) {
@@ -835,13 +1176,9 @@
             }
             syncProgramSelection();
 
-            // hide details modal, show registration modal
             document.getElementById('registerModal').classList.add('hidden');
             document.getElementById('popupModal').classList.remove('hidden');
-            // ensure signature canvas sizes correctly after showing
-            setTimeout(() => {
-                initSignaturePad();
-            }, 50);
+            setTimeout(() => initSignaturePad(), 50);
         }
 
         function closeModal() {
@@ -849,26 +1186,123 @@
         }
 
         const authRadios = document.querySelectorAll('input[name="authorization_choice"]');
-        const permissionSection = document.querySelector('[data-auth-permissions]');
-        const permissionCheckboxes = permissionSection ? permissionSection.querySelectorAll('input[type="checkbox"]') : [];
-        const authHint = document.querySelector('[data-auth-hint]');
+        const authExtra = document.querySelector('[data-auth-extra]');
         const syncPermissions = () => {
-            if (!permissionSection) return;
+            if (!authExtra) return;
             const allowSelected = Array.from(authRadios).some((r) => r.checked && r.value === 'allow');
-            permissionSection.classList.toggle('hidden', !allowSelected);
-            if (authHint) {
-                authHint.classList.toggle('hidden', allowSelected);
-            }
-            permissionCheckboxes.forEach((cb) => {
-                cb.disabled = !allowSelected;
-                if (!allowSelected) {
-                    cb.checked = false;
-                }
-            });
+            authExtra.classList.toggle('hidden', !allowSelected);
         };
 
         authRadios.forEach((radio) => radio.addEventListener('change', syncPermissions));
         syncPermissions();
+
+        (function () {
+            const billBlocksContainer = document.getElementById('patient-bill-blocks');
+            const billBlockTemplate = document.getElementById('patient-bill-block-template');
+            const billAddBtn = document.getElementById('patient-bill-add');
+            const foodAssistFollowup = document.getElementById('food-assistance-followup');
+            const medicalBillsFollowup = document.getElementById('medical-bills-followup');
+            const BILL_MAX_AMOUNT = 500;
+
+            const renumberBillBlocks = () => {
+                if (!billBlocksContainer) {
+                    return;
+                }
+                const blocks = billBlocksContainer.querySelectorAll('.patient-bill-block');
+                const n = blocks.length;
+                blocks.forEach((block, i) => {
+                    const label = block.querySelector('.patient-bill-block-label');
+                    if (label) {
+                        label.textContent = 'Bill ' + (i + 1);
+                    }
+                    const btn = block.querySelector('.patient-bill-remove');
+                    if (btn) {
+                        btn.disabled = n <= 1;
+                    }
+                });
+            };
+
+            const appendBillBlock = () => {
+                if (!billBlocksContainer || !billBlockTemplate?.content?.firstElementChild) {
+                    return;
+                }
+                const node = billBlockTemplate.content.firstElementChild.cloneNode(true);
+                node.querySelectorAll('input').forEach((el) => {
+                    el.value = '';
+                });
+                const sel = node.querySelector('select[name="bill_support_expense[]"]');
+                if (sel) {
+                    sel.selectedIndex = 0;
+                }
+                billBlocksContainer.appendChild(node);
+                renumberBillBlocks();
+                const amountInput = node.querySelector('input[name="bill_amount[]"]');
+                if (amountInput) {
+                    amountInput.setAttribute('max', String(BILL_MAX_AMOUNT));
+                }
+                node.querySelector('input[name="bill_name[]"]')?.focus();
+            };
+
+            const syncAssistanceFollowups = () => {
+                if (!billBlocksContainer) {
+                    return;
+                }
+                const selectedValues = Array.from(
+                    billBlocksContainer.querySelectorAll('select[name="bill_support_expense[]"]')
+                ).map((el) => (el.value || '').trim().toLowerCase());
+                const hasMedicalBills = selectedValues.includes('medical bills');
+                const hasFoodAssistance = selectedValues.includes('food assistance');
+
+                foodAssistFollowup?.classList.toggle('hidden', !hasMedicalBills);
+                medicalBillsFollowup?.classList.toggle('hidden', !hasFoodAssistance);
+            };
+
+            billAddBtn?.addEventListener('click', appendBillBlock);
+            billBlocksContainer?.addEventListener('click', (e) => {
+                const btn = e.target.closest('.patient-bill-remove');
+                if (!btn || btn.disabled) {
+                    return;
+                }
+                const block = btn.closest('.patient-bill-block');
+                if (!block || billBlocksContainer.querySelectorAll('.patient-bill-block').length <= 1) {
+                    return;
+                }
+                block.remove();
+                renumberBillBlocks();
+                syncAssistanceFollowups();
+            });
+            billBlocksContainer?.addEventListener('change', (e) => {
+                if (e.target.matches('select[name="bill_support_expense[]"]')) {
+                    syncAssistanceFollowups();
+                }
+            });
+            billBlocksContainer?.addEventListener('input', (e) => {
+                if (!e.target.matches('input[name="bill_amount[]"]')) {
+                    return;
+                }
+                const raw = (e.target.value || '').toString().trim();
+                if (raw === '') {
+                    return;
+                }
+                const value = Number(raw);
+                if (Number.isNaN(value)) {
+                    return;
+                }
+                if (value > BILL_MAX_AMOUNT) {
+                    e.target.value = String(BILL_MAX_AMOUNT);
+                    e.target.setCustomValidity('Amount cannot exceed $500.');
+                    e.target.reportValidity();
+                } else {
+                    e.target.setCustomValidity('');
+                }
+            });
+            billBlocksContainer?.querySelectorAll('input[name="bill_amount[]"]').forEach((input) => {
+                input.setAttribute('max', String(BILL_MAX_AMOUNT));
+            });
+
+            renumberBillBlocks();
+            syncAssistanceFollowups();
+        })();
 
         // Story word count (max 1000 words)
         const storyField = document.getElementById('story-field');
@@ -918,6 +1352,80 @@
             signatureInput.value = signaturePad.isEmpty() ? '' : signaturePad.toDataURL('image/png');
         };
 
+        const mtmSignatureCanvas = document.getElementById('mtm-signature-pad');
+        const mtmSignatureInput = document.getElementById('mtm_signature_data');
+        const mtmClearBtn = document.getElementById('mtm-signature-clear');
+        let mtmSignaturePad = null;
+
+        const syncMtmSignature = () => {
+            if (!mtmSignaturePad || !mtmSignatureInput) return;
+            mtmSignatureInput.value = mtmSignaturePad.isEmpty() ? '' : mtmSignaturePad.toDataURL('image/png');
+        };
+
+        const initMtmSignaturePad = () => {
+            if (!mtmSignatureCanvas || !window.SignaturePad) return;
+
+            const setup = () => {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                const width = mtmSignatureCanvas.offsetWidth || mtmSignatureCanvas.parentElement?.clientWidth || 400;
+                const height = 160;
+                mtmSignatureCanvas.width = width * ratio;
+                mtmSignatureCanvas.height = height * ratio;
+                mtmSignatureCanvas.style.width = width + 'px';
+                mtmSignatureCanvas.style.height = height + 'px';
+                const ctx = mtmSignatureCanvas.getContext('2d');
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(ratio, ratio);
+
+                if (!mtmSignaturePad) {
+                    mtmSignaturePad = new SignaturePad(mtmSignatureCanvas, {
+                        backgroundColor: '#ffffff',
+                        penColor: '#9E2469',
+                    });
+                    mtmSignaturePad.addEventListener('endStroke', syncMtmSignature);
+                }
+                mtmSignaturePad.clear();
+                syncMtmSignature();
+            };
+
+            requestAnimationFrame(() => requestAnimationFrame(setup));
+        };
+
+        if (mtmClearBtn) {
+            mtmClearBtn.addEventListener('click', () => {
+                if (mtmSignaturePad) {
+                    mtmSignaturePad.clear();
+                    syncMtmSignature();
+                }
+            });
+        }
+
+        const mtmForm = document.querySelector('#mtmPopupModal form');
+        mtmForm?.addEventListener('submit', (e) => {
+            syncMtmSignature();
+            if (!mtmSignatureInput?.value) {
+                e.preventDefault();
+                alert('Please add your signature before submitting.');
+            }
+        });
+
+        document.querySelectorAll('input[name="applying_for"]').forEach((radio) => {
+            radio.addEventListener('change', () => {
+                const wrap = document.getElementById('mtm-loved-one-wrap');
+                if (!wrap) return;
+                const val = document.querySelector('input[name="applying_for"]:checked')?.value;
+                wrap.classList.toggle('hidden', val === 'self' || !val);
+            });
+        });
+
+        document.querySelectorAll('input[name="mtm_treatment_status"]').forEach((radio) => {
+            radio.addEventListener('change', () => {
+                const wrap = document.getElementById('mtm-treatment-other-wrap');
+                if (!wrap) return;
+                wrap.classList.toggle('hidden', document.querySelector('input[name="mtm_treatment_status"]:checked')?.value !== 'other');
+            });
+        });
+
         const initSignaturePad = () => {
             if (!signatureCanvas || !window.SignaturePad) return;
             if (!signaturePad) {
@@ -948,17 +1456,31 @@
                 alert('Please select an application period before submitting.');
                 return;
             }
-            const programCheckboxes = Array.from(document.querySelectorAll('input[name="programs_applied[]"]'));
-            const hasProgramSelected = programCheckboxes.some((checkbox) => checkbox.checked);
+            const programRadios = document.querySelectorAll('input[name="programs_applied"]');
+            const hasProgramSelected = Array.from(programRadios).some((r) => r.checked);
             if (!hasProgramSelected) {
                 e.preventDefault();
-                alert('Please select at least one program before submitting.');
+                alert('Please select one program before submitting.');
                 return;
             }
             if (storyField && countWords(storyField.value) > MAX_STORY_WORDS) {
                 e.preventDefault();
                 alert('Your story may not exceed 1000 words. Please shorten it.');
                 return;
+            }
+            const amountInputs = document.querySelectorAll('input[name="bill_amount[]"]');
+            for (const input of amountInputs) {
+                const raw = (input.value || '').toString().trim();
+                if (raw === '') {
+                    continue;
+                }
+                const value = Number(raw);
+                if (!Number.isNaN(value) && value > 500) {
+                    e.preventDefault();
+                    alert('Amount Due cannot exceed $500 per bill entry.');
+                    input.focus();
+                    return;
+                }
             }
             if (!signatureInput.value) {
                 e.preventDefault();

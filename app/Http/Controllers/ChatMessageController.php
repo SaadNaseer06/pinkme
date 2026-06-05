@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
-use App\Mail\ChatMessageReceived;
 use App\Models\Application;
 use App\Models\Message;
 use App\Models\Patient;
@@ -13,7 +12,6 @@ use App\Models\UserNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ChatMessageController extends Controller
@@ -112,15 +110,10 @@ class ChatMessageController extends Controller
                 UserNotification::create([
                     'user_id' => $contact->id,
                     'title' => 'New chat message',
-                    'message' => 'You have a new message from '.(optional($user->profile)->full_name ?? $user->email ?? 'a contact').'.',
+                    'message' => 'You have a new message from '.(optional($user->profile)->full_name ?? $user->email ?? 'a contact').': '.$snippet,
                     'priority' => \App\Models\UserNotification::PRIORITY_IMPORTANT,
                     'link_url' => $chatUrl,
                 ]);
-            } catch (\Throwable $e) {
-                report($e);
-            }
-            try {
-                Mail::to($contact->email)->queue(new ChatMessageReceived($user, $contact, $snippet, $chatUrl));
             } catch (\Throwable $e) {
                 report($e);
             }

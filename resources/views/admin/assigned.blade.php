@@ -25,7 +25,8 @@
         ->appends(request()->query());
 
     // --- Helpers ---
-    $fmtDate = fn($dt) => $dt ? Carbon::parse($dt)->format('Y-m-d') : '—';
+    $appTz = config('app.timezone');
+    $fmtDate = fn ($dt) => $dt ? Carbon::parse($dt)->timezone($appTz)->format('M j, Y g:i A') : '—';
     $appCode = fn($app) => $app->code ?: 'APP-' . str_pad((string) $app->id, 6, '0', STR_PAD_LEFT);
 
     $statusBadge = function ($status) {
@@ -106,7 +107,7 @@
                                 <tr class="border-t border-[#e0cfd8]">
                                     <th class="p-2 text-lg text-[#91848C] font-normal app-h">Patient Name</th>
                                     <th class="p-2 text-lg text-[#91848C] font-normal app-h pad-left">Applications ID</th>
-                                    <th class="p-2 text-lg text-[#91848C] font-normal app-h">Sub. Date</th>
+                                    <th class="p-2 text-lg text-[#91848C] font-normal app-h">Submitted</th>
                                     <th class="p-2 text-lg text-[#91848C] font-normal app-h">Email</th>
                                     <th class="p-2 text-lg text-[#91848C] font-normal app-h">Contact</th>
                                     <th class="p-2 text-lg text-[#91848C] font-normal app-h">Assigned Reviewer</th>

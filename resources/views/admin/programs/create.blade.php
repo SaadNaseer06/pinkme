@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.admin')
+@extends('admin.layouts.admin')
 
 @section('title', 'Create Program')
 
@@ -32,6 +32,8 @@
                 enctype="multipart/form-data" class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
                 @csrf
                 <div class="space-y-8">
+                    @include('admin.programs.partials.program_type_and_sponsor', ['program' => null])
+
                     <section class="rounded-2xl border border-[#E9DCE7] bg-white shadow-sm">
                         <div class="border-b border-[#F1E5EF] px-6 py-5">
                         <h2 class="text-lg font-semibold text-[#213430]">All fields are custom</h2>

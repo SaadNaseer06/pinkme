@@ -18,11 +18,15 @@ class RegistrationInvoice extends Model
         'payment_method',
         'status',
         'file_path',
+        'payment_proof_path',
+        'payment_proof_original_name',
+        'payment_proof_uploaded_at',
         'notes',
     ];
 
     protected $casts = [
         'issue_date' => 'date',
+        'payment_proof_uploaded_at' => 'datetime',
     ];
 
     public function programRegistration()

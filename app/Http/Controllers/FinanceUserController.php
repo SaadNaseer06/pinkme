@@ -9,7 +9,11 @@ use App\Models\ProgramRegistration;
 use App\Models\RegistrationInvoice;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Models\UserProfile;
 use App\Support\PatientApplicationNotifications;
+use App\Support\TransactionalMail;
+use App\Support\PaymentProofNotifications;
+use App\Support\ProgramRegistrationNotifiers;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -18,29 +22,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class FinanceUserController extends Controller
 {
     /**
-     * Email to use for applicant-facing mail: form email first, then account email.
-     * Ignores empty strings (PHP ?? alone does not fall back when user->email is '').
-     */
-    private function resolveApplicantEmail(ProgramRegistration $registration): ?string
-    {
-        $registration->loadMissing('user');
-
-        foreach ([$registration->email, $registration->user?->email] as $candidate) {
-            $e = strtolower(trim((string) $candidate));
-            if ($e !== '' && filter_var($e, FILTER_VALIDATE_EMAIL)) {
-                return $e;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Registrations awaiting budget allocation: shared finance queue (pending_finance) plus legacy rows assigned to this user.
+     * Registrations awaiting payment processing: shared finance queue (pending_finance) plus legacy rows assigned to this user.
      */
     private function financeBudgetQueueBaseQuery(int $financeUserId): Builder
     {
@@ -81,6 +68,52 @@ class FinanceUserController extends Controller
             ->count();
 
         return view('finance.dashboard', compact('pendingRegistrations', 'allocatedCount'));
+    }
+
+    public function setting()
+    {
+        $user = Auth::user()->load('profile');
+
+        return view('finance.setting', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $rules = [
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'username' => ['nullable', 'string', 'max:255', Rule::unique('user_profiles', 'username')->ignore($user->profile?->id)],
+            'full_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+        ];
+
+        $validated = $request->validate($rules);
+
+        $user->email = $validated['email'];
+        $user->save();
+
+        $profile = $user->profile ?? UserProfile::firstOrCreate(
+            ['user_id' => $user->id],
+            ['full_name' => $user->email, 'phone' => '']
+        );
+
+        if ($request->hasFile('avatar')) {
+            if ($profile->avatar && ! str_contains((string) $profile->avatar, '://')) {
+                Storage::disk('public')->delete($profile->avatar);
+            }
+            $profile->avatar = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $profile->full_name = $validated['full_name'] ?? $profile->full_name ?? $user->email;
+        $profile->phone = $validated['phone'] ?? $profile->phone ?? '';
+        $profile->username = $validated['username'] ?? $profile->username;
+        $profile->save();
+
+        return redirect()
+            ->route('finance.setting')
+            ->with('success', 'Profile updated successfully.');
     }
 
     public function registrations()
@@ -150,6 +183,88 @@ class FinanceUserController extends Controller
         $registration->load(['program', 'user.profile', 'assignedCaseManager.profile', 'registrationInvoices']);
 
         return view('finance.show_registration', compact('registration'));
+    }
+
+    /**
+     * Finance may reject an application still in the finance queue (no invoice yet), e.g. if it was routed incorrectly.
+     */
+    public function rejectRegistration(Request $request, ProgramRegistration $registration)
+    {
+        if ($registration->registrationInvoices()->exists()) {
+            return redirect()
+                ->route('finance.registrations.show', $registration)
+                ->with('error', 'This application already has bills paid recorded and cannot be rejected.');
+        }
+
+        if (strtolower((string) $registration->status) !== ProgramRegistration::STATUS_PENDING_FINANCE) {
+            return redirect()
+                ->route('finance.registrations.show', $registration)
+                ->with('error', 'Only applications awaiting finance payment can be rejected here.');
+        }
+
+        if ($registration->finance_user_id !== null && ! $this->financeUserOwnsRegistration($registration)) {
+            return redirect()
+                ->route('finance.dashboard')
+                ->with('error', 'Another finance team member is handling this application.');
+        }
+
+        if ($registration->finance_user_id === null) {
+            DB::transaction(function () use ($registration): void {
+                $reg = ProgramRegistration::whereKey($registration->id)->lockForUpdate()->first();
+                if (
+                    ! $reg
+                    || strtolower((string) $reg->status) !== ProgramRegistration::STATUS_PENDING_FINANCE
+                    || $reg->registrationInvoices()->exists()
+                ) {
+                    return;
+                }
+                if ($reg->finance_user_id !== null) {
+                    return;
+                }
+                $reg->forceFill(['finance_user_id' => Auth::id()])->save();
+            });
+            $registration->refresh();
+        }
+
+        if (! $this->financeUserOwnsRegistration($registration)) {
+            return redirect()
+                ->route('finance.dashboard')
+                ->with('error', 'This application was claimed by another team member.');
+        }
+
+        $data = $request->validate([
+            'note' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $registration->loadMissing(['program', 'user']);
+
+        $registration->update([
+            'status' => ProgramRegistration::STATUS_REJECTED,
+            'review_note' => $data['note'],
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+            'finance_user_id' => null,
+        ]);
+
+        $programTitle = $registration->program?->title ?? 'a program';
+        PatientApplicationNotifications::notifyProgramRegistrationApplicant(
+            $registration,
+            'Rejected',
+            'Application update',
+            'Your application for "'.$programTitle.'" was not approved for payment processing by the finance team. Reason: '.$data['note'],
+            $data['note'],
+            UserNotification::PRIORITY_IMPORTANT
+        );
+
+        ProgramRegistrationNotifiers::notifyAdmins(
+            'Application rejected by finance',
+            'A finance team member rejected an application that was in the finance queue.',
+            $registration
+        );
+
+        return redirect()
+            ->route('finance.registrations')
+            ->with('success', 'The application has been rejected and the applicant has been notified.');
     }
 
     /**
@@ -261,24 +376,34 @@ class FinanceUserController extends Controller
             try {
                 UserNotification::create([
                     'user_id' => $admin->id,
-                    'title' => 'Budget Allocated by Finance',
-                    'message' => 'Finance has allocated budget for '.($registration->full_name ?? 'N/A').' - '.($registration->program?->title ?? 'Program').'. Invoice #'.$invoice->invoice_number.' ($'.number_format($invoice->amount, 2).').',
+                    'title' => 'A Patient Bill(s) Paid By Finance & Grant Team',
+                    'message' => 'Finance & Grant Team has paid the patient bill for '.($registration->full_name ?? 'N/A').' – '.($registration->program?->title ?? 'Program').'. Invoice #'.$invoice->invoice_number.' ($'.number_format($invoice->amount, 2).').',
                     'priority' => UserNotification::PRIORITY_IMPORTANT,
                     'link_url' => route('admin.program_registrations.show', $registration),
                 ]);
                 if ($admin->email) {
-                    Mail::to($admin->email)->queue(new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
+                    TransactionalMail::send($admin->email, new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
                 }
             } catch (\Throwable $e) {
                 report($e);
             }
         }
 
-        $patientEmail = $this->resolveApplicantEmail($registration);
+        $registration->loadMissing('assignedCaseManager');
+        $assignedCm = $registration->assignedCaseManager;
+        if ($assignedCm && filled($assignedCm->email)) {
+            try {
+                TransactionalMail::send($assignedCm->email, new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        $patientEmail = PatientApplicationNotifications::applicantEmailForProgramRegistration($registration);
         $applicantMailWarning = null;
         if ($patientEmail) {
             try {
-                Mail::to($patientEmail)->queue(new BudgetAllocatedToPatient($registration, $invoice, $pdfPath, $pdfDisk));
+                TransactionalMail::send($patientEmail, new BudgetAllocatedToPatient($registration, $invoice, null, $pdfDisk));
                 Log::info('Budget allocation email sent to applicant', [
                     'registration_id' => $registration->id,
                     'email' => $patientEmail,
@@ -303,7 +428,7 @@ class FinanceUserController extends Controller
 
         $redirect = redirect()
             ->route('finance.registrations.show', $registration)
-            ->with('success', 'Invoice generated successfully. Budget has been allocated to the patient request.');
+            ->with('success', 'Bills paid and proof of payments updated.');
         if ($applicantMailWarning) {
             $redirect->with('warning', $applicantMailWarning);
         }
@@ -331,17 +456,17 @@ class FinanceUserController extends Controller
         foreach ($adminUsers as $admin) {
             if ($admin->email) {
                 try {
-                    Mail::to($admin->email)->queue(new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
+                    TransactionalMail::send($admin->email, new BudgetAllocatedToAdmin($registration, $invoice, $pdfPath, $pdfDisk));
                 } catch (\Throwable $e) {
                     report($e);
                 }
             }
         }
 
-        $patientEmail = $this->resolveApplicantEmail($registration);
+        $patientEmail = PatientApplicationNotifications::applicantEmailForProgramRegistration($registration);
         if ($patientEmail) {
             try {
-                Mail::to($patientEmail)->queue(new BudgetAllocatedToPatient($registration, $invoice, $pdfPath, $pdfDisk));
+                TransactionalMail::send($patientEmail, new BudgetAllocatedToPatient($registration, $invoice, null, $pdfDisk));
                 Log::info('Budget allocation resend: email sent to applicant', [
                     'registration_id' => $registration->id,
                     'email' => $patientEmail,
@@ -362,7 +487,80 @@ class FinanceUserController extends Controller
 
         return redirect()
             ->route('finance.registrations.show', $registration)
-            ->with('success', 'Invoice PDF emails were sent again to the patient and administrators.');
+            ->with('success', 'Notification emails were sent again. The patient receives a bill-paid confirmation only (no receipt attachment). Administrators receive the invoice PDF where configured.');
+    }
+
+    /**
+     * Step 3: upload proof of external payment (receipt) after payment is completed.
+     */
+    public function uploadPaymentProof(Request $request, ProgramRegistration $registration, RegistrationInvoice $invoice)
+    {
+        if ($invoice->program_registration_id !== $registration->id) {
+            abort(404);
+        }
+        if (! $this->financeUserOwnsRegistration($registration)) {
+            abort(403);
+        }
+
+        $request->validate([
+            'payment_proof' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:15360'],
+        ]);
+
+        $firstProofUpload = $invoice->payment_proof_uploaded_at === null;
+
+        $file = $request->file('payment_proof');
+        $path = $file->store('payment_proofs/invoices', 'public');
+
+        $invoice->update([
+            'payment_proof_path' => $path,
+            'payment_proof_original_name' => $file->getClientOriginalName(),
+            'payment_proof_uploaded_at' => now(),
+        ]);
+
+        if ($firstProofUpload) {
+            PaymentProofNotifications::notifyPatientAdminAndCaseManager($registration->fresh(), $invoice->fresh());
+            $msg = 'Payment proof uploaded successfully! Administrators and the Patient Support Coordinator have been notified.';
+        } else {
+            $msg = 'Payment proof file was replaced.';
+        }
+
+        return redirect()
+            ->route('finance.registrations.show', $registration)
+            ->with('success', $msg);
+    }
+
+    /**
+     * Optional receipts uploaded before recording payment / generating the invoice (finance queue only).
+     */
+    public function uploadPrePaymentProofs(Request $request, ProgramRegistration $registration)
+    {
+        if (! $this->financeMayManagePrePaymentProofs($registration)) {
+            abort(403);
+        }
+
+        $request->validate([
+            'pre_payment_proofs' => ['required', 'array', 'min:1', 'max:5'],
+            'pre_payment_proofs.*' => ['file', 'mimes:pdf,jpg,jpeg,png', 'max:15360'],
+        ]);
+
+        $existing = $registration->finance_pre_payment_proof_paths ?? [];
+        if (! is_array($existing)) {
+            $existing = [];
+        }
+
+        foreach ($request->file('pre_payment_proofs', []) as $file) {
+            $existing[] = [
+                'path' => $file->store('payment_proofs/pre_invoice', 'public'),
+                'original_name' => $file->getClientOriginalName(),
+                'uploaded_at' => now()->toIso8601String(),
+            ];
+        }
+
+        $registration->update(['finance_pre_payment_proof_paths' => $existing]);
+
+        return redirect()
+            ->route('finance.registrations.show', $registration)
+            ->with('success', 'Payment receipts uploaded. You can record bills paid when ready.');
     }
 
     /**
@@ -379,7 +577,7 @@ class FinanceUserController extends Controller
         if ($registration->registrationInvoices()->exists()) {
             return redirect()
                 ->route('finance.team_chats')
-                ->with('error', 'This application already has a budget allocation.');
+                ->with('error', 'This application already has bills paid recorded.');
         }
 
         DB::transaction(function () use ($registration): void {
@@ -501,6 +699,22 @@ class FinanceUserController extends Controller
      *
      * @return \Illuminate\Database\Eloquent\Collection<int, ProgramRegistration>
      */
+    private function financeMayManagePrePaymentProofs(ProgramRegistration $registration): bool
+    {
+        if (strtolower((string) $registration->status) !== ProgramRegistration::STATUS_PENDING_FINANCE) {
+            return false;
+        }
+        if ($registration->registrationInvoices()->exists()) {
+            return false;
+        }
+        $registration->refresh();
+        if ($registration->finance_user_id !== null && (int) $registration->finance_user_id !== (int) Auth::id()) {
+            return false;
+        }
+
+        return true;
+    }
+
     private function financeClaimableRegistrationsForTeamChats(int $financeUserId)
     {
         return ProgramRegistration::query()

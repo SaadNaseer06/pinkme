@@ -1,6 +1,6 @@
 @extends('finance.layouts.app')
 
-@section('title', 'Allocate Budget - Generate Invoice')
+@section('title', 'Record Bills Paid - Invoice')
 
 @section('content')
 <main class="max-w-3xl mx-auto">
@@ -12,15 +12,16 @@
     </a>
 
     <div class="bg-[#F3E8EF] rounded-2xl p-8 shadow-sm border border-[#E5D2DE]">
-        <h1 class="text-2xl font-semibold text-[#213430] mb-2">Allocate Budget</h1>
-        <p class="text-[#4C4047] mb-8">Generate an invoice to allocate budget for: <strong class="text-[#213430]">{{ $registration->full_name }}</strong> – {{ optional($registration->program)->title ?? 'Program' }}</p>
+        <p class="text-xs font-semibold uppercase tracking-wide text-[#9E2469] mb-1">Step 2 — Review &amp; payment processing</p>
+        <h1 class="text-2xl font-semibold text-[#213430] mb-2">Record bills paid &amp; generate invoice</h1>
+        <p class="text-[#4C4047] mb-8">Record the payment method and amount after you process payment externally. Applicant: <strong class="text-[#213430]">{{ $registration->full_name }}</strong> – {{ optional($registration->program)->title ?? 'Program' }}</p>
 
         <form method="POST" action="{{ route('finance.invoice.store', $registration) }}" class="space-y-6">
             @csrf
 
             <div>
                 <label class="block text-sm font-medium text-[#213430] mb-2">Payment Purpose <span class="text-red-500">*</span></label>
-                <input type="text" name="payment_purpose" value="{{ old('payment_purpose', 'Budget allocation for ' . optional($registration->program)->title) }}" required
+                <input type="text" name="payment_purpose" value="{{ old('payment_purpose', 'Bills paid for ' . optional($registration->program)->title) }}" required
                     class="w-full rounded-xl border border-[#DCCFD8] bg-white px-4 py-3 text-[#4C4047] placeholder:text-[#B1A4AD] focus:outline-none focus:ring-2 focus:ring-[#9E2469] focus:border-transparent transition">
                 @error('payment_purpose')
                     <p class="text-xs text-[#9E2469] mt-1">{{ $message }}</p>
@@ -80,7 +81,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Generate Invoice & Allocate Budget
+                    Process payment &amp; generate invoice
                 </button>
             </div>
         </form>

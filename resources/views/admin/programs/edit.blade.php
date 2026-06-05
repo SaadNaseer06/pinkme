@@ -14,13 +14,25 @@
                         <h1 class="mt-2 text-3xl font-semibold">Edit Program</h1>
                         <p class="mt-3 text-sm lg:text-base max-w-xl opacity-95">Adjust or add fields using the builder. All program data is now defined by custom fields, with the banner upload handled separately below.</p>
                     </div>
-                    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-end">
                         <a href="{{ route('admin.programs-events') }}"
                             class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/25 px-5 py-3 text-sm font-medium text-white backdrop-blur transition hover:bg-white/30">Back
                             to programs</a>
                         <button type="submit" form="edit-program-form"
                             class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#9E2469] shadow-md shadow-white/40 transition hover:bg-[#FFF1F7]">Update
                             Program</button>
+                        <form action="{{ route('programs.destroy', $program) }}" method="POST" class="inline-flex"
+                            onsubmit="return confirm(@js(
+                                'Delete this program?'
+                                .(($program->registrations_count ?? 0) > 0 ? ' '.$program->registrations_count.' application(s) will be removed too.' : '')
+                                .' This cannot be undone.'
+                            ));">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/90 px-5 py-3 text-sm font-semibold text-red-700 shadow-md transition hover:bg-red-50">Delete
+                                program</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -30,6 +42,8 @@
                 @csrf
                 @method('PUT')
                 <div class="space-y-8">
+                    @include('admin.programs.partials.program_type_and_sponsor', ['program' => $program])
+
                     <section class="rounded-2xl border border-[#E9DCE7] bg-white shadow-sm">
                         <div class="border-b border-[#F1E5EF] px-6 py-5">
                         <h2 class="text-lg font-semibold text-[#213430]">All fields are custom</h2>

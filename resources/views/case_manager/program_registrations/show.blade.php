@@ -48,7 +48,7 @@
                     <div>
                         <h2 class="text-3xl font-semibold text-[#213430] app-main">Registration Details</h2>
                         <p class="text-base text-[#6C5F67] app-text mt-2">
-                            Submitted on {{ $registration->created_at?->format('d M Y, h:i A') ?? 'N/A' }}
+                            Submitted on {{ $registration->created_at?->timezone(config('app.timezone'))->format('d M Y, h:i A') ?? 'N/A' }}
                         </p>
                     </div>
                     <span class="px-5 py-2 rounded-full text-base font-semibold app-text {{ $badgeClasses }}">
@@ -63,7 +63,7 @@
                 @endif
                 @if ($status === \App\Models\ProgramRegistration::STATUS_PENDING_FINANCE)
                     <div class="rounded-lg border border-[#DCCFD8] bg-white px-4 py-3 text-sm text-[#6C5F67] app-text">
-                        This application is with the finance team for budget allocation. You can review details but cannot change the decision from here.
+                        This application is with the finance team for payment processing. You can review details but cannot change the decision from here.
                     </div>
                 @endif
 
@@ -72,7 +72,7 @@
                     <p class="text-base text-[#213430] app-text mt-2">
                         {{ $registration->assignedCaseManager?->profile?->full_name ?? $registration->assignedCaseManager?->email ?? 'Unassigned' }}
                         @if ($registration->assigned_at)
-                            <span class="text-[#91848C]">• assigned {{ $registration->assigned_at->format('d M Y, h:i A') }}</span>
+                            <span class="text-[#91848C]">• assigned {{ $registration->assigned_at->timezone(config('app.timezone'))->format('d M Y, h:i A') }}</span>
                         @endif
                     </p>
                 </div>
@@ -136,7 +136,39 @@
                                 @endforeach
                             </ul>
                         @endif
+                        <p class="text-base text-[#213430] app-text"><span class="font-medium">Breast cancer stage:</span> {{ $registration->breast_cancer_stage ?? 'N/A' }}</p>
+                        <p class="text-base text-[#213430] app-text"><span class="font-medium">Ethnicity:</span> {{ $registration->ethnicity ?: '—' }}</p>
                         <p class="text-base text-[#213430] app-text mt-2"><span class="font-medium">Billing Details:</span> {{ $registration->billing_details ?? 'N/A' }}</p>
+                        @if (is_array($registration->patient_bill_line_items) && count($registration->patient_bill_line_items) > 0)
+                            <div class="mt-4 overflow-x-auto">
+                                <p class="font-medium text-[#213430] mb-2">Applicant bill table</p>
+                                <p class="text-xs text-[#91848C] mb-2">Note: To ensure proper processing, the bill must be in the patient’s name to qualify for assistance.</p>
+                                <table class="min-w-full text-sm border border-[#E6D8E1] rounded-md">
+                                    <thead class="bg-[#F3E8EF]"><tr>
+                                        <th class="p-2 text-left">Service Provider Name</th>
+                                        <th class="p-2 text-left">Bill Payment Link(s)</th>
+                                        <th class="p-2 text-left">Amount Due</th>
+                                        <th class="p-2 text-left">Type of Support Expenses</th>
+                                        <th class="p-2 text-left">Provider Contact Information</th>
+                                        <th class="p-2 text-left">Account Number</th>
+                                        <th class="p-2 text-left">Notes (optional)</th>
+                                    </tr></thead>
+                                    <tbody>
+                                        @foreach ($registration->patient_bill_line_items as $row)
+                                            <tr class="border-t border-[#E6D8E1]">
+                                                <td class="p-2">{{ $row['name'] ?? '' }}</td>
+                                                <td class="p-2 break-all">{{ $row['url'] ?? '' }}</td>
+                                                <td class="p-2">{{ $row['amount'] ?? '' }}</td>
+                                                <td class="p-2">{{ $row['support_expense_type'] ?? '' }}</td>
+                                                <td class="p-2">{{ $row['provider_contact'] ?? '' }}</td>
+                                                <td class="p-2">{{ $row['account_number'] ?? '' }}</td>
+                                                <td class="p-2">{{ $row['notes'] ?? '' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
                         <div class="text-base text-[#213430] app-text">
                             <span class="font-medium">Signature:</span>
                             @if ($registration->signature)
@@ -309,7 +341,7 @@
 
                 @if ($registration->status === \App\Models\ProgramRegistration::STATUS_PENDING)
                     <div class="bg-white rounded-lg p-5 md:p-6 space-y-6 border border-[#E6D8E1]">
-                        <h3 class="text-xl font-semibold text-[#213430] app-main">Case Manager Review</h3>
+                        <h3 class="text-xl font-semibold text-[#213430] app-main">Patient Support Coordinator Review</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <form method="POST" action="{{ route('case_manager.program_registrations.approve', $registration) }}" class="bg-[#F8F2F6] rounded-lg p-4 space-y-3 border border-[#E6D8E1]">
                                 @csrf
@@ -338,7 +370,7 @@
                     <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 text-base text-[#213430] app-text border border-[#E6D8E1]">
                         <h3 class="text-xl font-semibold text-[#213430] app-main">Review Summary</h3>
                         <p><span class="font-medium">Reviewed By:</span> {{ $registration->reviewer?->profile->full_name ?? $registration->reviewer?->email ?? 'N/A' }}</p>
-                        <p><span class="font-medium">Reviewed At:</span> {{ $registration->reviewed_at?->format('d M Y, h:i A') ?? 'N/A' }}</p>
+                        <p><span class="font-medium">Reviewed At:</span> {{ $registration->reviewed_at?->timezone(config('app.timezone'))->format('d M Y, h:i A') ?? 'N/A' }}</p>
                         @if ($registration->review_note)
                             <div>
                                 <span class="font-medium">Review Note:</span>

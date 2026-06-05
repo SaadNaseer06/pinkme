@@ -1,6 +1,6 @@
 ﻿@extends('admin.layouts.admin')
 
-@section('title', 'Add Case Manager')
+@section('title', 'Add Coordinator')
 
 @section('content')
     <!-- Main Content -->
@@ -17,7 +17,7 @@
                         </svg>
                     </a>
                     <div>
-                        <h1 class="text-2xl font-semibold text-[#213430] app-main">Add New Case Manager</h1>
+                        <h1 class="text-2xl font-semibold text-[#213430] app-main">Patient Support Coordinator</h1>
                         <p class="text-sm text-[#91848C] mt-1 app-text">Fill in the details to create a new case manager
                             account</p>
                     </div>

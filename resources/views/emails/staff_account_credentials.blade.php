@@ -15,7 +15,7 @@
             <p style="margin: 0;"><strong>Temporary password:</strong> {{ $password }}</p>
         </div>
 
-        <p style="margin: 0 0 8px;"><strong>Staff login link</strong> (admin, case manager, and finance — not the patient register page):</p>
+        <p style="margin: 0 0 8px; font-weight: 600; letter-spacing: 0.04em;">{{ config('app.staff_access_notice', 'BOARD MEMBER ACCESS ONLY') }}</p>
         <p style="margin: 0 0 16px;">
             <a href="{{ $loginUrl }}" target="_blank" rel="noopener" style="color: #9E2469; font-weight: 600; word-break: break-all;">{{ $loginUrl }}</a>
         </p>

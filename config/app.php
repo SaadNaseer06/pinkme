@@ -13,7 +13,16 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Pink Me'),
+    'name' => env('APP_NAME', 'PINK "ME"'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Brand display name (registered mark)
+    |--------------------------------------------------------------------------
+    */
+    'brand_name' => env('APP_BRAND_NAME', 'PINK "ME"®'),
+
+    'staff_access_notice' => env('APP_STAFF_ACCESS_NOTICE', 'BOARD MEMBER ACCESS ONLY'),
 
     /*
     |--------------------------------------------------------------------------
@@ -78,7 +87,7 @@ return [
     |
     */
 
-    'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'timezone' => env('APP_TIMEZONE', 'America/Denver'),
 
     /*
     |--------------------------------------------------------------------------

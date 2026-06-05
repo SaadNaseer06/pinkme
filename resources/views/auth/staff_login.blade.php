@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Staff sign in — {{ config('app.name', 'Pink Me') }}</title>
+    <title>Staff sign in — {{ $brandName ?? config('app.brand_name', 'PINK "ME"®') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -19,11 +19,10 @@
     <div class="w-full max-w-md">
         <div class="text-center mb-8">
             <img src="{{ asset('public/images/logo.png') }}"
-                alt="{{ config('app.name', 'Pink Me') }}"
+                alt="{{ $brandName ?? config('app.brand_name', 'PINK "ME"®') }}"
                 class="mx-auto h-16 w-auto max-w-[200px] object-contain mb-4" />
-            <h1 class="text-2xl font-semibold text-[#213430]">Staff sign in</h1>
-            <p class="mt-2 text-sm text-[#6C5B68]">For administrators, case managers, and finance users. Use your work
-                email and password.</p>
+            <h1 class="text-2xl font-semibold text-[#213430]">{{ $staffLoginHeading ?? 'Staff sign in' }}</h1>
+            <p class="mt-2 text-sm font-semibold tracking-wide text-[#6C5B68] uppercase">{{ $staffAccessNotice ?? 'BOARD MEMBER ACCESS ONLY' }}</p>
         </div>
 
         <div class="rounded-2xl border border-[#E9DCE7] bg-white shadow-lg shadow-[#9E2469]/10 p-8">
@@ -35,8 +34,17 @@
                     ? old('remember') !== null
                     : (!empty($rememberedEmailValue) || !empty($rememberedPasswordValue));
             @endphp
+            @if (!empty($staffPortalBackUrl))
+                <p class="mb-4 text-center">
+                    <a href="{{ $staffPortalBackUrl }}" class="text-sm font-medium text-[#9E2469] hover:underline">&larr; Choose a different portal</a>
+                </p>
+            @endif
+
             <form method="POST" action="{{ route('login.staff.submit') }}" class="space-y-5">
                 @csrf
+                @if (!empty($staffPortal))
+                    <input type="hidden" name="portal" value="{{ $staffPortal }}">
+                @endif
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-[#213430] mb-1.5">Email</label>

@@ -49,6 +49,21 @@ artisan() {
   "$PHP" artisan "$@"
 }
 
+link_public_storage() {
+  echo "=== Linking public/storage ==="
+  if [ -L public/storage ]; then
+    echo "public/storage symlink already exists"
+    return 0
+  fi
+  if [ -e public/storage ] && [ ! -L public/storage ]; then
+    echo "WARNING: public/storage exists and is not a symlink; skipping"
+    return 0
+  fi
+  mkdir -p storage/app/public
+  ln -sf ../storage/app/public public/storage
+  echo "Created public/storage -> ../storage/app/public"
+}
+
 echo "=== PinkMe remote deploy ==="
 
 if [ ! -f .env ]; then
@@ -84,7 +99,7 @@ echo "=== Setting permissions ==="
 mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
-artisan storage:link 2>/dev/null || true
+link_public_storage
 
 echo "=== Running migrations ==="
 artisan migrate --force

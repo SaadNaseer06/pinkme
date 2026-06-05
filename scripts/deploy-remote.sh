@@ -24,18 +24,24 @@ detect_php() {
   echo "php"
 }
 
+php_can_run_artisan() {
+  "$PHP" -r 'exit(function_exists("proc_open") ? 0 : 1);' 2>/dev/null
+}
+
 PHP="$(detect_php)"
 echo "Using PHP $("$PHP" -r 'echo PHP_VERSION;') ($PHP)"
 
+if ! php_can_run_artisan; then
+  echo "NOTE: proc_open is disabled for this PHP CLI."
+  echo "      Composer will skip scripts; package manifest is uploaded from CI."
+fi
+
 run_composer() {
-  if command -v composer >/dev/null 2>&1; then
-    composer "$@"
-    return
-  fi
   if [ ! -f composer.phar ]; then
     echo "Downloading composer.phar..."
     curl -sS -o composer.phar https://getcomposer.org/download/latest-stable/composer.phar
   fi
+  # Always use cPanel PHP binary — system `composer` may use a restricted PHP.
   "$PHP" composer.phar "$@"
 }
 
@@ -65,9 +71,17 @@ if [ -n "${APP_URL:-}" ]; then
 fi
 
 echo "=== Installing Composer dependencies ==="
-run_composer install --no-dev --optimize-autoloader --no-interaction
+# --no-scripts avoids `artisan package:discover` during install (needs proc_open on cPanel).
+run_composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+if [ ! -f bootstrap/cache/packages.php ]; then
+  echo "ERROR: bootstrap/cache/packages.php is missing."
+  echo "       The deploy workflow should upload it from CI before migrations run."
+  exit 1
+fi
 
 echo "=== Setting permissions ==="
+mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
 artisan storage:link 2>/dev/null || true

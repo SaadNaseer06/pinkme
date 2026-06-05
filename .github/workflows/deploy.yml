@@ -31,7 +31,10 @@ jobs:
         run: composer validate --strict
 
       - name: Install PHP dependencies
-        run: composer install --no-interaction --prefer-dist
+        run: composer install --no-dev --no-interaction --prefer-dist --no-scripts
+
+      - name: Build Laravel package manifest
+        run: php artisan package:discover --ansi
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -51,6 +54,15 @@ jobs:
           path: public/build
           retention-days: 1
 
+      - name: Upload Laravel bootstrap cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: laravel-bootstrap-cache
+          path: |
+            bootstrap/cache/packages.php
+            bootstrap/cache/services.php
+          retention-days: 1
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -61,6 +73,12 @@ jobs:
         with:
           name: vite-build
           path: public/build
+
+      - name: Download Laravel bootstrap cache
+        uses: actions/download-artifact@v4
+        with:
+          name: laravel-bootstrap-cache
+          path: bootstrap-cache
 
       - name: Configure SSH key
         env:
@@ -93,6 +111,37 @@ jobs:
             exit 1
           fi
 
+      - name: Pull latest code on server
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
+          CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
+          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+        run: |
+          set -e
+          SSH_OPTS="-o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -p ${CPANEL_SSH_PORT:-22}"
+          ssh ${SSH_OPTS} "${CPANEL_USERNAME}@${CPANEL_HOST}" bash -s <<REMOTE
+          set -euo pipefail
+          cd "${DEPLOY_PATH}"
+          echo "=== Pulling latest code ==="
+          git fetch origin main
+          git reset --hard origin/main
+          mkdir -p bootstrap/cache
+          REMOTE
+
+      - name: Upload Laravel package manifest to server
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
+          CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
+          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+        run: |
+          SCP_OPTS="-o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -P ${CPANEL_SSH_PORT:-22}"
+          scp ${SCP_OPTS} bootstrap-cache/packages.php \
+            "${CPANEL_USERNAME}@${CPANEL_HOST}:${DEPLOY_PATH}/bootstrap/cache/packages.php"
+          scp ${SCP_OPTS} bootstrap-cache/services.php \
+            "${CPANEL_USERNAME}@${CPANEL_HOST}:${DEPLOY_PATH}/bootstrap/cache/services.php"
+
       - name: Deploy application on server
         env:
           APP_URL: ${{ secrets.DEPLOY_APP_URL }}
@@ -103,13 +152,9 @@ jobs:
         run: |
           set -e
           SSH_OPTS="-o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -p ${CPANEL_SSH_PORT:-22}"
-
           ssh ${SSH_OPTS} "${CPANEL_USERNAME}@${CPANEL_HOST}" bash -s <<REMOTE
           set -euo pipefail
           cd "${DEPLOY_PATH}"
-          echo "=== Pulling latest code ==="
-          git fetch origin main
-          git reset --hard origin/main
           chmod +x scripts/deploy-remote.sh
           export APP_URL="${APP_URL}"
           bash scripts/deploy-remote.sh

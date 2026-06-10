@@ -44,7 +44,7 @@
                         <!-- Support Programs Section -->
                         <div class="mt-6 mb-6">
                             <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-2xl font-semibold text-[#213430] program-main">PINK “ME” Assistance Programs</h2>
+                                <h2 class="text-2xl font-semibold text-[#213430] program-main">PINK “ME” Assistance Programs sdsadasda</h2>
                                 @if ($programs->count() > 0)
                                     <div class="flex items-center space-x-4">
                                         <form method="GET" class="flex items-center gap-2">

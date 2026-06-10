@@ -88,8 +88,7 @@ configure_apache_rewrite() {
     cat > .htaccess <<EOF
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase ${url_path}/
-    RewriteCond %{REQUEST_URI} !^${url_path}/public/
+    RewriteCond %{REQUEST_URI} !^${url_path}/public/ [NC]
     RewriteRule ^(.*)$ public/\$1 [L]
 </IfModule>
 EOF

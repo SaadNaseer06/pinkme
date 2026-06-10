@@ -103,9 +103,9 @@ In GitHub: **Settings → Secrets and variables → Actions → New repository s
 |--------|---------|-------------|
 | `BACKUP_CPANEL_HOST` | `66.29.149.231` or `serverlinktestwebsites.com` | SSH hostname |
 | `BACKUP_CPANEL_SSH_PORT` | `22` | SSH port |
-| `BACKUP_CPANEL_USERNAME` | `serverlinkitestwe` | cPanel account username |
+| `BACKUP_CPANEL_USERNAME` | `serverlinktestwe` | cPanel account username (check General Information in cPanel) |
 | `BACKUP_CPANEL_SSH_KEY` | Full private key PEM | Same deploy key or a second key authorized on this account |
-| `BACKUP_DEPLOY_PATH` | `/home/serverlinkitestwe/public_html/pinkme` | Absolute path to the git repo |
+| `BACKUP_DEPLOY_PATH` | `/home/serverlinktestwe/public_html/pinkme` | Absolute path to the git repo |
 | `BACKUP_DEPLOY_APP_URL` | `https://serverlinktestwebsites.com/pinkme` | Backup site URL (no trailing slash) |
 
 If backup secrets are missing, that deploy target is **skipped** (production still deploys).
@@ -187,7 +187,7 @@ Manual deploy: **Actions → Deploy to cPanel → Run workflow**.
 | `git fetch` fails on server | Ensure repo exists at `DEPLOY_PATH` and remote is `origin` → GitHub |
 | HTTP 500 after deploy | Check `storage/logs/laravel.log`; run `bash scripts/deploy-fix.sh` on server |
 | Assets missing | Confirm `DEPLOY_APP_URL` matches `.env`; Vite `public/build` uploaded |
-| Migrations fail | Fix DB credentials in server `.env`; run `php artisan migrate --force` manually once |
+| HTTP 500 on backup `/pinkme/` | Run `bash scripts/fix-cpanel-subdirectory.sh` on server; confirm `BACKUP_DEPLOY_PATH` uses username `serverlinktestwe` |
 
 ---
 

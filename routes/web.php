@@ -30,6 +30,26 @@ use App\Http\Controllers\WebinarController;
 use App\Models\Program;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+
+/*
+| Fallback when Apache cannot serve the public/storage symlink (common on cPanel
+| subdirectory installs). If the file exists on disk, Laravel streams it.
+*/
+$servePublicDiskFile = static function (string $path) {
+    $path = ltrim($path, '/');
+    if ($path === '' || str_contains($path, '..')) {
+        abort(404);
+    }
+    if (! Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    return response()->file(Storage::disk('public')->path($path));
+};
+
+Route::get('public/storage/{path}', $servePublicDiskFile)->where('path', '.*');
+Route::get('storage/{path}', $servePublicDiskFile)->where('path', '.*');
 
 Route::get('/', function () {
     if (Auth::check()) {

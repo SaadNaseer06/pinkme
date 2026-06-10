@@ -61,8 +61,13 @@ EOF
 mkdir -p storage/app/public storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
-if [ ! -L public/storage ] && [ ! -e public/storage ]; then
+if [ -e public/storage ] && [ ! -L public/storage ]; then
+  echo "Removing non-symlink public/storage"
+  rm -rf public/storage
+fi
+if [ ! -L public/storage ]; then
   ln -sf ../storage/app/public public/storage
+  echo "Created public/storage symlink"
 fi
 
 PHP="/usr/local/bin/ea-php82"

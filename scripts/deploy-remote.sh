@@ -51,15 +51,23 @@ artisan() {
 
 link_public_storage() {
   echo "=== Linking public/storage ==="
-  if [ -L public/storage ]; then
-    echo "public/storage symlink already exists"
-    return 0
-  fi
-  if [ -e public/storage ] && [ ! -L public/storage ]; then
-    echo "WARNING: public/storage exists and is not a symlink; skipping"
-    return 0
-  fi
   mkdir -p storage/app/public
+
+  if [ -e public/storage ] && [ ! -L public/storage ]; then
+    echo "Removing non-symlink public/storage (blocks web access to uploaded files)"
+    rm -rf public/storage
+  fi
+
+  if [ -L public/storage ]; then
+    local target
+    target="$(readlink public/storage 2>/dev/null || true)"
+    if [ "$target" = "../storage/app/public" ]; then
+      echo "public/storage symlink already exists"
+      return 0
+    fi
+    rm -f public/storage
+  fi
+
   ln -sf ../storage/app/public public/storage
   echo "Created public/storage -> ../storage/app/public"
 }

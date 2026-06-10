@@ -17,6 +17,10 @@ if (! function_exists('storage_url')) {
 
         $path = (string) $path;
         if (preg_match('#^https?://#i', $path)) {
+            if (config('app.asset_public_prefix')) {
+                return preg_replace('#/storage/app/public/#', '/public/storage/', $path) ?? $path;
+            }
+
             return $path;
         }
 

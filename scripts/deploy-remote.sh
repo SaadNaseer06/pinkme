@@ -180,6 +180,12 @@ else
   echo 'USE_PUBLIC_URL_PREFIX=true' >> .env
 fi
 
+if grep -q '^STORAGE_PUBLIC_USE_FULL_PATH=' .env 2>/dev/null; then
+  sed -i 's|^STORAGE_PUBLIC_USE_FULL_PATH=.*|STORAGE_PUBLIC_USE_FULL_PATH=false|' .env
+else
+  echo 'STORAGE_PUBLIC_USE_FULL_PATH=false' >> .env
+fi
+
 configure_apache_rewrite
 
 echo "=== Installing Composer dependencies ==="

@@ -82,6 +82,10 @@ grep -q '^USE_PUBLIC_URL_PREFIX=' .env && \
   sed -i 's|^USE_PUBLIC_URL_PREFIX=.*|USE_PUBLIC_URL_PREFIX=true|' .env || \
   echo 'USE_PUBLIC_URL_PREFIX=true' >> .env
 
+grep -q '^STORAGE_PUBLIC_USE_FULL_PATH=' .env && \
+  sed -i 's|^STORAGE_PUBLIC_USE_FULL_PATH=.*|STORAGE_PUBLIC_USE_FULL_PATH=false|' .env || \
+  echo 'STORAGE_PUBLIC_USE_FULL_PATH=false' >> .env
+
 "$PHP" artisan config:clear 2>/dev/null || true
 "$PHP" artisan route:clear 2>/dev/null || true
 "$PHP" artisan config:cache 2>/dev/null || true

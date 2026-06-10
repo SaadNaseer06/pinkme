@@ -17,9 +17,16 @@ if (file_exists($envPath)) {
                 $uri = $_SERVER['REQUEST_URI'];
                 $uriPath = parse_url($uri, PHP_URL_PATH) ?: '/';
                 $query = parse_url($uri, PHP_URL_QUERY);
-                if (str_starts_with($uriPath, $basePath)) {
-                    $newPath = substr($uriPath, strlen($basePath)) ?: '/';
-                    $_SERVER['REQUEST_URI'] = $newPath . ($query ? '?' . $query : '');
+                $prefixes = array_values(array_unique([
+                    rtrim($basePath, '/'),
+                    rtrim($basePath, '/').'/public',
+                ]));
+                foreach ($prefixes as $prefix) {
+                    if ($prefix !== '' && str_starts_with($uriPath, $prefix)) {
+                        $newPath = substr($uriPath, strlen($prefix)) ?: '/';
+                        $_SERVER['REQUEST_URI'] = $newPath.($query ? '?'.$query : '');
+                        break;
+                    }
                 }
             }
             break;

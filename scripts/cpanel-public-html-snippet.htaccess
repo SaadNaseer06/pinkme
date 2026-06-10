@@ -1,0 +1,11 @@
+# Snippet for public_html/.htaccess — routes /pinkme/* into the Laravel public folder.
+# Replace FOLDER and URL_PATH when copying (pinkme / /pinkme).
+#
+# BEGIN PINKME-LARAVEL
+# <IfModule mod_rewrite.c>
+# RewriteEngine On
+# RewriteRule ^pinkme/?$ pinkme/public/ [L]
+# RewriteCond %{REQUEST_URI} !^/pinkme/public/ [NC]
+# RewriteRule ^pinkme(?:/(.*))?$ pinkme/public/$1 [L]
+# </IfModule>
+# END PINKME-LARAVEL

@@ -74,6 +74,44 @@ url_path_from_app_url() {
   fi
 }
 
+configure_parent_htaccess() {
+  local url_path="$1"
+  local folder="$2"
+  local parent_htaccess
+  parent_htaccess="$(dirname "$(pwd)")/.htaccess"
+  local begin="# BEGIN PINKME-LARAVEL-${folder}"
+  local end="# END PINKME-LARAVEL-${folder}"
+
+  if [ ! -d "$(dirname "$parent_htaccess")" ]; then
+    echo "WARNING: Parent directory not found for ${parent_htaccess}"
+    return 0
+  fi
+
+  echo "=== Updating parent .htaccess: ${parent_htaccess} ==="
+  touch "$parent_htaccess"
+
+  if grep -qF "$begin" "$parent_htaccess" 2>/dev/null; then
+    awk -v begin="$begin" -v end="$end" '
+      $0 == begin { skip=1; next }
+      $0 == end { skip=0; next }
+      !skip { print }
+    ' "$parent_htaccess" > "${parent_htaccess}.tmp"
+    mv "${parent_htaccess}.tmp" "$parent_htaccess"
+  fi
+
+  cat >> "$parent_htaccess" <<EOF
+
+${begin}
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^${folder}/?\$ ${folder}/public/ [L]
+RewriteCond %{REQUEST_URI} !^${url_path}/public/ [NC]
+RewriteRule ^${folder}(?:/(.*))?\$ ${folder}/public/\$1 [L]
+</IfModule>
+${end}
+EOF
+}
+
 configure_apache_rewrite() {
   local app_url="${APP_URL:-}"
   if [ -z "$app_url" ] && [ -f .env ]; then
@@ -84,6 +122,8 @@ configure_apache_rewrite() {
   url_path="$(url_path_from_app_url "$app_url")"
 
   if [ -n "$url_path" ]; then
+    local folder
+    folder="$(basename "$url_path")"
     echo "=== Configuring Apache for subdirectory: ${url_path} ==="
     cat > .htaccess <<EOF
 <IfModule mod_rewrite.c>
@@ -97,6 +137,7 @@ EOF
     else
       echo "WARNING: public/.htaccess.cpanel missing"
     fi
+    configure_parent_htaccess "$url_path" "$folder"
   else
     echo "=== Configuring Apache for domain root ==="
     cat > .htaccess <<'EOF'

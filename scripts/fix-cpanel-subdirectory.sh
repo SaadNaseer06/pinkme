@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fix Apache 500 on cPanel subdirectory installs (e.g. /pinkme/).
+# Fix Apache 404/500 on cPanel subdirectory installs (e.g. /pinkme/).
 # Run on the server: bash scripts/fix-cpanel-subdirectory.sh
 set -euo pipefail
 
@@ -7,13 +7,14 @@ cd "$(dirname "$0")/.."
 
 APP_URL="$(grep -E '^APP_URL=' .env 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'" | tr -d '\r' || true)"
 URL_PATH="$(echo "${APP_URL%/}" | sed -E 's#^https?://[^/]+##' )"
+FOLDER="$(basename "$URL_PATH")"
 
 if [ -z "$URL_PATH" ] || [ "$URL_PATH" = "" ]; then
   echo "ERROR: APP_URL in .env must include the subdirectory path, e.g. https://serverlinktestwebsites.com/pinkme"
   exit 1
 fi
 
-echo "Using URL path: ${URL_PATH}"
+echo "Using URL path: ${URL_PATH} (folder: ${FOLDER})"
 
 cat > .htaccess <<EOF
 <IfModule mod_rewrite.c>
@@ -29,6 +30,33 @@ else
   echo "ERROR: public/.htaccess.cpanel not found"
   exit 1
 fi
+
+PARENT_HTACCESS="$(dirname "$(pwd)")/.htaccess"
+BEGIN="# BEGIN PINKME-LARAVEL-${FOLDER}"
+END="# END PINKME-LARAVEL-${FOLDER}"
+
+echo "Updating ${PARENT_HTACCESS}"
+touch "$PARENT_HTACCESS"
+if grep -qF "$BEGIN" "$PARENT_HTACCESS" 2>/dev/null; then
+  awk -v begin="$BEGIN" -v end="$END" '
+    $0 == begin { skip=1; next }
+    $0 == end { skip=0; next }
+    !skip { print }
+  ' "$PARENT_HTACCESS" > "${PARENT_HTACCESS}.tmp"
+  mv "${PARENT_HTACCESS}.tmp" "$PARENT_HTACCESS"
+fi
+
+cat >> "$PARENT_HTACCESS" <<EOF
+
+${BEGIN}
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^${FOLDER}/?\$ ${FOLDER}/public/ [L]
+RewriteCond %{REQUEST_URI} !^${URL_PATH}/public/ [NC]
+RewriteRule ^${FOLDER}(?:/(.*))?\$ ${FOLDER}/public/\$1 [L]
+</IfModule>
+${END}
+EOF
 
 mkdir -p storage/app/public storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
@@ -55,8 +83,12 @@ grep -q '^USE_PUBLIC_URL_PREFIX=' .env && \
   echo 'USE_PUBLIC_URL_PREFIX=true' >> .env
 
 "$PHP" artisan config:clear 2>/dev/null || true
+"$PHP" artisan route:clear 2>/dev/null || true
 "$PHP" artisan config:cache 2>/dev/null || true
+"$PHP" artisan route:cache 2>/dev/null || true
 
 echo ""
-echo "Done. Test: ${APP_URL}/register?tab=login"
-echo "If still 500, run: tail -30 storage/logs/laravel.log"
+echo "Done. Test these URLs:"
+echo "  ${APP_URL}/register?tab=login"
+echo "  ${APP_URL}/admin/dashboard  (should redirect to staff login if not logged in)"
+echo "If still broken: tail -30 storage/logs/laravel.log"

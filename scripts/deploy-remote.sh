@@ -64,6 +64,55 @@ link_public_storage() {
   echo "Created public/storage -> ../storage/app/public"
 }
 
+url_path_from_app_url() {
+  local url="${1:-}"
+  url="${url%/}"
+  if [[ "$url" =~ ^https?://[^/]+(/.*)$ ]]; then
+    echo "${BASH_REMATCH[1]}"
+  else
+    echo ""
+  fi
+}
+
+configure_apache_rewrite() {
+  local app_url="${APP_URL:-}"
+  if [ -z "$app_url" ] && [ -f .env ]; then
+    app_url="$(grep -E '^APP_URL=' .env | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'" | tr -d '\r')"
+  fi
+
+  local url_path
+  url_path="$(url_path_from_app_url "$app_url")"
+
+  if [ -n "$url_path" ]; then
+    echo "=== Configuring Apache for subdirectory: ${url_path} ==="
+    cat > .htaccess <<EOF
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase ${url_path}/
+    RewriteCond %{REQUEST_URI} !^${url_path}/public/
+    RewriteRule ^(.*)$ public/\$1 [L]
+</IfModule>
+EOF
+    if [ -f public/.htaccess.cpanel ]; then
+      sed "s|RewriteBase /pinkme/public/|RewriteBase ${url_path}/public/|" public/.htaccess.cpanel > public/.htaccess
+    else
+      echo "WARNING: public/.htaccess.cpanel missing"
+    fi
+  else
+    echo "=== Configuring Apache for domain root ==="
+    cat > .htaccess <<'EOF'
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+EOF
+    if git show HEAD:public/.htaccess >/dev/null 2>&1; then
+      git show HEAD:public/.htaccess > public/.htaccess
+    fi
+  fi
+}
+
 echo "=== PinkMe remote deploy ==="
 
 if [ ! -f .env ]; then
@@ -90,6 +139,8 @@ if grep -q '^USE_PUBLIC_URL_PREFIX=' .env 2>/dev/null; then
 else
   echo 'USE_PUBLIC_URL_PREFIX=true' >> .env
 fi
+
+configure_apache_rewrite
 
 echo "=== Installing Composer dependencies ==="
 # --no-scripts avoids `artisan package:discover` during install (needs proc_open on cPanel).

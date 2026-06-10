@@ -1,4 +1,4 @@
-# Deploys to cPanel on push to main (after CI passes).
+# Deploys to cPanel on push to main — production + backup servers in parallel.
 # Setup: see CI_CD.md and configure GitHub repository secrets.
 name: Deploy to cPanel
 
@@ -7,10 +7,6 @@ on:
     branches:
       - main
   workflow_dispatch:
-
-concurrency:
-  group: deploy-cpanel-production
-  cancel-in-progress: true
 
 jobs:
   build:
@@ -66,31 +62,64 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [production, backup]
+
+    concurrency:
+      group: deploy-cpanel-${{ matrix.target }}
+      cancel-in-progress: true
 
     steps:
+      - name: Resolve deploy credentials
+        id: creds
+        env:
+          HOST: ${{ matrix.target == 'production' && secrets.CPANEL_HOST || secrets.BACKUP_CPANEL_HOST }}
+          PORT: ${{ matrix.target == 'production' && secrets.CPANEL_SSH_PORT || secrets.BACKUP_CPANEL_SSH_PORT }}
+          USER: ${{ matrix.target == 'production' && secrets.CPANEL_USERNAME || secrets.BACKUP_CPANEL_USERNAME }}
+          KEY: ${{ matrix.target == 'production' && secrets.CPANEL_SSH_KEY || secrets.BACKUP_CPANEL_SSH_KEY }}
+          PATH: ${{ matrix.target == 'production' && secrets.DEPLOY_PATH || secrets.BACKUP_DEPLOY_PATH }}
+          URL: ${{ matrix.target == 'production' && secrets.DEPLOY_APP_URL || secrets.BACKUP_DEPLOY_APP_URL }}
+        run: |
+          set -e
+          if [ -z "$HOST" ] || [ -z "$USER" ] || [ -z "$KEY" ] || [ -z "$PATH" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping ${{ matrix.target }} — required secrets are not configured."
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "host=$HOST" >> "$GITHUB_OUTPUT"
+          echo "port=${PORT:-22}" >> "$GITHUB_OUTPUT"
+          echo "user=$USER" >> "$GITHUB_OUTPUT"
+          echo "path=$PATH" >> "$GITHUB_OUTPUT"
+          echo "url=${URL:-}" >> "$GITHUB_OUTPUT"
+          printf '%s' "$KEY" > deploy_key_raw.txt
+
       - name: Download Vite build
+        if: steps.creds.outputs.skip != 'true'
         uses: actions/download-artifact@v4
         with:
           name: vite-build
           path: public/build
 
       - name: Download Laravel bootstrap cache
+        if: steps.creds.outputs.skip != 'true'
         uses: actions/download-artifact@v4
         with:
           name: laravel-bootstrap-cache
           path: bootstrap-cache
 
       - name: Configure SSH key
-        env:
-          SSH_KEY: ${{ secrets.CPANEL_SSH_KEY }}
+        if: steps.creds.outputs.skip != 'true'
         run: |
           set -e
           mkdir -p ~/.ssh
+          SSH_KEY="$(cat deploy_key_raw.txt)"
 
           FIRST_LINE="$(echo "$SSH_KEY" | tr -d '\r' | sed '/./!d;q')"
           if echo "$FIRST_LINE" | grep -qE '^(ssh-rsa|ssh-ed25519|ecdsa-sha2-)'; then
-            echo "ERROR: CPANEL_SSH_KEY looks like a PUBLIC key."
-            echo "Use the private key (-----BEGIN ... PRIVATE KEY-----)."
+            echo "ERROR: SSH key for ${{ matrix.target }} looks like a PUBLIC key."
             exit 1
           fi
 
@@ -98,43 +127,44 @@ jobs:
             printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           else
             echo "$SSH_KEY" | tr -d '\n\r' | base64 -d > ~/.ssh/deploy_key 2>/dev/null || {
-              echo "ERROR: Could not decode CPANEL_SSH_KEY as base64 or PEM."
+              echo "ERROR: Could not decode SSH key for ${{ matrix.target }}."
               exit 1
             }
           fi
           chmod 600 ~/.ssh/deploy_key
 
           if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>/tmp/deploy_key_err.txt; then
-            echo "ERROR: Invalid or passphrase-protected private key."
+            echo "ERROR: Invalid or passphrase-protected key for ${{ matrix.target }}."
             cat /tmp/deploy_key_err.txt || true
-            echo "Generate a deploy key with no passphrase: ssh-keygen -t ed25519 -N \"\" -f github_deploy"
             exit 1
           fi
 
       - name: Pull latest code on server
+        if: steps.creds.outputs.skip != 'true'
         env:
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
-          CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
-          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+          DEPLOY_PATH: ${{ steps.creds.outputs.path }}
+          CPANEL_HOST: ${{ steps.creds.outputs.host }}
+          CPANEL_USERNAME: ${{ steps.creds.outputs.user }}
+          CPANEL_SSH_PORT: ${{ steps.creds.outputs.port }}
         run: |
           set -e
           SSH_OPTS="-o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -p ${CPANEL_SSH_PORT:-22}"
           ssh ${SSH_OPTS} "${CPANEL_USERNAME}@${CPANEL_HOST}" bash -s <<REMOTE
           set -euo pipefail
           cd "${DEPLOY_PATH}"
-          echo "=== Pulling latest code ==="
+          echo "=== [${{ matrix.target }}] Pulling latest code ==="
           git fetch origin main
           git reset --hard origin/main
           mkdir -p bootstrap/cache
           REMOTE
 
       - name: Upload Laravel package manifest to server
+        if: steps.creds.outputs.skip != 'true'
         env:
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
-          CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
-          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+          DEPLOY_PATH: ${{ steps.creds.outputs.path }}
+          CPANEL_HOST: ${{ steps.creds.outputs.host }}
+          CPANEL_USERNAME: ${{ steps.creds.outputs.user }}
+          CPANEL_SSH_PORT: ${{ steps.creds.outputs.port }}
         run: |
           SCP_OPTS="-o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -P ${CPANEL_SSH_PORT:-22}"
           scp ${SCP_OPTS} bootstrap-cache/packages.php \
@@ -143,12 +173,13 @@ jobs:
             "${CPANEL_USERNAME}@${CPANEL_HOST}:${DEPLOY_PATH}/bootstrap/cache/services.php"
 
       - name: Deploy application on server
+        if: steps.creds.outputs.skip != 'true'
         env:
-          APP_URL: ${{ secrets.DEPLOY_APP_URL }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
-          CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
-          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+          APP_URL: ${{ steps.creds.outputs.url }}
+          DEPLOY_PATH: ${{ steps.creds.outputs.path }}
+          CPANEL_HOST: ${{ steps.creds.outputs.host }}
+          CPANEL_USERNAME: ${{ steps.creds.outputs.user }}
+          CPANEL_SSH_PORT: ${{ steps.creds.outputs.port }}
         run: |
           set -e
           SSH_OPTS="-o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -p ${CPANEL_SSH_PORT:-22}"
@@ -161,18 +192,20 @@ jobs:
           REMOTE
 
       - name: Upload Vite build to server
+        if: steps.creds.outputs.skip != 'true'
         env:
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
-          CPANEL_USERNAME: ${{ secrets.CPANEL_USERNAME }}
-          CPANEL_SSH_PORT: ${{ secrets.CPANEL_SSH_PORT }}
+          DEPLOY_PATH: ${{ steps.creds.outputs.path }}
+          CPANEL_HOST: ${{ steps.creds.outputs.host }}
+          CPANEL_USERNAME: ${{ steps.creds.outputs.user }}
+          CPANEL_SSH_PORT: ${{ steps.creds.outputs.port }}
         run: |
           scp -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -P "${CPANEL_SSH_PORT:-22}" \
             -r public/build "${CPANEL_USERNAME}@${CPANEL_HOST}:${DEPLOY_PATH}/public/"
 
       - name: Deployment summary
+        if: steps.creds.outputs.skip != 'true'
         env:
-          APP_URL: ${{ secrets.DEPLOY_APP_URL }}
+          APP_URL: ${{ steps.creds.outputs.url }}
         run: |
-          echo "Deployed to ${APP_URL:-cPanel server}"
+          echo "Deployed [${{ matrix.target }}] to ${APP_URL:-${{ steps.creds.outputs.host }}}"
           echo "Commit: ${GITHUB_SHA}"

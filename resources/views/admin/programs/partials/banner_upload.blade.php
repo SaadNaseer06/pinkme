@@ -3,13 +3,15 @@
     $bannerUrl = $bannerUrl ?? null;
 @endphp
 
+@if (!($embedded ?? false))
 <section class="rounded-2xl border border-[#E9DCE7] bg-white shadow-sm">
     <div class="border-b border-[#F1E5EF] px-6 py-5">
         <h2 class="text-lg font-semibold text-[#213430]">Program banner</h2>
         <p class="mt-1 text-sm text-[#6C5B68]">Upload an optional cover image. This remains a separate upload and is not part of the custom fields.</p>
     </div>
+@endif
 
-    <div class="px-6 py-6 space-y-4">
+    <div class="px-6 py-6 space-y-4 {{ ($embedded ?? false) ? 'pt-2' : '' }}">
         <p class="text-sm text-[#6C5B68]">Use a horizontal image for best results. Max size 25MB.</p>
 
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
@@ -40,7 +42,9 @@
             <p class="text-xs text-[#9E2469]">{{ $message }}</p>
         @enderror
     </div>
+@if (!($embedded ?? false))
 </section>
+@endif
 
 @push('scripts')
     <script>

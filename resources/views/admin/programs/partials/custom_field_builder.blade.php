@@ -6,13 +6,15 @@
     $usesStarterTemplate = $usesStarterTemplate ?? false;
 @endphp
 
+@if (!($embedded ?? false))
 <section class="rounded-2xl border border-[#E9DCE7] bg-white shadow-sm">
     <div class="flex flex-col gap-1 border-b border-[#F1E5EF] px-6 py-5">
         <h2 class="text-lg font-semibold text-[#213430]">Additional Program Fields</h2>
         <p class="mt-1 text-sm text-[#6C5B68]">Pick a field name from the list (title, description, dates, fund, etc.) so it maps correctly everywhere.</p>
     </div>
+@endif
 
-    <div class="px-6 py-6">
+    <div class="px-6 py-6 {{ ($embedded ?? false) ? 'pt-2' : '' }}">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <div class="rounded-xl border border-[#E9DCE7] bg-[#FDF7FB] p-4 shadow-inner space-y-4 lg:w-[280px] lg:flex-none lg:sticky lg:top-4">
                 <div class="flex items-center justify-between gap-2">
@@ -25,7 +27,7 @@
                         <div class="flex items-center justify-between gap-2">
                             <p class="text-xs font-semibold text-[#213430]">{{ $usesStarterTemplate ? 'Starter template' : 'Copy fields' }}</p>
                             <button type="button" data-load-default
-                                class="text-xs font-semibold text-[#9E2469] hover:underline">Use it</button>
+                                class="text-xs font-semibold text-[#9E2469] hover:underline">{{ $usesStarterTemplate ? 'Use starter template' : 'Use it' }}</button>
                         </div>
                         <p class="mt-1 text-[11px] text-[#6C5B68]">
                             @if ($usesStarterTemplate)
@@ -38,7 +40,7 @@
                             data-default-hint>Template applied. Edit any value, then save.</p>
                     </div>
                 @endif
-                <p class="text-xs text-[#6C5B68]">Add common fields from the chips below, then fine-tune on the right.</p>
+                <p class="text-xs text-[#6C5B68] {{ ($embedded ?? false) ? 'hidden sm:block' : '' }}">Add common fields from the chips below, then fine-tune on the right.</p>
                 <button type="button" id="{{ $builderId }}-add"
                     class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-[#9E2469] bg-white px-4 py-2 text-sm font-semibold text-[#9E2469] transition hover:bg-[#FDF0F7]">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -60,9 +62,9 @@
             </div>
 
             <div class="space-y-4 flex-1">
-                <p class="text-sm text-[#6C5B68]">Fields you add appear here. They are shown to patients and also drive required backend values.</p>
+                <p class="text-sm text-[#6C5B68] {{ ($embedded ?? false) ? 'hidden' : '' }}">Fields you add appear here. They are shown to patients and also drive required backend values.</p>
                 <div id="{{ $builderId }}-list" class="space-y-4" data-field-builder-list></div>
-                <p class="text-xs text-[#91848C]">Tip: popular fields include "Location", "Program lead", "Capacity", "Registration deadline", "Meeting link", and "Notes for participants".</p>
+                <p class="text-xs text-[#91848C] {{ ($embedded ?? false) ? 'hidden' : '' }}">Tip: popular fields include "Location", "Program lead", "Capacity", "Registration deadline", "Meeting link", and "Notes for participants".</p>
                 @if ($errors->has('custom_fields') || $errors->has('title'))
                     <p class="text-xs font-semibold text-[#B32020]">
                         {{ $errors->first('title') ?? $errors->first('custom_fields') }}
@@ -71,7 +73,9 @@
             </div>
         </div>
     </div>
+@if (!($embedded ?? false))
 </section>
+@endif
 
 <template id="{{ $builderId }}-template">
     <div class="rounded-xl border border-[#E9DCE7] bg-[#FDF7FB] px-4 py-4 shadow-sm" data-custom-field>
@@ -404,9 +408,12 @@
                 syncIndexes();
             };
 
-            const applyDefaultFields = () => {
+            const applyDefaultFields = (askConfirm = true) => {
                 if (!Array.isArray(defaultFields) || defaultFields.length === 0) {
                     return;
+                }
+                if (askConfirm && listEl.querySelectorAll('[data-custom-field]').length > 0) {
+                    if (!confirm('Replace current program detail fields with the template?')) return;
                 }
                 listEl.innerHTML = '';
                 defaultFields.forEach((field) => addField(field));
@@ -417,6 +424,8 @@
                 }
                 listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
             };
+
+            window.programFieldBuilderApplyDefault = applyDefaultFields;
 
             // Quick add common fields
             if (quickButtons.length) {
@@ -436,7 +445,7 @@
             }
 
             if (defaultButton) {
-                defaultButton.addEventListener('click', applyDefaultFields);
+                defaultButton.addEventListener('click', () => applyDefaultFields(true));
             }
 
             // Seed builder — starter template stays empty until admin clicks "Use it"

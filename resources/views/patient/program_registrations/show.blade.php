@@ -106,6 +106,9 @@
 
                 @include('partials.moments_that_matter_registration_details', ['registration' => $registration])
 
+                @include('admin.program_registrations.partials.dynamic_responses', ['registration' => $registration])
+
+                @if (empty($registration->application_responses))
                 <div class="bg-white rounded-lg p-5 md:p-6 space-y-4 border border-[#E6D8E1]">
                     <h2 class="text-xl font-semibold text-[#213430] app-main">Application Details</h2>
                     @unless ($registration->program?->isMomentsThatMatter() || $registration->mtm_package)
@@ -251,6 +254,7 @@
                     </div>
                 </div>
                 @endunless
+                @endif
 
                 @if ($registration->review_note)
                     <div class="bg-white rounded-lg p-5 md:p-6 space-y-3 text-base text-[#213430] app-text border border-[#E6D8E1]">

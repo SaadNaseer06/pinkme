@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Program;
 use App\Models\ProgramRegistration;
+use App\Support\ApplicationFormFieldTypes;
+use App\Support\ApplicationFormSchema;
+use App\Support\ApplicationFormTemplates;
 use App\Support\PatientApplicationNotifications;
 use App\Support\ProgramDefaultTemplate;
 use App\Support\ProgramType;
@@ -119,6 +122,8 @@ class ProgramController extends Controller
             'program_type_label' => $program->programTypeLabel(),
             'sponsor_name' => $program->sponsor_name,
             'sponsor_logo' => $program->sponsorLogoUrl(),
+            'application_form_schema' => $program->application_form_schema ?? [],
+            'has_dynamic_application_form' => $program->hasDynamicApplicationForm(),
         ]);
     }
 
@@ -135,12 +140,14 @@ class ProgramController extends Controller
         }
 
         $usesStarterTemplate = $defaultProgram === null;
+        $applicationFormTemplates = ApplicationFormTemplates::all();
 
         return view('admin.programs.create', compact(
             'defaultProgram',
             'defaultFields',
             'defaultProgramTitle',
             'usesStarterTemplate',
+            'applicationFormTemplates',
         ));
     }
 
@@ -165,6 +172,7 @@ class ProgramController extends Controller
             'custom_fields.*.label' => ['nullable', 'string', 'max:120'],
             'custom_fields.*.type' => ['required_with:custom_fields.*.name', Rule::in($this->customFieldTypes())],
             'custom_fields.*.value' => ['nullable', 'string', 'max:1000'],
+            ...$this->applicationFormSchemaValidationRules(),
         ]);
 
         $validator->after(function ($validator) use ($r) {
@@ -236,6 +244,7 @@ class ProgramController extends Controller
         $data['sponsor_name'] = $r->input('sponsor_name');
 
         $data['custom_fields'] = $this->normalizeCustomFields($r->input('custom_fields', []));
+        $data['application_form_schema'] = $this->normalizeApplicationFormSchema($r->input('application_form_schema', []));
         $data = $this->mergeDerivedDefaults($data);
 
         $program = Program::create($data);
@@ -247,8 +256,9 @@ class ProgramController extends Controller
     public function edit(Program $program)
     {
         $program->loadCount('registrations');
+        $applicationFormTemplates = ApplicationFormTemplates::all();
 
-        return view('admin.programs.edit', compact('program'));
+        return view('admin.programs.edit', compact('program', 'applicationFormTemplates'));
     }
 
     public function update(Request $r, Program $program)
@@ -272,6 +282,7 @@ class ProgramController extends Controller
             'custom_fields.*.label' => ['nullable', 'string', 'max:120'],
             'custom_fields.*.type' => ['required_with:custom_fields.*.name', Rule::in($this->customFieldTypes())],
             'custom_fields.*.value' => ['nullable', 'string', 'max:1000'],
+            ...$this->applicationFormSchemaValidationRules(),
         ]);
 
         $validator->after(function ($validator) use ($r) {
@@ -347,6 +358,7 @@ class ProgramController extends Controller
         $data['sponsor_name'] = $r->input('sponsor_name');
 
         $data['custom_fields'] = $this->normalizeCustomFields($r->input('custom_fields', []));
+        $data['application_form_schema'] = $this->normalizeApplicationFormSchema($r->input('application_form_schema', []));
         $data = $this->mergeDerivedDefaults($data, $program);
 
         $program->update($data);
@@ -374,6 +386,36 @@ class ProgramController extends Controller
         }
 
         return redirect()->route('admin.programs-events')->with('success', $message);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function applicationFormSchemaValidationRules(): array
+    {
+        return [
+            'application_form_schema' => ['nullable', 'array'],
+            'application_form_schema.*.id' => ['nullable', 'string', 'max:60'],
+            'application_form_schema.*.name' => ['required_with:application_form_schema', 'string', 'max:80'],
+            'application_form_schema.*.label' => ['nullable', 'string', 'max:255'],
+            'application_form_schema.*.type' => ['required_with:application_form_schema.*.name', Rule::in(array_keys(ApplicationFormFieldTypes::options()))],
+            'application_form_schema.*.section' => ['nullable', 'string', 'max:120'],
+            'application_form_schema.*.required' => ['nullable', 'boolean'],
+            'application_form_schema.*.help_text' => ['nullable', 'string', 'max:500'],
+            'application_form_schema.*.options' => ['nullable'],
+            'application_form_schema.*.maps_to_column' => ['nullable', 'string', Rule::in(ApplicationFormSchema::MAPPABLE_COLUMNS)],
+            'application_form_schema.*.conditional_field' => ['nullable', 'string', 'max:80'],
+            'application_form_schema.*.conditional_value' => ['nullable', 'string', 'max:255'],
+        ];
+    }
+
+    /**
+     * @param  array<int, mixed>  $rawFields
+     * @return list<array<string, mixed>>
+     */
+    private function normalizeApplicationFormSchema(array $rawFields): array
+    {
+        return ApplicationFormSchema::normalize($rawFields);
     }
 
     /**

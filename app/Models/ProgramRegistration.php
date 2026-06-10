@@ -74,6 +74,7 @@ class ProgramRegistration extends Model
         'signature_date',
         'justification',
         'document_paths',
+        'application_responses',
         'treatment_letter_path',
         'bill_statement_paths',
         'income_document_paths',
@@ -93,6 +94,7 @@ class ProgramRegistration extends Model
 
     protected $casts = [
         'document_paths' => 'array',
+        'application_responses' => 'array',
         'programs_applied' => 'array',
         'active_treatment' => 'boolean',
         'pregnant' => 'boolean',

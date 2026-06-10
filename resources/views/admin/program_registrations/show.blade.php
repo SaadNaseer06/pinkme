@@ -297,7 +297,10 @@
 
             @include('partials.moments_that_matter_registration_details', ['registration' => $registration])
 
+            @include('admin.program_registrations.partials.dynamic_responses', ['registration' => $registration])
+
             @unless ($isMtm)
+            @if (empty($registration->application_responses))
             <div class="registration-detail-section bg-white rounded-lg p-5 md:p-6 space-y-4 border border-[#E6D8E1] w-full min-w-0">
                 <h3 class="text-xl font-semibold text-[#213430] app-main">Application Details</h3>
                 <p class="text-base text-[#213430] app-text break-words"><span class="font-medium">Active Treatment:</span> {{ $registration->active_treatment ? 'Yes' : 'No' }}</p>
@@ -457,6 +460,7 @@
                     @endif
                 </div>
             </div>
+            @endif
             @endunless
 
             @if ($isMtm && in_array($registration->status, [\App\Models\ProgramRegistration::STATUS_PENDING, \App\Models\ProgramRegistration::STATUS_APPROVED], true))

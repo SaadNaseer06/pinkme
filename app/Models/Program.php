@@ -23,6 +23,7 @@ class Program extends Model
         'sponsor_name',
         'sponsor_logo',
         'custom_fields',
+        'application_form_schema',
     ];
 
     protected $casts = [
@@ -32,6 +33,7 @@ class Program extends Model
         'application_end_date' => 'date',
         'max_applications' => 'integer',
         'custom_fields' => 'array',
+        'application_form_schema' => 'array',
     ];
 
     protected $appends = ['effective_status', 'effective_status_label'];
@@ -150,6 +152,11 @@ class Program extends Model
     public function isFinancialAssistance(): bool
     {
         return ($this->program_type ?? ProgramType::FINANCIAL_ASSISTANCE) === ProgramType::FINANCIAL_ASSISTANCE;
+    }
+
+    public function hasDynamicApplicationForm(): bool
+    {
+        return ! empty($this->application_form_schema);
     }
 
     public function programTypeLabel(): string

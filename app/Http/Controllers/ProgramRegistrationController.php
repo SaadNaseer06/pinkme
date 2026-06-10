@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Mail\GrantAssistancePreviouslyReceivedMail;
 use App\Models\Program;
 use App\Models\ProgramRegistration;
+use App\Support\ApplicationFormFieldTypes;
+use App\Support\ApplicationFormSchema;
 use App\Support\MomentsThatMatterOptions;
 use App\Support\PatientBillSupportExpenseTypes;
 use App\Support\ProgramApplicationEthnicityOptions;
@@ -27,6 +29,10 @@ class ProgramRegistrationController extends Controller
     public function store(Request $request)
     {
         $program = Program::findOrFail($request->input('program_id'));
+
+        if ($program->hasDynamicApplicationForm()) {
+            return $this->storeDynamicApplication($request, $program);
+        }
 
         if ($program->isMomentsThatMatter()) {
             return $this->storeMomentsThatMatter($request, $program);
@@ -475,6 +481,164 @@ class ProgramRegistrationController extends Controller
         }
 
         return redirect()->back()->with('mtm_submission_notice', true);
+    }
+
+    protected function storeDynamicApplication(Request $request, Program $program)
+    {
+        $schema = $program->application_form_schema ?? [];
+
+        if ($schema === []) {
+            return redirect()->back()->withErrors([
+                'program_id' => 'This program does not have an application form configured yet.',
+            ]);
+        }
+
+        if (! $program->isApplicationOpen()) {
+            return redirect()->back()->withErrors([
+                'program_id' => 'Applications for this program are not open yet or have closed.',
+            ]);
+        }
+
+        $alreadyApplied = ProgramRegistration::query()
+            ->where('user_id', Auth::id())
+            ->where('program_id', $program->id)
+            ->exists();
+
+        if ($alreadyApplied) {
+            return redirect()->back()->withErrors([
+                'program_id' => 'You already applied for this program.',
+            ]);
+        }
+
+        if ($program->hasReachedMaxApplications()) {
+            return redirect()->back()->withErrors([
+                'program_id' => ProgramApplicationCapacity::CLOSED_MESSAGE,
+            ]);
+        }
+
+        $rules = ApplicationFormSchema::buildValidationRules($schema, $request);
+        $validated = $request->validate($rules);
+
+        $rawFields = $request->input('app_field', []);
+        if (! is_array($rawFields)) {
+            $rawFields = [];
+        }
+
+        $responses = [];
+        $documentPaths = [];
+        $signaturePath = null;
+
+        $now = now()->format('Ymd_His');
+        $userId = Auth::id() ?? 'guest';
+        $makeFilename = function (string $label, string $extension) use ($userId, $now, $program) {
+            $safeLabel = preg_replace('/[^a-z0-9_]+/i', '_', $label);
+
+            return strtolower($safeLabel.'_program_'.$program->id.'_'.$userId.'_'.$now.'_'.Str::random(6).'.'.strtolower($extension ?: 'bin'));
+        };
+
+        foreach ($schema as $field) {
+            $type = $field['type'] ?? '';
+            $name = $field['name'] ?? '';
+
+            if ($name === '' || ApplicationFormFieldTypes::isDisplayOnly($type)) {
+                continue;
+            }
+
+            if (! ApplicationFormSchema::isFieldApplicable($field, $rawFields)) {
+                continue;
+            }
+
+            if ($type === ApplicationFormFieldTypes::FILE) {
+                if ($request->hasFile('app_field.'.$name)) {
+                    $file = $request->file('app_field.'.$name);
+                    $stored = $file->storeAs(
+                        'program_documents/dynamic',
+                        $makeFilename($name, $file->getClientOriginalExtension()),
+                        'public'
+                    );
+                    $responses[$name] = $stored;
+                    $documentPaths[] = $stored;
+                }
+
+                continue;
+            }
+
+            if ($type === ApplicationFormFieldTypes::SIGNATURE) {
+                $signatureData = $rawFields[$name] ?? null;
+                if (is_string($signatureData) && preg_match('/^data:image\\/(png|jpeg);base64,/', $signatureData)) {
+                    $signaturePath = 'program_documents/signatures/'.$makeFilename($name, 'png');
+                    $encoded = substr($signatureData, strpos($signatureData, ',') + 1);
+                    Storage::disk('public')->put($signaturePath, base64_decode($encoded));
+                    $responses[$name] = $signaturePath;
+                }
+
+                continue;
+            }
+
+            $value = $rawFields[$name] ?? null;
+            if ($type === ApplicationFormFieldTypes::CHECKBOX) {
+                $responses[$name] = filter_var($value, FILTER_VALIDATE_BOOL) ? 'Yes' : 'No';
+            } elseif ($type === ApplicationFormFieldTypes::CHECKBOX_GROUP) {
+                $responses[$name] = is_array($value) ? array_values(array_filter($value)) : [];
+            } else {
+                $responses[$name] = is_array($value) ? $value : trim((string) ($value ?? ''));
+            }
+        }
+
+        if ($program->program_type === ProgramType::FOOD_ASSISTANCE) {
+            $priorCards = $responses['prior_food_cards'] ?? '';
+            if (is_string($priorCards) && str_contains($priorCards, 'three (3)')) {
+                return redirect()->back()->withErrors([
+                    'app_field.prior_food_cards' => 'Individuals who have already received three Electronic Food Card awards are not eligible for additional assistance.',
+                ]);
+            }
+        }
+
+        $mapped = ApplicationFormSchema::extractMappedAttributes($schema, $responses);
+        $firstName = $mapped['first_name'] ?? ($responses['first_name'] ?? 'Applicant');
+        $lastName = $mapped['last_name'] ?? ($responses['last_name'] ?? '');
+        $email = $mapped['email'] ?? ($responses['email'] ?? (Auth::user()?->email ?? ''));
+        $phone = $mapped['phone'] ?? ($responses['phone'] ?? '');
+        $username = strtolower(preg_replace('/\s+/', '', $firstName.' '.$lastName));
+
+        $registration = ProgramRegistration::create(array_merge([
+            'program_id' => $program->id,
+            'user_id' => Auth::id(),
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'username' => $username,
+            'email' => $email,
+            'phone' => $phone,
+            'application_responses' => $responses,
+            'document_paths' => $documentPaths !== [] ? $documentPaths : null,
+            'signature' => $signaturePath,
+            'status' => ProgramRegistration::STATUS_PENDING,
+        ], array_filter($mapped, fn ($value, $key) => ! in_array($key, ['first_name', 'last_name', 'email', 'phone'], true), ARRAY_FILTER_USE_BOTH)));
+
+        $programLabel = $program->programTypeLabel();
+        ProgramRegistrationNotifiers::notifyAdmins(
+            'New program application received',
+            "A new {$programLabel} application has been submitted and is awaiting review.",
+            $registration
+        );
+
+        ProgramRegistrationNotifiers::notifyCaseManagersInbox(
+            'New application in your inbox',
+            "A patient submitted a {$programLabel} application. Open it to review and approve or reject.",
+            $registration
+        );
+
+        if ($program->max_applications) {
+            $currentCount = ProgramRegistration::where('program_id', $program->id)->count();
+            if ($currentCount >= $program->max_applications && $program->status !== 'completed') {
+                $program->update(['status' => 'completed']);
+            }
+        }
+
+        return redirect()->back()->with(
+            'success',
+            'Your application has been submitted successfully. Our team will review your details and get in touch with you shortly.'
+        );
     }
 
     public function show(ProgramRegistration $registration)

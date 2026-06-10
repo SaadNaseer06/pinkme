@@ -160,6 +160,7 @@
     </main>
 
     @include('patient.programs.partials.moments_that_matter_form')
+    @include('patient.programs.partials.dynamic_application_modal')
 
     <!-- Modal -->
     <div id="registerModal" class="modal-overlay fixed inset-0 z-50 bg-black/50 hidden flex items-start justify-end overflow-y-auto">
@@ -930,9 +931,15 @@
                     const applicationOpen = data.is_application_open !== false;
                     const atCapacity = data.is_at_capacity === true;
                     currentProgramType = data.program_type || 'financial_assistance';
+                    currentApplicationFormSchema = data.application_form_schema || [];
 
                     if (alreadyRegistered || !applicationOpen || atCapacity) {
                         openModal(programId);
+                        return;
+                    }
+
+                    if (data.has_dynamic_application_form && currentApplicationFormSchema.length > 0) {
+                        openDynamicApplicationModal(programId, currentProgramTitle, currentApplicationFormSchema);
                         return;
                     }
 
@@ -967,6 +974,7 @@
         let currentProgramId = null;
         let currentProgramTitle = "";
         let currentProgramType = 'financial_assistance';
+        let currentApplicationFormSchema = [];
 
         function openMtmApplicationModal() {
             document.getElementById('registerModal')?.classList.add('hidden');
@@ -1043,6 +1051,7 @@
                 .then(data => {
                     currentProgramTitle = data.title || "";
                     currentProgramType = data.program_type || 'financial_assistance';
+                    currentApplicationFormSchema = data.application_form_schema || [];
                     updateProgramSponsor('modal', data);
                     document.querySelector('#registerModal .modal-title').textContent = data.title || '—';
                     document.querySelector('#registerModal .modal-description').textContent = data.description || 'â€”';
@@ -1159,6 +1168,11 @@
         }
 
         function openRegistrationForm() {
+            if (currentApplicationFormSchema.length > 0) {
+                openDynamicApplicationModal(currentProgramId, currentProgramTitle, currentApplicationFormSchema);
+                return;
+            }
+
             if (currentProgramType === 'moments_that_matter') {
                 document.getElementById('mtm_program_id').value = currentProgramId;
                 const mtmTitle = document.getElementById('mtm-modal-program-title');

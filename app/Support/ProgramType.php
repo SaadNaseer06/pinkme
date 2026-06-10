@@ -8,9 +8,15 @@ class ProgramType
 
     public const MOMENTS_THAT_MATTER = 'moments_that_matter';
 
+    public const MAMMOGRAM_IMAGING = 'mammogram_imaging';
+
+    public const FOOD_ASSISTANCE = 'food_assistance';
+
     public const LABELS = [
         self::FINANCIAL_ASSISTANCE => 'Financial Assistance',
         self::MOMENTS_THAT_MATTER => 'Moments That Matter',
+        self::MAMMOGRAM_IMAGING => 'Mammogram & Imaging Support',
+        self::FOOD_ASSISTANCE => 'Food Assistance',
     ];
 
     public static function options(): array
@@ -26,5 +32,10 @@ class ProgramType
     public static function isMomentsThatMatter(?string $type): bool
     {
         return $type === self::MOMENTS_THAT_MATTER;
+    }
+
+    public static function usesDynamicApplicationForm(?string $type): bool
+    {
+        return in_array($type, [self::MAMMOGRAM_IMAGING, self::FOOD_ASSISTANCE], true);
     }
 }

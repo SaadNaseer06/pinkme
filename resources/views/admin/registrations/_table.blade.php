@@ -95,7 +95,7 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 text-sm font-medium align-top w-24">
-                        <div class="inline-flex">
+                        <div class="inline-flex relative">
                             <button type="button" data-actions-toggle
                                 class="inline-flex items-center justify-center h-8 w-8 rounded-full border border-gray-400 text-gray-600 hover:bg-gray-100 transition"
                                 aria-haspopup="true" aria-expanded="false" title="Actions">

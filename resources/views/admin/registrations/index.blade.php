@@ -124,7 +124,12 @@
                 <div class="admin-apps-panel__header">
                     <div>
                         <h2 class="text-lg font-semibold text-[#213430]">Application requests</h2>
-                        <p class="text-sm text-[#6C5F67] mt-0.5">Filter by program type and status, then open a row to review details.</p>
+                        <p class="text-sm text-[#6C5F67] mt-0.5">
+                            Filter by program type and status, then open a row to review details.
+                            @if ($isFinancialApplicationsView)
+                                <button type="button" id="openPastGrantCyclesModal" class="text-[#9E2469] hover:underline font-normal">Past grant cycles</button>
+                            @endif
+                        </p>
                     </div>
                     <nav class="admin-segmented-tabs" aria-label="Application type" id="programTypeTabs">
                         <a href="{{ route('admin.registrations.index', ['program_type' => 'all', 'program_status' => $programSelectedStatus]) }}"
@@ -199,6 +204,10 @@
                 </div>
             </div>
         </div>
+
+        @include('admin.registrations._past_grant_cycles_modal', [
+            'closedGrantCycles' => $closedGrantCycles ?? collect(),
+        ])
 
         <div id="assignModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
             <div class="bg-white rounded-2xl w-full max-w-md shadow-xl p-6">
@@ -888,6 +897,45 @@
             const assignModalCancel = document.getElementById('assignModalCancel');
             const sendToFinanceModal = document.getElementById('sendToFinanceModal');
             const sendToFinanceRegistrationId = document.getElementById('sendToFinanceRegistrationId');
+
+            const pastGrantCyclesModal = document.getElementById('pastGrantCyclesModal');
+            const openPastGrantCyclesModal = document.getElementById('openPastGrantCyclesModal');
+            const pastGrantCyclesModalClose = document.getElementById('pastGrantCyclesModalClose');
+            const pastGrantCyclesModalDone = document.getElementById('pastGrantCyclesModalDone');
+
+            function openPastGrantCycles() {
+                if (!pastGrantCyclesModal) return;
+                pastGrantCyclesModal.classList.remove('hidden');
+                pastGrantCyclesModal.classList.add('flex');
+            }
+
+            function closePastGrantCycles() {
+                if (!pastGrantCyclesModal) return;
+                pastGrantCyclesModal.classList.add('hidden');
+                pastGrantCyclesModal.classList.remove('flex');
+            }
+
+            if (openPastGrantCyclesModal) {
+                openPastGrantCyclesModal.addEventListener('click', openPastGrantCycles);
+            }
+            if (pastGrantCyclesModalClose) {
+                pastGrantCyclesModalClose.addEventListener('click', closePastGrantCycles);
+            }
+            if (pastGrantCyclesModalDone) {
+                pastGrantCyclesModalDone.addEventListener('click', closePastGrantCycles);
+            }
+            if (pastGrantCyclesModal) {
+                pastGrantCyclesModal.addEventListener('click', function(e) {
+                    if (e.target === pastGrantCyclesModal) {
+                        closePastGrantCycles();
+                    }
+                });
+            }
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && pastGrantCyclesModal && !pastGrantCyclesModal.classList.contains('hidden')) {
+                    closePastGrantCycles();
+                }
+            });
 
             function closeActionMenus() {
                 document.querySelectorAll('[data-actions-menu]').forEach(menu => menu.classList.add('hidden'));

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FinancialAssistanceApplicationPeriod;
 use App\Support\ProgramType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -209,6 +210,11 @@ class ProgramRegistration extends Model
         return $this->relationLoaded('program')
             ? $this->program?->isMomentsThatMatter() === true
             : $this->program()->where('program_type', ProgramType::MOMENTS_THAT_MATTER)->exists();
+    }
+
+    public function scopeForApplicationPeriod(Builder $query, ?string $periodKey): Builder
+    {
+        return FinancialAssistanceApplicationPeriod::applyToQuery($query, $periodKey);
     }
 
     /**

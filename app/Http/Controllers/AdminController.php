@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\UserProfile;
 use App\Services\FinanceNotificationService;
 use App\Support\AdminApplicationStatsChart;
+use App\Support\FinancialAssistanceApplicationPeriod;
 use App\Support\PatientApplicationNotifications;
 use App\Support\ProgramType;
 use Carbon\Carbon;
@@ -1425,6 +1426,7 @@ class AdminController extends Controller
             'displayCol' => $displayCol,
             'caseManagers' => $caseManagers,
             'financeUsers' => $financeUsers,
+            'closedGrantCycles' => FinancialAssistanceApplicationPeriod::closedPeriods(),
         ]);
     }
 
@@ -1456,6 +1458,122 @@ class AdminController extends Controller
 
     public function registrationsExport(Request $request): StreamedResponse
     {
+        return $this->streamProgramRegistrationsCsv($request);
+    }
+
+    public function registrationArchiveExport(string $period): StreamedResponse
+    {
+        if (FinancialAssistanceApplicationPeriod::parsePeriodKey($period) === null) {
+            abort(404);
+        }
+
+        return $this->streamArchiveCsv($period);
+    }
+
+    protected function archiveRegistrationsQuery(string $period): Builder
+    {
+        return ProgramRegistration::query()
+            ->forApplicationType(ProgramType::FINANCIAL_ASSISTANCE)
+            ->forApplicationPeriod($period)
+            ->orderByDesc('created_at');
+    }
+
+    protected function streamArchiveCsv(string $period): StreamedResponse
+    {
+        $exportQuery = $this->archiveRegistrationsQuery($period)
+            ->with([
+                'program:id,title',
+                'user:id,email',
+                'assignedCaseManager.profile:id,user_id,full_name',
+                'financeUser.profile:id,user_id,full_name',
+                'registrationInvoices:id,program_registration_id,invoice_number,status,amount,issue_date',
+            ]);
+
+        $filename = FinancialAssistanceApplicationPeriod::archiveFilename($period);
+        $periodLabel = FinancialAssistanceApplicationPeriod::label($period);
+        $tz = config('app.timezone');
+
+        return response()->stream(function () use ($exportQuery, $tz, $periodLabel) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                'ID',
+                'Applicant name',
+                'Email',
+                'Phone',
+                'Ethnicity',
+                'Breast cancer stage',
+                'Program',
+                'Application period',
+                'Programs applied',
+                'Application status',
+                'Case manager',
+                'Finance user',
+                'Paid by finance',
+                'Invoice #',
+                'Invoice amount',
+                'Submitted at',
+                'Bill: service provider name',
+                'Bill: payment link',
+                'Bill: amount due',
+                'Bill: type of support expenses',
+                'Bill: provider contact',
+                'Bill: account number',
+                'Bill: notes (optional)',
+            ]);
+
+            $exportQuery->chunk(100, function ($rows) use ($handle, $tz, $periodLabel) {
+                foreach ($rows as $reg) {
+                    $paid = $reg->registrationInvoices->contains(fn ($inv) => $inv->status === 'Paid');
+                    $inv = $reg->registrationInvoices->first();
+                    $programsApplied = is_array($reg->programs_applied)
+                        ? implode('; ', $reg->programs_applied)
+                        : '';
+                    $base = [
+                        $reg->id,
+                        $reg->full_name,
+                        $reg->email,
+                        $reg->phone ?? '',
+                        $reg->ethnicity ?? '',
+                        $reg->breast_cancer_stage ?? '',
+                        $reg->program?->title ?? '',
+                        $periodLabel,
+                        $programsApplied,
+                        $reg->status,
+                        $reg->assignedCaseManager?->profile?->full_name ?? $reg->assignedCaseManager?->email ?? '',
+                        $reg->financeUser?->profile?->full_name ?? $reg->financeUser?->email ?? '',
+                        $paid ? 'Yes' : 'No',
+                        $inv?->invoice_number ?? '',
+                        $inv !== null ? number_format((float) $inv->amount, 2, '.', '') : '',
+                        $reg->created_at?->timezone($tz)->format('Y-m-d H:i:s') ?? '',
+                    ];
+                    $lines = $reg->patient_bill_line_items;
+                    if (! is_array($lines) || $lines === []) {
+                        fputcsv($handle, array_merge($base, ['', '', '', '', '', '', '']));
+                    } else {
+                        foreach ($lines as $line) {
+                            fputcsv($handle, array_merge($base, [
+                                $line['name'] ?? '',
+                                $line['url'] ?? '',
+                                $line['amount'] ?? '',
+                                $line['support_expense_type'] ?? '',
+                                $line['provider_contact'] ?? '',
+                                $line['account_number'] ?? '',
+                                $line['notes'] ?? '',
+                            ]));
+                        }
+                    }
+                }
+            });
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
+    protected function streamProgramRegistrationsCsv(Request $request): StreamedResponse
+    {
         $exportQuery = $this->programRegistrationsFilteredQuery($request)
             ->with([
                 'program:id,title',
@@ -1466,11 +1584,6 @@ class AdminController extends Controller
             ]);
 
         $filename = 'program_applications_'.now()->format('Ymd_His').'.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-        ];
-
         $tz = config('app.timezone');
 
         return response()->stream(function () use ($exportQuery, $tz) {
@@ -1539,7 +1652,10 @@ class AdminController extends Controller
             });
 
             fclose($handle);
-        }, 200, $headers);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
     }
 
     /**

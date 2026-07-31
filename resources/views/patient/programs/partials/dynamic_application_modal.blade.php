@@ -75,7 +75,22 @@
             const fieldName = wrap.getAttribute('data-conditional-field');
             const field = currentSchema.find((f) => f.name === fieldName);
             if (!field) return;
-            wrap.classList.toggle('hidden', !isFieldVisible(field, values));
+            const visible = isFieldVisible(field, values);
+            wrap.classList.toggle('hidden', !visible);
+            wrap.querySelectorAll('input, select, textarea').forEach((el) => {
+                if (visible) {
+                    if (el.getAttribute('data-was-required') === '1') {
+                        el.required = true;
+                        el.removeAttribute('data-was-required');
+                    }
+                } else if (el.required) {
+                    el.setAttribute('data-was-required', '1');
+                    el.required = false;
+                }
+                if (!visible && el.type === 'file') {
+                    el.value = '';
+                }
+            });
         });
     };
 

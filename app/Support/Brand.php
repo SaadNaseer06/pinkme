@@ -6,7 +6,7 @@ class Brand
 {
     public static function name(): string
     {
-        return (string) config('app.brand_name', 'PINK "ME"®');
+        return (string) config('app.brand_name', 'PINK "ME"'."\u{00AE}");
     }
 
     public static function namePlain(): string

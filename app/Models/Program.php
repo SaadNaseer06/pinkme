@@ -159,6 +159,19 @@ class Program extends Model
         return ! empty($this->application_form_schema);
     }
 
+    /**
+     * Application form schema with missing select/radio options restored from the type template.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function resolvedApplicationFormSchema(): array
+    {
+        return \App\Support\ApplicationFormSchema::hydrateMissingOptions(
+            $this->application_form_schema ?? [],
+            $this->program_type
+        );
+    }
+
     public function programTypeLabel(): string
     {
         return ProgramType::label($this->program_type);

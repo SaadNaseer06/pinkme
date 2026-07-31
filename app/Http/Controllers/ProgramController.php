@@ -122,7 +122,7 @@ class ProgramController extends Controller
             'program_type_label' => $program->programTypeLabel(),
             'sponsor_name' => $program->sponsor_name,
             'sponsor_logo' => $program->sponsorLogoUrl(),
-            'application_form_schema' => $program->application_form_schema ?? [],
+            'application_form_schema' => $program->resolvedApplicationFormSchema(),
             'has_dynamic_application_form' => $program->hasDynamicApplicationForm(),
         ]);
     }

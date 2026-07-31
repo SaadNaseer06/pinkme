@@ -284,6 +284,59 @@ final class ApplicationFormSchema
         return preg_replace('/[^a-z0-9_]/', '', strtolower($slug)) ?? '';
     }
 
+    /**
+     * Restore empty choice-field options from the program-type template (by field name).
+     *
+     * @param  list<array<string, mixed>>  $schema
+     * @return list<array<string, mixed>>
+     */
+    public static function hydrateMissingOptions(array $schema, ?string $programType): array
+    {
+        if ($schema === [] || ! $programType) {
+            return $schema;
+        }
+
+        $templateByName = collect(ApplicationFormTemplates::forType($programType))
+            ->filter(fn ($field) => is_array($field) && filled($field['name'] ?? null))
+            ->keyBy(fn ($field) => (string) $field['name']);
+
+        if ($templateByName->isEmpty()) {
+            return $schema;
+        }
+
+        $choiceTypes = [
+            ApplicationFormFieldTypes::SELECT,
+            ApplicationFormFieldTypes::RADIO,
+            ApplicationFormFieldTypes::CHECKBOX_GROUP,
+        ];
+
+        return array_map(function ($field) use ($templateByName, $choiceTypes) {
+            if (! is_array($field)) {
+                return $field;
+            }
+
+            $type = (string) ($field['type'] ?? '');
+            if (! in_array($type, $choiceTypes, true)) {
+                return $field;
+            }
+
+            $options = self::normalizeOptions($field['options'] ?? []);
+            if ($options !== []) {
+                $field['options'] = $options;
+
+                return $field;
+            }
+
+            $name = (string) ($field['name'] ?? '');
+            $template = $templateByName->get($name);
+            if (is_array($template)) {
+                $field['options'] = self::normalizeOptions($template['options'] ?? []);
+            }
+
+            return $field;
+        }, $schema);
+    }
+
     private static function defaultLabel(string $name): string
     {
         return Str::title(str_replace('_', ' ', $name));

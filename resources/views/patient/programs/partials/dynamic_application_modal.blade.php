@@ -35,6 +35,29 @@
 
     const slugMatch = (a, b) => String(a || '').toLowerCase().trim() === String(b || '').toLowerCase().trim();
 
+    const normalizeFieldOptions = (raw) => {
+        if (!raw) return [];
+        let list = raw;
+        if (typeof raw === 'string') {
+            try {
+                const parsed = JSON.parse(raw);
+                list = Array.isArray(parsed) ? parsed : raw.split(/\r?\n/);
+            } catch (e) {
+                list = raw.split(/\r?\n/);
+            }
+        }
+        if (!Array.isArray(list)) return [];
+        return list.map((opt) => {
+            if (opt && typeof opt === 'object') {
+                const value = String(opt.value ?? opt.label ?? '').trim();
+                const label = String(opt.label ?? opt.value ?? '').trim();
+                return value ? { value, label: label || value } : null;
+            }
+            const value = String(opt ?? '').trim();
+            return value ? { value, label: value } : null;
+        }).filter(Boolean);
+    };
+
     const getFieldValues = () => {
         const values = {};
         if (!form) return values;
@@ -150,22 +173,31 @@
                 control.name = baseName;
                 if (required) control.required = true;
                 control.setAttribute('data-dynamic-field', name);
-                (field.options || []).forEach((opt) => {
-                    const o = document.createElement('option');
-                    o.value = opt.value || opt.label || opt;
-                    o.textContent = opt.label || opt.value || opt;
-                    control.appendChild(o);
-                });
+                {
+                    const opts = normalizeFieldOptions(field.options);
+                    const placeholder = document.createElement('option');
+                    placeholder.value = '';
+                    placeholder.textContent = opts.length ? 'Select an option' : 'No options available';
+                    placeholder.disabled = true;
+                    placeholder.selected = true;
+                    control.appendChild(placeholder);
+                    opts.forEach((opt) => {
+                        const o = document.createElement('option');
+                        o.value = opt.value;
+                        o.textContent = opt.label;
+                        control.appendChild(o);
+                    });
+                }
                 break;
             case 'radio':
                 control = document.createElement('div');
                 control.className = 'space-y-2';
-                (field.options || []).forEach((opt, i) => {
-                    const val = opt.value || opt.label || opt;
+                normalizeFieldOptions(field.options).forEach((opt, i) => {
+                    const val = opt.value;
                     const id = `dyn_${name}_${i}`;
                     const row = document.createElement('label');
                     row.className = 'flex items-center gap-2 text-sm';
-                    row.innerHTML = `<input type="radio" name="${baseName}" value="${val}" id="${id}" class="text-[#9E2469]" ${req} data-dynamic-field="${name}"><span>${opt.label || val}</span>`;
+                    row.innerHTML = `<input type="radio" name="${baseName}" value="${val}" id="${id}" class="text-[#9E2469]" ${req} data-dynamic-field="${name}"><span>${opt.label}</span>`;
                     control.appendChild(row);
                 });
                 break;
@@ -179,11 +211,11 @@
             case 'checkbox_group':
                 control = document.createElement('div');
                 control.className = 'space-y-2';
-                (field.options || []).forEach((opt, i) => {
-                    const val = opt.value || opt.label || opt;
+                normalizeFieldOptions(field.options).forEach((opt) => {
+                    const val = opt.value;
                     const row = document.createElement('label');
                     row.className = 'flex items-center gap-2 text-sm';
-                    row.innerHTML = `<input type="checkbox" name="app_field[${name}][]" value="${val}" class="text-[#9E2469]"><span>${opt.label || val}</span>`;
+                    row.innerHTML = `<input type="checkbox" name="app_field[${name}][]" value="${val}" class="text-[#9E2469]"><span>${opt.label}</span>`;
                     control.appendChild(row);
                 });
                 break;

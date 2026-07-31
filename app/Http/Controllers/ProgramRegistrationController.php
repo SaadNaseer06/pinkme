@@ -485,7 +485,7 @@ class ProgramRegistrationController extends Controller
 
     protected function storeDynamicApplication(Request $request, Program $program)
     {
-        $schema = $program->application_form_schema ?? [];
+        $schema = $program->resolvedApplicationFormSchema();
 
         if ($schema === []) {
             return redirect()->back()->withErrors([

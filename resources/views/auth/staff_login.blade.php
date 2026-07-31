@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Staff sign in — {{ $brandName ?? config('app.brand_name', 'PINK "ME"®') }}</title>
+    <title>Staff sign in — {{ $brandName ?? \App\Support\Brand::name() }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -19,7 +19,7 @@
     <div class="w-full max-w-md">
         <div class="text-center mb-8">
             <img src="{{ asset('public/images/logo.png') }}"
-                alt="{{ $brandName ?? config('app.brand_name', 'PINK "ME"®') }}"
+                alt="{{ $brandName ?? \App\Support\Brand::name() }}"
                 class="mx-auto h-16 w-auto max-w-[200px] object-contain mb-4" />
             <h1 class="text-2xl font-semibold text-[#213430]">{{ $staffLoginHeading ?? 'Staff sign in' }}</h1>
             <p class="mt-2 text-sm font-semibold tracking-wide text-[#6C5B68] uppercase">{{ $staffAccessNotice ?? 'BOARD MEMBER ACCESS ONLY' }}</p>

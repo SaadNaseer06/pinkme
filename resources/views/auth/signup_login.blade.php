@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $brandName ?? config('app.brand_name', 'PINK "ME"®') }} - Authentication</title>
+    <title>{{ $brandName ?? \App\Support\Brand::name() }} - Authentication</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -575,7 +575,7 @@
                                 <img src="{{ asset('public/images/logo.png') }}" alt="Logo" class="h-16 tab-logo" />
                             </div>
                             <h2 class="text-3xl font-bold text-gray-800 mb-2 mobile-h1">
-                                Welcome To The {{ config('app.name', 'PINK "ME"') }} Portal
+                                Welcome To The {{ $brandName ?? \App\Support\Brand::name() }} Portal
                             </h2>
                             <p class="text-gray-600 text-lg mobile-h2">Create your account to get started</p>
                         </div>
@@ -967,7 +967,7 @@
                                     class="h-16 tab-logo" />
                             </div>
                             <h2 class="text-3xl font-bold text-gray-800 mb-2 mobile-h1">
-                                Welcome Back To The {{ config('app.name', 'PINK "ME"') }} Portal
+                                Welcome Back To The {{ $brandName ?? \App\Support\Brand::name() }} Portal
                             </h2>
                             <p class="text-gray-600 text-lg mobile-h2">
                                 Sign in to your account

@@ -20,7 +20,7 @@ return [
     | Brand display name (registered mark)
     |--------------------------------------------------------------------------
     */
-    'brand_name' => env('APP_BRAND_NAME', 'PINK "ME"'."\u{00AE}"),
+    'brand_name' => env('APP_BRAND_NAME', 'PINK "ME"'),
 
     'staff_access_notice' => env('APP_STAFF_ACCESS_NOTICE', 'BOARD MEMBER ACCESS ONLY'),
 

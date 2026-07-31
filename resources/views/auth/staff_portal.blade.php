@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff portal — {{ $brandName ?? config('app.brand_name', 'PINK "ME"®') }}</title>
+    <title>Staff portal — {{ $brandName ?? \App\Support\Brand::name() }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -18,7 +18,7 @@
     <div class="w-full max-w-3xl">
         <div class="text-center mb-10">
             <img src="{{ asset('public/images/logo.png') }}"
-                alt="{{ $brandName ?? config('app.brand_name', 'PINK "ME"®') }}"
+                alt="{{ $brandName ?? \App\Support\Brand::name() }}"
                 class="mx-auto h-16 w-auto max-w-[200px] object-contain mb-4" />
             <h1 class="text-2xl font-semibold text-[#213430]">Staff portal</h1>
             <p class="mt-2 text-sm font-semibold tracking-wide text-[#6C5B68] max-w-lg mx-auto uppercase">

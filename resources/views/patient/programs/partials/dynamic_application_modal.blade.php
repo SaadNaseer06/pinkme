@@ -75,26 +75,7 @@
             const fieldName = wrap.getAttribute('data-conditional-field');
             const field = currentSchema.find((f) => f.name === fieldName);
             if (!field) return;
-            const visible = isFieldVisible(field, values);
-            wrap.classList.toggle('hidden', !visible);
-            wrap.querySelectorAll('input, select, textarea').forEach((el) => {
-                if (visible) {
-                    el.disabled = false;
-                    if (field.required && el.type !== 'hidden') {
-                        el.required = true;
-                    }
-                } else {
-                    el.required = false;
-                    el.disabled = true;
-                    if (el.type === 'file') {
-                        el.value = '';
-                    } else if (el.type === 'checkbox' || el.type === 'radio') {
-                        el.checked = false;
-                    } else if (el.type !== 'hidden') {
-                        el.value = '';
-                    }
-                }
-            });
+            wrap.classList.toggle('hidden', !isFieldVisible(field, values));
         });
     };
 
@@ -197,7 +178,6 @@
                 control.accept = '.pdf,.jpg,.jpeg,.png';
                 control.className = inputClass;
                 control.name = baseName;
-                control.setAttribute('data-dynamic-field', name);
                 if (required) control.required = true;
                 break;
             case 'date':

@@ -75,26 +75,18 @@ final class ApplicationFormTemplates
                 'Unsure',
             ]),
             self::field('explanation_of_need', 'Explanation of Need', ApplicationFormFieldTypes::LONG_TEXT, required: true, mapsTo: 'story'),
-            self::section('X-Ray Associates of New Mexico'),
+            self::section('Diagnostic Center Selection'),
             self::field('preferred_center', 'Preferred Participating Center', ApplicationFormFieldTypes::SELECT, required: true, options: [
-                'X-Ray Associates of New Mexico',
+                'Center 1',
+                'Center 2',
+                'Center 3',
                 'No preference',
                 'Assistance needed',
             ]),
-            self::field(
-                'permission_to_share',
-                'Permission to share information with X-Ray Associates of New Mexico',
-                ApplicationFormFieldTypes::CHECKBOX,
-                required: true,
-                helpText: 'I authorize PINK "ME" to share my information with X-Ray Associates of New Mexico for imaging support.'
-            ),
-            self::guidelines(
-                'xray_scheduling_note',
-                'Note: Once your application has been approved by PINK "ME", X-Ray Associates of New Mexico will coordinate the scheduling of the appointment and provide the patient with the imaging location.'
-            ),
+            self::field('permission_to_share', 'Permission to Share Info', ApplicationFormFieldTypes::CHECKBOX, required: true, helpText: 'I authorize PINK "ME" to submit my information to a participating diagnostic center.'),
             self::section('Required Acknowledgments'),
             self::field('ack_no_guarantee', 'I understand that submitting this application does not guarantee approval.', ApplicationFormFieldTypes::CHECKBOX, required: true),
-            self::field('ack_center_contact', 'I understand that approved applications will be submitted to X-Ray Associates of New Mexico for scheduling.', ApplicationFormFieldTypes::CHECKBOX, required: true),
+            self::field('ack_center_contact', 'I understand that approved applications will be submitted to a diagnostic center for scheduling.', ApplicationFormFieldTypes::CHECKBOX, required: true),
             self::field('ack_billed_to_pinkme', 'I understand that approved services will be billed directly to PINK "ME".', ApplicationFormFieldTypes::CHECKBOX, required: true),
             self::field('ack_no_medical_advice', 'I understand that PINK "ME" does not provide medical advice or treatment.', ApplicationFormFieldTypes::CHECKBOX, required: true),
             self::field('ack_accurate_info', 'I certify that all information provided is accurate to the best of my knowledge.', ApplicationFormFieldTypes::CHECKBOX, required: true),
@@ -186,21 +178,9 @@ final class ApplicationFormTemplates
             self::section('Required Documentation'),
             self::field('breast_cancer_verification', 'Upload Breast Cancer Verification Documentation', ApplicationFormFieldTypes::FILE, required: true),
             self::field('treatment_verification', 'Upload Treatment or Survivor Verification', ApplicationFormFieldTypes::FILE, required: true),
-            self::section('Supporting Grocery Documentation'),
-            self::field(
-                'upload_supporting_docs',
-                'I need to upload supporting grocery documentation',
-                ApplicationFormFieldTypes::CHECKBOX,
-                helpText: 'Check this box if you are applying for a 2nd or 3rd food card award, or otherwise need to attach grocery documentation. (Final wording TBD.)'
-            ),
-            self::field(
-                'previous_receipt',
-                'Upload Previous Grocery Receipt / Supporting Documentation',
-                ApplicationFormFieldTypes::FILE,
-                required: true,
-                conditionalField: 'upload_supporting_docs',
-                conditionalValue: '1'
-            ),
+            self::section('Previous Food Card Receipt'),
+            self::field('previous_receipt', 'Upload Previous Grocery Receipt (2nd/3rd request)', ApplicationFormFieldTypes::FILE, conditionalField: 'prior_food_cards', conditionalValue: 'Yes, I have received one (1) food card'),
+            self::field('receipt_acknowledgment', 'I understand receipt documentation is required for 2nd/3rd requests', ApplicationFormFieldTypes::CHECKBOX),
             self::section('Certifications'),
             self::field('cert_diagnosis', 'I certify that I have been diagnosed with breast cancer.', ApplicationFormFieldTypes::CHECKBOX, required: true),
             self::field('cert_accurate', 'I certify that all information provided is true and accurate.', ApplicationFormFieldTypes::CHECKBOX, required: true),

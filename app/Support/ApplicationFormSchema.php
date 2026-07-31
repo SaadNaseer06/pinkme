@@ -68,7 +68,16 @@ final class ApplicationFormSchema
                 }
 
                 $conditional = null;
-                if (! empty($field['conditional_field']) && ($field['conditional_value'] ?? '') !== '') {
+                if (! empty($field['conditional']) && is_array($field['conditional'])) {
+                    $condField = trim((string) ($field['conditional']['field'] ?? ''));
+                    $condValue = trim((string) ($field['conditional']['value'] ?? ''));
+                    if ($condField !== '' && $condValue !== '') {
+                        $conditional = [
+                            'field' => self::slugifyName($condField),
+                            'value' => $condValue,
+                        ];
+                    }
+                } elseif (! empty($field['conditional_field']) && ($field['conditional_value'] ?? '') !== '') {
                     $conditional = [
                         'field' => self::slugifyName($field['conditional_field']),
                         'value' => trim((string) $field['conditional_value']),

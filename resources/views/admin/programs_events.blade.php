@@ -20,6 +20,16 @@
                     <h1 class="text-2xl font-semibold text-[#213430] app-main">Programs</h1>
                 </div>
 
+                @if ($errors->any())
+                    <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                        <ul class="list-disc pl-5 space-y-0.5">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="mt-6 bg-[#F3E8EF] rounded-lg p-6">
                     {{-- Fund Raising Events tab - commented for now
                     <div class="flex flex-wrap">
@@ -99,10 +109,20 @@
                                             'sponsor_name' => $program->sponsor_name,
                                             'sponsor_logo' => $program->sponsorLogoUrl(),
                                         ];
+                                        $duplicatePayload = [
+                                            'id' => $program->id,
+                                            'title' => $program->title,
+                                            'event_date' => optional($program->event_date)->format('Y-m-d'),
+                                            'event_time' => $programTime ? $programTime->format('H:i') : '09:00',
+                                            'application_start_date' => optional($program->application_start_date)->format('Y-m-d'),
+                                            'application_end_date' => optional($program->application_end_date)->format('Y-m-d'),
+                                            'status' => 'upcoming',
+                                            'action' => route('programs.duplicate', $program),
+                                        ];
                                     @endphp
                                     <!-- Desktop Program Card -->
                                     <div
-                                        class="bg-[#F3E8EF] rounded-lg p-4 mb-4 hidden md:flex items-center justify-between w-full">
+                                        class="bg-[#F3E8EF] rounded-lg p-4 mb-4 hidden md:flex items-center justify-between w-full overflow-visible relative z-0">
                                         <div class="flex items-center gap-4">
                                             <div class="w-20 h-20 rounded-lg overflow-hidden">
                                                 <img src="{{ $image }}" alt="{{ $program->title }}"
@@ -131,18 +151,27 @@
                                             <a href="{{ route('programs.edit', $program) }}"
                                                 class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-[#213430] shadow-sm hover:bg-[#F6EDF5] transition">Edit</a>
                                             <button type="button" onclick='openProgramDetailModal(@json($detail))'
-                                                class="bg-[#9E2469] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#B52D75] transition">View
-                                                Details</button>
-                                            <form action="{{ route('programs.destroy', $program) }}" method="POST" class="inline-flex"
-                                                onsubmit="return confirm(@js(
-                                                    'Delete this program?'
-                                                    .(($program->registrations_count ?? 0) > 0 ? ' '.$program->registrations_count.' application(s) will be removed too.' : '')
-                                                    .' This cannot be undone.'
-                                                ));">
+                                                class="bg-[#9E2469] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#B52D75] transition">View</button>
+                                            <div class="relative shrink-0" data-program-actions>
+                                                <button type="button" data-program-actions-toggle
+                                                    class="bg-white px-3 py-2 rounded-lg text-sm font-medium text-[#213430] shadow-sm hover:bg-[#F6EDF5] transition"
+                                                    aria-haspopup="true" aria-expanded="false" title="More actions">⋯</button>
+                                                <div data-program-actions-menu
+                                                    class="hidden fixed min-w-[11rem] rounded-xl border border-[#E6D8E1] bg-white shadow-xl py-1"
+                                                    style="z-index: 9999;">
+                                                    <button type="button"
+                                                        onclick='openDuplicateProgramModal(@json($duplicatePayload));'
+                                                        class="block w-full text-left px-4 py-2.5 text-sm text-[#213430] hover:bg-[#FDF0F7] whitespace-nowrap">Duplicate</button>
+                                                    <button type="button"
+                                                        data-delete-form="program-delete-{{ $program->id }}"
+                                                        data-confirm-message="Delete this program?{{ ($program->registrations_count ?? 0) > 0 ? ' '.$program->registrations_count.' application(s) will be removed too.' : '' }} This cannot be undone."
+                                                        onclick="submitProgramDelete(this)"
+                                                        class="block w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 whitespace-nowrap">Delete</button>
+                                                </div>
+                                            </div>
+                                            <form id="program-delete-{{ $program->id }}" action="{{ route('programs.destroy', $program) }}" method="POST" class="hidden">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit"
-                                                    class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 transition">Delete</button>
                                             </form>
                                         </div>
                                     </div>
@@ -177,17 +206,23 @@
                                                         class="flex-1 min-w-[4.5rem] text-center border border-[#213430] text-[#213430] text-xs py-2 rounded-md program-btn">Edit</a>
                                                     <button type="button" onclick='openProgramDetailModal(@json($detail))'
                                                         class="flex-1 min-w-[4.5rem] text-center bg-[#9E2469] text-white text-xs py-2 rounded-md program-btn">View</button>
-                                                    <form action="{{ route('programs.destroy', $program) }}" method="POST" class="flex-1 min-w-[4.5rem]"
-                                                        onsubmit="return confirm(@js(
-                                                            'Delete this program?'
-                                                            .(($program->registrations_count ?? 0) > 0 ? ' '.$program->registrations_count.' application(s) will be removed too.' : '')
-                                                            .' This cannot be undone.'
-                                                        ));">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="w-full text-center border border-red-200 text-red-600 text-xs py-2 rounded-md program-btn hover:bg-red-50">Delete</button>
-                                                    </form>
+                                                    <div class="relative shrink-0" data-program-actions>
+                                                        <button type="button" data-program-actions-toggle
+                                                            class="px-3 text-center border border-[#DCCFD8] text-[#213430] text-xs py-2 rounded-md program-btn"
+                                                            aria-haspopup="true" aria-expanded="false" title="More actions">⋯</button>
+                                                        <div data-program-actions-menu
+                                                            class="hidden fixed min-w-[10rem] rounded-lg border border-[#E6D8E1] bg-white shadow-xl py-1"
+                                                            style="z-index: 9999;">
+                                                            <button type="button"
+                                                                onclick='openDuplicateProgramModal(@json($duplicatePayload));'
+                                                                class="block w-full text-left px-3 py-2 text-xs text-[#213430] hover:bg-[#FDF0F7] whitespace-nowrap">Duplicate</button>
+                                                            <button type="button"
+                                                                data-delete-form="program-delete-{{ $program->id }}"
+                                                                data-confirm-message="Delete this program?{{ ($program->registrations_count ?? 0) > 0 ? ' '.$program->registrations_count.' application(s) will be removed too.' : '' }} This cannot be undone."
+                                                                onclick="submitProgramDelete(this)"
+                                                                class="block w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 whitespace-nowrap">Delete</button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -388,6 +423,88 @@
             </div>
 
         <!-- Modals -->
+        <!-- Duplicate Program Modal -->
+        <div id="duplicateProgramModal" class="fixed inset-0 bg-black/40 z-50 hidden items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+                <div class="flex items-start justify-between gap-4 p-6 border-b border-[#E6D8E1]">
+                    <div>
+                        <h3 class="text-lg font-semibold text-[#213430]">Duplicate program</h3>
+                        <p class="text-sm text-[#6C5F67] mt-1">Creates a full copy (type, form, listing, banner, sponsor). Only update the title and dates for the new cycle.</p>
+                    </div>
+                    <button type="button" onclick="closeDuplicateProgramModal()"
+                        class="h-8 w-8 inline-flex items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50"
+                        aria-label="Close">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="duplicateProgramForm" method="POST" action="" class="p-6 space-y-4">
+                    @csrf
+                    <div>
+                        <label for="duplicate_title" class="block text-sm font-medium text-[#213430] mb-1">Program title *</label>
+                        <input type="text" name="title" id="duplicate_title" required
+                            class="w-full rounded-lg border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469]">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="duplicate_event_date" class="block text-sm font-medium text-[#213430] mb-1">Event date</label>
+                            <input type="date" name="event_date" id="duplicate_event_date"
+                                class="w-full rounded-lg border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469]">
+                        </div>
+                        <div>
+                            <label for="duplicate_event_time" class="block text-sm font-medium text-[#213430] mb-1">Event time</label>
+                            <input type="time" name="event_time" id="duplicate_event_time"
+                                class="w-full rounded-lg border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469]">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="duplicate_application_start_date" class="block text-sm font-medium text-[#213430] mb-1">Application start date</label>
+                            <input type="date" name="application_start_date" id="duplicate_application_start_date"
+                                class="w-full rounded-lg border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469]">
+                        </div>
+                        <div>
+                            <label for="duplicate_application_end_date" class="block text-sm font-medium text-[#213430] mb-1">Application end date</label>
+                            <input type="date" name="application_end_date" id="duplicate_application_end_date"
+                                class="w-full rounded-lg border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469]">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="duplicate_status" class="block text-sm font-medium text-[#213430] mb-1">Status</label>
+                        <select name="status" id="duplicate_status"
+                            class="w-full rounded-lg border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469]">
+                            <option value="upcoming">Upcoming</option>
+                            <option value="ongoing">Ongoing</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+
+                    @error('title')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                    @error('application_end_date')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+
+                    <div class="flex items-center justify-end gap-3 pt-2">
+                        <button type="button" onclick="closeDuplicateProgramModal()"
+                            class="px-4 py-2 rounded-md border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 rounded-md bg-[#9E2469] text-white text-sm font-semibold hover:bg-[#B52D75]">
+                            Create duplicate
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Program Details Modal -->
         <div id="programDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
             <div id="programDetailModalPanel"
@@ -668,6 +785,125 @@
                 }
             }
         }
+
+        function submitProgramDelete(button) {
+            const formId = button?.getAttribute('data-delete-form');
+            const message = button?.getAttribute('data-confirm-message') || 'Delete this program? This cannot be undone.';
+            const form = formId ? document.getElementById(formId) : null;
+            if (!form) return;
+            if (window.confirm(message)) {
+                form.submit();
+            }
+        }
+
+        function closeProgramActionMenus() {
+            document.querySelectorAll('[data-program-actions-menu]').forEach((menu) => {
+                const host = menu._programActionsHost;
+                if (host && menu.parentElement === document.body) {
+                    host.appendChild(menu);
+                }
+                menu.classList.add('hidden');
+                menu.style.top = '';
+                menu.style.left = '';
+                menu.style.right = '';
+                menu.style.visibility = '';
+            });
+            document.querySelectorAll('[data-program-actions-toggle]').forEach((btn) => btn.setAttribute('aria-expanded', 'false'));
+        }
+
+        function positionProgramActionMenu(toggle, menu) {
+            const host = toggle.closest('[data-program-actions]');
+            if (host) {
+                menu._programActionsHost = host;
+            }
+            document.body.appendChild(menu);
+            menu.style.visibility = 'hidden';
+            menu.classList.remove('hidden');
+            const rect = toggle.getBoundingClientRect();
+            const menuWidth = Math.max(menu.offsetWidth || 176, 176);
+            const menuHeight = Math.max(menu.offsetHeight || 88, 88);
+            const gap = 8;
+            const spaceBelow = window.innerHeight - rect.bottom - gap;
+            const openUp = spaceBelow < menuHeight && rect.top > menuHeight + gap;
+            const top = openUp
+                ? Math.round(rect.top - menuHeight - gap)
+                : Math.round(rect.bottom + gap);
+            const left = Math.min(
+                Math.max(8, rect.right - menuWidth),
+                window.innerWidth - menuWidth - 8
+            );
+            menu.style.position = 'fixed';
+            menu.style.top = `${Math.max(8, top)}px`;
+            menu.style.left = `${Math.round(left)}px`;
+            menu.style.right = 'auto';
+            menu.style.zIndex = '9999';
+            menu.style.visibility = '';
+        }
+
+        document.addEventListener('click', function(e) {
+            const toggle = e.target.closest('[data-program-actions-toggle]');
+            if (toggle) {
+                e.preventDefault();
+                e.stopPropagation();
+                const wrap = toggle.closest('[data-program-actions]');
+                let targetMenu = wrap?.querySelector('[data-program-actions-menu]');
+                if (!targetMenu) {
+                    targetMenu = Array.from(document.querySelectorAll('[data-program-actions-menu]'))
+                        .find((m) => m._programActionsHost === wrap);
+                }
+                const wasOpen = targetMenu && !targetMenu.classList.contains('hidden');
+                closeProgramActionMenus();
+                if (targetMenu && !wasOpen) {
+                    positionProgramActionMenu(toggle, targetMenu);
+                    toggle.setAttribute('aria-expanded', 'true');
+                }
+                return;
+            }
+            if (e.target.closest('[data-program-actions-menu]')) {
+                return;
+            }
+            closeProgramActionMenus();
+        });
+
+        window.addEventListener('resize', closeProgramActionMenus);
+        window.addEventListener('scroll', closeProgramActionMenus, true);
+
+        function openDuplicateProgramModal(payload) {
+            closeProgramActionMenus();
+            const modal = document.getElementById('duplicateProgramModal');
+            const form = document.getElementById('duplicateProgramForm');
+            if (!modal || !form || !payload) return;
+
+            form.action = payload.action || '';
+            document.getElementById('duplicate_title').value = payload.title || '';
+            document.getElementById('duplicate_event_date').value = payload.event_date || '';
+            document.getElementById('duplicate_event_time').value = payload.event_time || '09:00';
+            document.getElementById('duplicate_application_start_date').value = payload.application_start_date || '';
+            document.getElementById('duplicate_application_end_date').value = payload.application_end_date || '';
+            document.getElementById('duplicate_status').value = payload.status || 'upcoming';
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeDuplicateProgramModal() {
+            const modal = document.getElementById('duplicateProgramModal');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('duplicateProgramModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDuplicateProgramModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDuplicateProgramModal();
+            }
+        });
 
         function openProgramDetailModal(payload) {
             openDetailModal(payload, {

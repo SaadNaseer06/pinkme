@@ -174,6 +174,7 @@ Route::prefix('admin')->middleware(['role.restrict'])->group(function () {
     // Route::post('sponsorship-programs',        [SponsorshipProgramController::class, 'store'])->name('sp.store');
 
     // Enrollable programs/workshops (tables: programs, program_registrations)
+    Route::post('programs/{program}/duplicate', [ProgramController::class, 'duplicate'])->name('programs.duplicate');
     Route::resource('programs', ProgramController::class);
 
     // Case Managers (admin management of casemanager users)

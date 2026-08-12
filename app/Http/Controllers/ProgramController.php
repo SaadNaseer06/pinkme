@@ -389,6 +389,194 @@ class ProgramController extends Controller
     }
 
     /**
+     * Duplicate a program with a new application / event schedule.
+     * Copies listing fields, application form, type, sponsor, and media from the source.
+     */
+    public function duplicate(Request $request, Program $program)
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'event_date' => ['nullable', 'date'],
+            'event_time' => ['nullable', 'date_format:H:i'],
+            'application_start_date' => ['nullable', 'date'],
+            'application_end_date' => ['nullable', 'date', 'after_or_equal:application_start_date'],
+            'status' => ['nullable', 'in:upcoming,ongoing,completed'],
+        ]);
+
+        $eventDate = $this->normalizeDate($validated['event_date'] ?? optional($program->event_date)->format('Y-m-d') ?? now()->toDateString());
+        $eventTime = $this->normalizeTime(
+            $validated['event_time']
+                ?? ($program->event_time ? Carbon::parse($program->event_time)->format('H:i') : '09:00')
+        );
+        $applicationStart = $this->normalizeNullableDate(
+            $validated['application_start_date'] ?? optional($program->application_start_date)->format('Y-m-d')
+        );
+        $applicationEnd = $this->normalizeNullableDate(
+            $validated['application_end_date'] ?? optional($program->application_end_date)->format('Y-m-d')
+        );
+        $status = $validated['status'] ?? ($program->status ?: 'upcoming');
+        $title = trim($validated['title']);
+        $eventTimeDisplay = Carbon::parse($eventTime)->format('H:i');
+
+        $scheduleOverrides = [
+            'title' => $title,
+            'event_date' => $eventDate,
+            'event_time' => $eventTimeDisplay,
+            'application_start_date' => $applicationStart,
+            'application_end_date' => $applicationEnd,
+            'status' => $status,
+            'description' => $program->description,
+            'max_applications' => $program->max_applications !== null ? (string) $program->max_applications : '',
+        ];
+
+        $customFields = $this->duplicateListingFields($program, $scheduleOverrides);
+        $applicationSchema = $this->duplicateApplicationFormSchema($program);
+
+        $duplicate = $program->replicate([
+            'banner',
+            'sponsor_logo',
+        ]);
+
+        $duplicate->fill([
+            'title' => $title,
+            'description' => $program->description,
+            'event_date' => $eventDate,
+            'event_time' => $eventTime,
+            'application_start_date' => $applicationStart,
+            'application_end_date' => $applicationEnd,
+            'status' => $status,
+            'program_type' => $program->program_type,
+            'sponsor_name' => $program->sponsor_name,
+            'max_applications' => $program->max_applications,
+            'custom_fields' => $customFields,
+            'application_form_schema' => $applicationSchema,
+            'banner' => $this->copyPublicStorageFile($program->banner, 'programs'),
+            'sponsor_logo' => $this->copyPublicStorageFile($program->sponsor_logo, 'programs/sponsors'),
+        ]);
+        $duplicate->save();
+
+        PatientApplicationNotifications::programCreatedForPatients($duplicate);
+
+        return redirect()
+            ->route('admin.programs-events');
+    }
+
+    /**
+     * @param  array<string, mixed>  $overrides
+     * @return list<array<string, mixed>>
+     */
+    private function duplicateListingFields(Program $program, array $overrides): array
+    {
+        $fields = is_array($program->custom_fields) ? $program->custom_fields : [];
+
+        if ($fields === []) {
+            $fields = ProgramDefaultTemplate::customFields();
+        }
+
+        $fields = array_map(function ($field) {
+            if (! is_array($field)) {
+                return $field;
+            }
+            $field['id'] = (string) Str::uuid();
+
+            return $field;
+        }, $fields);
+
+        return $this->syncCustomFieldValues($fields, $overrides);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function duplicateApplicationFormSchema(Program $program): array
+    {
+        $schema = is_array($program->application_form_schema) ? $program->application_form_schema : [];
+
+        if ($schema === [] && ProgramType::usesDynamicApplicationForm($program->program_type)) {
+            $schema = ApplicationFormTemplates::forType($program->program_type);
+        }
+
+        return array_values(array_map(function ($field) {
+            if (! is_array($field)) {
+                return $field;
+            }
+            $field['id'] = (string) Str::uuid();
+
+            return $field;
+        }, $schema));
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $fields
+     * @param  array<string, mixed>  $values
+     * @return array<int, array<string, mixed>>
+     */
+    private function syncCustomFieldValues(array $fields, array $values): array
+    {
+        $present = [];
+        foreach ($fields as &$field) {
+            $name = $field['name'] ?? null;
+            if ($name !== null && array_key_exists($name, $values)) {
+                $field['value'] = $values[$name];
+                $present[$name] = true;
+            }
+        }
+        unset($field);
+
+        // Ensure core listing keys exist so the edit form shows the same fields as the source program.
+        $labels = [
+            'title' => 'Title',
+            'description' => 'Description',
+            'event_date' => 'Program date',
+            'application_start_date' => 'Application Start Date',
+            'application_end_date' => 'Application End Date',
+            'event_time' => 'Time',
+            'status' => 'Status',
+            'max_applications' => 'Maximum Applications',
+        ];
+        $types = [
+            'title' => 'short_text',
+            'description' => 'long_text',
+            'event_date' => 'date',
+            'application_start_date' => 'date',
+            'application_end_date' => 'date',
+            'event_time' => 'time',
+            'status' => 'short_text',
+            'max_applications' => 'number',
+        ];
+
+        foreach ($labels as $name => $label) {
+            if (isset($present[$name]) || ! array_key_exists($name, $values)) {
+                continue;
+            }
+            $fields[] = [
+                'id' => (string) Str::uuid(),
+                'name' => $name,
+                'label' => $label,
+                'type' => $types[$name] ?? 'short_text',
+                'value' => $values[$name],
+                'required' => false,
+            ];
+        }
+
+        return array_values($fields);
+    }
+
+    private function copyPublicStorageFile(?string $path, string $directory): ?string
+    {
+        if (! filled($path) || ! Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        $destination = trim($directory, '/').'/'.Str::uuid().($extension !== '' ? '.'.$extension : '');
+
+        Storage::disk('public')->copy($path, $destination);
+
+        return $destination;
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function applicationFormSchemaValidationRules(): array

@@ -119,6 +119,12 @@
                                             'status' => 'upcoming',
                                             'action' => route('programs.duplicate', $program),
                                         ];
+                                        $formPreviewPayload = [
+                                            'id' => $program->id,
+                                            'title' => $program->title,
+                                            'schema' => $program->resolvedApplicationFormSchema(),
+                                        ];
+                                        $canPreviewForm = $program->hasDynamicApplicationForm();
                                     @endphp
                                     <!-- Desktop Program Card -->
                                     <div
@@ -147,7 +153,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex items-center gap-2 shrink-0">
                                             <a href="{{ route('programs.edit', $program) }}"
                                                 class="bg-white px-4 py-2 rounded-lg text-sm font-medium text-[#213430] shadow-sm hover:bg-[#F6EDF5] transition">Edit</a>
                                             <button type="button" onclick='openProgramDetailModal(@json($detail))'
@@ -159,6 +165,11 @@
                                                 <div data-program-actions-menu
                                                     class="hidden fixed min-w-[11rem] rounded-xl border border-[#E6D8E1] bg-white shadow-xl py-1"
                                                     style="z-index: 9999;">
+                                                    @if ($canPreviewForm)
+                                                        <button type="button"
+                                                            onclick='previewApplicationFormAsPatient(@json($formPreviewPayload)); closeProgramActionMenus();'
+                                                            class="block w-full text-left px-4 py-2.5 text-sm text-[#213430] hover:bg-[#FDF0F7] whitespace-nowrap">Preview form</button>
+                                                    @endif
                                                     <button type="button"
                                                         onclick='openDuplicateProgramModal(@json($duplicatePayload));'
                                                         class="block w-full text-left px-4 py-2.5 text-sm text-[#213430] hover:bg-[#FDF0F7] whitespace-nowrap">Duplicate</button>
@@ -213,6 +224,11 @@
                                                         <div data-program-actions-menu
                                                             class="hidden fixed min-w-[10rem] rounded-lg border border-[#E6D8E1] bg-white shadow-xl py-1"
                                                             style="z-index: 9999;">
+                                                            @if ($canPreviewForm)
+                                                                <button type="button"
+                                                                    onclick='previewApplicationFormAsPatient(@json($formPreviewPayload)); closeProgramActionMenus();'
+                                                                    class="block w-full text-left px-3 py-2 text-xs text-[#213430] hover:bg-[#FDF0F7] whitespace-nowrap">Preview form</button>
+                                                            @endif
                                                             <button type="button"
                                                                 onclick='openDuplicateProgramModal(@json($duplicatePayload));'
                                                                 class="block w-full text-left px-3 py-2 text-xs text-[#213430] hover:bg-[#FDF0F7] whitespace-nowrap">Duplicate</button>
@@ -687,6 +703,8 @@
                 </div>
             </div>
         </div>
+
+    @include('admin.programs.partials.application_form_patient_preview')
 @endsection
 
 @push('scripts')

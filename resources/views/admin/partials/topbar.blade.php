@@ -6,7 +6,7 @@
 
 <!-- Top Navigation Bar -->
 <header
-    class="mt-4 mr-6 bg-[#F3E8EF] p-4 justify-between items-center rounded-lg tab-head md:flex hidden tab-header-1">
+    class="mt-0 md:mt-0 mr-6 bg-[#F3E8EF] p-4 justify-between items-center rounded-lg tab-head md:flex hidden tab-header-1">
     <!-- Search Bar -->
     <div class="relative flex-1 min-w-0 max-w-md mr-4">
     </div>
@@ -80,7 +80,7 @@
     </div>
 </header>
 <header
-    class="mt-4 ml-6 mr-6 bg-[#F3E8EF] p-4 flex justify-between items-center rounded-lg tab-head md:hidden tab-header">
+    class="mt-0 ml-6 mr-6 bg-[#F3E8EF] p-4 flex justify-between items-center rounded-lg tab-head md:hidden tab-header">
 
 
     <!-- User Menu -->

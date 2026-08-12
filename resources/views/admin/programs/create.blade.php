@@ -13,9 +13,13 @@
                         <h1 class="mt-1 text-2xl sm:text-3xl font-semibold">Create New Program</h1>
                         <p class="mt-2 text-sm opacity-95 max-w-lg">Follow the four steps below. Most programs only need listing details; Mammogram and Food programs also need an application form.</p>
                     </div>
-                    <div class="flex gap-3 shrink-0">
+                    <div class="flex flex-wrap gap-3 shrink-0">
                         <a href="{{ route('admin.programs-events') }}"
                             class="inline-flex items-center justify-center rounded-xl bg-white/25 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/30">Cancel</a>
+                        <button type="button"
+                            onclick="previewDraftApplicationFormAsPatient({ builderId: 'application-form-builder', fallbackTitle: 'Program Application' })"
+                            class="inline-flex items-center justify-center rounded-xl bg-white/25 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/30 border border-white/40"
+                            title="See the application form as a patient would">Preview form</button>
                         <button type="submit" form="create-program-form"
                             class="inline-flex items-center justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-[#9E2469] shadow-md hover:bg-[#FFF1F7]">Save program</button>
                     </div>
@@ -67,6 +71,7 @@
                             'builderId' => 'application-form-builder',
                             'initialFields' => old('application_form_schema', []),
                             'applicationFormTemplates' => $applicationFormTemplates ?? [],
+                            'previewProgramTitle' => 'Program Application',
                         ])
                     </div>
                 </div>
@@ -80,4 +85,6 @@
             </form>
         </div>
     </div>
+
+    @include('admin.programs.partials.application_form_patient_preview')
 @endsection

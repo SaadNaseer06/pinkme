@@ -1,7 +1,13 @@
-<div id="dynamicPopupModal" class="fixed inset-0 z-50 hidden flex items-start sm:items-center justify-center bg-black/60 px-4 py-6 overflow-y-auto">
-    <div class="bg-[#F3E8EF] p-6 rounded-lg w-full max-w-4xl min-w-0 relative overflow-y-auto max-h-[90vh] shadow-xl border border-[#DCCFD8]">
+<div id="dynamicPopupModal" class="fixed inset-0 z-[10050] hidden items-center justify-center bg-black/60 px-4 py-4 overflow-y-auto">
+    <div class="bg-[#F3E8EF] p-6 rounded-lg w-full max-w-4xl min-w-0 relative overflow-y-auto max-h-[min(90vh,100%)] shadow-xl border border-[#DCCFD8] my-auto">
         <button type="button" onclick="closeDynamicApplicationModal()"
             class="absolute top-4 right-4 text-[#91848C] hover:text-black text-2xl font-bold">&times;</button>
+
+        <div id="dynamic-preview-banner"
+            class="hidden mb-4 rounded-lg border border-[#D4A017]/40 bg-[#FFF8E7] px-4 py-3 text-sm text-[#6B4E00]">
+            <p class="font-semibold">Patient preview</p>
+            <p class="mt-0.5">This is how applicants see the application form. Submissions are disabled.</p>
+        </div>
 
         <h2 id="dynamic-modal-title" class="text-lg font-medium text-black app-main mb-2">Program Application</h2>
         <p id="dynamic-modal-subtitle" class="text-sm text-[#91848C] mb-4"></p>
@@ -13,9 +19,12 @@
 
             <div class="flex flex-wrap gap-3 justify-end border-t border-[#DCCFD8] pt-4">
                 <button type="button" onclick="closeDynamicApplicationModal()"
-                    class="rounded-lg border border-[#213430] px-5 py-2 text-sm font-medium text-[#213430] hover:bg-white">Cancel</button>
-                <button type="submit"
+                    class="rounded-lg border border-[#213430] px-5 py-2 text-sm font-medium text-[#213430] hover:bg-white"
+                    id="dynamic-cancel-btn">Cancel</button>
+                <button type="submit" id="dynamic-submit-btn"
                     class="rounded-lg bg-pink px-6 py-2 text-sm font-semibold text-white hover:bg-[#9E2469]">Submit Application</button>
+                <button type="button" onclick="closeDynamicApplicationModal()" id="dynamic-preview-close-btn"
+                    class="hidden rounded-lg bg-pink px-6 py-2 text-sm font-semibold text-white hover:bg-[#9E2469]">Close preview</button>
             </div>
         </form>
     </div>
@@ -29,6 +38,7 @@
     const form = document.getElementById('dynamic-application-form');
     let currentSchema = [];
     let signaturePads = {};
+    let isPreviewMode = false;
 
     const inputClass = 'w-full rounded-lg border border-[#DCCFD8] bg-white px-3 py-2 text-sm text-[#213430] focus:border-[#9E2469] focus:ring-1 focus:ring-[#9E2469]';
     const labelClass = 'block text-sm font-medium text-[#213430] mb-1';
@@ -306,6 +316,29 @@
         });
     };
 
+    const setPreviewUi = (preview) => {
+        isPreviewMode = !!preview;
+        const banner = document.getElementById('dynamic-preview-banner');
+        const submitBtn = document.getElementById('dynamic-submit-btn');
+        const cancelBtn = document.getElementById('dynamic-cancel-btn');
+        const closePreviewBtn = document.getElementById('dynamic-preview-close-btn');
+        banner?.classList.toggle('hidden', !isPreviewMode);
+        submitBtn?.classList.toggle('hidden', isPreviewMode);
+        cancelBtn?.classList.toggle('hidden', isPreviewMode);
+        closePreviewBtn?.classList.toggle('hidden', !isPreviewMode);
+        if (form) {
+            if (isPreviewMode) form.setAttribute('data-preview', '1');
+            else form.removeAttribute('data-preview');
+        }
+    };
+
+    form?.addEventListener('submit', function(e) {
+        if (form.getAttribute('data-preview') === '1' || isPreviewMode) {
+            e.preventDefault();
+            alert('Preview only — submissions are disabled.');
+        }
+    });
+
     window.renderDynamicApplicationForm = function(schema, programTitle) {
         currentSchema = Array.isArray(schema) ? schema : [];
         signaturePads = {};
@@ -334,19 +367,50 @@
         const titleEl = document.getElementById('dynamic-modal-title');
         const subtitleEl = document.getElementById('dynamic-modal-subtitle');
         if (titleEl) titleEl.textContent = programTitle || 'Program Application';
-        if (subtitleEl) subtitleEl.textContent = 'Please complete all required fields marked with *.';
+        if (subtitleEl) {
+            subtitleEl.textContent = isPreviewMode
+                ? 'Interact with the form exactly as a patient would. Required fields are marked with *.'
+                : 'Please complete all required fields marked with *.';
+        }
     };
 
-    window.openDynamicApplicationModal = function(programId, programTitle, schema) {
-        document.getElementById('dynamic_program_id').value = programId;
+    window.openDynamicApplicationModal = function(programId, programTitle, schema, options) {
+        const opts = options && typeof options === 'object' ? options : {};
+        setPreviewUi(!!opts.preview);
+        const programIdInput = document.getElementById('dynamic_program_id');
+        if (programIdInput) programIdInput.value = programId || '';
         document.getElementById('registerModal')?.classList.add('hidden');
         document.getElementById('popupModal')?.classList.add('hidden');
         renderDynamicApplicationForm(schema, programTitle);
-        modal?.classList.remove('hidden');
+        if (modal) {
+            if (modal.parentElement !== document.body) {
+                document.body.appendChild(modal);
+            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
+        }
     };
 
     window.closeDynamicApplicationModal = function() {
-        modal?.classList.add('hidden');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        document.body.classList.remove('overflow-hidden');
+        setPreviewUi(false);
+        if (fieldsContainer) fieldsContainer.innerHTML = '';
+        if (form) form.reset();
+    };
+
+    window.previewApplicationFormAsPatient = function(payload) {
+        const data = payload && typeof payload === 'object' ? payload : {};
+        const schema = Array.isArray(data.schema) ? data.schema : [];
+        if (!schema.length) {
+            alert('This program does not have a custom application form to preview yet.');
+            return;
+        }
+        openDynamicApplicationModal(data.id || '', data.title || 'Program Application', schema, { preview: true });
     };
 })();
 </script>

@@ -31,9 +31,12 @@
 
 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-[#E9DCE7] bg-[#FDF7FB] px-4 py-3 mb-6" data-step-footer>
     <p class="text-sm text-[#6C5B68]" data-step-hint>Step 1 of 4 — Choose the program type and optional sponsor.</p>
-    <div class="flex gap-2">
+    <div class="flex flex-wrap gap-2">
         <button type="button" data-step-back
             class="hidden rounded-xl border border-[#DCCFD8] bg-white px-4 py-2 text-sm font-semibold text-[#213430] hover:bg-[#F3E8EF]">Back</button>
+        <button type="button" data-preview-form
+            class="hidden rounded-xl border border-[#9E2469] bg-white px-4 py-2 text-sm font-semibold text-[#9E2469] hover:bg-[#FDF0F7]"
+            title="See the application form as a patient would">Preview form</button>
         <button type="button" data-step-next
             class="rounded-xl bg-[#9E2469] px-4 py-2 text-sm font-semibold text-white hover:bg-[#8A1F5C]">Continue</button>
     </div>
@@ -46,13 +49,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const navBtns = document.querySelectorAll('[data-step-nav]');
     const backBtn = document.querySelector('[data-step-back]');
     const nextBtn = document.querySelector('[data-step-next]');
+    const previewBtn = document.querySelector('[data-preview-form]');
     const hintEl = document.querySelector('[data-step-hint]');
     const dynamicTypes = @json($dynamicTypes);
     const getProgramType = () => document.querySelector('input[name="program_type"]:checked')?.value || '';
     const stepHints = {
         1: 'Choose the program type and optional sponsor.',
         2: 'Set the title, description, dates, and capacity patients see on the program card.',
-        3: 'Build the questions applicants answer — load a starter template to get started quickly.',
+        3: 'Build the questions applicants answer — use Preview form to check the patient view.',
         4: 'Upload a cover image so the program is easy to recognize.',
     };
 
@@ -87,6 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
             nextBtn.textContent = 'Continue';
             nextBtn.classList.toggle('hidden', current === total);
         }
+        if (previewBtn) previewBtn.classList.toggle('hidden', current !== 3);
         if (hintEl) {
             const base = stepHints[current] || '';
             hintEl.textContent = current === total
@@ -113,6 +118,11 @@ document.addEventListener('DOMContentLoaded', function () {
     navBtns.forEach((btn) => btn.addEventListener('click', () => goTo(Number(btn.dataset.stepNav))));
     backBtn?.addEventListener('click', () => goTo(current - 1));
     nextBtn?.addEventListener('click', () => goTo(current + 1));
+    previewBtn?.addEventListener('click', () => {
+        if (typeof previewDraftApplicationFormAsPatient === 'function') {
+            previewDraftApplicationFormAsPatient({ builderId: 'application-form-builder' });
+        }
+    });
 
     const syncTypeHint = () => {
         const banner = document.querySelector('[data-template-suggest]');

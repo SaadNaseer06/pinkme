@@ -16,6 +16,10 @@
                     <div class="flex flex-wrap gap-3 shrink-0">
                         <a href="{{ route('admin.programs-events') }}"
                             class="inline-flex items-center justify-center rounded-xl bg-white/25 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/30">Back</a>
+                        <button type="button"
+                            onclick="previewDraftApplicationFormAsPatient({ builderId: 'application-form-builder', programId: @js($program->id), fallbackTitle: @js($program->title) })"
+                            class="inline-flex items-center justify-center rounded-xl bg-white/25 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/30 border border-white/40"
+                            title="See the application form as a patient would">Preview form</button>
                         <button type="submit" form="edit-program-form"
                             class="inline-flex items-center justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-[#9E2469] shadow-md hover:bg-[#FFF1F7]">Save changes</button>
                         <form action="{{ route('programs.destroy', $program) }}" method="POST" class="inline-flex"
@@ -73,6 +77,8 @@
                             'builderId' => 'application-form-builder',
                             'initialFields' => old('application_form_schema', $program->application_form_schema ?? []),
                             'applicationFormTemplates' => $applicationFormTemplates ?? [],
+                            'previewProgramId' => $program->id,
+                            'previewProgramTitle' => $program->title,
                         ])
                     </div>
                 </div>
@@ -86,4 +92,6 @@
             </form>
         </div>
     </div>
+
+    @include('admin.programs.partials.application_form_patient_preview')
 @endsection
